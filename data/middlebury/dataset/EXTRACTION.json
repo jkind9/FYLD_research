@@ -1,0 +1,8 @@
+{
+  "extracted_date": "2026-10-01",
+  "entry_count": 120,
+  "expanded_bytes": 50105243,
+  "training_pairs_with_reference": 15,
+  "test_pairs_without_public_reference": 15,
+  "validation": "required files present and ZIP CRC checked during extraction; no algorithm run or geometry parsing yet"
+}

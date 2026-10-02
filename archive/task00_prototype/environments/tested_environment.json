@@ -1,0 +1,38 @@
+{
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "executable": "C:\\Users\\jkind\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\python.exe",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "cpu_environment": null,
+  "cpu_physical_cores": 16,
+  "cpu_logical_cores": 32,
+  "ram_bytes": 66156642304,
+  "packages": {
+    "numpy": "2.4.2",
+    "scipy": "1.17.1",
+    "Pillow": "12.3.0",
+    "open3d": "0.19.0",
+    "matplotlib": "3.10.8",
+    "psutil": "7.2.2",
+    "pytest": "9.0.2",
+    "torch": "2.11.0+cu128"
+  },
+  "nvidia_smi": "NVIDIA GeForce RTX 5070 Ti, 16303 MiB, 595.97, 12.0",
+  "torch_cuda": {
+    "build": "12.8",
+    "available": true,
+    "compiled_architectures": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120"
+    ],
+    "capability": [
+      12,
+      0
+    ],
+    "kernel_result": 32.0,
+    "kernel_test": "passed"
+  }
+}

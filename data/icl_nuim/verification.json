@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-02",
+  "test_count": 23,
+  "acquisition_statement_coverage_percent": 88,
+  "results": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "36bca9",
+        "wall_time_seconds": 1.973567,
+        "exit_code": 0,
+        "original_token_count": 191,
+        "output": ".......................                                                  [100%]\r\n=============================== tests coverage ================================\r\n______________ coverage: platform win32, python 3.12.10-final-0 _______________\r\n\r\nName                                             Stmts   Miss  Cover   Missing\r\n------------------------------------------------------------------------------\r\nexperiments\\datasets\\acquisition.py                129     15    88%   97, 145-146, 150, 154, 223-230, 239-240\r\nexperiments\\datasets\\tests\\test_acquisition.py     105      1    99%   167\r\n------------------------------------------------------------------------------\r\nTOTAL                                              234     16    93%\r\n23 passed in 0.32s\r\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "db1417",
+        "wall_time_seconds": 0.627846,
+        "exit_code": 0,
+        "original_token_count": 33,
+        "output": "Success: no issues found in 1 source file\r\nAll checks passed!\nAll done! \\u2728 \\U0001f370 \\u2728\r\n2 files would be left unchanged.\r\n"
+      }
+    }
+  ],
+  "review_fixes": [
+    "Bound gzip before tar parsing; cap metadata reads at 1 MiB",
+    "Publish provenance before completed archive; injected failure regression"
+  ],
+  "geometry_scoring_ready": false
+}

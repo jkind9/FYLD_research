@@ -1,0 +1,22 @@
+[
+  {
+    "url": "https://vision.middlebury.edu/stereo/submit3/zip/MiddEval3-data-Q.zip",
+    "resolved_url": "https://vision.middlebury.edu/stereo/submit3/zip/MiddEval3-data-Q.zip",
+    "bytes": 30937533,
+    "sha256": "a1411f283b523541e0d2e8b3a1dd6618974a0e539aea0122490791a041fffc09",
+    "local_file": "data\\middlebury\\MiddEval3-data-Q.zip",
+    "retrieved_date": "2026-10-01",
+    "permission_url": "https://vision.middlebury.edu/stereo/data/",
+    "checksum_status": "locally computed; not publisher-authenticated"
+  },
+  {
+    "url": "https://vision.middlebury.edu/stereo/submit3/zip/MiddEval3-GT0-Q.zip",
+    "resolved_url": "https://vision.middlebury.edu/stereo/submit3/zip/MiddEval3-GT0-Q.zip",
+    "bytes": 13555667,
+    "sha256": "489b6a4015951a3c865aa54c0f37dcb648b5d0efad8019264e22499cef35ca45",
+    "local_file": "data\\middlebury\\MiddEval3-GT0-Q.zip",
+    "retrieved_date": "2026-10-01",
+    "permission_url": "https://vision.middlebury.edu/stereo/data/",
+    "checksum_status": "locally computed; not publisher-authenticated"
+  }
+]

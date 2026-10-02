@@ -1,0 +1,11 @@
+{
+  "selected_date": "2026-10-02",
+  "sequence": "rgbd_dataset_freiburg1_desk",
+  "source": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download#freiburg1_desk",
+  "reason": "Separate four-desk camera sweep with loop closures, rather than tuned Freiburg1 xyz translational motion; same indoor sensor/site, not scene-independent evidence",
+  "status": "selected before method tuning; not downloaded or evaluated",
+  "protocol": "freeze parameters on xyz before desk evaluation; only evaluator may read reference poses; any retuning using desk results makes it development data and requires a new held-out sequence",
+  "numeric_acceptance_limits": "unset; task 05 must record limits before experiment",
+  "licence_source": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset",
+  "licence": "CC BY 4.0 unless otherwise specified"
+}

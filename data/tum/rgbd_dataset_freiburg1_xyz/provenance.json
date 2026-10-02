@@ -1,0 +1,12 @@
+{
+  "source_url": "https://cvg.cit.tum.de/rgbd/dataset/freiburg1/rgbd_dataset_freiburg1_xyz.tgz",
+  "resolved_url": "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg1/rgbd_dataset_freiburg1_xyz.tgz",
+  "size_bytes": 448204271,
+  "local_sha256": "a0236d97b8c30cd93b653656d2b6c293ff7c982a4130ef2a1a8beecdb124ef98",
+  "publisher_sha256": null,
+  "checksum_status": "local content hash only; no publisher checksum located",
+  "download_utc": "2026-10-01T18:29:41.349500+00:00",
+  "licence": "CC BY 4.0",
+  "licence_source": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset#license",
+  "attribution": "Sturm, Engelhard, Endres, Burgard, Cremers (IROS 2012), A Benchmark for the Evaluation of RGB-D SLAM Systems"
+}

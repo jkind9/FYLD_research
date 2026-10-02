@@ -1,0 +1,130 @@
+{
+  "checked_date": "2026-10-02",
+  "representation": "clean TUM-compatible ICL PNGs, NOT native radial .depth or noisy variant",
+  "calibration": {
+    "width": 640,
+    "height": 480,
+    "fx": 481.2,
+    "fy": -480.0,
+    "cx": 319.5,
+    "cy": 239.5,
+    "source": "https://www.doc.ic.ac.uk/~ahanda/VaFRIC/codes.html"
+  },
+  "depth": {
+    "raw_type": "uint16 PNG",
+    "units": "raw / 5000 = camera-axis Z in metres; publisher TUM-format compatibility contract",
+    "invalid": 0,
+    "native_radial_conversion": "do not apply to these PNGs"
+  },
+  "pose": {
+    "path": "trajectory2/livingRoom2.gt.freiburg",
+    "columns": [
+      "frame_id",
+      "tx",
+      "ty",
+      "tz",
+      "qx",
+      "qy",
+      "qz",
+      "qw"
+    ],
+    "translation_units": "metres",
+    "direction": "T_compatible_world_camera: p_world=R*p_camera+t, per TUM pose contract",
+    "first_pose_matrix": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -2.25
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "frame_id_rule": "exact image ID = pose ID; 1..880; exclude unposed image 0; do not invent Unix timestamps"
+  },
+  "surface": {
+    "path": "reference_surface/living-room.ply",
+    "frame": "publisher reference-model frame, distinct from compatible-pose world",
+    "format": "binary little endian point cloud with normals/RGB, no mesh faces",
+    "units_evidence": "metric interpretation follows benchmark and depth/pose format; PLY header has no unit declaration"
+  },
+  "alignment": {
+    "source": "https://raw.githubusercontent.com/mp3guy/SurfReg/master/src/SurfReg.cpp",
+    "lines": "126-140",
+    "publisher_contract": "reconstruction in first-frame camera coordinates, negative fy",
+    "S_model_first_camera": [
+      [
+        0.999822,
+        0.0034419,
+        0.0185526,
+        -0.786316
+      ],
+      [
+        -0.00350915,
+        0.999987,
+        0.00359374,
+        1.28433
+      ],
+      [
+        0.01854,
+        0.00365819,
+        -0.999821,
+        1.45583
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "determinant": -0.9999992262956449,
+    "derived_model_from_compatible_world": [
+      [
+        0.999822,
+        0.0034419,
+        0.0185526,
+        -0.7445726500000001
+      ],
+      [
+        -0.00350915,
+        0.999987,
+        0.00359374,
+        1.292415915
+      ],
+      [
+        0.01854,
+        0.00365819,
+        -0.999821,
+        -0.7937672499999999
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "equation": "p_model = S_model_first_camera * inverse(T_world_camera_first) * T_world_camera_i * p_camera_i",
+    "derivation_status": "algebra from documented contracts; empirical adapter/roundtrip verification remains task 03",
+    "warning": "contains a reflection; not SE(3), do not convert S to quaternion or fit a scale"
+  },
+  "scoring_ready": false,
+  "scoring_prerequisite": "task 03 independently validates projection, pose direction, exact-ID subset and the fixed surface transform; no surface score produced by task 02"
+}

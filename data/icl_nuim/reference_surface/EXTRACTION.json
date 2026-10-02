@@ -1,0 +1,17 @@
+{
+  "archive": "living-room.ply.tar.gz",
+  "local_sha256": "a99b8a140fb90fb6bee5ab81921ee7391a7054f0234dc9434944566de1c91692",
+  "compressed_bytes": 89545763,
+  "expanded_bytes": 269522228,
+  "member_count": 1,
+  "gzip_stream_bytes": 269523968,
+  "validated_utc": "2026-10-02T07:36:08.780698+00:00",
+  "validation": "bounded safe members, exact payload lengths, gzip EOF/CRC",
+  "scoring_ready": false,
+  "files": [
+    {
+      "path": "living-room.ply",
+      "bytes": 269522228
+    }
+  ]
+}

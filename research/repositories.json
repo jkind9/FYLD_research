@@ -1,0 +1,57 @@
+{
+  "verified_utc_date": "2026-10-01",
+  "selected": [
+    {
+      "name": "colmap",
+      "url": "https://github.com/colmap/colmap.git",
+      "ref": "3.12.6",
+      "commit": "4d5b60e19ad268072adaf1267d21fa38a9a828ca",
+      "tag_object_sha": "c4c6107c9cb0ab6ebf6ef0f54e91811047f17f83",
+      "purpose": "Optional batch image-only SfM/MVS; not required for A/B",
+      "environment": "Separate COLMAP binary/build environment; CMake/C++ dependencies, CUDA optional for supported stages",
+      "licence_sources": [
+        "https://github.com/colmap/colmap/blob/3.12.6/COPYING.txt"
+      ],
+      "submodules_required_for_reference_checkout": false,
+      "setup_status": "reference clone checked out at pinned SHA; binaries not built/installed",
+      "executed": false,
+      "update_history": [],
+      "resolved_commit": "4d5b60e19ad268072adaf1267d21fa38a9a828ca",
+      "fetched_utc": "2026-10-01T18:41:31.727008+00:00"
+    },
+    {
+      "name": "rtabmap",
+      "url": "https://github.com/introlab/rtabmap.git",
+      "ref": "0.22.1",
+      "commit": "df6300e0ba3e90058f90b09c4d646279366d3516",
+      "purpose": "Loop-closure reference and possible later RGB-D SLAM baseline",
+      "environment": "Separate CMake/C++ build with OpenCV/PCL; optional ROS, not installed here",
+      "licence_sources": [
+        "https://github.com/introlab/rtabmap/blob/0.22.1/LICENSE"
+      ],
+      "submodules_required_for_reference_checkout": false,
+      "setup_status": "reference clone checked out at pinned SHA; binaries not built/installed",
+      "executed": false,
+      "update_history": [],
+      "resolved_commit": "df6300e0ba3e90058f90b09c4d646279366d3516",
+      "fetched_utc": "2026-10-01T18:41:34.474935+00:00"
+    }
+  ],
+  "reference_only": [
+    {
+      "name": "MobileStereoNet",
+      "url": "https://github.com/cogsys-tuebingen/mobilestereonet",
+      "reason": "Stereo lead; weight terms and deployment need separate review"
+    },
+    {
+      "name": "BANet",
+      "url": "https://github.com/gangweix/BANet",
+      "reason": "Official repository linked from arXiv:2503.03259; not fetched/executed"
+    },
+    {
+      "name": "MASt3R-SLAM",
+      "url": "https://github.com/rmurai0610/MASt3R-SLAM",
+      "reason": "Code and pretrained weights have separate restrictions; no execution until permitted company use established"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "rgb": {
+    "listed_frames": 798,
+    "timestamp_range": [
+      1305031102.175304,
+      1305031128.747363
+    ],
+    "first_image": {
+      "size": [
+        640,
+        480
+      ],
+      "mode": "RGB"
+    },
+    "all_listed_files_present": true,
+    "image_validation": "first image decoded only"
+  },
+  "depth": {
+    "listed_frames": 798,
+    "timestamp_range": [
+      1305031102.160407,
+      1305031128.754646
+    ],
+    "first_image": {
+      "size": [
+        640,
+        480
+      ],
+      "mode": "I;16"
+    },
+    "all_listed_files_present": true,
+    "image_validation": "first image decoded only"
+  },
+  "poses": {
+    "rows": 3000,
+    "timestamp_range": [
+      1305031098.6659,
+      1305031128.7555
+    ],
+    "quaternion_norm_range": [
+      0.9999177416167793,
+      1.0000837714911686
+    ]
+  },
+  "checked_utc": "2026-10-02T07:41:13.057130+00:00",
+  "source_unchanged": true
+}

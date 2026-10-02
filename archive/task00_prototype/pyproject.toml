@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fyld-scene-mapping"
+version = "0.1.0"
+description = "Inspectable offline RGB-D scene mapping experiments"
+requires-python = ">=3.11,<3.13"
+dependencies = ["numpy>=1.26,<3", "scipy>=1.11,<2", "Pillow>=10,<13", "open3d==0.19.0", "matplotlib>=3.8,<4", "psutil>=5.9,<8"]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]

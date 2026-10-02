@@ -1,0 +1,11 @@
+{
+  "source_url": "https://www.doc.ic.ac.uk/~ahanda/living_room_traj2_frei_png.tar.gz",
+  "resolved_url": "https://www.doc.ic.ac.uk/~ahanda/living_room_traj2_frei_png.tar.gz",
+  "bytes": 429825445,
+  "local_sha256": "1b94a59ab814d9202d0d33369d123ecf734c3503298990319cc336b9aecf54d8",
+  "retrieved_utc": "2026-10-02T07:35:51.180867+00:00",
+  "licence": "CC BY 3.0",
+  "licence_source": "https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html",
+  "attribution": "Handa, Whelan, McDonald, Davison; ICRA 2014",
+  "checksum_status": "local content hash only; no publisher checksum located"
+}

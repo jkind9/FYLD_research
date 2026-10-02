@@ -1,0 +1,7069 @@
+{
+  "archive": "living_room_traj2_frei_png.tar.gz",
+  "local_sha256": "1b94a59ab814d9202d0d33369d123ecf734c3503298990319cc336b9aecf54d8",
+  "compressed_bytes": 429825445,
+  "expanded_bytes": 481610533,
+  "member_count": 1766,
+  "gzip_stream_bytes": 482964992,
+  "validated_utc": "2026-10-02T07:36:05.024435+00:00",
+  "validation": "bounded safe members, exact payload lengths, gzip EOF/CRC",
+  "scoring_ready": false,
+  "files": [
+    {
+      "path": "depth/260.png",
+      "bytes": 159770
+    },
+    {
+      "path": "rgb/75.png",
+      "bytes": 336329
+    },
+    {
+      "path": "rgb/388.png",
+      "bytes": 404739
+    },
+    {
+      "path": "rgb/653.png",
+      "bytes": 341557
+    },
+    {
+      "path": "rgb/407.png",
+      "bytes": 378323
+    },
+    {
+      "path": "rgb/519.png",
+      "bytes": 377290
+    },
+    {
+      "path": "depth/833.png",
+      "bytes": 193160
+    },
+    {
+      "path": "depth/89.png",
+      "bytes": 189962
+    },
+    {
+      "path": "rgb/252.png",
+      "bytes": 359880
+    },
+    {
+      "path": "depth/432.png",
+      "bytes": 244317
+    },
+    {
+      "path": "rgb/118.png",
+      "bytes": 315261
+    },
+    {
+      "path": "depth/167.png",
+      "bytes": 236171
+    },
+    {
+      "path": "depth/279.png",
+      "bytes": 162437
+    },
+    {
+      "path": "depth/544.png",
+      "bytes": 226674
+    },
+    {
+      "path": "rgb/92.png",
+      "bytes": 324166
+    },
+    {
+      "path": "rgb/670.png",
+      "bytes": 344804
+    },
+    {
+      "path": "depth/850.png",
+      "bytes": 208914
+    },
+    {
+      "path": "rgb/536.png",
+      "bytes": 402443
+    },
+    {
+      "path": "rgb/801.png",
+      "bytes": 374711
+    },
+    {
+      "path": "depth/697.png",
+      "bytes": 157388
+    },
+    {
+      "path": "depth/561.png",
+      "bytes": 213582
+    },
+    {
+      "path": "depth/716.png",
+      "bytes": 194056
+    },
+    {
+      "path": "depth/296.png",
+      "bytes": 162866
+    },
+    {
+      "path": "rgb/135.png",
+      "bytes": 323627
+    },
+    {
+      "path": "depth/184.png",
+      "bytes": 231032
+    },
+    {
+      "path": "rgb/689.png",
+      "bytes": 362304
+    },
+    {
+      "path": "depth/315.png",
+      "bytes": 172527
+    },
+    {
+      "path": "rgb/708.png",
+      "bytes": 379059
+    },
+    {
+      "path": "depth/650.png",
+      "bytes": 93239
+    },
+    {
+      "path": "depth/869.png",
+      "bytes": 217130
+    },
+    {
+      "path": "rgb/288.png",
+      "bytes": 368223
+    },
+    {
+      "path": "rgb/553.png",
+      "bytes": 394912
+    },
+    {
+      "path": "rgb/307.png",
+      "bytes": 367654
+    },
+    {
+      "path": "depth/468.png",
+      "bytes": 199324
+    },
+    {
+      "path": "depth/733.png",
+      "bytes": 198260
+    },
+    {
+      "path": "rgb/152.png",
+      "bytes": 319742
+    },
+    {
+      "path": "depth/633.png",
+      "bytes": 136055
+    },
+    {
+      "path": "depth/332.png",
+      "bytes": 148161
+    },
+    {
+      "path": "rgb/725.png",
+      "bytes": 375052
+    },
+    {
+      "path": "rgb/837.png",
+      "bytes": 380943
+    },
+    {
+      "path": "depth/750.png",
+      "bytes": 184477
+    },
+    {
+      "path": "rgb/436.png",
+      "bytes": 358111
+    },
+    {
+      "path": "rgb/570.png",
+      "bytes": 393380
+    },
+    {
+      "path": "rgb/324.png",
+      "bytes": 378012
+    },
+    {
+      "path": "rgb/11.png",
+      "bytes": 358065
+    },
+    {
+      "path": "depth/485.png",
+      "bytes": 191245
+    },
+    {
+      "path": "depth/597.png",
+      "bytes": 201199
+    },
+    {
+      "path": "depth/616.png",
+      "bytes": 187845
+    },
+    {
+      "path": "depth/215.png",
+      "bytes": 204550
+    },
+    {
+      "path": "depth/25.png",
+      "bytes": 158851
+    },
+    {
+      "path": "rgb/854.png",
+      "bytes": 386382
+    },
+    {
+      "path": "rgb/589.png",
+      "bytes": 386408
+    },
+    {
+      "path": "rgb/742.png",
+      "bytes": 345195
+    },
+    {
+      "path": "depth/103.png",
+      "bytes": 205248
+    },
+    {
+      "path": "rgb/608.png",
+      "bytes": 385736
+    },
+    {
+      "path": "depth/769.png",
+      "bytes": 155283
+    },
+    {
+      "path": "rgb/341.png",
+      "bytes": 401466
+    },
+    {
+      "path": "rgb/188.png",
+      "bytes": 304799
+    },
+    {
+      "path": "rgb/453.png",
+      "bytes": 341837
+    },
+    {
+      "path": "rgb/207.png",
+      "bytes": 294426
+    },
+    {
+      "path": "depth/368.png",
+      "bytes": 201585
+    },
+    {
+      "path": "depth/232.png",
+      "bytes": 184472
+    },
+    {
+      "path": "depth/42.png",
+      "bytes": 159862
+    },
+    {
+      "path": "rgb/625.png",
+      "bytes": 373635
+    },
+    {
+      "path": "rgb/871.png",
+      "bytes": 379271
+    },
+    {
+      "path": "depth/120.png",
+      "bytes": 222711
+    },
+    {
+      "path": "rgb/47.png",
+      "bytes": 343340
+    },
+    {
+      "path": "depth/786.png",
+      "bytes": 139395
+    },
+    {
+      "path": "depth/139.png",
+      "bytes": 234212
+    },
+    {
+      "path": "depth/805.png",
+      "bytes": 158721
+    },
+    {
+      "path": "rgb/470.png",
+      "bytes": 327387
+    },
+    {
+      "path": "rgb/224.png",
+      "bytes": 309684
+    },
+    {
+      "path": "depth/385.png",
+      "bytes": 191504
+    },
+    {
+      "path": "rgb/778.png",
+      "bytes": 366530
+    },
+    {
+      "path": "rgb/489.png",
+      "bytes": 343145
+    },
+    {
+      "path": "depth/404.png",
+      "bytes": 176579
+    },
+    {
+      "path": "depth/516.png",
+      "bytes": 225781
+    },
+    {
+      "path": "rgb/64.png",
+      "bytes": 338235
+    },
+    {
+      "path": "rgb/377.png",
+      "bytes": 400774
+    },
+    {
+      "path": "rgb/642.png",
+      "bytes": 349910
+    },
+    {
+      "path": "depth/822.png",
+      "bytes": 179417
+    },
+    {
+      "path": "rgb/508.png",
+      "bytes": 357048
+    },
+    {
+      "path": "depth/669.png",
+      "bytes": 108892
+    },
+    {
+      "path": "depth/421.png",
+      "bytes": 242314
+    },
+    {
+      "path": "depth/78.png",
+      "bytes": 172021
+    },
+    {
+      "path": "rgb/241.png",
+      "bytes": 352793
+    },
+    {
+      "path": "rgb/795.png",
+      "bytes": 374681
+    },
+    {
+      "path": "rgb/107.png",
+      "bytes": 319189
+    },
+    {
+      "path": "depth/156.png",
+      "bytes": 237735
+    },
+    {
+      "path": "depth/268.png",
+      "bytes": 161061
+    },
+    {
+      "path": "depth/533.png",
+      "bytes": 232741
+    },
+    {
+      "path": "rgb/394.png",
+      "bytes": 404666
+    },
+    {
+      "path": "rgb/81.png",
+      "bytes": 337813
+    },
+    {
+      "path": "rgb/413.png",
+      "bytes": 363814
+    },
+    {
+      "path": "rgb/525.png",
+      "bytes": 384614
+    },
+    {
+      "path": "depth/7.png",
+      "bytes": 143874
+    },
+    {
+      "path": "depth/686.png",
+      "bytes": 131773
+    },
+    {
+      "path": "depth/95.png",
+      "bytes": 196753
+    },
+    {
+      "path": "depth/705.png",
+      "bytes": 178589
+    },
+    {
+      "path": "depth/285.png",
+      "bytes": 163945
+    },
+    {
+      "path": "rgb/124.png",
+      "bytes": 318859
+    },
+    {
+      "path": "depth/173.png",
+      "bytes": 234810
+    },
+    {
+      "path": "rgb/678.png",
+      "bytes": 352904
+    },
+    {
+      "path": "depth/550.png",
+      "bytes": 223614
+    },
+    {
+      "path": "depth/304.png",
+      "bytes": 170451
+    },
+    {
+      "path": "rgb/809.png",
+      "bytes": 379641
+    },
+    {
+      "path": "depth/858.png",
+      "bytes": 214246
+    },
+    {
+      "path": "rgb/277.png",
+      "bytes": 365105
+    },
+    {
+      "path": "rgb/542.png",
+      "bytes": 404893
+    },
+    {
+      "path": "depth/722.png",
+      "bytes": 195028
+    },
+    {
+      "path": "depth/457.png",
+      "bytes": 211929
+    },
+    {
+      "path": "depth/569.png",
+      "bytes": 213323
+    },
+    {
+      "path": "rgb/141.png",
+      "bytes": 319931
+    },
+    {
+      "path": "depth/190.png",
+      "bytes": 225704
+    },
+    {
+      "path": "rgb/695.png",
+      "bytes": 365392
+    },
+    {
+      "path": "depth/321.png",
+      "bytes": 165782
+    },
+    {
+      "path": "rgb/714.png",
+      "bytes": 378618
+    },
+    {
+      "path": "rgb/826.png",
+      "bytes": 379790
+    },
+    {
+      "path": "depth/875.png",
+      "bytes": 217004
+    },
+    {
+      "path": "rgb/294.png",
+      "bytes": 368932
+    },
+    {
+      "path": "depth/622.png",
+      "bytes": 176268
+    },
+    {
+      "path": "rgb/313.png",
+      "bytes": 366531
+    },
+    {
+      "path": "rgb/425.png",
+      "bytes": 352868
+    },
+    {
+      "path": "depth/474.png",
+      "bytes": 190532
+    },
+    {
+      "path": "depth/586.png",
+      "bytes": 206922
+    },
+    {
+      "path": "depth/605.png",
+      "bytes": 192654
+    },
+    {
+      "path": "depth/204.png",
+      "bytes": 212015
+    },
+    {
+      "path": "depth/14.png",
+      "bytes": 145216
+    },
+    {
+      "path": "depth/128.png",
+      "bytes": 229686
+    },
+    {
+      "path": "rgb/578.png",
+      "bytes": 387226
+    },
+    {
+      "path": "rgb/731.png",
+      "bytes": 362413
+    },
+    {
+      "path": "rgb/843.png",
+      "bytes": 381989
+    },
+    {
+      "path": "rgb/19.png",
+      "bytes": 355836
+    },
+    {
+      "path": "depth/758.png",
+      "bytes": 172818
+    },
+    {
+      "path": "rgb/330.png",
+      "bytes": 387702
+    },
+    {
+      "path": "rgb/177.png",
+      "bytes": 314071
+    },
+    {
+      "path": "rgb/442.png",
+      "bytes": 361360
+    },
+    {
+      "path": "depth/491.png",
+      "bytes": 199276
+    },
+    {
+      "path": "depth/357.png",
+      "bytes": 203751
+    },
+    {
+      "path": "depth/221.png",
+      "bytes": 195383
+    },
+    {
+      "path": "depth/31.png",
+      "bytes": 158557
+    },
+    {
+      "path": "rgb/349.png",
+      "bytes": 405811
+    },
+    {
+      "path": "rgb/614.png",
+      "bytes": 384886
+    },
+    {
+      "path": "rgb/595.png",
+      "bytes": 387519
+    },
+    {
+      "path": "rgb/860.png",
+      "bytes": 386859
+    },
+    {
+      "path": "rgb/36.png",
+      "bytes": 348393
+    },
+    {
+      "path": "depth/775.png",
+      "bytes": 148103
+    },
+    {
+      "path": "depth/792.png",
+      "bytes": 139512
+    },
+    {
+      "path": "rgb/879.png",
+      "bytes": 375546
+    },
+    {
+      "path": "rgb/194.png",
+      "bytes": 306935
+    },
+    {
+      "path": "rgb/213.png",
+      "bytes": 294839
+    },
+    {
+      "path": "depth/374.png",
+      "bytes": 205905
+    },
+    {
+      "path": "rgb/767.png",
+      "bytes": 359009
+    },
+    {
+      "path": "rgb/478.png",
+      "bytes": 336290
+    },
+    {
+      "path": "depth/505.png",
+      "bytes": 218970
+    },
+    {
+      "path": "rgb/53.png",
+      "bytes": 346013
+    },
+    {
+      "path": "depth/819.png",
+      "bytes": 175223
+    },
+    {
+      "path": "rgb/366.png",
+      "bytes": 406577
+    },
+    {
+      "path": "rgb/631.png",
+      "bytes": 358600
+    },
+    {
+      "path": "depth/811.png",
+      "bytes": 167237
+    },
+    {
+      "path": "depth/391.png",
+      "bytes": 155693
+    },
+    {
+      "path": "depth/145.png",
+      "bytes": 237799
+    },
+    {
+      "path": "depth/658.png",
+      "bytes": 62970
+    },
+    {
+      "path": "depth/67.png",
+      "bytes": 172849
+    },
+    {
+      "path": "rgb/230.png",
+      "bytes": 329180
+    },
+    {
+      "path": "depth/410.png",
+      "bytes": 211696
+    },
+    {
+      "path": "rgb/784.png",
+      "bytes": 368490
+    },
+    {
+      "path": "rgb/495.png",
+      "bytes": 348738
+    },
+    {
+      "path": "depth/257.png",
+      "bytes": 159956
+    },
+    {
+      "path": "depth/522.png",
+      "bytes": 228457
+    },
+    {
+      "path": "rgb/70.png",
+      "bytes": 335648
+    },
+    {
+      "path": "rgb/383.png",
+      "bytes": 402898
+    },
+    {
+      "path": "rgb/402.png",
+      "bytes": 390467
+    },
+    {
+      "path": "rgb/249.png",
+      "bytes": 359890
+    },
+    {
+      "path": "rgb/514.png",
+      "bytes": 368459
+    },
+    {
+      "path": "depth/675.png",
+      "bytes": 116128
+    },
+    {
+      "path": "depth/429.png",
+      "bytes": 246470
+    },
+    {
+      "path": "depth/84.png",
+      "bytes": 182834
+    },
+    {
+      "path": "depth/162.png",
+      "bytes": 236630
+    },
+    {
+      "path": "depth/274.png",
+      "bytes": 161201
+    },
+    {
+      "path": "rgb/113.png",
+      "bytes": 315582
+    },
+    {
+      "path": "rgb/89.png",
+      "bytes": 327164
+    },
+    {
+      "path": "rgb/667.png",
+      "bytes": 342663
+    },
+    {
+      "path": "depth/847.png",
+      "bytes": 206792
+    },
+    {
+      "path": "rgb/266.png",
+      "bytes": 360685
+    },
+    {
+      "path": "rgb/531.png",
+      "bytes": 395002
+    },
+    {
+      "path": "depth/711.png",
+      "bytes": 190838
+    },
+    {
+      "path": "depth/692.png",
+      "bytes": 143429
+    },
+    {
+      "path": "depth/446.png",
+      "bytes": 228573
+    },
+    {
+      "path": "depth/558.png",
+      "bytes": 217020
+    },
+    {
+      "path": "rgb/130.png",
+      "bytes": 321953
+    },
+    {
+      "path": "depth/291.png",
+      "bytes": 160815
+    },
+    {
+      "path": "rgb/684.png",
+      "bytes": 357429
+    },
+    {
+      "path": "depth/310.png",
+      "bytes": 173603
+    },
+    {
+      "path": "rgb/703.png",
+      "bytes": 373614
+    },
+    {
+      "path": "rgb/815.png",
+      "bytes": 378664
+    },
+    {
+      "path": "depth/864.png",
+      "bytes": 216955
+    },
+    {
+      "path": "rgb/283.png",
+      "bytes": 366890
+    },
+    {
+      "path": "rgb/302.png",
+      "bytes": 367807
+    },
+    {
+      "path": "rgb/149.png",
+      "bytes": 321430
+    },
+    {
+      "path": "depth/198.png",
+      "bytes": 218099
+    },
+    {
+      "path": "depth/463.png",
+      "bytes": 208041
+    },
+    {
+      "path": "depth/575.png",
+      "bytes": 207581
+    },
+    {
+      "path": "depth/329.png",
+      "bytes": 151661
+    },
+    {
+      "path": "depth/418.png",
+      "bytes": 238643
+    },
+    {
+      "path": "rgb/567.png",
+      "bytes": 392492
+    },
+    {
+      "path": "rgb/720.png",
+      "bytes": 380357
+    },
+    {
+      "path": "rgb/832.png",
+      "bytes": 381898
+    },
+    {
+      "path": "depth/210.png",
+      "bytes": 207712
+    },
+    {
+      "path": "depth/592.png",
+      "bytes": 204501
+    },
+    {
+      "path": "depth/747.png",
+      "bytes": 189370
+    },
+    {
+      "path": "depth/611.png",
+      "bytes": 190927
+    },
+    {
+      "path": "rgb/166.png",
+      "bytes": 312004
+    },
+    {
+      "path": "rgb/431.png",
+      "bytes": 366617
+    },
+    {
+      "path": "depth/480.png",
+      "bytes": 172955
+    },
+    {
+      "path": "depth/346.png",
+      "bytes": 202592
+    },
+    {
+      "path": "rgb/739.png",
+      "bytes": 346389
+    },
+    {
+      "path": "rgb/868.png",
+      "bytes": 381496
+    },
+    {
+      "path": "depth/20.png",
+      "bytes": 150951
+    },
+    {
+      "path": "depth/764.png",
+      "bytes": 162007
+    },
+    {
+      "path": "rgb/603.png",
+      "bytes": 387822
+    },
+    {
+      "path": "rgb/584.png",
+      "bytes": 387380
+    },
+    {
+      "path": "rgb/338.png",
+      "bytes": 394802
+    },
+    {
+      "path": "rgb/25.png",
+      "bytes": 353399
+    },
+    {
+      "path": "depth/499.png",
+      "bytes": 215507
+    },
+    {
+      "path": "depth/39.png",
+      "bytes": 159212
+    },
+    {
+      "path": "depth/117.png",
+      "bytes": 220092
+    },
+    {
+      "path": "rgb/183.png",
+      "bytes": 310500
+    },
+    {
+      "path": "rgb/202.png",
+      "bytes": 298083
+    },
+    {
+      "path": "rgb/5.png",
+      "bytes": 358813
+    },
+    {
+      "path": "depth/363.png",
+      "bytes": 202218
+    },
+    {
+      "path": "rgb/756.png",
+      "bytes": 348385
+    },
+    {
+      "path": "rgb/467.png",
+      "bytes": 330105
+    },
+    {
+      "path": "depth/229.png",
+      "bytes": 186671
+    },
+    {
+      "path": "rgb/42.png",
+      "bytes": 342349
+    },
+    {
+      "path": "rgb/355.png",
+      "bytes": 406005
+    },
+    {
+      "path": "rgb/620.png",
+      "bytes": 380162
+    },
+    {
+      "path": "depth/781.png",
+      "bytes": 140829
+    },
+    {
+      "path": "depth/800.png",
+      "bytes": 152181
+    },
+    {
+      "path": "depth/647.png",
+      "bytes": 111236
+    },
+    {
+      "path": "depth/56.png",
+      "bytes": 164913
+    },
+    {
+      "path": "depth/134.png",
+      "bytes": 231761
+    },
+    {
+      "path": "depth/380.png",
+      "bytes": 206923
+    },
+    {
+      "path": "rgb/773.png",
+      "bytes": 363608
+    },
+    {
+      "path": "depth/246.png",
+      "bytes": 156550
+    },
+    {
+      "path": "rgb/639.png",
+      "bytes": 350742
+    },
+    {
+      "path": "depth/511.png",
+      "bytes": 221904
+    },
+    {
+      "path": "depth/808.png",
+      "bytes": 163267
+    },
+    {
+      "path": "depth/664.png",
+      "bytes": 100632
+    },
+    {
+      "path": "rgb/372.png",
+      "bytes": 403898
+    },
+    {
+      "path": "rgb/484.png",
+      "bytes": 337419
+    },
+    {
+      "path": "rgb/238.png",
+      "bytes": 345896
+    },
+    {
+      "path": "rgb/503.png",
+      "bytes": 353166
+    },
+    {
+      "path": "depth/399.png",
+      "bytes": 177440
+    },
+    {
+      "path": "depth/263.png",
+      "bytes": 161409
+    },
+    {
+      "path": "depth/73.png",
+      "bytes": 171345
+    },
+    {
+      "path": "depth/151.png",
+      "bytes": 238253
+    },
+    {
+      "path": "rgb/102.png",
+      "bytes": 319576
+    },
+    {
+      "path": "rgb/790.png",
+      "bytes": 371754
+    },
+    {
+      "path": "rgb/78.png",
+      "bytes": 336351
+    },
+    {
+      "path": "rgb/656.png",
+      "bytes": 339144
+    },
+    {
+      "path": "depth/681.png",
+      "bytes": 124181
+    },
+    {
+      "path": "depth/836.png",
+      "bytes": 196444
+    },
+    {
+      "path": "depth/700.png",
+      "bytes": 164581
+    },
+    {
+      "path": "rgb/255.png",
+      "bytes": 359593
+    },
+    {
+      "path": "rgb/520.png",
+      "bytes": 379095
+    },
+    {
+      "path": "depth/2.png",
+      "bytes": 144259
+    },
+    {
+      "path": "depth/435.png",
+      "bytes": 239985
+    },
+    {
+      "path": "depth/90.png",
+      "bytes": 191354
+    },
+    {
+      "path": "depth/547.png",
+      "bytes": 226535
+    },
+    {
+      "path": "depth/280.png",
+      "bytes": 162600
+    },
+    {
+      "path": "rgb/673.png",
+      "bytes": 347737
+    },
+    {
+      "path": "rgb/95.png",
+      "bytes": 322636
+    },
+    {
+      "path": "rgb/539.png",
+      "bytes": 405343
+    },
+    {
+      "path": "rgb/804.png",
+      "bytes": 376376
+    },
+    {
+      "path": "depth/853.png",
+      "bytes": 211691
+    },
+    {
+      "path": "depth/719.png",
+      "bytes": 194551
+    },
+    {
+      "path": "rgb/272.png",
+      "bytes": 362863
+    },
+    {
+      "path": "depth/452.png",
+      "bytes": 216453
+    },
+    {
+      "path": "rgb/138.png",
+      "bytes": 323478
+    },
+    {
+      "path": "depth/187.png",
+      "bytes": 227950
+    },
+    {
+      "path": "depth/299.png",
+      "bytes": 165819
+    },
+    {
+      "path": "depth/564.png",
+      "bytes": 211185
+    },
+    {
+      "path": "depth/318.png",
+      "bytes": 169139
+    },
+    {
+      "path": "rgb/690.png",
+      "bytes": 362226
+    },
+    {
+      "path": "rgb/556.png",
+      "bytes": 392637
+    },
+    {
+      "path": "rgb/821.png",
+      "bytes": 376387
+    },
+    {
+      "path": "depth/870.png",
+      "bytes": 216986
+    },
+    {
+      "path": "depth/736.png",
+      "bytes": 199578
+    },
+    {
+      "path": "rgb/155.png",
+      "bytes": 315517
+    },
+    {
+      "path": "rgb/420.png",
+      "bytes": 343837
+    },
+    {
+      "path": "depth/581.png",
+      "bytes": 207640
+    },
+    {
+      "path": "depth/335.png",
+      "bytes": 170949
+    },
+    {
+      "path": "rgb/728.png",
+      "bytes": 369535
+    },
+    {
+      "path": "depth/600.png",
+      "bytes": 199412
+    },
+    {
+      "path": "rgb/439.png",
+      "bytes": 362653
+    },
+    {
+      "path": "rgb/573.png",
+      "bytes": 387313
+    },
+    {
+      "path": "rgb/327.png",
+      "bytes": 381751
+    },
+    {
+      "path": "rgb/14.png",
+      "bytes": 358052
+    },
+    {
+      "path": "depth/488.png",
+      "bytes": 192701
+    },
+    {
+      "path": "depth/753.png",
+      "bytes": 181042
+    },
+    {
+      "path": "depth/619.png",
+      "bytes": 182526
+    },
+    {
+      "path": "rgb/172.png",
+      "bytes": 313427
+    },
+    {
+      "path": "depth/28.png",
+      "bytes": 159976
+    },
+    {
+      "path": "rgb/857.png",
+      "bytes": 387951
+    },
+    {
+      "path": "depth/352.png",
+      "bytes": 203886
+    },
+    {
+      "path": "rgb/745.png",
+      "bytes": 344289
+    },
+    {
+      "path": "depth/106.png",
+      "bytes": 207624
+    },
+    {
+      "path": "depth/218.png",
+      "bytes": 201781
+    },
+    {
+      "path": "rgb/456.png",
+      "bytes": 337453
+    },
+    {
+      "path": "rgb/590.png",
+      "bytes": 387024
+    },
+    {
+      "path": "rgb/344.png",
+      "bytes": 404468
+    },
+    {
+      "path": "rgb/31.png",
+      "bytes": 349270
+    },
+    {
+      "path": "depth/770.png",
+      "bytes": 154213
+    },
+    {
+      "path": "depth/636.png",
+      "bytes": 127862
+    },
+    {
+      "path": "depth/235.png",
+      "bytes": 181815
+    },
+    {
+      "path": "depth/45.png",
+      "bytes": 160747
+    },
+    {
+      "path": "rgb/762.png",
+      "bytes": 355547
+    },
+    {
+      "path": "rgb/874.png",
+      "bytes": 376922
+    },
+    {
+      "path": "depth/123.png",
+      "bytes": 225185
+    },
+    {
+      "path": "rgb/628.png",
+      "bytes": 369163
+    },
+    {
+      "path": "depth/500.png",
+      "bytes": 216447
+    },
+    {
+      "path": "depth/789.png",
+      "bytes": 139492
+    },
+    {
+      "path": "depth/653.png",
+      "bytes": 72710
+    },
+    {
+      "path": "rgb/361.png",
+      "bytes": 405884
+    },
+    {
+      "path": "rgb/473.png",
+      "bytes": 329600
+    },
+    {
+      "path": "rgb/227.png",
+      "bytes": 318122
+    },
+    {
+      "path": "depth/388.png",
+      "bytes": 183046
+    },
+    {
+      "path": "depth/407.png",
+      "bytes": 194676
+    },
+    {
+      "path": "depth/62.png",
+      "bytes": 168867
+    },
+    {
+      "path": "depth/519.png",
+      "bytes": 227163
+    },
+    {
+      "path": "depth/252.png",
+      "bytes": 162574
+    },
+    {
+      "path": "depth/140.png",
+      "bytes": 234796
+    },
+    {
+      "path": "rgb/67.png",
+      "bytes": 338390
+    },
+    {
+      "path": "rgb/645.png",
+      "bytes": 349565
+    },
+    {
+      "path": "depth/670.png",
+      "bytes": 110148
+    },
+    {
+      "path": "depth/825.png",
+      "bytes": 182331
+    },
+    {
+      "path": "rgb/490.png",
+      "bytes": 343213
+    },
+    {
+      "path": "rgb/244.png",
+      "bytes": 355222
+    },
+    {
+      "path": "rgb/798.png",
+      "bytes": 375291
+    },
+    {
+      "path": "depth/159.png",
+      "bytes": 237157
+    },
+    {
+      "path": "depth/424.png",
+      "bytes": 246783
+    },
+    {
+      "path": "depth/536.png",
+      "bytes": 231371
+    },
+    {
+      "path": "rgb/662.png",
+      "bytes": 340758
+    },
+    {
+      "path": "depth/842.png",
+      "bytes": 201734
+    },
+    {
+      "path": "rgb/397.png",
+      "bytes": 401796
+    },
+    {
+      "path": "rgb/84.png",
+      "bytes": 335726
+    },
+    {
+      "path": "rgb/416.png",
+      "bytes": 353528
+    },
+    {
+      "path": "rgb/528.png",
+      "bytes": 390647
+    },
+    {
+      "path": "depth/708.png",
+      "bytes": 186187
+    },
+    {
+      "path": "depth/689.png",
+      "bytes": 137707
+    },
+    {
+      "path": "depth/98.png",
+      "bytes": 199955
+    },
+    {
+      "path": "rgb/261.png",
+      "bytes": 362197
+    },
+    {
+      "path": "depth/441.png",
+      "bytes": 235371
+    },
+    {
+      "path": "rgb/127.png",
+      "bytes": 321543
+    },
+    {
+      "path": "depth/176.png",
+      "bytes": 234998
+    },
+    {
+      "path": "depth/288.png",
+      "bytes": 161707
+    },
+    {
+      "path": "depth/553.png",
+      "bytes": 221312
+    },
+    {
+      "path": "depth/307.png",
+      "bytes": 172033
+    },
+    {
+      "path": "depth/725.png",
+      "bytes": 195471
+    },
+    {
+      "path": "rgb/545.png",
+      "bytes": 402011
+    },
+    {
+      "path": "rgb/810.png",
+      "bytes": 380167
+    },
+    {
+      "path": "depth/570.png",
+      "bytes": 213197
+    },
+    {
+      "path": "depth/742.png",
+      "bytes": 194742
+    },
+    {
+      "path": "rgb/144.png",
+      "bytes": 321784
+    },
+    {
+      "path": "depth/193.png",
+      "bytes": 224146
+    },
+    {
+      "path": "rgb/698.png",
+      "bytes": 368764
+    },
+    {
+      "path": "depth/324.png",
+      "bytes": 160662
+    },
+    {
+      "path": "rgb/717.png",
+      "bytes": 380511
+    },
+    {
+      "path": "rgb/829.png",
+      "bytes": 381579
+    },
+    {
+      "path": "depth/878.png",
+      "bytes": 216843
+    },
+    {
+      "path": "depth/589.png",
+      "bytes": 205901
+    },
+    {
+      "path": "rgb/297.png",
+      "bytes": 367969
+    },
+    {
+      "path": "rgb/562.png",
+      "bytes": 387831
+    },
+    {
+      "path": "rgb/316.png",
+      "bytes": 367967
+    },
+    {
+      "path": "rgb/428.png",
+      "bytes": 364061
+    },
+    {
+      "path": "depth/477.png",
+      "bytes": 190396
+    },
+    {
+      "path": "depth/341.png",
+      "bytes": 193737
+    },
+    {
+      "path": "depth/608.png",
+      "bytes": 192097
+    },
+    {
+      "path": "rgb/161.png",
+      "bytes": 309552
+    },
+    {
+      "path": "depth/17.png",
+      "bytes": 147751
+    },
+    {
+      "path": "depth/207.png",
+      "bytes": 209266
+    },
+    {
+      "path": "rgb/734.png",
+      "bytes": 354771
+    },
+    {
+      "path": "rgb/846.png",
+      "bytes": 383494
+    },
+    {
+      "path": "depth/224.png",
+      "bytes": 189241
+    },
+    {
+      "path": "rgb/445.png",
+      "bytes": 357929
+    },
+    {
+      "path": "depth/642.png",
+      "bytes": 116758
+    },
+    {
+      "path": "rgb/333.png",
+      "bytes": 388853
+    },
+    {
+      "path": "rgb/20.png",
+      "bytes": 355186
+    },
+    {
+      "path": "depth/494.png",
+      "bytes": 208290
+    },
+    {
+      "path": "depth/34.png",
+      "bytes": 158803
+    },
+    {
+      "path": "depth/625.png",
+      "bytes": 170459
+    },
+    {
+      "path": "rgb/39.png",
+      "bytes": 345909
+    },
+    {
+      "path": "rgb/751.png",
+      "bytes": 345265
+    },
+    {
+      "path": "rgb/0.png",
+      "bytes": 356915
+    },
+    {
+      "path": "rgb/598.png",
+      "bytes": 389282
+    },
+    {
+      "path": "rgb/863.png",
+      "bytes": 384430
+    },
+    {
+      "path": "depth/112.png",
+      "bytes": 214204
+    },
+    {
+      "path": "rgb/617.png",
+      "bytes": 381778
+    },
+    {
+      "path": "depth/778.png",
+      "bytes": 143354
+    },
+    {
+      "path": "rgb/350.png",
+      "bytes": 405649
+    },
+    {
+      "path": "rgb/197.png",
+      "bytes": 301825
+    },
+    {
+      "path": "rgb/462.png",
+      "bytes": 335846
+    },
+    {
+      "path": "rgb/216.png",
+      "bytes": 297972
+    },
+    {
+      "path": "depth/377.png",
+      "bytes": 207231
+    },
+    {
+      "path": "depth/241.png",
+      "bytes": 178001
+    },
+    {
+      "path": "depth/51.png",
+      "bytes": 163024
+    },
+    {
+      "path": "depth/508.png",
+      "bytes": 220525
+    },
+    {
+      "path": "rgb/56.png",
+      "bytes": 345971
+    },
+    {
+      "path": "rgb/369.png",
+      "bytes": 406253
+    },
+    {
+      "path": "rgb/880.png",
+      "bytes": 375745
+    },
+    {
+      "path": "rgb/634.png",
+      "bytes": 352992
+    },
+    {
+      "path": "depth/795.png",
+      "bytes": 142958
+    },
+    {
+      "path": "depth/148.png",
+      "bytes": 238400
+    },
+    {
+      "path": "depth/814.png",
+      "bytes": 170508
+    },
+    {
+      "path": "rgb/233.png",
+      "bytes": 335891
+    },
+    {
+      "path": "depth/394.png",
+      "bytes": 169985
+    },
+    {
+      "path": "rgb/787.png",
+      "bytes": 370013
+    },
+    {
+      "path": "rgb/498.png",
+      "bytes": 350576
+    },
+    {
+      "path": "depth/413.png",
+      "bytes": 226045
+    },
+    {
+      "path": "depth/525.png",
+      "bytes": 230334
+    },
+    {
+      "path": "rgb/73.png",
+      "bytes": 335562
+    },
+    {
+      "path": "depth/614.png",
+      "bytes": 189204
+    },
+    {
+      "path": "rgb/386.png",
+      "bytes": 403041
+    },
+    {
+      "path": "rgb/651.png",
+      "bytes": 343233
+    },
+    {
+      "path": "rgb/405.png",
+      "bytes": 382466
+    },
+    {
+      "path": "rgb/517.png",
+      "bytes": 374462
+    },
+    {
+      "path": "depth/831.png",
+      "bytes": 191216
+    },
+    {
+      "path": "depth/678.png",
+      "bytes": 119508
+    },
+    {
+      "path": "depth/87.png",
+      "bytes": 188134
+    },
+    {
+      "path": "rgb/250.png",
+      "bytes": 359763
+    },
+    {
+      "path": "depth/430.png",
+      "bytes": 246662
+    },
+    {
+      "path": "rgb/116.png",
+      "bytes": 314360
+    },
+    {
+      "path": "depth/165.png",
+      "bytes": 236293
+    },
+    {
+      "path": "depth/277.png",
+      "bytes": 162225
+    },
+    {
+      "path": "depth/542.png",
+      "bytes": 227453
+    },
+    {
+      "path": "depth/213.png",
+      "bytes": 205900
+    },
+    {
+      "path": "rgb/90.png",
+      "bytes": 325640
+    },
+    {
+      "path": "rgb/269.png",
+      "bytes": 359840
+    },
+    {
+      "path": "rgb/534.png",
+      "bytes": 398961
+    },
+    {
+      "path": "depth/695.png",
+      "bytes": 150731
+    },
+    {
+      "path": "depth/449.png",
+      "bytes": 221525
+    },
+    {
+      "path": "depth/714.png",
+      "bytes": 194143
+    },
+    {
+      "path": "depth/294.png",
+      "bytes": 161619
+    },
+    {
+      "path": "rgb/133.png",
+      "bytes": 323011
+    },
+    {
+      "path": "depth/182.png",
+      "bytes": 232059
+    },
+    {
+      "path": "rgb/687.png",
+      "bytes": 360732
+    },
+    {
+      "path": "depth/313.png",
+      "bytes": 173741
+    },
+    {
+      "path": "rgb/706.png",
+      "bytes": 378413
+    },
+    {
+      "path": "rgb/818.png",
+      "bytes": 376619
+    },
+    {
+      "path": "depth/867.png",
+      "bytes": 217196
+    },
+    {
+      "path": "depth/731.png",
+      "bytes": 197440
+    },
+    {
+      "path": "rgb/286.png",
+      "bytes": 368612
+    },
+    {
+      "path": "rgb/551.png",
+      "bytes": 396734
+    },
+    {
+      "path": "rgb/305.png",
+      "bytes": 368077
+    },
+    {
+      "path": "depth/466.png",
+      "bytes": 201860
+    },
+    {
+      "path": "depth/578.png",
+      "bytes": 207602
+    },
+    {
+      "path": "rgb/150.png",
+      "bytes": 320465
+    },
+    {
+      "path": "depth/631.png",
+      "bytes": 145489
+    },
+    {
+      "path": "depth/330.png",
+      "bytes": 139318
+    },
+    {
+      "path": "rgb/723.png",
+      "bytes": 377274
+    },
+    {
+      "path": "rgb/835.png",
+      "bytes": 381473
+    },
+    {
+      "path": "depth/23.png",
+      "bytes": 156714
+    },
+    {
+      "path": "depth/595.png",
+      "bytes": 202552
+    },
+    {
+      "path": "rgb/169.png",
+      "bytes": 312795
+    },
+    {
+      "path": "rgb/322.png",
+      "bytes": 376722
+    },
+    {
+      "path": "rgb/434.png",
+      "bytes": 360646
+    },
+    {
+      "path": "depth/483.png",
+      "bytes": 190130
+    },
+    {
+      "path": "depth/349.png",
+      "bytes": 203443
+    },
+    {
+      "path": "rgb/28.png",
+      "bytes": 351311
+    },
+    {
+      "path": "rgb/740.png",
+      "bytes": 345543
+    },
+    {
+      "path": "rgb/587.png",
+      "bytes": 385898
+    },
+    {
+      "path": "rgb/852.png",
+      "bytes": 385091
+    },
+    {
+      "path": "depth/101.png",
+      "bytes": 202633
+    },
+    {
+      "path": "rgb/606.png",
+      "bytes": 384837
+    },
+    {
+      "path": "depth/767.png",
+      "bytes": 157737
+    },
+    {
+      "path": "rgb/8.png",
+      "bytes": 358999
+    },
+    {
+      "path": "rgb/186.png",
+      "bytes": 305899
+    },
+    {
+      "path": "rgb/451.png",
+      "bytes": 345297
+    },
+    {
+      "path": "rgb/205.png",
+      "bytes": 295378
+    },
+    {
+      "path": "depth/366.png",
+      "bytes": 201445
+    },
+    {
+      "path": "rgb/759.png",
+      "bytes": 351521
+    },
+    {
+      "path": "depth/230.png",
+      "bytes": 186155
+    },
+    {
+      "path": "depth/40.png",
+      "bytes": 158964
+    },
+    {
+      "path": "rgb/45.png",
+      "bytes": 343097
+    },
+    {
+      "path": "depth/803.png",
+      "bytes": 155591
+    },
+    {
+      "path": "rgb/358.png",
+      "bytes": 405889
+    },
+    {
+      "path": "rgb/623.png",
+      "bytes": 378098
+    },
+    {
+      "path": "depth/839.png",
+      "bytes": 200117
+    },
+    {
+      "path": "depth/784.png",
+      "bytes": 139734
+    },
+    {
+      "path": "depth/137.png",
+      "bytes": 232944
+    },
+    {
+      "path": "depth/402.png",
+      "bytes": 176146
+    },
+    {
+      "path": "depth/59.png",
+      "bytes": 166093
+    },
+    {
+      "path": "rgb/222.png",
+      "bytes": 306453
+    },
+    {
+      "path": "depth/383.png",
+      "bytes": 198950
+    },
+    {
+      "path": "rgb/776.png",
+      "bytes": 365140
+    },
+    {
+      "path": "rgb/487.png",
+      "bytes": 340444
+    },
+    {
+      "path": "depth/249.png",
+      "bytes": 143432
+    },
+    {
+      "path": "depth/514.png",
+      "bytes": 223993
+    },
+    {
+      "path": "rgb/62.png",
+      "bytes": 340660
+    },
+    {
+      "path": "rgb/375.png",
+      "bytes": 401497
+    },
+    {
+      "path": "rgb/640.png",
+      "bytes": 350444
+    },
+    {
+      "path": "depth/820.png",
+      "bytes": 176470
+    },
+    {
+      "path": "rgb/506.png",
+      "bytes": 354861
+    },
+    {
+      "path": "depth/667.png",
+      "bytes": 106645
+    },
+    {
+      "path": "depth/266.png",
+      "bytes": 161479
+    },
+    {
+      "path": "depth/76.png",
+      "bytes": 170832
+    },
+    {
+      "path": "depth/703.png",
+      "bytes": 173757
+    },
+    {
+      "path": "rgb/793.png",
+      "bytes": 374145
+    },
+    {
+      "path": "rgb/105.png",
+      "bytes": 319077
+    },
+    {
+      "path": "depth/154.png",
+      "bytes": 238106
+    },
+    {
+      "path": "rgb/659.png",
+      "bytes": 338937
+    },
+    {
+      "path": "depth/531.png",
+      "bytes": 232635
+    },
+    {
+      "path": "depth/684.png",
+      "bytes": 128793
+    },
+    {
+      "path": "rgb/392.png",
+      "bytes": 402788
+    },
+    {
+      "path": "rgb/258.png",
+      "bytes": 360932
+    },
+    {
+      "path": "rgb/411.png",
+      "bytes": 368824
+    },
+    {
+      "path": "rgb/523.png",
+      "bytes": 382219
+    },
+    {
+      "path": "depth/5.png",
+      "bytes": 142942
+    },
+    {
+      "path": "depth/438.png",
+      "bytes": 237191
+    },
+    {
+      "path": "depth/93.png",
+      "bytes": 194294
+    },
+    {
+      "path": "depth/171.png",
+      "bytes": 234838
+    },
+    {
+      "path": "depth/283.png",
+      "bytes": 164266
+    },
+    {
+      "path": "rgb/122.png",
+      "bytes": 316063
+    },
+    {
+      "path": "rgb/98.png",
+      "bytes": 320432
+    },
+    {
+      "path": "rgb/676.png",
+      "bytes": 350696
+    },
+    {
+      "path": "depth/302.png",
+      "bytes": 168405
+    },
+    {
+      "path": "rgb/807.png",
+      "bytes": 378884
+    },
+    {
+      "path": "depth/856.png",
+      "bytes": 213900
+    },
+    {
+      "path": "rgb/275.png",
+      "bytes": 363687
+    },
+    {
+      "path": "rgb/540.png",
+      "bytes": 405298
+    },
+    {
+      "path": "depth/720.png",
+      "bytes": 194902
+    },
+    {
+      "path": "depth/455.png",
+      "bytes": 212962
+    },
+    {
+      "path": "depth/567.png",
+      "bytes": 212413
+    },
+    {
+      "path": "depth/828.png",
+      "bytes": 186675
+    },
+    {
+      "path": "rgb/693.png",
+      "bytes": 364134
+    },
+    {
+      "path": "rgb/712.png",
+      "bytes": 378517
+    },
+    {
+      "path": "rgb/559.png",
+      "bytes": 389095
+    },
+    {
+      "path": "rgb/824.png",
+      "bytes": 378246
+    },
+    {
+      "path": "depth/873.png",
+      "bytes": 216949
+    },
+    {
+      "path": "depth/739.png",
+      "bytes": 198413
+    },
+    {
+      "path": "rgb/292.png",
+      "bytes": 368910
+    },
+    {
+      "path": "rgb/158.png",
+      "bytes": 312105
+    },
+    {
+      "path": "rgb/311.png",
+      "bytes": 366371
+    },
+    {
+      "path": "rgb/423.png",
+      "bytes": 345198
+    },
+    {
+      "path": "depth/472.png",
+      "bytes": 194893
+    },
+    {
+      "path": "depth/584.png",
+      "bytes": 207434
+    },
+    {
+      "path": "depth/338.png",
+      "bytes": 179772
+    },
+    {
+      "path": "depth/603.png",
+      "bytes": 196115
+    },
+    {
+      "path": "depth/12.png",
+      "bytes": 144549
+    },
+    {
+      "path": "depth/202.png",
+      "bytes": 213958
+    },
+    {
+      "path": "rgb/576.png",
+      "bytes": 386903
+    },
+    {
+      "path": "rgb/841.png",
+      "bytes": 382470
+    },
+    {
+      "path": "rgb/17.png",
+      "bytes": 356450
+    },
+    {
+      "path": "depth/756.png",
+      "bytes": 176413
+    },
+    {
+      "path": "rgb/175.png",
+      "bytes": 316109
+    },
+    {
+      "path": "rgb/440.png",
+      "bytes": 362422
+    },
+    {
+      "path": "depth/620.png",
+      "bytes": 181706
+    },
+    {
+      "path": "depth/355.png",
+      "bytes": 204522
+    },
+    {
+      "path": "rgb/748.png",
+      "bytes": 344096
+    },
+    {
+      "path": "depth/109.png",
+      "bytes": 210501
+    },
+    {
+      "path": "rgb/347.png",
+      "bytes": 402425
+    },
+    {
+      "path": "rgb/34.png",
+      "bytes": 348111
+    },
+    {
+      "path": "rgb/593.png",
+      "bytes": 387582
+    },
+    {
+      "path": "rgb/612.png",
+      "bytes": 385280
+    },
+    {
+      "path": "rgb/459.png",
+      "bytes": 334885
+    },
+    {
+      "path": "depth/639.png",
+      "bytes": 121058
+    },
+    {
+      "path": "depth/773.png",
+      "bytes": 150759
+    },
+    {
+      "path": "rgb/877.png",
+      "bytes": 376003
+    },
+    {
+      "path": "rgb/192.png",
+      "bytes": 307783
+    },
+    {
+      "path": "depth/48.png",
+      "bytes": 161874
+    },
+    {
+      "path": "rgb/211.png",
+      "bytes": 293752
+    },
+    {
+      "path": "depth/372.png",
+      "bytes": 203695
+    },
+    {
+      "path": "rgb/765.png",
+      "bytes": 357377
+    },
+    {
+      "path": "depth/126.png",
+      "bytes": 228202
+    },
+    {
+      "path": "depth/238.png",
+      "bytes": 179889
+    },
+    {
+      "path": "depth/503.png",
+      "bytes": 218152
+    },
+    {
+      "path": "rgb/476.png",
+      "bytes": 334434
+    },
+    {
+      "path": "rgb/364.png",
+      "bytes": 406331
+    },
+    {
+      "path": "rgb/51.png",
+      "bytes": 344867
+    },
+    {
+      "path": "depth/790.png",
+      "bytes": 139750
+    },
+    {
+      "path": "depth/656.png",
+      "bytes": 52686
+    },
+    {
+      "path": "depth/673.png",
+      "bytes": 113489
+    },
+    {
+      "path": "depth/65.png",
+      "bytes": 170947
+    },
+    {
+      "path": "depth/143.png",
+      "bytes": 236819
+    },
+    {
+      "path": "rgb/782.png",
+      "bytes": 367953
+    },
+    {
+      "path": "depth/255.png",
+      "bytes": 161606
+    },
+    {
+      "path": "rgb/648.png",
+      "bytes": 348321
+    },
+    {
+      "path": "depth/520.png",
+      "bytes": 227391
+    },
+    {
+      "path": "rgb/247.png",
+      "bytes": 359531
+    },
+    {
+      "path": "rgb/381.png",
+      "bytes": 401142
+    },
+    {
+      "path": "rgb/493.png",
+      "bytes": 347532
+    },
+    {
+      "path": "rgb/400.png",
+      "bytes": 392136
+    },
+    {
+      "path": "rgb/512.png",
+      "bytes": 363719
+    },
+    {
+      "path": "depth/539.png",
+      "bytes": 228584
+    },
+    {
+      "path": "depth/427.png",
+      "bytes": 247019
+    },
+    {
+      "path": "depth/82.png",
+      "bytes": 178856
+    },
+    {
+      "path": "depth/160.png",
+      "bytes": 237016
+    },
+    {
+      "path": "depth/272.png",
+      "bytes": 160640
+    },
+    {
+      "path": "rgb/111.png",
+      "bytes": 316645
+    },
+    {
+      "path": "rgb/87.png",
+      "bytes": 330243
+    },
+    {
+      "path": "rgb/665.png",
+      "bytes": 341433
+    },
+    {
+      "path": "rgb/419.png",
+      "bytes": 345341
+    },
+    {
+      "path": "depth/690.png",
+      "bytes": 139576
+    },
+    {
+      "path": "depth/845.png",
+      "bytes": 204727
+    },
+    {
+      "path": "rgb/264.png",
+      "bytes": 360207
+    },
+    {
+      "path": "depth/628.png",
+      "bytes": 160038
+    },
+    {
+      "path": "depth/179.png",
+      "bytes": 233260
+    },
+    {
+      "path": "depth/444.png",
+      "bytes": 231727
+    },
+    {
+      "path": "depth/556.png",
+      "bytes": 218575
+    },
+    {
+      "path": "rgb/682.png",
+      "bytes": 356463
+    },
+    {
+      "path": "rgb/701.png",
+      "bytes": 369450
+    },
+    {
+      "path": "rgb/548.png",
+      "bytes": 400777
+    },
+    {
+      "path": "rgb/813.png",
+      "bytes": 379117
+    },
+    {
+      "path": "depth/862.png",
+      "bytes": 216311
+    },
+    {
+      "path": "depth/728.png",
+      "bytes": 194690
+    },
+    {
+      "path": "rgb/281.png",
+      "bytes": 366658
+    },
+    {
+      "path": "rgb/147.png",
+      "bytes": 321671
+    },
+    {
+      "path": "rgb/300.png",
+      "bytes": 367817
+    },
+    {
+      "path": "depth/196.png",
+      "bytes": 220225
+    },
+    {
+      "path": "depth/461.png",
+      "bytes": 208593
+    },
+    {
+      "path": "depth/573.png",
+      "bytes": 208541
+    },
+    {
+      "path": "depth/327.png",
+      "bytes": 159874
+    },
+    {
+      "path": "rgb/319.png",
+      "bytes": 370703
+    },
+    {
+      "path": "rgb/565.png",
+      "bytes": 391608
+    },
+    {
+      "path": "rgb/830.png",
+      "bytes": 381769
+    },
+    {
+      "path": "depth/734.png",
+      "bytes": 198413
+    },
+    {
+      "path": "depth/745.png",
+      "bytes": 192545
+    },
+    {
+      "path": "depth/762.png",
+      "bytes": 164830
+    },
+    {
+      "path": "rgb/164.png",
+      "bytes": 311011
+    },
+    {
+      "path": "depth/416.png",
+      "bytes": 234809
+    },
+    {
+      "path": "depth/590.png",
+      "bytes": 205512
+    },
+    {
+      "path": "depth/344.png",
+      "bytes": 202119
+    },
+    {
+      "path": "rgb/737.png",
+      "bytes": 347856
+    },
+    {
+      "path": "rgb/849.png",
+      "bytes": 384608
+    },
+    {
+      "path": "depth/717.png",
+      "bytes": 194352
+    },
+    {
+      "path": "rgb/336.png",
+      "bytes": 392177
+    },
+    {
+      "path": "rgb/601.png",
+      "bytes": 389237
+    },
+    {
+      "path": "rgb/582.png",
+      "bytes": 387572
+    },
+    {
+      "path": "rgb/448.png",
+      "bytes": 352651
+    },
+    {
+      "path": "rgb/23.png",
+      "bytes": 353265
+    },
+    {
+      "path": "depth/497.png",
+      "bytes": 212477
+    },
+    {
+      "path": "depth/37.png",
+      "bytes": 158712
+    },
+    {
+      "path": "rgb/866.png",
+      "bytes": 382881
+    },
+    {
+      "path": "rgb/181.png",
+      "bytes": 311793
+    },
+    {
+      "path": "rgb/200.png",
+      "bytes": 300405
+    },
+    {
+      "path": "rgb/3.png",
+      "bytes": 357861
+    },
+    {
+      "path": "depth/361.png",
+      "bytes": 203247
+    },
+    {
+      "path": "rgb/754.png",
+      "bytes": 347097
+    },
+    {
+      "path": "depth/115.png",
+      "bytes": 217960
+    },
+    {
+      "path": "depth/227.png",
+      "bytes": 186790
+    },
+    {
+      "path": "rgb/465.png",
+      "bytes": 332837
+    },
+    {
+      "path": "rgb/353.png",
+      "bytes": 406362
+    },
+    {
+      "path": "rgb/40.png",
+      "bytes": 344406
+    },
+    {
+      "path": "rgb/219.png",
+      "bytes": 301748
+    },
+    {
+      "path": "depth/645.png",
+      "bytes": 112982
+    },
+    {
+      "path": "depth/54.png",
+      "bytes": 163830
+    },
+    {
+      "path": "depth/132.png",
+      "bytes": 232313
+    },
+    {
+      "path": "depth/244.png",
+      "bytes": 172254
+    },
+    {
+      "path": "rgb/771.png",
+      "bytes": 362345
+    },
+    {
+      "path": "rgb/59.png",
+      "bytes": 345092
+    },
+    {
+      "path": "rgb/637.png",
+      "bytes": 351822
+    },
+    {
+      "path": "depth/817.png",
+      "bytes": 173302
+    },
+    {
+      "path": "depth/798.png",
+      "bytes": 148942
+    },
+    {
+      "path": "depth/662.png",
+      "bytes": 87316
+    },
+    {
+      "path": "rgb/370.png",
+      "bytes": 405569
+    },
+    {
+      "path": "rgb/482.png",
+      "bytes": 337864
+    },
+    {
+      "path": "rgb/236.png",
+      "bytes": 341293
+    },
+    {
+      "path": "rgb/501.png",
+      "bytes": 353145
+    },
+    {
+      "path": "depth/397.png",
+      "bytes": 173577
+    },
+    {
+      "path": "depth/261.png",
+      "bytes": 160687
+    },
+    {
+      "path": "depth/71.png",
+      "bytes": 171579
+    },
+    {
+      "path": "depth/528.png",
+      "bytes": 231821
+    },
+    {
+      "path": "rgb/76.png",
+      "bytes": 336977
+    },
+    {
+      "path": "rgb/100.png",
+      "bytes": 320563
+    },
+    {
+      "path": "rgb/389.png",
+      "bytes": 405318
+    },
+    {
+      "path": "rgb/654.png",
+      "bytes": 340345
+    },
+    {
+      "path": "rgb/408.png",
+      "bytes": 374546
+    },
+    {
+      "path": "depth/834.png",
+      "bytes": 194148
+    },
+    {
+      "path": "rgb/253.png",
+      "bytes": 358994
+    },
+    {
+      "path": "depth/0.png",
+      "bytes": 146096
+    },
+    {
+      "path": "rgb/119.png",
+      "bytes": 315469
+    },
+    {
+      "path": "depth/168.png",
+      "bytes": 235896
+    },
+    {
+      "path": "depth/433.png",
+      "bytes": 242712
+    },
+    {
+      "path": "depth/545.png",
+      "bytes": 226651
+    },
+    {
+      "path": "rgb/671.png",
+      "bytes": 345362
+    },
+    {
+      "path": "rgb/93.png",
+      "bytes": 323714
+    },
+    {
+      "path": "depth/851.png",
+      "bytes": 209777
+    },
+    {
+      "path": "rgb/537.png",
+      "bytes": 403547
+    },
+    {
+      "path": "rgb/802.png",
+      "bytes": 375045
+    },
+    {
+      "path": "depth/698.png",
+      "bytes": 159780
+    },
+    {
+      "path": "depth/562.png",
+      "bytes": 211982
+    },
+    {
+      "path": "rgb/270.png",
+      "bytes": 361203
+    },
+    {
+      "path": "depth/450.png",
+      "bytes": 220228
+    },
+    {
+      "path": "rgb/136.png",
+      "bytes": 323932
+    },
+    {
+      "path": "depth/185.png",
+      "bytes": 230226
+    },
+    {
+      "path": "depth/297.png",
+      "bytes": 163877
+    },
+    {
+      "path": "depth/316.png",
+      "bytes": 171628
+    },
+    {
+      "path": "rgb/709.png",
+      "bytes": 377971
+    },
+    {
+      "path": "depth/751.png",
+      "bytes": 183515
+    },
+    {
+      "path": "rgb/289.png",
+      "bytes": 367648
+    },
+    {
+      "path": "rgb/554.png",
+      "bytes": 393729
+    },
+    {
+      "path": "rgb/308.png",
+      "bytes": 367068
+    },
+    {
+      "path": "depth/469.png",
+      "bytes": 200051
+    },
+    {
+      "path": "depth/598.png",
+      "bytes": 200529
+    },
+    {
+      "path": "rgb/153.png",
+      "bytes": 319184
+    },
+    {
+      "path": "depth/634.png",
+      "bytes": 133419
+    },
+    {
+      "path": "depth/333.png",
+      "bytes": 162444
+    },
+    {
+      "path": "rgb/726.png",
+      "bytes": 373224
+    },
+    {
+      "path": "rgb/838.png",
+      "bytes": 381328
+    },
+    {
+      "path": "rgb/325.png",
+      "bytes": 378873
+    },
+    {
+      "path": "depth/233.png",
+      "bytes": 183403
+    },
+    {
+      "path": "rgb/571.png",
+      "bytes": 391999
+    },
+    {
+      "path": "rgb/437.png",
+      "bytes": 360119
+    },
+    {
+      "path": "rgb/12.png",
+      "bytes": 357837
+    },
+    {
+      "path": "depth/486.png",
+      "bytes": 191113
+    },
+    {
+      "path": "depth/350.png",
+      "bytes": 203591
+    },
+    {
+      "path": "depth/617.png",
+      "bytes": 186397
+    },
+    {
+      "path": "rgb/170.png",
+      "bytes": 312469
+    },
+    {
+      "path": "depth/26.png",
+      "bytes": 159989
+    },
+    {
+      "path": "rgb/855.png",
+      "bytes": 387206
+    },
+    {
+      "path": "depth/216.png",
+      "bytes": 203827
+    },
+    {
+      "path": "rgb/743.png",
+      "bytes": 345085
+    },
+    {
+      "path": "depth/104.png",
+      "bytes": 206061
+    },
+    {
+      "path": "rgb/609.png",
+      "bytes": 385520
+    },
+    {
+      "path": "depth/250.png",
+      "bytes": 151460
+    },
+    {
+      "path": "rgb/189.png",
+      "bytes": 304846
+    },
+    {
+      "path": "rgb/342.png",
+      "bytes": 402330
+    },
+    {
+      "path": "rgb/454.png",
+      "bytes": 340374
+    },
+    {
+      "path": "rgb/208.png",
+      "bytes": 294747
+    },
+    {
+      "path": "depth/369.png",
+      "bytes": 201879
+    },
+    {
+      "path": "depth/43.png",
+      "bytes": 160060
+    },
+    {
+      "path": "rgb/760.png",
+      "bytes": 353323
+    },
+    {
+      "path": "rgb/48.png",
+      "bytes": 342991
+    },
+    {
+      "path": "rgb/872.png",
+      "bytes": 378259
+    },
+    {
+      "path": "depth/121.png",
+      "bytes": 223019
+    },
+    {
+      "path": "rgb/626.png",
+      "bytes": 373522
+    },
+    {
+      "path": "depth/787.png",
+      "bytes": 139203
+    },
+    {
+      "path": "depth/386.png",
+      "bytes": 188089
+    },
+    {
+      "path": "depth/651.png",
+      "bytes": 85129
+    },
+    {
+      "path": "depth/806.png",
+      "bytes": 160398
+    },
+    {
+      "path": "rgb/471.png",
+      "bytes": 328761
+    },
+    {
+      "path": "rgb/225.png",
+      "bytes": 311981
+    },
+    {
+      "path": "depth/405.png",
+      "bytes": 180150
+    },
+    {
+      "path": "rgb/779.png",
+      "bytes": 367244
+    },
+    {
+      "path": "associations.txt",
+      "bytes": 29514
+    },
+    {
+      "path": "depth/60.png",
+      "bytes": 166116
+    },
+    {
+      "path": "depth/517.png",
+      "bytes": 226753
+    },
+    {
+      "path": "rgb/65.png",
+      "bytes": 337127
+    },
+    {
+      "path": "depth/840.png",
+      "bytes": 200779
+    },
+    {
+      "path": "rgb/378.png",
+      "bytes": 400387
+    },
+    {
+      "path": "rgb/643.png",
+      "bytes": 349803
+    },
+    {
+      "path": "rgb/509.png",
+      "bytes": 357980
+    },
+    {
+      "path": "depth/823.png",
+      "bytes": 180404
+    },
+    {
+      "path": "depth/422.png",
+      "bytes": 244666
+    },
+    {
+      "path": "depth/79.png",
+      "bytes": 173999
+    },
+    {
+      "path": "rgb/242.png",
+      "bytes": 354988
+    },
+    {
+      "path": "rgb/108.png",
+      "bytes": 318226
+    },
+    {
+      "path": "rgb/796.png",
+      "bytes": 375047
+    },
+    {
+      "path": "depth/157.png",
+      "bytes": 237699
+    },
+    {
+      "path": "depth/269.png",
+      "bytes": 161805
+    },
+    {
+      "path": "depth/534.png",
+      "bytes": 232406
+    },
+    {
+      "path": "rgb/660.png",
+      "bytes": 339207
+    },
+    {
+      "path": "depth/623.png",
+      "bytes": 174530
+    },
+    {
+      "path": "rgb/395.png",
+      "bytes": 405448
+    },
+    {
+      "path": "rgb/82.png",
+      "bytes": 337182
+    },
+    {
+      "path": "rgb/414.png",
+      "bytes": 360648
+    },
+    {
+      "path": "rgb/526.png",
+      "bytes": 385919
+    },
+    {
+      "path": "depth/8.png",
+      "bytes": 143891
+    },
+    {
+      "path": "depth/687.png",
+      "bytes": 133296
+    },
+    {
+      "path": "depth/96.png",
+      "bytes": 197593
+    },
+    {
+      "path": "depth/706.png",
+      "bytes": 181060
+    },
+    {
+      "path": "depth/286.png",
+      "bytes": 163201
+    },
+    {
+      "path": "rgb/125.png",
+      "bytes": 320274
+    },
+    {
+      "path": "depth/174.png",
+      "bytes": 234877
+    },
+    {
+      "path": "rgb/679.png",
+      "bytes": 353204
+    },
+    {
+      "path": "depth/551.png",
+      "bytes": 223223
+    },
+    {
+      "path": "depth/305.png",
+      "bytes": 171215
+    },
+    {
+      "path": "depth/859.png",
+      "bytes": 214800
+    },
+    {
+      "path": "rgb/278.png",
+      "bytes": 365197
+    },
+    {
+      "path": "rgb/543.png",
+      "bytes": 404528
+    },
+    {
+      "path": "depth/458.png",
+      "bytes": 210780
+    },
+    {
+      "path": "depth/723.png",
+      "bytes": 195433
+    },
+    {
+      "path": "rgb/142.png",
+      "bytes": 319512
+    },
+    {
+      "path": "depth/191.png",
+      "bytes": 225050
+    },
+    {
+      "path": "rgb/696.png",
+      "bytes": 366995
+    },
+    {
+      "path": "depth/322.png",
+      "bytes": 164589
+    },
+    {
+      "path": "rgb/715.png",
+      "bytes": 379077
+    },
+    {
+      "path": "rgb/827.png",
+      "bytes": 380366
+    },
+    {
+      "path": "depth/876.png",
+      "bytes": 217003
+    },
+    {
+      "path": "depth/740.png",
+      "bytes": 197225
+    },
+    {
+      "path": "rgb/295.png",
+      "bytes": 368766
+    },
+    {
+      "path": "rgb/560.png",
+      "bytes": 389137
+    },
+    {
+      "path": "rgb/314.png",
+      "bytes": 366627
+    },
+    {
+      "path": "rgb/426.png",
+      "bytes": 355716
+    },
+    {
+      "path": "depth/475.png",
+      "bytes": 189685
+    },
+    {
+      "path": "depth/587.png",
+      "bytes": 206621
+    },
+    {
+      "path": "depth/606.png",
+      "bytes": 192258
+    },
+    {
+      "path": "depth/205.png",
+      "bytes": 210880
+    },
+    {
+      "path": "depth/15.png",
+      "bytes": 144907
+    },
+    {
+      "path": "rgb/732.png",
+      "bytes": 360209
+    },
+    {
+      "path": "rgb/579.png",
+      "bytes": 387179
+    },
+    {
+      "path": "rgb/844.png",
+      "bytes": 382709
+    },
+    {
+      "path": "depth/222.png",
+      "bytes": 193611
+    },
+    {
+      "path": "depth/759.png",
+      "bytes": 170514
+    },
+    {
+      "path": "rgb/178.png",
+      "bytes": 312706
+    },
+    {
+      "path": "rgb/331.png",
+      "bytes": 387194
+    },
+    {
+      "path": "rgb/443.png",
+      "bytes": 360548
+    },
+    {
+      "path": "depth/492.png",
+      "bytes": 202334
+    },
+    {
+      "path": "depth/358.png",
+      "bytes": 203561
+    },
+    {
+      "path": "rgb/37.png",
+      "bytes": 348371
+    },
+    {
+      "path": "depth/32.png",
+      "bytes": 158346
+    },
+    {
+      "path": "rgb/596.png",
+      "bytes": 387890
+    },
+    {
+      "path": "rgb/861.png",
+      "bytes": 386016
+    },
+    {
+      "path": "depth/110.png",
+      "bytes": 211741
+    },
+    {
+      "path": "rgb/615.png",
+      "bytes": 385463
+    },
+    {
+      "path": "depth/776.png",
+      "bytes": 146023
+    },
+    {
+      "path": "depth/640.png",
+      "bytes": 119270
+    },
+    {
+      "path": "rgb/195.png",
+      "bytes": 304751
+    },
+    {
+      "path": "rgb/460.png",
+      "bytes": 333887
+    },
+    {
+      "path": "rgb/214.png",
+      "bytes": 295602
+    },
+    {
+      "path": "depth/375.png",
+      "bytes": 206800
+    },
+    {
+      "path": "rgb/768.png",
+      "bytes": 360173
+    },
+    {
+      "path": "depth/129.png",
+      "bytes": 230567
+    },
+    {
+      "path": "depth/506.png",
+      "bytes": 219446
+    },
+    {
+      "path": "rgb/54.png",
+      "bytes": 346144
+    },
+    {
+      "path": "rgb/367.png",
+      "bytes": 406854
+    },
+    {
+      "path": "rgb/632.png",
+      "bytes": 353707
+    },
+    {
+      "path": "rgb/479.png",
+      "bytes": 337483
+    },
+    {
+      "path": "depth/793.png",
+      "bytes": 139966
+    },
+    {
+      "path": "depth/392.png",
+      "bytes": 169958
+    },
+    {
+      "path": "depth/812.png",
+      "bytes": 168120
+    },
+    {
+      "path": "depth/659.png",
+      "bytes": 71114
+    },
+    {
+      "path": "depth/68.png",
+      "bytes": 172433
+    },
+    {
+      "path": "rgb/231.png",
+      "bytes": 331438
+    },
+    {
+      "path": "depth/411.png",
+      "bytes": 217639
+    },
+    {
+      "path": "rgb/785.png",
+      "bytes": 368956
+    },
+    {
+      "path": "depth/146.png",
+      "bytes": 238251
+    },
+    {
+      "path": "depth/258.png",
+      "bytes": 159685
+    },
+    {
+      "path": "depth/523.png",
+      "bytes": 228879
+    },
+    {
+      "path": "rgb/496.png",
+      "bytes": 349580
+    },
+    {
+      "path": "rgb/384.png",
+      "bytes": 402863
+    },
+    {
+      "path": "rgb/71.png",
+      "bytes": 335307
+    },
+    {
+      "path": "rgb/403.png",
+      "bytes": 388240
+    },
+    {
+      "path": "rgb/515.png",
+      "bytes": 370794
+    },
+    {
+      "path": "depth/676.png",
+      "bytes": 117689
+    },
+    {
+      "path": "depth/85.png",
+      "bytes": 185390
+    },
+    {
+      "path": "depth/809.png",
+      "bytes": 164837
+    },
+    {
+      "path": "depth/275.png",
+      "bytes": 161738
+    },
+    {
+      "path": "rgb/114.png",
+      "bytes": 314748
+    },
+    {
+      "path": "depth/163.png",
+      "bytes": 236605
+    },
+    {
+      "path": "rgb/668.png",
+      "bytes": 343371
+    },
+    {
+      "path": "depth/540.png",
+      "bytes": 228965
+    },
+    {
+      "path": "depth/848.png",
+      "bytes": 207626
+    },
+    {
+      "path": "rgb/267.png",
+      "bytes": 361020
+    },
+    {
+      "path": "rgb/532.png",
+      "bytes": 396089
+    },
+    {
+      "path": "depth/712.png",
+      "bytes": 192071
+    },
+    {
+      "path": "depth/693.png",
+      "bytes": 145428
+    },
+    {
+      "path": "depth/447.png",
+      "bytes": 226748
+    },
+    {
+      "path": "depth/559.png",
+      "bytes": 215712
+    },
+    {
+      "path": "depth/292.png",
+      "bytes": 160741
+    },
+    {
+      "path": "rgb/131.png",
+      "bytes": 322113
+    },
+    {
+      "path": "depth/180.png",
+      "bytes": 232992
+    },
+    {
+      "path": "rgb/685.png",
+      "bytes": 358120
+    },
+    {
+      "path": "depth/311.png",
+      "bytes": 174166
+    },
+    {
+      "path": "rgb/704.png",
+      "bytes": 375749
+    },
+    {
+      "path": "rgb/816.png",
+      "bytes": 377663
+    },
+    {
+      "path": "depth/865.png",
+      "bytes": 217044
+    },
+    {
+      "path": "rgb/284.png",
+      "bytes": 367936
+    },
+    {
+      "path": "rgb/303.png",
+      "bytes": 367748
+    },
+    {
+      "path": "depth/199.png",
+      "bytes": 217307
+    },
+    {
+      "path": "depth/464.png",
+      "bytes": 206234
+    },
+    {
+      "path": "depth/576.png",
+      "bytes": 207775
+    },
+    {
+      "path": "depth/612.png",
+      "bytes": 190711
+    },
+    {
+      "path": "depth/419.png",
+      "bytes": 239655
+    },
+    {
+      "path": "rgb/721.png",
+      "bytes": 379606
+    },
+    {
+      "path": "rgb/568.png",
+      "bytes": 392897
+    },
+    {
+      "path": "rgb/833.png",
+      "bytes": 381514
+    },
+    {
+      "path": "depth/748.png",
+      "bytes": 187495
+    },
+    {
+      "path": "rgb/167.png",
+      "bytes": 313415
+    },
+    {
+      "path": "rgb/320.png",
+      "bytes": 372633
+    },
+    {
+      "path": "rgb/432.png",
+      "bytes": 366414
+    },
+    {
+      "path": "depth/481.png",
+      "bytes": 179201
+    },
+    {
+      "path": "depth/593.png",
+      "bytes": 203938
+    },
+    {
+      "path": "depth/347.png",
+      "bytes": 202530
+    },
+    {
+      "path": "depth/211.png",
+      "bytes": 206964
+    },
+    {
+      "path": "depth/21.png",
+      "bytes": 152946
+    },
+    {
+      "path": "rgb/339.png",
+      "bytes": 396183
+    },
+    {
+      "path": "rgb/26.png",
+      "bytes": 352648
+    },
+    {
+      "path": "rgb/585.png",
+      "bytes": 387161
+    },
+    {
+      "path": "rgb/850.png",
+      "bytes": 384658
+    },
+    {
+      "path": "rgb/604.png",
+      "bytes": 385818
+    },
+    {
+      "path": "depth/765.png",
+      "bytes": 160554
+    },
+    {
+      "path": "rgb/869.png",
+      "bytes": 380761
+    },
+    {
+      "path": "rgb/184.png",
+      "bytes": 309348
+    },
+    {
+      "path": "rgb/6.png",
+      "bytes": 358241
+    },
+    {
+      "path": "rgb/203.png",
+      "bytes": 297576
+    },
+    {
+      "path": "depth/364.png",
+      "bytes": 201964
+    },
+    {
+      "path": "rgb/757.png",
+      "bytes": 349504
+    },
+    {
+      "path": "depth/118.png",
+      "bytes": 220905
+    },
+    {
+      "path": "depth/737.png",
+      "bytes": 199348
+    },
+    {
+      "path": "rgb/43.png",
+      "bytes": 342482
+    },
+    {
+      "path": "rgb/356.png",
+      "bytes": 406131
+    },
+    {
+      "path": "rgb/621.png",
+      "bytes": 378740
+    },
+    {
+      "path": "rgb/468.png",
+      "bytes": 328435
+    },
+    {
+      "path": "depth/801.png",
+      "bytes": 153413
+    },
+    {
+      "path": "depth/782.png",
+      "bytes": 140169
+    },
+    {
+      "path": "depth/648.png",
+      "bytes": 109612
+    },
+    {
+      "path": "depth/400.png",
+      "bytes": 177528
+    },
+    {
+      "path": "depth/57.png",
+      "bytes": 165483
+    },
+    {
+      "path": "rgb/220.png",
+      "bytes": 303843
+    },
+    {
+      "path": "depth/381.png",
+      "bytes": 204938
+    },
+    {
+      "path": "rgb/774.png",
+      "bytes": 363758
+    },
+    {
+      "path": "depth/135.png",
+      "bytes": 231846
+    },
+    {
+      "path": "depth/247.png",
+      "bytes": 148468
+    },
+    {
+      "path": "depth/512.png",
+      "bytes": 222788
+    },
+    {
+      "path": "rgb/485.png",
+      "bytes": 338200
+    },
+    {
+      "path": "rgb/373.png",
+      "bytes": 403040
+    },
+    {
+      "path": "rgb/60.png",
+      "bytes": 344352
+    },
+    {
+      "path": "rgb/239.png",
+      "bytes": 348646
+    },
+    {
+      "path": "rgb/504.png",
+      "bytes": 353101
+    },
+    {
+      "path": "depth/665.png",
+      "bytes": 103388
+    },
+    {
+      "path": "depth/264.png",
+      "bytes": 161863
+    },
+    {
+      "path": "depth/74.png",
+      "bytes": 171314
+    },
+    {
+      "path": "depth/152.png",
+      "bytes": 238414
+    },
+    {
+      "path": "rgb/791.png",
+      "bytes": 372606
+    },
+    {
+      "path": "rgb/103.png",
+      "bytes": 319664
+    },
+    {
+      "path": "rgb/79.png",
+      "bytes": 337543
+    },
+    {
+      "path": "rgb/657.png",
+      "bytes": 338690
+    },
+    {
+      "path": "depth/837.png",
+      "bytes": 197890
+    },
+    {
+      "path": "depth/682.png",
+      "bytes": 125666
+    },
+    {
+      "path": "rgb/390.png",
+      "bytes": 403607
+    },
+    {
+      "path": "depth/701.png",
+      "bytes": 167568
+    },
+    {
+      "path": "rgb/256.png",
+      "bytes": 360007
+    },
+    {
+      "path": "rgb/521.png",
+      "bytes": 380230
+    },
+    {
+      "path": "depth/3.png",
+      "bytes": 143645
+    },
+    {
+      "path": "depth/436.png",
+      "bytes": 238655
+    },
+    {
+      "path": "depth/91.png",
+      "bytes": 192697
+    },
+    {
+      "path": "depth/548.png",
+      "bytes": 225479
+    },
+    {
+      "path": "depth/281.png",
+      "bytes": 163092
+    },
+    {
+      "path": "rgb/120.png",
+      "bytes": 315910
+    },
+    {
+      "path": "rgb/96.png",
+      "bytes": 322629
+    },
+    {
+      "path": "rgb/674.png",
+      "bytes": 348722
+    },
+    {
+      "path": "depth/300.png",
+      "bytes": 166760
+    },
+    {
+      "path": "rgb/805.png",
+      "bytes": 376903
+    },
+    {
+      "path": "depth/854.png",
+      "bytes": 212683
+    },
+    {
+      "path": "rgb/273.png",
+      "bytes": 363346
+    },
+    {
+      "path": "rgb/139.png",
+      "bytes": 321576
+    },
+    {
+      "path": "depth/188.png",
+      "bytes": 227242
+    },
+    {
+      "path": "depth/453.png",
+      "bytes": 215132
+    },
+    {
+      "path": "depth/565.png",
+      "bytes": 211601
+    },
+    {
+      "path": "depth/319.png",
+      "bytes": 168565
+    },
+    {
+      "path": "rgb/691.png",
+      "bytes": 363551
+    },
+    {
+      "path": "rgb/710.png",
+      "bytes": 378520
+    },
+    {
+      "path": "rgb/557.png",
+      "bytes": 392115
+    },
+    {
+      "path": "rgb/822.png",
+      "bytes": 376693
+    },
+    {
+      "path": "depth/871.png",
+      "bytes": 217067
+    },
+    {
+      "path": "depth/582.png",
+      "bytes": 207522
+    },
+    {
+      "path": "rgb/290.png",
+      "bytes": 368410
+    },
+    {
+      "path": "rgb/156.png",
+      "bytes": 314100
+    },
+    {
+      "path": "rgb/421.png",
+      "bytes": 340062
+    },
+    {
+      "path": "depth/470.png",
+      "bytes": 199565
+    },
+    {
+      "path": "depth/336.png",
+      "bytes": 172725
+    },
+    {
+      "path": "rgb/729.png",
+      "bytes": 367338
+    },
+    {
+      "path": "depth/601.png",
+      "bytes": 198014
+    },
+    {
+      "path": "depth/10.png",
+      "bytes": 143173
+    },
+    {
+      "path": "depth/200.png",
+      "bytes": 216279
+    },
+    {
+      "path": "rgb/574.png",
+      "bytes": 387075
+    },
+    {
+      "path": "rgb/328.png",
+      "bytes": 383486
+    },
+    {
+      "path": "rgb/15.png",
+      "bytes": 358181
+    },
+    {
+      "path": "depth/489.png",
+      "bytes": 194828
+    },
+    {
+      "path": "depth/754.png",
+      "bytes": 179584
+    },
+    {
+      "path": "rgb/173.png",
+      "bytes": 314568
+    },
+    {
+      "path": "depth/29.png",
+      "bytes": 159436
+    },
+    {
+      "path": "rgb/858.png",
+      "bytes": 387551
+    },
+    {
+      "path": "depth/353.png",
+      "bytes": 203998
+    },
+    {
+      "path": "rgb/746.png",
+      "bytes": 344146
+    },
+    {
+      "path": "depth/107.png",
+      "bytes": 208672
+    },
+    {
+      "path": "depth/219.png",
+      "bytes": 199831
+    },
+    {
+      "path": "rgb/345.png",
+      "bytes": 404088
+    },
+    {
+      "path": "rgb/32.png",
+      "bytes": 348875
+    },
+    {
+      "path": "rgb/591.png",
+      "bytes": 387511
+    },
+    {
+      "path": "rgb/610.png",
+      "bytes": 385415
+    },
+    {
+      "path": "rgb/457.png",
+      "bytes": 336334
+    },
+    {
+      "path": "depth/771.png",
+      "bytes": 153299
+    },
+    {
+      "path": "depth/370.png",
+      "bytes": 202278
+    },
+    {
+      "path": "depth/637.png",
+      "bytes": 125375
+    },
+    {
+      "path": "rgb/190.png",
+      "bytes": 304516
+    },
+    {
+      "path": "depth/46.png",
+      "bytes": 161249
+    },
+    {
+      "path": "rgb/875.png",
+      "bytes": 376513
+    },
+    {
+      "path": "depth/236.png",
+      "bytes": 181099
+    },
+    {
+      "path": "rgb/763.png",
+      "bytes": 356292
+    },
+    {
+      "path": "depth/124.png",
+      "bytes": 226351
+    },
+    {
+      "path": "rgb/629.png",
+      "bytes": 365692
+    },
+    {
+      "path": "depth/501.png",
+      "bytes": 217516
+    },
+    {
+      "path": "depth/654.png",
+      "bytes": 64119
+    },
+    {
+      "path": "rgb/362.png",
+      "bytes": 406136
+    },
+    {
+      "path": "rgb/474.png",
+      "bytes": 331198
+    },
+    {
+      "path": "rgb/228.png",
+      "bytes": 322263
+    },
+    {
+      "path": "depth/389.png",
+      "bytes": 167944
+    },
+    {
+      "path": "depth/408.png",
+      "bytes": 200777
+    },
+    {
+      "path": "depth/63.png",
+      "bytes": 169215
+    },
+    {
+      "path": "depth/141.png",
+      "bytes": 235535
+    },
+    {
+      "path": "depth/253.png",
+      "bytes": 162854
+    },
+    {
+      "path": "rgb/780.png",
+      "bytes": 367654
+    },
+    {
+      "path": "rgb/68.png",
+      "bytes": 337660
+    },
+    {
+      "path": "rgb/646.png",
+      "bytes": 349372
+    },
+    {
+      "path": "depth/826.png",
+      "bytes": 183403
+    },
+    {
+      "path": "depth/671.png",
+      "bytes": 110790
+    },
+    {
+      "path": "depth/425.png",
+      "bytes": 246588
+    },
+    {
+      "path": "rgb/491.png",
+      "bytes": 344165
+    },
+    {
+      "path": "rgb/245.png",
+      "bytes": 357902
+    },
+    {
+      "path": "rgb/510.png",
+      "bytes": 358679
+    },
+    {
+      "path": "rgb/799.png",
+      "bytes": 375223
+    },
+    {
+      "path": "depth/270.png",
+      "bytes": 161173
+    },
+    {
+      "path": "depth/80.png",
+      "bytes": 175627
+    },
+    {
+      "path": "depth/537.png",
+      "bytes": 230722
+    },
+    {
+      "path": "rgb/85.png",
+      "bytes": 334896
+    },
+    {
+      "path": "rgb/398.png",
+      "bytes": 394664
+    },
+    {
+      "path": "rgb/663.png",
+      "bytes": 341171
+    },
+    {
+      "path": "rgb/417.png",
+      "bytes": 349773
+    },
+    {
+      "path": "rgb/529.png",
+      "bytes": 392138
+    },
+    {
+      "path": "depth/709.png",
+      "bytes": 188783
+    },
+    {
+      "path": "depth/843.png",
+      "bytes": 202667
+    },
+    {
+      "path": "depth/99.png",
+      "bytes": 201028
+    },
+    {
+      "path": "rgb/262.png",
+      "bytes": 362447
+    },
+    {
+      "path": "depth/442.png",
+      "bytes": 235065
+    },
+    {
+      "path": "rgb/128.png",
+      "bytes": 321594
+    },
+    {
+      "path": "depth/177.png",
+      "bytes": 234348
+    },
+    {
+      "path": "depth/289.png",
+      "bytes": 161077
+    },
+    {
+      "path": "depth/554.png",
+      "bytes": 219898
+    },
+    {
+      "path": "depth/308.png",
+      "bytes": 172756
+    },
+    {
+      "path": "rgb/680.png",
+      "bytes": 354282
+    },
+    {
+      "path": "rgb/546.png",
+      "bytes": 401633
+    },
+    {
+      "path": "rgb/811.png",
+      "bytes": 379925
+    },
+    {
+      "path": "depth/860.png",
+      "bytes": 215221
+    },
+    {
+      "path": "depth/571.png",
+      "bytes": 211997
+    },
+    {
+      "path": "depth/726.png",
+      "bytes": 194946
+    },
+    {
+      "path": "rgb/145.png",
+      "bytes": 322311
+    },
+    {
+      "path": "depth/194.png",
+      "bytes": 222849
+    },
+    {
+      "path": "rgb/699.png",
+      "bytes": 368222
+    },
+    {
+      "path": "depth/325.png",
+      "bytes": 158727
+    },
+    {
+      "path": "rgb/718.png",
+      "bytes": 380836
+    },
+    {
+      "path": "depth/879.png",
+      "bytes": 216790
+    },
+    {
+      "path": "depth/743.png",
+      "bytes": 194381
+    },
+    {
+      "path": "rgb/298.png",
+      "bytes": 367823
+    },
+    {
+      "path": "rgb/563.png",
+      "bytes": 388522
+    },
+    {
+      "path": "rgb/317.png",
+      "bytes": 368317
+    },
+    {
+      "path": "rgb/429.png",
+      "bytes": 364667
+    },
+    {
+      "path": "depth/478.png",
+      "bytes": 186729
+    },
+    {
+      "path": "depth/342.png",
+      "bytes": 197947
+    },
+    {
+      "path": "depth/609.png",
+      "bytes": 191743
+    },
+    {
+      "path": "rgb/162.png",
+      "bytes": 309686
+    },
+    {
+      "path": "depth/18.png",
+      "bytes": 148575
+    },
+    {
+      "path": "depth/208.png",
+      "bytes": 208810
+    },
+    {
+      "path": "rgb/735.png",
+      "bytes": 352434
+    },
+    {
+      "path": "rgb/847.png",
+      "bytes": 384060
+    },
+    {
+      "path": "depth/225.png",
+      "bytes": 187458
+    },
+    {
+      "path": "rgb/21.png",
+      "bytes": 355332
+    },
+    {
+      "path": "rgb/580.png",
+      "bytes": 387465
+    },
+    {
+      "path": "rgb/334.png",
+      "bytes": 389699
+    },
+    {
+      "path": "rgb/446.png",
+      "bytes": 356859
+    },
+    {
+      "path": "depth/495.png",
+      "bytes": 209404
+    },
+    {
+      "path": "depth/760.png",
+      "bytes": 168284
+    },
+    {
+      "path": "depth/626.png",
+      "bytes": 167957
+    },
+    {
+      "path": "depth/35.png",
+      "bytes": 158640
+    },
+    {
+      "path": "rgb/1.png",
+      "bytes": 356786
+    },
+    {
+      "path": "rgb/864.png",
+      "bytes": 383924
+    },
+    {
+      "path": "rgb/752.png",
+      "bytes": 345841
+    },
+    {
+      "path": "rgb/599.png",
+      "bytes": 390038
+    },
+    {
+      "path": "depth/113.png",
+      "bytes": 215915
+    },
+    {
+      "path": "rgb/618.png",
+      "bytes": 379052
+    },
+    {
+      "path": "depth/779.png",
+      "bytes": 142447
+    },
+    {
+      "path": "rgb/198.png",
+      "bytes": 301907
+    },
+    {
+      "path": "rgb/351.png",
+      "bytes": 406717
+    },
+    {
+      "path": "rgb/463.png",
+      "bytes": 336555
+    },
+    {
+      "path": "rgb/217.png",
+      "bytes": 299759
+    },
+    {
+      "path": "depth/378.png",
+      "bytes": 207180
+    },
+    {
+      "path": "depth/643.png",
+      "bytes": 115445
+    },
+    {
+      "path": "depth/52.png",
+      "bytes": 163292
+    },
+    {
+      "path": "depth/509.png",
+      "bytes": 220913
+    },
+    {
+      "path": "depth/242.png",
+      "bytes": 177100
+    },
+    {
+      "path": "depth/130.png",
+      "bytes": 231139
+    },
+    {
+      "path": "rgb/57.png",
+      "bytes": 345501
+    },
+    {
+      "path": "rgb/635.png",
+      "bytes": 351756
+    },
+    {
+      "path": "depth/815.png",
+      "bytes": 171569
+    },
+    {
+      "path": "depth/796.png",
+      "bytes": 144994
+    },
+    {
+      "path": "depth/660.png",
+      "bytes": 77046
+    },
+    {
+      "path": "depth/832.png",
+      "bytes": 192044
+    },
+    {
+      "path": "rgb/480.png",
+      "bytes": 337049
+    },
+    {
+      "path": "rgb/234.png",
+      "bytes": 337789
+    },
+    {
+      "path": "depth/395.png",
+      "bytes": 170573
+    },
+    {
+      "path": "rgb/788.png",
+      "bytes": 370288
+    },
+    {
+      "path": "depth/149.png",
+      "bytes": 238406
+    },
+    {
+      "path": "depth/414.png",
+      "bytes": 229288
+    },
+    {
+      "path": "depth/526.png",
+      "bytes": 231010
+    },
+    {
+      "path": "rgb/74.png",
+      "bytes": 336022
+    },
+    {
+      "path": "rgb/387.png",
+      "bytes": 403504
+    },
+    {
+      "path": "rgb/652.png",
+      "bytes": 342654
+    },
+    {
+      "path": "rgb/499.png",
+      "bytes": 351642
+    },
+    {
+      "path": "rgb/406.png",
+      "bytes": 380816
+    },
+    {
+      "path": "rgb/518.png",
+      "bytes": 376109
+    },
+    {
+      "path": "depth/685.png",
+      "bytes": 130183
+    },
+    {
+      "path": "depth/679.png",
+      "bytes": 121130
+    },
+    {
+      "path": "depth/88.png",
+      "bytes": 189140
+    },
+    {
+      "path": "rgb/251.png",
+      "bytes": 359447
+    },
+    {
+      "path": "depth/431.png",
+      "bytes": 245817
+    },
+    {
+      "path": "rgb/117.png",
+      "bytes": 315281
+    },
+    {
+      "path": "depth/166.png",
+      "bytes": 236041
+    },
+    {
+      "path": "depth/278.png",
+      "bytes": 162385
+    },
+    {
+      "path": "depth/543.png",
+      "bytes": 226691
+    },
+    {
+      "path": "rgb/91.png",
+      "bytes": 324326
+    },
+    {
+      "path": "depth/696.png",
+      "bytes": 153842
+    },
+    {
+      "path": "rgb/535.png",
+      "bytes": 400553
+    },
+    {
+      "path": "rgb/800.png",
+      "bytes": 374871
+    },
+    {
+      "path": "depth/704.png",
+      "bytes": 176008
+    },
+    {
+      "path": "depth/560.png",
+      "bytes": 214710
+    },
+    {
+      "path": "depth/715.png",
+      "bytes": 194071
+    },
+    {
+      "path": "depth/295.png",
+      "bytes": 162174
+    },
+    {
+      "path": "rgb/134.png",
+      "bytes": 322929
+    },
+    {
+      "path": "depth/183.png",
+      "bytes": 231848
+    },
+    {
+      "path": "rgb/688.png",
+      "bytes": 361529
+    },
+    {
+      "path": "depth/314.png",
+      "bytes": 173220
+    },
+    {
+      "path": "rgb/707.png",
+      "bytes": 379027
+    },
+    {
+      "path": "rgb/819.png",
+      "bytes": 376053
+    },
+    {
+      "path": "depth/868.png",
+      "bytes": 217245
+    },
+    {
+      "path": "depth/732.png",
+      "bytes": 197925
+    },
+    {
+      "path": "rgb/287.png",
+      "bytes": 368515
+    },
+    {
+      "path": "rgb/552.png",
+      "bytes": 396091
+    },
+    {
+      "path": "rgb/306.png",
+      "bytes": 368108
+    },
+    {
+      "path": "depth/467.png",
+      "bytes": 200156
+    },
+    {
+      "path": "depth/579.png",
+      "bytes": 207531
+    },
+    {
+      "path": "rgb/151.png",
+      "bytes": 320304
+    },
+    {
+      "path": "depth/331.png",
+      "bytes": 133992
+    },
+    {
+      "path": "rgb/724.png",
+      "bytes": 376114
+    },
+    {
+      "path": "rgb/836.png",
+      "bytes": 381289
+    },
+    {
+      "path": "depth/214.png",
+      "bytes": 205310
+    },
+    {
+      "path": "depth/596.png",
+      "bytes": 201820
+    },
+    {
+      "path": "rgb/10.png",
+      "bytes": 358023
+    },
+    {
+      "path": "depth/632.png",
+      "bytes": 139290
+    },
+    {
+      "path": "rgb/323.png",
+      "bytes": 376986
+    },
+    {
+      "path": "rgb/435.png",
+      "bytes": 359115
+    },
+    {
+      "path": "depth/484.png",
+      "bytes": 191589
+    },
+    {
+      "path": "depth/24.png",
+      "bytes": 157303
+    },
+    {
+      "path": "depth/615.png",
+      "bytes": 188580
+    },
+    {
+      "path": "rgb/607.png",
+      "bytes": 385124
+    },
+    {
+      "path": "livingRoom2.gt.freiburg",
+      "bytes": 63739
+    },
+    {
+      "path": "rgb/853.png",
+      "bytes": 385390
+    },
+    {
+      "path": "rgb/741.png",
+      "bytes": 345355
+    },
+    {
+      "path": "rgb/588.png",
+      "bytes": 385546
+    },
+    {
+      "path": "depth/102.png",
+      "bytes": 203753
+    },
+    {
+      "path": "rgb/29.png",
+      "bytes": 350930
+    },
+    {
+      "path": "rgb/187.png",
+      "bytes": 304450
+    },
+    {
+      "path": "depth/768.png",
+      "bytes": 156524
+    },
+    {
+      "path": "rgb/206.png",
+      "bytes": 294383
+    },
+    {
+      "path": "rgb/340.png",
+      "bytes": 398995
+    },
+    {
+      "path": "rgb/452.png",
+      "bytes": 343595
+    },
+    {
+      "path": "rgb/9.png",
+      "bytes": 358632
+    },
+    {
+      "path": "depth/367.png",
+      "bytes": 201434
+    },
+    {
+      "path": "depth/231.png",
+      "bytes": 185001
+    },
+    {
+      "path": "depth/41.png",
+      "bytes": 159695
+    },
+    {
+      "path": "rgb/46.png",
+      "bytes": 343399
+    },
+    {
+      "path": "rgb/359.png",
+      "bytes": 405997
+    },
+    {
+      "path": "rgb/870.png",
+      "bytes": 380328
+    },
+    {
+      "path": "rgb/624.png",
+      "bytes": 377400
+    },
+    {
+      "path": "depth/785.png",
+      "bytes": 139464
+    },
+    {
+      "path": "depth/604.png",
+      "bytes": 194136
+    },
+    {
+      "path": "depth/804.png",
+      "bytes": 157168
+    },
+    {
+      "path": "rgb/223.png",
+      "bytes": 308292
+    },
+    {
+      "path": "depth/384.png",
+      "bytes": 195276
+    },
+    {
+      "path": "rgb/777.png",
+      "bytes": 366011
+    },
+    {
+      "path": "depth/138.png",
+      "bytes": 233483
+    },
+    {
+      "path": "depth/403.png",
+      "bytes": 175667
+    },
+    {
+      "path": "depth/515.png",
+      "bytes": 225123
+    },
+    {
+      "path": "rgb/63.png",
+      "bytes": 339445
+    },
+    {
+      "path": "rgb/376.png",
+      "bytes": 401142
+    },
+    {
+      "path": "rgb/641.png",
+      "bytes": 350292
+    },
+    {
+      "path": "rgb/488.png",
+      "bytes": 341455
+    },
+    {
+      "path": "depth/821.png",
+      "bytes": 178175
+    },
+    {
+      "path": "rgb/507.png",
+      "bytes": 356494
+    },
+    {
+      "path": "depth/668.png",
+      "bytes": 107424
+    },
+    {
+      "path": "depth/420.png",
+      "bytes": 240548
+    },
+    {
+      "path": "depth/77.png",
+      "bytes": 170696
+    },
+    {
+      "path": "rgb/240.png",
+      "bytes": 351327
+    },
+    {
+      "path": "rgb/106.png",
+      "bytes": 319323
+    },
+    {
+      "path": "rgb/794.png",
+      "bytes": 374410
+    },
+    {
+      "path": "depth/155.png",
+      "bytes": 237875
+    },
+    {
+      "path": "depth/267.png",
+      "bytes": 161602
+    },
+    {
+      "path": "depth/532.png",
+      "bytes": 232778
+    },
+    {
+      "path": "rgb/412.png",
+      "bytes": 366498
+    },
+    {
+      "path": "rgb/393.png",
+      "bytes": 403075
+    },
+    {
+      "path": "rgb/80.png",
+      "bytes": 338382
+    },
+    {
+      "path": "rgb/259.png",
+      "bytes": 361035
+    },
+    {
+      "path": "rgb/524.png",
+      "bytes": 383594
+    },
+    {
+      "path": "depth/6.png",
+      "bytes": 143068
+    },
+    {
+      "path": "depth/439.png",
+      "bytes": 235994
+    },
+    {
+      "path": "depth/94.png",
+      "bytes": 195609
+    },
+    {
+      "path": "depth/172.png",
+      "bytes": 234649
+    },
+    {
+      "path": "depth/284.png",
+      "bytes": 164168
+    },
+    {
+      "path": "rgb/123.png",
+      "bytes": 318169
+    },
+    {
+      "path": "rgb/99.png",
+      "bytes": 320734
+    },
+    {
+      "path": "rgb/677.png",
+      "bytes": 351829
+    },
+    {
+      "path": "depth/303.png",
+      "bytes": 169448
+    },
+    {
+      "path": "rgb/808.png",
+      "bytes": 379343
+    },
+    {
+      "path": "depth/857.png",
+      "bytes": 213944
+    },
+    {
+      "path": "rgb/276.png",
+      "bytes": 364381
+    },
+    {
+      "path": "rgb/541.png",
+      "bytes": 404895
+    },
+    {
+      "path": "depth/721.png",
+      "bytes": 195005
+    },
+    {
+      "path": "depth/456.png",
+      "bytes": 212538
+    },
+    {
+      "path": "depth/568.png",
+      "bytes": 212822
+    },
+    {
+      "path": "rgb/140.png",
+      "bytes": 320187
+    },
+    {
+      "path": "rgb/694.png",
+      "bytes": 364435
+    },
+    {
+      "path": "depth/320.png",
+      "bytes": 167639
+    },
+    {
+      "path": "rgb/713.png",
+      "bytes": 378648
+    },
+    {
+      "path": "rgb/825.png",
+      "bytes": 379053
+    },
+    {
+      "path": "depth/874.png",
+      "bytes": 216857
+    },
+    {
+      "path": "rgb/293.png",
+      "bytes": 369193
+    },
+    {
+      "path": "rgb/312.png",
+      "bytes": 366240
+    },
+    {
+      "path": "rgb/159.png",
+      "bytes": 310686
+    },
+    {
+      "path": "rgb/424.png",
+      "bytes": 347640
+    },
+    {
+      "path": "depth/473.png",
+      "bytes": 193558
+    },
+    {
+      "path": "depth/585.png",
+      "bytes": 206969
+    },
+    {
+      "path": "depth/339.png",
+      "bytes": 184013
+    },
+    {
+      "path": "depth/203.png",
+      "bytes": 212916
+    },
+    {
+      "path": "depth/13.png",
+      "bytes": 144441
+    },
+    {
+      "path": "rgb/730.png",
+      "bytes": 365144
+    },
+    {
+      "path": "rgb/577.png",
+      "bytes": 386994
+    },
+    {
+      "path": "rgb/842.png",
+      "bytes": 382390
+    },
+    {
+      "path": "rgb/18.png",
+      "bytes": 356355
+    },
+    {
+      "path": "depth/757.png",
+      "bytes": 174978
+    },
+    {
+      "path": "depth/621.png",
+      "bytes": 179520
+    },
+    {
+      "path": "rgb/176.png",
+      "bytes": 316043
+    },
+    {
+      "path": "rgb/441.png",
+      "bytes": 361348
+    },
+    {
+      "path": "depth/490.png",
+      "bytes": 197412
+    },
+    {
+      "path": "depth/356.png",
+      "bytes": 203912
+    },
+    {
+      "path": "rgb/749.png",
+      "bytes": 344249
+    },
+    {
+      "path": "depth/220.png",
+      "bytes": 197584
+    },
+    {
+      "path": "depth/30.png",
+      "bytes": 159103
+    },
+    {
+      "path": "rgb/35.png",
+      "bytes": 348616
+    },
+    {
+      "path": "rgb/594.png",
+      "bytes": 387805
+    },
+    {
+      "path": "rgb/348.png",
+      "bytes": 404095
+    },
+    {
+      "path": "rgb/613.png",
+      "bytes": 385457
+    },
+    {
+      "path": "depth/829.png",
+      "bytes": 188234
+    },
+    {
+      "path": "depth/774.png",
+      "bytes": 149516
+    },
+    {
+      "path": "rgb/212.png",
+      "bytes": 293602
+    },
+    {
+      "path": "rgb/193.png",
+      "bytes": 308750
+    },
+    {
+      "path": "depth/49.png",
+      "bytes": 162352
+    },
+    {
+      "path": "rgb/878.png",
+      "bytes": 375333
+    },
+    {
+      "path": "depth/373.png",
+      "bytes": 204616
+    },
+    {
+      "path": "rgb/766.png",
+      "bytes": 358133
+    },
+    {
+      "path": "depth/127.png",
+      "bytes": 229013
+    },
+    {
+      "path": "depth/239.png",
+      "bytes": 179150
+    },
+    {
+      "path": "depth/504.png",
+      "bytes": 218381
+    },
+    {
+      "path": "rgb/52.png",
+      "bytes": 345065
+    },
+    {
+      "path": "rgb/365.png",
+      "bytes": 406309
+    },
+    {
+      "path": "rgb/630.png",
+      "bytes": 361210
+    },
+    {
+      "path": "rgb/477.png",
+      "bytes": 336047
+    },
+    {
+      "path": "depth/791.png",
+      "bytes": 139634
+    },
+    {
+      "path": "depth/390.png",
+      "bytes": 150891
+    },
+    {
+      "path": "depth/810.png",
+      "bytes": 166004
+    },
+    {
+      "path": "depth/657.png",
+      "bytes": 56793
+    },
+    {
+      "path": "depth/66.png",
+      "bytes": 172311
+    },
+    {
+      "path": "depth/256.png",
+      "bytes": 160707
+    },
+    {
+      "path": "rgb/783.png",
+      "bytes": 368151
+    },
+    {
+      "path": "depth/144.png",
+      "bytes": 237307
+    },
+    {
+      "path": "rgb/649.png",
+      "bytes": 346522
+    },
+    {
+      "path": "depth/521.png",
+      "bytes": 227756
+    },
+    {
+      "path": "rgb/401.png",
+      "bytes": 391159
+    },
+    {
+      "path": "rgb/382.png",
+      "bytes": 402193
+    },
+    {
+      "path": "rgb/494.png",
+      "bytes": 348458
+    },
+    {
+      "path": "rgb/248.png",
+      "bytes": 359596
+    },
+    {
+      "path": "rgb/513.png",
+      "bytes": 366149
+    },
+    {
+      "path": "depth/674.png",
+      "bytes": 115017
+    },
+    {
+      "path": "depth/428.png",
+      "bytes": 246783
+    },
+    {
+      "path": "depth/83.png",
+      "bytes": 180123
+    },
+    {
+      "path": "depth/161.png",
+      "bytes": 236638
+    },
+    {
+      "path": "depth/273.png",
+      "bytes": 161019
+    },
+    {
+      "path": "rgb/112.png",
+      "bytes": 316042
+    },
+    {
+      "path": "rgb/88.png",
+      "bytes": 328062
+    },
+    {
+      "path": "rgb/666.png",
+      "bytes": 341884
+    },
+    {
+      "path": "depth/846.png",
+      "bytes": 205949
+    },
+    {
+      "path": "depth/710.png",
+      "bytes": 190272
+    },
+    {
+      "path": "rgb/265.png",
+      "bytes": 360099
+    },
+    {
+      "path": "rgb/530.png",
+      "bytes": 393508
+    },
+    {
+      "path": "depth/629.png",
+      "bytes": 155779
+    },
+    {
+      "path": "depth/691.png",
+      "bytes": 141568
+    },
+    {
+      "path": "depth/445.png",
+      "bytes": 230121
+    },
+    {
+      "path": "depth/557.png",
+      "bytes": 217767
+    },
+    {
+      "path": "depth/818.png",
+      "bytes": 174558
+    },
+    {
+      "path": "depth/290.png",
+      "bytes": 161131
+    },
+    {
+      "path": "rgb/683.png",
+      "bytes": 356900
+    },
+    {
+      "path": "rgb/549.png",
+      "bytes": 399441
+    },
+    {
+      "path": "rgb/702.png",
+      "bytes": 371232
+    },
+    {
+      "path": "rgb/814.png",
+      "bytes": 378767
+    },
+    {
+      "path": "depth/863.png",
+      "bytes": 216796
+    },
+    {
+      "path": "depth/729.png",
+      "bytes": 195571
+    },
+    {
+      "path": "rgb/282.png",
+      "bytes": 366849
+    },
+    {
+      "path": "rgb/301.png",
+      "bytes": 368013
+    },
+    {
+      "path": "rgb/148.png",
+      "bytes": 321512
+    },
+    {
+      "path": "depth/197.png",
+      "bytes": 218908
+    },
+    {
+      "path": "depth/462.png",
+      "bytes": 208394
+    },
+    {
+      "path": "depth/574.png",
+      "bytes": 207644
+    },
+    {
+      "path": "depth/328.png",
+      "bytes": 161831
+    },
+    {
+      "path": "depth/529.png",
+      "bytes": 232219
+    },
+    {
+      "path": "rgb/566.png",
+      "bytes": 391989
+    },
+    {
+      "path": "rgb/831.png",
+      "bytes": 381722
+    },
+    {
+      "path": "depth/880.png",
+      "bytes": 216725
+    },
+    {
+      "path": "depth/591.png",
+      "bytes": 204855
+    },
+    {
+      "path": "depth/746.png",
+      "bytes": 191283
+    },
+    {
+      "path": "rgb/165.png",
+      "bytes": 311249
+    },
+    {
+      "path": "rgb/430.png",
+      "bytes": 367194
+    },
+    {
+      "path": "depth/610.png",
+      "bytes": 191390
+    },
+    {
+      "path": "depth/345.png",
+      "bytes": 202907
+    },
+    {
+      "path": "rgb/738.png",
+      "bytes": 346798
+    },
+    {
+      "path": "rgb/449.png",
+      "bytes": 350381
+    },
+    {
+      "path": "depth/763.png",
+      "bytes": 163567
+    },
+    {
+      "path": "rgb/24.png",
+      "bytes": 353308
+    },
+    {
+      "path": "rgb/583.png",
+      "bytes": 387175
+    },
+    {
+      "path": "rgb/337.png",
+      "bytes": 393665
+    },
+    {
+      "path": "rgb/602.png",
+      "bytes": 388477
+    },
+    {
+      "path": "depth/498.png",
+      "bytes": 214184
+    },
+    {
+      "path": "depth/38.png",
+      "bytes": 159043
+    },
+    {
+      "path": "rgb/201.png",
+      "bytes": 298997
+    },
+    {
+      "path": "rgb/182.png",
+      "bytes": 311538
+    },
+    {
+      "path": "rgb/4.png",
+      "bytes": 358356
+    },
+    {
+      "path": "rgb/867.png",
+      "bytes": 382099
+    },
+    {
+      "path": "depth/362.png",
+      "bytes": 202626
+    },
+    {
+      "path": "rgb/755.png",
+      "bytes": 347745
+    },
+    {
+      "path": "depth/116.png",
+      "bytes": 219082
+    },
+    {
+      "path": "depth/228.png",
+      "bytes": 186520
+    },
+    {
+      "path": "rgb/41.png",
+      "bytes": 342698
+    },
+    {
+      "path": "rgb/354.png",
+      "bytes": 406302
+    },
+    {
+      "path": "rgb/466.png",
+      "bytes": 331511
+    },
+    {
+      "path": "depth/780.png",
+      "bytes": 141302
+    },
+    {
+      "path": "depth/646.png",
+      "bytes": 111910
+    },
+    {
+      "path": "depth/55.png",
+      "bytes": 164561
+    },
+    {
+      "path": "depth/133.png",
+      "bytes": 231719
+    },
+    {
+      "path": "rgb/772.png",
+      "bytes": 362944
+    },
+    {
+      "path": "depth/245.png",
+      "bytes": 164756
+    },
+    {
+      "path": "rgb/638.png",
+      "bytes": 350863
+    },
+    {
+      "path": "depth/510.png",
+      "bytes": 221290
+    },
+    {
+      "path": "depth/799.png",
+      "bytes": 150483
+    },
+    {
+      "path": "depth/663.png",
+      "bytes": 94430
+    },
+    {
+      "path": "rgb/371.png",
+      "bytes": 404910
+    },
+    {
+      "path": "rgb/483.png",
+      "bytes": 337877
+    },
+    {
+      "path": "rgb/237.png",
+      "bytes": 343374
+    },
+    {
+      "path": "rgb/502.png",
+      "bytes": 353069
+    },
+    {
+      "path": "depth/398.png",
+      "bytes": 175318
+    },
+    {
+      "path": "depth/417.png",
+      "bytes": 236836
+    },
+    {
+      "path": "depth/72.png",
+      "bytes": 171305
+    },
+    {
+      "path": "depth/150.png",
+      "bytes": 238339
+    },
+    {
+      "path": "depth/262.png",
+      "bytes": 160952
+    },
+    {
+      "path": "rgb/101.png",
+      "bytes": 320122
+    },
+    {
+      "path": "rgb/77.png",
+      "bytes": 336155
+    },
+    {
+      "path": "rgb/655.png",
+      "bytes": 339120
+    },
+    {
+      "path": "rgb/409.png",
+      "bytes": 373362
+    },
+    {
+      "path": "depth/680.png",
+      "bytes": 122892
+    },
+    {
+      "path": "depth/835.png",
+      "bytes": 195403
+    },
+    {
+      "path": "rgb/254.png",
+      "bytes": 359273
+    },
+    {
+      "path": "depth/1.png",
+      "bytes": 144691
+    },
+    {
+      "path": "depth/169.png",
+      "bytes": 235275
+    },
+    {
+      "path": "depth/434.png",
+      "bytes": 240725
+    },
+    {
+      "path": "depth/546.png",
+      "bytes": 226874
+    },
+    {
+      "path": "rgb/94.png",
+      "bytes": 322812
+    },
+    {
+      "path": "rgb/672.png",
+      "bytes": 346751
+    },
+    {
+      "path": "depth/852.png",
+      "bytes": 210661
+    },
+    {
+      "path": "rgb/538.png",
+      "bytes": 404967
+    },
+    {
+      "path": "rgb/803.png",
+      "bytes": 375657
+    },
+    {
+      "path": "depth/699.png",
+      "bytes": 162054
+    },
+    {
+      "path": "depth/718.png",
+      "bytes": 194319
+    },
+    {
+      "path": "rgb/271.png",
+      "bytes": 362763
+    },
+    {
+      "path": "depth/451.png",
+      "bytes": 218379
+    },
+    {
+      "path": "rgb/137.png",
+      "bytes": 324268
+    },
+    {
+      "path": "depth/186.png",
+      "bytes": 229025
+    },
+    {
+      "path": "depth/298.png",
+      "bytes": 164866
+    },
+    {
+      "path": "depth/563.png",
+      "bytes": 211023
+    },
+    {
+      "path": "depth/317.png",
+      "bytes": 170114
+    },
+    {
+      "path": "rgb/820.png",
+      "bytes": 375937
+    },
+    {
+      "path": "rgb/555.png",
+      "bytes": 393101
+    },
+    {
+      "path": "rgb/309.png",
+      "bytes": 366536
+    },
+    {
+      "path": "depth/735.png",
+      "bytes": 199055
+    },
+    {
+      "path": "rgb/154.png",
+      "bytes": 317187
+    },
+    {
+      "path": "depth/580.png",
+      "bytes": 207690
+    },
+    {
+      "path": "depth/334.png",
+      "bytes": 169613
+    },
+    {
+      "path": "rgb/727.png",
+      "bytes": 371504
+    },
+    {
+      "path": "rgb/839.png",
+      "bytes": 381823
+    },
+    {
+      "path": "depth/707.png",
+      "bytes": 183411
+    },
+    {
+      "path": "depth/752.png",
+      "bytes": 182597
+    },
+    {
+      "path": "rgb/438.png",
+      "bytes": 362073
+    },
+    {
+      "path": "rgb/572.png",
+      "bytes": 389449
+    },
+    {
+      "path": "rgb/326.png",
+      "bytes": 380071
+    },
+    {
+      "path": "rgb/13.png",
+      "bytes": 357523
+    },
+    {
+      "path": "depth/487.png",
+      "bytes": 191168
+    },
+    {
+      "path": "depth/599.png",
+      "bytes": 200223
+    },
+    {
+      "path": "depth/618.png",
+      "bytes": 183808
+    },
+    {
+      "path": "rgb/171.png",
+      "bytes": 313098
+    },
+    {
+      "path": "depth/27.png",
+      "bytes": 160116
+    },
+    {
+      "path": "rgb/856.png",
+      "bytes": 387602
+    },
+    {
+      "path": "depth/351.png",
+      "bytes": 203727
+    },
+    {
+      "path": "rgb/744.png",
+      "bytes": 344654
+    },
+    {
+      "path": "depth/105.png",
+      "bytes": 207201
+    },
+    {
+      "path": "depth/217.png",
+      "bytes": 203142
+    },
+    {
+      "path": "rgb/30.png",
+      "bytes": 350288
+    },
+    {
+      "path": "rgb/343.png",
+      "bytes": 403019
+    },
+    {
+      "path": "rgb/455.png",
+      "bytes": 339278
+    },
+    {
+      "path": "rgb/209.png",
+      "bytes": 294893
+    },
+    {
+      "path": "depth/635.png",
+      "bytes": 130558
+    },
+    {
+      "path": "depth/234.png",
+      "bytes": 182634
+    },
+    {
+      "path": "depth/44.png",
+      "bytes": 160546
+    },
+    {
+      "path": "rgb/873.png",
+      "bytes": 377448
+    },
+    {
+      "path": "rgb/627.png",
+      "bytes": 372212
+    },
+    {
+      "path": "rgb/761.png",
+      "bytes": 354329
+    },
+    {
+      "path": "depth/122.png",
+      "bytes": 223720
+    },
+    {
+      "path": "rgb/49.png",
+      "bytes": 343720
+    },
+    {
+      "path": "depth/807.png",
+      "bytes": 162076
+    },
+    {
+      "path": "depth/788.png",
+      "bytes": 139430
+    },
+    {
+      "path": "depth/652.png",
+      "bytes": 78836
+    },
+    {
+      "path": "rgb/360.png",
+      "bytes": 405747
+    },
+    {
+      "path": "rgb/472.png",
+      "bytes": 328196
+    },
+    {
+      "path": "rgb/226.png",
+      "bytes": 314549
+    },
+    {
+      "path": "depth/406.png",
+      "bytes": 188182
+    },
+    {
+      "path": "depth/387.png",
+      "bytes": 186252
+    },
+    {
+      "path": "depth/251.png",
+      "bytes": 158530
+    },
+    {
+      "path": "depth/61.png",
+      "bytes": 168075
+    },
+    {
+      "path": "depth/518.png",
+      "bytes": 227137
+    },
+    {
+      "path": "rgb/66.png",
+      "bytes": 338583
+    },
+    {
+      "path": "rgb/379.png",
+      "bytes": 399677
+    },
+    {
+      "path": "rgb/644.png",
+      "bytes": 349848
+    },
+    {
+      "path": "depth/824.png",
+      "bytes": 181486
+    },
+    {
+      "path": "depth/841.png",
+      "bytes": 201343
+    },
+    {
+      "path": "rgb/243.png",
+      "bytes": 357343
+    },
+    {
+      "path": "rgb/797.png",
+      "bytes": 374816
+    },
+    {
+      "path": "rgb/109.png",
+      "bytes": 317903
+    },
+    {
+      "path": "depth/158.png",
+      "bytes": 237574
+    },
+    {
+      "path": "depth/423.png",
+      "bytes": 246200
+    },
+    {
+      "path": "depth/535.png",
+      "bytes": 232174
+    },
+    {
+      "path": "rgb/83.png",
+      "bytes": 337024
+    },
+    {
+      "path": "depth/624.png",
+      "bytes": 173378
+    },
+    {
+      "path": "rgb/396.png",
+      "bytes": 403615
+    },
+    {
+      "path": "rgb/661.png",
+      "bytes": 339547
+    },
+    {
+      "path": "rgb/415.png",
+      "bytes": 357608
+    },
+    {
+      "path": "rgb/527.png",
+      "bytes": 388562
+    },
+    {
+      "path": "depth/9.png",
+      "bytes": 143465
+    },
+    {
+      "path": "depth/688.png",
+      "bytes": 135286
+    },
+    {
+      "path": "depth/97.png",
+      "bytes": 199130
+    },
+    {
+      "path": "rgb/260.png",
+      "bytes": 361648
+    },
+    {
+      "path": "depth/440.png",
+      "bytes": 235478
+    },
+    {
+      "path": "rgb/126.png",
+      "bytes": 321265
+    },
+    {
+      "path": "depth/175.png",
+      "bytes": 235039
+    },
+    {
+      "path": "depth/287.png",
+      "bytes": 162418
+    },
+    {
+      "path": "depth/552.png",
+      "bytes": 222485
+    },
+    {
+      "path": "depth/306.png",
+      "bytes": 171619
+    },
+    {
+      "path": "rgb/279.png",
+      "bytes": 366015
+    },
+    {
+      "path": "rgb/544.png",
+      "bytes": 403282
+    },
+    {
+      "path": "depth/724.png",
+      "bytes": 195817
+    },
+    {
+      "path": "depth/459.png",
+      "bytes": 209446
+    },
+    {
+      "path": "depth/741.png",
+      "bytes": 195751
+    },
+    {
+      "path": "rgb/143.png",
+      "bytes": 320175
+    },
+    {
+      "path": "depth/192.png",
+      "bytes": 224880
+    },
+    {
+      "path": "rgb/697.png",
+      "bytes": 369184
+    },
+    {
+      "path": "depth/323.png",
+      "bytes": 162601
+    },
+    {
+      "path": "rgb/716.png",
+      "bytes": 379623
+    },
+    {
+      "path": "rgb/828.png",
+      "bytes": 381090
+    },
+    {
+      "path": "depth/877.png",
+      "bytes": 216904
+    },
+    {
+      "path": "depth/588.png",
+      "bytes": 206277
+    },
+    {
+      "path": "rgb/296.png",
+      "bytes": 368707
+    },
+    {
+      "path": "rgb/561.png",
+      "bytes": 388673
+    },
+    {
+      "path": "rgb/315.png",
+      "bytes": 367073
+    },
+    {
+      "path": "rgb/427.png",
+      "bytes": 360290
+    },
+    {
+      "path": "depth/476.png",
+      "bytes": 189300
+    },
+    {
+      "path": "depth/340.png",
+      "bytes": 188937
+    },
+    {
+      "path": "depth/607.png",
+      "bytes": 192161
+    },
+    {
+      "path": "rgb/160.png",
+      "bytes": 310677
+    },
+    {
+      "path": "depth/16.png",
+      "bytes": 146903
+    },
+    {
+      "path": "depth/206.png",
+      "bytes": 209771
+    },
+    {
+      "path": "rgb/733.png",
+      "bytes": 357351
+    },
+    {
+      "path": "rgb/845.png",
+      "bytes": 383239
+    },
+    {
+      "path": "depth/223.png",
+      "bytes": 191173
+    },
+    {
+      "path": "rgb/332.png",
+      "bytes": 388092
+    },
+    {
+      "path": "rgb/179.png",
+      "bytes": 312477
+    },
+    {
+      "path": "rgb/444.png",
+      "bytes": 359810
+    },
+    {
+      "path": "depth/493.png",
+      "bytes": 205615
+    },
+    {
+      "path": "depth/359.png",
+      "bytes": 203564
+    },
+    {
+      "path": "rgb/616.png",
+      "bytes": 384866
+    },
+    {
+      "path": "depth/33.png",
+      "bytes": 158228
+    },
+    {
+      "path": "rgb/862.png",
+      "bytes": 385107
+    },
+    {
+      "path": "rgb/750.png",
+      "bytes": 344515
+    },
+    {
+      "path": "rgb/597.png",
+      "bytes": 388741
+    },
+    {
+      "path": "depth/111.png",
+      "bytes": 213024
+    },
+    {
+      "path": "rgb/38.png",
+      "bytes": 346949
+    },
+    {
+      "path": "depth/777.png",
+      "bytes": 144742
+    },
+    {
+      "path": "depth/641.png",
+      "bytes": 118163
+    },
+    {
+      "path": "rgb/196.png",
+      "bytes": 303174
+    },
+    {
+      "path": "rgb/461.png",
+      "bytes": 334473
+    },
+    {
+      "path": "rgb/215.png",
+      "bytes": 296097
+    },
+    {
+      "path": "depth/376.png",
+      "bytes": 207570
+    },
+    {
+      "path": "rgb/769.png",
+      "bytes": 361046
+    },
+    {
+      "path": "depth/240.png",
+      "bytes": 178489
+    },
+    {
+      "path": "depth/50.png",
+      "bytes": 162581
+    },
+    {
+      "path": "depth/507.png",
+      "bytes": 219986
+    },
+    {
+      "path": "rgb/55.png",
+      "bytes": 345892
+    },
+    {
+      "path": "rgb/368.png",
+      "bytes": 406154
+    },
+    {
+      "path": "rgb/633.png",
+      "bytes": 353456
+    },
+    {
+      "path": "depth/794.png",
+      "bytes": 141576
+    },
+    {
+      "path": "depth/393.png",
+      "bytes": 172141
+    },
+    {
+      "path": "depth/813.png",
+      "bytes": 169396
+    },
+    {
+      "path": "depth/69.png",
+      "bytes": 171845
+    },
+    {
+      "path": "rgb/232.png",
+      "bytes": 333493
+    },
+    {
+      "path": "depth/412.png",
+      "bytes": 222097
+    },
+    {
+      "path": "rgb/786.png",
+      "bytes": 369615
+    },
+    {
+      "path": "depth/147.png",
+      "bytes": 238213
+    },
+    {
+      "path": "depth/259.png",
+      "bytes": 159645
+    },
+    {
+      "path": "depth/524.png",
+      "bytes": 229726
+    },
+    {
+      "path": "rgb/72.png",
+      "bytes": 335551
+    },
+    {
+      "path": "rgb/385.png",
+      "bytes": 402736
+    },
+    {
+      "path": "rgb/650.png",
+      "bytes": 344489
+    },
+    {
+      "path": "rgb/497.png",
+      "bytes": 349799
+    },
+    {
+      "path": "rgb/404.png",
+      "bytes": 383975
+    },
+    {
+      "path": "rgb/516.png",
+      "bytes": 372124
+    },
+    {
+      "path": "depth/830.png",
+      "bytes": 189872
+    },
+    {
+      "path": "depth/677.png",
+      "bytes": 118833
+    },
+    {
+      "path": "depth/86.png",
+      "bytes": 186448
+    },
+    {
+      "path": "depth/276.png",
+      "bytes": 161815
+    },
+    {
+      "path": "rgb/115.png",
+      "bytes": 313918
+    },
+    {
+      "path": "depth/164.png",
+      "bytes": 236535
+    },
+    {
+      "path": "rgb/669.png",
+      "bytes": 344301
+    },
+    {
+      "path": "depth/541.png",
+      "bytes": 228465
+    },
+    {
+      "path": "depth/849.png",
+      "bytes": 208273
+    },
+    {
+      "path": "rgb/268.png",
+      "bytes": 359618
+    },
+    {
+      "path": "rgb/533.png",
+      "bytes": 397581
+    },
+    {
+      "path": "depth/694.png",
+      "bytes": 147508
+    },
+    {
+      "path": "depth/448.png",
+      "bytes": 224530
+    },
+    {
+      "path": "depth/713.png",
+      "bytes": 193496
+    },
+    {
+      "path": "depth/293.png",
+      "bytes": 161238
+    },
+    {
+      "path": "rgb/132.png",
+      "bytes": 322249
+    },
+    {
+      "path": "depth/181.png",
+      "bytes": 232553
+    },
+    {
+      "path": "rgb/686.png",
+      "bytes": 359562
+    },
+    {
+      "path": "depth/312.png",
+      "bytes": 174176
+    },
+    {
+      "path": "rgb/705.png",
+      "bytes": 377540
+    },
+    {
+      "path": "rgb/817.png",
+      "bytes": 377415
+    },
+    {
+      "path": "depth/866.png",
+      "bytes": 216978
+    },
+    {
+      "path": "depth/730.png",
+      "bytes": 196522
+    },
+    {
+      "path": "rgb/285.png",
+      "bytes": 368278
+    },
+    {
+      "path": "rgb/550.png",
+      "bytes": 397932
+    },
+    {
+      "path": "rgb/304.png",
+      "bytes": 367633
+    },
+    {
+      "path": "depth/465.png",
+      "bytes": 204080
+    },
+    {
+      "path": "depth/577.png",
+      "bytes": 207612
+    },
+    {
+      "path": "depth/613.png",
+      "bytes": 189704
+    },
+    {
+      "path": "depth/630.png",
+      "bytes": 149574
+    },
+    {
+      "path": "rgb/569.png",
+      "bytes": 393134
+    },
+    {
+      "path": "rgb/722.png",
+      "bytes": 378666
+    },
+    {
+      "path": "rgb/834.png",
+      "bytes": 381877
+    },
+    {
+      "path": "depth/212.png",
+      "bytes": 206282
+    },
+    {
+      "path": "depth/749.png",
+      "bytes": 186126
+    },
+    {
+      "path": "rgb/321.png",
+      "bytes": 376051
+    },
+    {
+      "path": "rgb/168.png",
+      "bytes": 313671
+    },
+    {
+      "path": "rgb/433.png",
+      "bytes": 362764
+    },
+    {
+      "path": "depth/482.png",
+      "bytes": 186512
+    },
+    {
+      "path": "depth/594.png",
+      "bytes": 203545
+    },
+    {
+      "path": "depth/348.png",
+      "bytes": 202374
+    },
+    {
+      "path": "depth/119.png",
+      "bytes": 221843
+    },
+    {
+      "path": "depth/22.png",
+      "bytes": 154049
+    },
+    {
+      "path": "rgb/851.png",
+      "bytes": 384838
+    },
+    {
+      "path": "rgb/605.png",
+      "bytes": 385076
+    },
+    {
+      "path": "rgb/586.png",
+      "bytes": 386218
+    },
+    {
+      "path": "depth/100.png",
+      "bytes": 202004
+    },
+    {
+      "path": "rgb/27.png",
+      "bytes": 351768
+    },
+    {
+      "path": "depth/766.png",
+      "bytes": 159103
+    },
+    {
+      "path": "rgb/204.png",
+      "bytes": 296785
+    },
+    {
+      "path": "rgb/185.png",
+      "bytes": 307908
+    },
+    {
+      "path": "rgb/450.png",
+      "bytes": 347110
+    },
+    {
+      "path": "rgb/7.png",
+      "bytes": 358484
+    },
+    {
+      "path": "depth/365.png",
+      "bytes": 201616
+    },
+    {
+      "path": "rgb/758.png",
+      "bytes": 350550
+    },
+    {
+      "path": "rgb/469.png",
+      "bytes": 327311
+    },
+    {
+      "path": "depth/401.png",
+      "bytes": 176776
+    },
+    {
+      "path": "rgb/44.png",
+      "bytes": 342423
+    },
+    {
+      "path": "depth/802.png",
+      "bytes": 154650
+    },
+    {
+      "path": "rgb/357.png",
+      "bytes": 406085
+    },
+    {
+      "path": "rgb/622.png",
+      "bytes": 377902
+    },
+    {
+      "path": "depth/838.png",
+      "bytes": 199218
+    },
+    {
+      "path": "depth/783.png",
+      "bytes": 139712
+    },
+    {
+      "path": "depth/649.png",
+      "bytes": 103770
+    },
+    {
+      "path": "depth/426.png",
+      "bytes": 246402
+    },
+    {
+      "path": "depth/58.png",
+      "bytes": 165743
+    },
+    {
+      "path": "rgb/221.png",
+      "bytes": 305505
+    },
+    {
+      "path": "depth/382.png",
+      "bytes": 201881
+    },
+    {
+      "path": "rgb/775.png",
+      "bytes": 364289
+    },
+    {
+      "path": "depth/136.png",
+      "bytes": 232215
+    },
+    {
+      "path": "depth/248.png",
+      "bytes": 141133
+    },
+    {
+      "path": "depth/513.png",
+      "bytes": 223611
+    },
+    {
+      "path": "rgb/61.png",
+      "bytes": 342469
+    },
+    {
+      "path": "rgb/374.png",
+      "bytes": 402098
+    },
+    {
+      "path": "rgb/486.png",
+      "bytes": 339336
+    },
+    {
+      "path": "depth/530.png",
+      "bytes": 232437
+    },
+    {
+      "path": "rgb/505.png",
+      "bytes": 353438
+    },
+    {
+      "path": "depth/666.png",
+      "bytes": 104913
+    },
+    {
+      "path": "depth/265.png",
+      "bytes": 161707
+    },
+    {
+      "path": "depth/75.png",
+      "bytes": 171286
+    },
+    {
+      "path": "depth/702.png",
+      "bytes": 170907
+    },
+    {
+      "path": "rgb/104.png",
+      "bytes": 319196
+    },
+    {
+      "path": "rgb/792.png",
+      "bytes": 373479
+    },
+    {
+      "path": "depth/153.png",
+      "bytes": 238236
+    },
+    {
+      "path": "rgb/658.png",
+      "bytes": 338722
+    },
+    {
+      "path": "depth/549.png",
+      "bytes": 224468
+    },
+    {
+      "path": "depth/683.png",
+      "bytes": 127334
+    },
+    {
+      "path": "rgb/391.png",
+      "bytes": 403314
+    },
+    {
+      "path": "rgb/410.png",
+      "bytes": 371573
+    },
+    {
+      "path": "rgb/257.png",
+      "bytes": 360032
+    },
+    {
+      "path": "rgb/522.png",
+      "bytes": 380850
+    },
+    {
+      "path": "depth/4.png",
+      "bytes": 144126
+    },
+    {
+      "path": "depth/437.png",
+      "bytes": 237605
+    },
+    {
+      "path": "depth/92.png",
+      "bytes": 193350
+    },
+    {
+      "path": "depth/170.png",
+      "bytes": 234920
+    },
+    {
+      "path": "depth/282.png",
+      "bytes": 163571
+    },
+    {
+      "path": "rgb/121.png",
+      "bytes": 314906
+    },
+    {
+      "path": "rgb/97.png",
+      "bytes": 321161
+    },
+    {
+      "path": "rgb/675.png",
+      "bytes": 349860
+    },
+    {
+      "path": "depth/301.png",
+      "bytes": 167404
+    },
+    {
+      "path": "rgb/806.png",
+      "bytes": 377775
+    },
+    {
+      "path": "depth/855.png",
+      "bytes": 213576
+    },
+    {
+      "path": "rgb/274.png",
+      "bytes": 363625
+    },
+    {
+      "path": "depth/189.png",
+      "bytes": 226622
+    },
+    {
+      "path": "depth/454.png",
+      "bytes": 213840
+    },
+    {
+      "path": "depth/566.png",
+      "bytes": 211945
+    },
+    {
+      "path": "rgb/692.png",
+      "bytes": 364209
+    },
+    {
+      "path": "rgb/558.png",
+      "bytes": 390182
+    },
+    {
+      "path": "rgb/711.png",
+      "bytes": 378789
+    },
+    {
+      "path": "rgb/823.png",
+      "bytes": 377446
+    },
+    {
+      "path": "depth/872.png",
+      "bytes": 216966
+    },
+    {
+      "path": "depth/738.png",
+      "bytes": 198963
+    },
+    {
+      "path": "rgb/291.png",
+      "bytes": 368598
+    },
+    {
+      "path": "rgb/310.png",
+      "bytes": 365987
+    },
+    {
+      "path": "rgb/157.png",
+      "bytes": 313199
+    },
+    {
+      "path": "rgb/422.png",
+      "bytes": 342517
+    },
+    {
+      "path": "depth/471.png",
+      "bytes": 198241
+    },
+    {
+      "path": "depth/583.png",
+      "bytes": 207442
+    },
+    {
+      "path": "depth/337.png",
+      "bytes": 175960
+    },
+    {
+      "path": "depth/602.png",
+      "bytes": 197362
+    },
+    {
+      "path": "depth/11.png",
+      "bytes": 142992
+    },
+    {
+      "path": "rgb/840.png",
+      "bytes": 382072
+    },
+    {
+      "path": "depth/201.png",
+      "bytes": 215292
+    },
+    {
+      "path": "rgb/575.png",
+      "bytes": 387297
+    },
+    {
+      "path": "rgb/329.png",
+      "bytes": 386553
+    },
+    {
+      "path": "rgb/16.png",
+      "bytes": 357356
+    },
+    {
+      "path": "depth/755.png",
+      "bytes": 177736
+    },
+    {
+      "path": "rgb/174.png",
+      "bytes": 315336
+    },
+    {
+      "path": "rgb/458.png",
+      "bytes": 335564
+    },
+    {
+      "path": "depth/108.png",
+      "bytes": 209356
+    },
+    {
+      "path": "depth/354.png",
+      "bytes": 204312
+    },
+    {
+      "path": "rgb/747.png",
+      "bytes": 343962
+    },
+    {
+      "path": "rgb/859.png",
+      "bytes": 387362
+    },
+    {
+      "path": "rgb/33.png",
+      "bytes": 348880
+    },
+    {
+      "path": "rgb/592.png",
+      "bytes": 387138
+    },
+    {
+      "path": "rgb/346.png",
+      "bytes": 402414
+    },
+    {
+      "path": "rgb/611.png",
+      "bytes": 385427
+    },
+    {
+      "path": "depth/772.png",
+      "bytes": 152182
+    },
+    {
+      "path": "depth/371.png",
+      "bytes": 202905
+    },
+    {
+      "path": "depth/638.png",
+      "bytes": 123026
+    },
+    {
+      "path": "rgb/191.png",
+      "bytes": 305125
+    },
+    {
+      "path": "depth/47.png",
+      "bytes": 161634
+    },
+    {
+      "path": "rgb/210.png",
+      "bytes": 294784
+    },
+    {
+      "path": "rgb/764.png",
+      "bytes": 356672
+    },
+    {
+      "path": "rgb/876.png",
+      "bytes": 376005
+    },
+    {
+      "path": "depth/125.png",
+      "bytes": 227206
+    },
+    {
+      "path": "depth/237.png",
+      "bytes": 180515
+    },
+    {
+      "path": "depth/502.png",
+      "bytes": 218228
+    },
+    {
+      "path": "rgb/50.png",
+      "bytes": 344656
+    },
+    {
+      "path": "rgb/363.png",
+      "bytes": 406456
+    },
+    {
+      "path": "rgb/475.png",
+      "bytes": 333809
+    },
+    {
+      "path": "rgb/229.png",
+      "bytes": 325917
+    },
+    {
+      "path": "depth/655.png",
+      "bytes": 56373
+    },
+    {
+      "path": "depth/409.png",
+      "bytes": 206207
+    },
+    {
+      "path": "depth/64.png",
+      "bytes": 170029
+    },
+    {
+      "path": "depth/142.png",
+      "bytes": 236123
+    },
+    {
+      "path": "depth/254.png",
+      "bytes": 162076
+    },
+    {
+      "path": "rgb/781.png",
+      "bytes": 367463
+    },
+    {
+      "path": "rgb/647.png",
+      "bytes": 348613
+    },
+    {
+      "path": "rgb/69.png",
+      "bytes": 336583
+    },
+    {
+      "path": "depth/827.png",
+      "bytes": 185166
+    },
+    {
+      "path": "depth/672.png",
+      "bytes": 112057
+    },
+    {
+      "path": "rgb/380.png",
+      "bytes": 400284
+    },
+    {
+      "path": "rgb/492.png",
+      "bytes": 345445
+    },
+    {
+      "path": "rgb/246.png",
+      "bytes": 359433
+    },
+    {
+      "path": "rgb/511.png",
+      "bytes": 361004
+    },
+    {
+      "path": "depth/727.png",
+      "bytes": 194491
+    },
+    {
+      "path": "depth/271.png",
+      "bytes": 160744
+    },
+    {
+      "path": "depth/81.png",
+      "bytes": 177327
+    },
+    {
+      "path": "depth/538.png",
+      "bytes": 230311
+    },
+    {
+      "path": "rgb/86.png",
+      "bytes": 333000
+    },
+    {
+      "path": "rgb/110.png",
+      "bytes": 317475
+    },
+    {
+      "path": "rgb/399.png",
+      "bytes": 393159
+    },
+    {
+      "path": "rgb/664.png",
+      "bytes": 340912
+    },
+    {
+      "path": "rgb/418.png",
+      "bytes": 347099
+    },
+    {
+      "path": "depth/844.png",
+      "bytes": 203791
+    },
+    {
+      "path": "rgb/263.png",
+      "bytes": 362233
+    },
+    {
+      "path": "rgb/129.png",
+      "bytes": 321949
+    },
+    {
+      "path": "depth/178.png",
+      "bytes": 233766
+    },
+    {
+      "path": "depth/443.png",
+      "bytes": 233294
+    },
+    {
+      "path": "depth/555.png",
+      "bytes": 219403
+    },
+    {
+      "path": "depth/309.png",
+      "bytes": 173312
+    },
+    {
+      "path": "rgb/681.png",
+      "bytes": 355113
+    },
+    {
+      "path": "rgb/547.png",
+      "bytes": 401258
+    },
+    {
+      "path": "rgb/700.png",
+      "bytes": 368066
+    },
+    {
+      "path": "rgb/812.png",
+      "bytes": 379590
+    },
+    {
+      "path": "depth/861.png",
+      "bytes": 215729
+    },
+    {
+      "path": "depth/572.png",
+      "bytes": 210562
+    },
+    {
+      "path": "rgb/280.png",
+      "bytes": 366270
+    },
+    {
+      "path": "rgb/146.png",
+      "bytes": 322687
+    },
+    {
+      "path": "depth/195.png",
+      "bytes": 221455
+    },
+    {
+      "path": "depth/460.png",
+      "bytes": 208739
+    },
+    {
+      "path": "depth/326.png",
+      "bytes": 157570
+    },
+    {
+      "path": "rgb/719.png",
+      "bytes": 380869
+    },
+    {
+      "path": "depth/360.png",
+      "bytes": 203541
+    },
+    {
+      "path": "depth/744.png",
+      "bytes": 193314
+    },
+    {
+      "path": "rgb/299.png",
+      "bytes": 367978
+    },
+    {
+      "path": "rgb/564.png",
+      "bytes": 390829
+    },
+    {
+      "path": "rgb/318.png",
+      "bytes": 369571
+    },
+    {
+      "path": "depth/479.png",
+      "bytes": 178018
+    },
+    {
+      "path": "depth/19.png",
+      "bytes": 149792
+    },
+    {
+      "path": "rgb/163.png",
+      "bytes": 310155
+    },
+    {
+      "path": "rgb/447.png",
+      "bytes": 355403
+    },
+    {
+      "path": "depth/343.png",
+      "bytes": 201187
+    },
+    {
+      "path": "rgb/736.png",
+      "bytes": 349756
+    },
+    {
+      "path": "rgb/848.png",
+      "bytes": 384093
+    },
+    {
+      "path": "depth/209.png",
+      "bytes": 208224
+    },
+    {
+      "path": "depth/761.png",
+      "bytes": 166550
+    },
+    {
+      "path": "rgb/22.png",
+      "bytes": 353693
+    },
+    {
+      "path": "rgb/581.png",
+      "bytes": 387781
+    },
+    {
+      "path": "rgb/335.png",
+      "bytes": 390663
+    },
+    {
+      "path": "rgb/600.png",
+      "bytes": 390035
+    },
+    {
+      "path": "depth/496.png",
+      "bytes": 211271
+    },
+    {
+      "path": "depth/36.png",
+      "bytes": 158616
+    },
+    {
+      "path": "depth/627.png",
+      "bytes": 164935
+    },
+    {
+      "path": "rgb/180.png",
+      "bytes": 312084
+    },
+    {
+      "path": "rgb/2.png",
+      "bytes": 357579
+    },
+    {
+      "path": "rgb/865.png",
+      "bytes": 383315
+    },
+    {
+      "path": "depth/226.png",
+      "bytes": 186981
+    },
+    {
+      "path": "rgb/753.png",
+      "bytes": 346660
+    },
+    {
+      "path": "depth/114.png",
+      "bytes": 216660
+    },
+    {
+      "path": "rgb/619.png",
+      "bytes": 380068
+    },
+    {
+      "path": "rgb/352.png",
+      "bytes": 406540
+    },
+    {
+      "path": "rgb/199.png",
+      "bytes": 301785
+    },
+    {
+      "path": "rgb/464.png",
+      "bytes": 334876
+    },
+    {
+      "path": "rgb/218.png",
+      "bytes": 300451
+    },
+    {
+      "path": "depth/379.png",
+      "bytes": 207196
+    },
+    {
+      "path": "depth/644.png",
+      "bytes": 114145
+    },
+    {
+      "path": "depth/53.png",
+      "bytes": 163705
+    },
+    {
+      "path": "depth/131.png",
+      "bytes": 231806
+    },
+    {
+      "path": "depth/243.png",
+      "bytes": 175612
+    },
+    {
+      "path": "rgb/770.png",
+      "bytes": 361561
+    },
+    {
+      "path": "rgb/636.png",
+      "bytes": 351196
+    },
+    {
+      "path": "rgb/58.png",
+      "bytes": 345130
+    },
+    {
+      "path": "depth/797.png",
+      "bytes": 146920
+    },
+    {
+      "path": "depth/396.png",
+      "bytes": 171833
+    },
+    {
+      "path": "depth/661.png",
+      "bytes": 81718
+    },
+    {
+      "path": "depth/816.png",
+      "bytes": 172514
+    },
+    {
+      "path": "rgb/481.png",
+      "bytes": 336838
+    },
+    {
+      "path": "rgb/235.png",
+      "bytes": 339588
+    },
+    {
+      "path": "rgb/500.png",
+      "bytes": 352465
+    },
+    {
+      "path": "rgb/789.png",
+      "bytes": 370960
+    },
+    {
+      "path": "depth/415.png",
+      "bytes": 232501
+    },
+    {
+      "path": "depth/70.png",
+      "bytes": 172006
+    },
+    {
+      "path": "depth/527.png",
+      "bytes": 231325
+    }
+  ]
+}
