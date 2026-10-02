@@ -1,7 +1,7 @@
 ---
 id: "10"
 title: Prepare research repository and publish initial main branch
-status: in_progress
+status: closed
 priority: MED
 type: infra
 blocked_by: []
@@ -74,16 +74,16 @@ Before: 0 commits and no remote. Target: reviewed main commit, no generated payl
 
 | Field | Value |
 |---|---|
-| Closing commit | Publication pending; initial snapshot not yet committed |
+| Closing commit | a507ae7b04d21aecc5fdeb6be956e1e4b1afe6a2 (initial publication); this receipt is recorded in a subsequent documentation commit |
 | Files changed | Plans, task board, research indexes, ignore/line-ending rules and publication notes; first-party executable source unchanged |
 | Test status | Acquisition suite: 23 passed in 0.20 s using system Python and fresh Windows TEMP; task lint: 11 tasks, 0 errors/warnings |
 | Before measurement | 0 Git commits; no remote |
-| After measurement | 119 candidate files; about 1.05 MB before final receipts; origin configured and remote has no refs |
+| After measurement | 119 tracked files, 1,049,127 working-tree bytes at initial commit; main published and origin/main SHA verified equal |
 | Delta | Added repository tracking and two implementation plans |
-| Outcome | Local content/credential/ignore checks complete; commit and remote SHA verification pending |
+| Outcome | Passed: initial commit pushed with main tracking origin/main; remote SHA matched; no raw payloads, environments, caches, vendor checkouts or assistant logs tracked |
 
 Security-reviewer and diff-reviewer were both invoked but failed at the account usage limit. Independent agent review is explicitly waived for this documentation/initial-publication task; no executable behaviour changed. Manual checks covered staged credential patterns, token-bearing URLs, file sizes, ignore rules, task states/dependencies and local Markdown links. No actual credentials were found; one coverage-badge URL was omitted from the published inventory. Task 09 still requires stateful plan/diff reviews when implemented.
 
 The board audit's oversized-file findings refer to ignored third-party checkouts; those are excluded from the snapshot, so vendor refactoring is outside this task. The constitution remains an unratified draft. Acquisition tests failed under restricted temporary-directory permissions; all 23 passed in a fresh external TEMP directory without source edits. The incomplete archived prototype remains explicitly unvalidated.
 
-still open because the reviewed snapshot must be committed, pushed and verified before task closure.
+No implementation follow-up is required to close this publication task. Tasks 03, 04, 05, 08 and 09 remain open research/implementation plans. Local caches and environments were excluded from Git, not deleted from the working machine.

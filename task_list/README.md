@@ -14,7 +14,7 @@
 | [08: phone feasibility](open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Open, alongside 03/04 | Inspect both phones; establish accessible streams, timing and calibration |
 | [09: recognition and persistent counting](open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Open | Add checked-observation identity controls, then recognition and measured-map integration |
 | [05: tracking control](open/05_evaluate_tracking_with_supplied_benchmark_depth.md) | Open | Independently measure tracking after task 03; substitute poses into reconstruction later |
-| [10: repository publication](open/10_prepare_research_repository_and_publish_initial_main.md) | In progress | Prepare and review the initial Git snapshot; publish main to the requested origin |
+| [10: repository publication](closed/10_prepare_research_repository_and_publish_initial_main.md) | Closed | 119-file initial snapshot published on main; remote SHA verified; data/environment exclusions and review limitations recorded |
 
 The [experiment guide](../experiments/README.md) is the active technical plan. These records track work and evidence rather than implementation dependencies.
 
