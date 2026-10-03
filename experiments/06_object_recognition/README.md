@@ -36,4 +36,14 @@ Compare phone-only, portable local edge computing and a backend. Begin with sele
 
 Measure labels, identity, location and inventory separately. Count duplicates, misses, incorrect merges and unresolved matches. Include looking away, occlusion, another return route, moved objects, tracking loss, restart/replay and map correction. A correct total can hide compensating errors.
 
-Before implementation, select scoped contract tests and review state/persistence. Before runs, stamp vocabulary, model, splits, sampling, thresholds and scoring settings. Product limits remain unselected. [Task 09](../../task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md) owns the work; no recognition or counting method has run.
+The checked-input identity store and its persistence tests are implemented and reviewed. Before detector or dataset runs, stamp vocabulary, model, splits, sampling, thresholds and scoring settings. Product limits remain unselected. [Task 09](../../task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md) owns the work; no pixel recognition or labelled revisit evaluation has run.
+
+## Checked identity records
+
+The first implementation slice stores operator-checked observations without running a detector. `IdentityStore` in `src/identity_store.py` saves each source descriptor as canonical JSON, its SHA-256, an explicit `new`, `matched` or `unresolved` decision, and optional position in metres with its pose revision. Original image and depth files stay in their existing dataset or run folders. Keep their paths and hashes in the descriptor; the store does not rewrite or fill missing evidence. A later consumer must report missing files and must not invent replacements.
+
+Object identities belong to one session, world and segment. Two different objects may share a label. A repeated source key with the same decision returns the saved identity; a changed payload or decision fails. One SQLite transaction writes the object and its first observation together. An unresolved observation has no object ID. This supports restart and replay controls but does not identify objects from pixels or prove revisit-count accuracy.
+
+Run the focused controls with `python -m pytest experiments/06_object_recognition/tests/test_identity_store.py`. On 2 October 2026, all 10 checks passed and line coverage for the store was 88%. The full repository suite also passed all 157 tests. No labelled object scenes, recognition model, held-out inventory score or phone measurement has run.
+
+The store keeps records rather than images, so it does not yet export a visual input-to-output review. Add that evidence when the stage connects checked detections, measured geometry and supporting views.

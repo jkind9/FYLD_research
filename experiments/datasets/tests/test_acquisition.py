@@ -139,6 +139,100 @@ def test_download_receipt_or_no_complete_archive(
         assert not archive.exists()
 
 
+def test_tum_download_verifies_publisher_length_and_records_local_hash(
+    tmp_path, monkeypatch
+):
+    calls = []
+
+    def response(request, timeout):
+        calls.append(request.get_method())
+        return (
+            Response(length=4, url="https://cvg.cit.tum.de/archive")
+            if request.get_method() == "HEAD"
+            else Response(b"data", url="https://webshare.cvg.cit.tum.de/archive")
+        )
+
+    monkeypatch.setattr(acquisition.urllib.request, "urlopen", response)
+    archive = tmp_path / "fresh" / "desk.tgz"
+
+    receipt = acquisition.download_tum_desk(archive)
+
+    assert calls == ["HEAD", "GET"]
+    assert archive.read_bytes() == b"data"
+    assert receipt["bytes"] == 4
+    assert receipt["local_sha256"] == acquisition.sha256(archive)
+    assert receipt["checksum_status"] == "local content hash only; publisher checksum not listed"
+    assert receipt["licence"] == "CC BY 4.0 unless otherwise specified"
+    assert archive.parent.is_dir()
+    assert archive.with_name("desk.tgz.json").is_file()
+
+
+@pytest.mark.parametrize(
+    "length,url",
+    [
+        (acquisition.TUM_MAX_COMPRESSED_BYTES + 1, "https://cvg.cit.tum.de/archive"),
+        (4, "https://unexpected.invalid/archive"),
+    ],
+)
+def test_tum_download_rejects_oversize_or_untrusted_publisher(
+    tmp_path, monkeypatch, length, url
+):
+    def response(request, timeout):
+        return (
+            Response(length=length, url="https://cvg.cit.tum.de/archive")
+            if request.get_method() == "HEAD"
+            else Response(b"data", url=url)
+        )
+
+    monkeypatch.setattr(acquisition.urllib.request, "urlopen", response)
+    archive = tmp_path / "desk.tgz"
+
+    with pytest.raises(ValueError):
+        acquisition.download_tum_desk(archive)
+
+    assert not archive.exists()
+
+
+def test_tum_download_rejects_an_existing_acquisition_lock(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        acquisition.urllib.request,
+        "urlopen",
+        lambda *args, **kwargs: pytest.fail("network must not start while another writer holds the lock"),
+    )
+    archive = tmp_path / "desk.tgz"
+    archive.with_name("desk.tgz.lock").write_text("active writer", encoding="utf-8")
+
+    with pytest.raises(FileExistsError):
+        acquisition.download_tum_desk(archive)
+
+
+def test_tum_download_does_not_replace_a_destination_created_mid_publish(
+    tmp_path, monkeypatch
+):
+    def response(request, timeout):
+        return (
+            Response(length=4, url="https://cvg.cit.tum.de/archive")
+            if request.get_method() == "HEAD"
+            else Response(b"data", url="https://webshare.cvg.cit.tum.de/archive")
+        )
+
+    monkeypatch.setattr(acquisition.urllib.request, "urlopen", response)
+    archive = tmp_path / "desk.tgz"
+    link = acquisition.os.link
+
+    def create_destination_then_link(source, destination):
+        if Path(destination) == archive:
+            archive.write_bytes(b"external writer")
+        return link(source, destination)
+
+    monkeypatch.setattr(acquisition.os, "link", create_destination_then_link)
+    with pytest.raises(FileExistsError):
+        acquisition.download_tum_desk(archive)
+
+    assert archive.read_bytes() == b"external writer"
+    assert not archive.with_name("desk.tgz.json").exists()
+
+
 def test_gzip_budget_precedes_tar_parser(tmp_path):
     archive = tmp_path / "huge-metadata.tgz"
     with tarfile.open(archive, "w:gz", format=tarfile.PAX_FORMAT) as stream:

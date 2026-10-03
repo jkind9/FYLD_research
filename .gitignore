@@ -6,6 +6,9 @@ __pycache__/
 .ruff_cache/
 pytest-cache-files-*/
 .pytest-work-*/
+.test_tmp*/
+experiments/**/runs/
+.kilo/
 .harness*-backup/
 shared-harness/
 archive/**/__pycache__/

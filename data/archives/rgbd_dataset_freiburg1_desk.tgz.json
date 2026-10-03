@@ -1,0 +1,14 @@
+{
+  "source_url": "https://cvg.cit.tum.de/rgbd/dataset/freiburg1/rgbd_dataset_freiburg1_desk.tgz",
+  "publisher_page": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download",
+  "resolved_url": "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg1/rgbd_dataset_freiburg1_desk.tgz",
+  "bytes": 344011403,
+  "local_sha256": "e983d6830916e66dc4a46a71368046b149b283de87769690e7aa4e0b9483530c",
+  "retrieved_utc": "2026-10-02T22:23:06.307490+00:00",
+  "licence": "CC BY 4.0 unless otherwise specified",
+  "licence_source": "https://cvg.cit.tum.de/data/datasets/rgbd-dataset",
+  "attribution": "Sturm et al., TUM RGB-D Dataset, IROS 2012",
+  "checksum_status": "local content hash only; publisher checksum not listed",
+  "publisher_length_source": "HTTPS HEAD Content-Length; checked against GET bytes",
+  "max_compressed_bytes": 536870912
+}

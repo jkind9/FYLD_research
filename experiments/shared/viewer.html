@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__TITLE__</title><style>
+body{font:16px system-ui;margin:24px;color:#172330;background:#f5f7fa}h1{font-size:26px}canvas{width:100%;height:auto;aspect-ratio:15/7;background:#fff;border:1px solid #99a8b8;touch-action:none}button,input,select{font:inherit;margin:6px;padding:5px}button:focus-visible,input:focus-visible,canvas:focus-visible{outline:3px solid #136bd2}.sources{display:flex;flex-wrap:wrap;gap:16px}.sources img{width:320px;max-width:100%}figure{margin:0}a{color:#164a85}#details{white-space:pre-wrap}label{display:inline-block}figcaption{max-width:320px}
+</style><h1>__TITLE__</h1><p id="note"></p><p><a href="review.html">Stage review</a> · <a href="metadata/artifact_roles.json">Artifact roles and provenance</a> · <a href="debug/scene.json">Display geometry and sampling counts</a></p>
+<label>Frame <input id="frame" type="range" min="0" value="0"></label><button id="previous">Previous</button><button id="next">Next</button><button id="reset">Reset view</button>
+<label>Segment <select id="segment"></select></label><label><input id="reference" type="checkbox" checked>Ground truth comparison</label>
+<p>Drag to orbit. Scroll to zoom. Arrow keys rotate the focused view. All axes are in metres. Camera pyramids show orientation; their size is for display.</p>
+<canvas id="scene" width="1200" height="560" tabindex="0" aria-label="Interactive 3D scene"></canvas><p id="details" aria-live="polite"></p><div id="sources" class="sources"></div>
+<script id="scene-data" type="application/json">__SCENE__</script><script>__SCRIPT__</script></html>

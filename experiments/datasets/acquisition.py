@@ -8,12 +8,15 @@ import hashlib
 import io
 import json
 import logging
+import os
 import shutil
 import tarfile
 import urllib.request
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
+from urllib.parse import urlparse
 from uuid import uuid4
 
 ASSETS = (
@@ -23,6 +26,14 @@ ASSETS = (
 BASE_URL = "https://www.doc.ic.ac.uk/~ahanda/"
 LICENCE_URL = BASE_URL + "VaFRIC/iclnuim.html"
 CHUNK = 1024 * 1024
+TUM_DESK_URL = (
+    "https://cvg.cit.tum.de/rgbd/dataset/freiburg1/"
+    "rgbd_dataset_freiburg1_desk.tgz"
+)
+TUM_DOWNLOAD_PAGE = "https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download"
+TUM_LICENCE_PAGE = "https://cvg.cit.tum.de/data/datasets/rgbd-dataset"
+TUM_MAX_COMPRESSED_BYTES = 512 * 1024**2
+TUM_PUBLISHER_HOSTS = {"cvg.cit.tum.de", "webshare.cvg.cit.tum.de"}
 
 
 class CappedTarReader(io.BufferedReader):
@@ -216,6 +227,91 @@ def download(url: str, archive: Path, expected_bytes: int) -> dict[str, Any]:
     temporary_metadata.replace(metadata_path)
     partial.rename(archive)
     return metadata
+
+
+def download_tum_desk(archive: Path) -> dict[str, Any]:
+    """Download the selected TUM desk archive with bounded publisher checks.
+
+    The publisher does not list a fixed checksum. The receipt records a local
+    SHA-256 fingerprint and the exact length agreed by HEAD and GET.
+    """
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = archive.with_name(archive.name + ".lock")
+    with _exclusive_file_lock(lock_path):
+        return _download_tum_desk_locked(archive)
+
+
+@contextmanager
+def _exclusive_file_lock(path: Path):
+    """Prevent concurrent publishers from racing on a data/receipt pair."""
+    with path.open("xb") as lock:
+        try:
+            yield
+        finally:
+            lock.close()
+            path.unlink(missing_ok=True)
+
+
+def _download_tum_desk_locked(archive: Path) -> dict[str, Any]:
+    metadata_path = archive.with_name(archive.name + ".json")
+    if archive.exists() or metadata_path.exists():
+        raise FileExistsError(f"Inspect existing TUM archive or receipt before reuse: {archive}")
+
+    with urllib.request.urlopen(
+        urllib.request.Request(TUM_DESK_URL, method="HEAD"), timeout=60
+    ) as head:
+        head_url = head.url
+        expected_bytes = int(head.headers.get("Content-Length", -1))
+        if not _trusted_tum_url(head_url):
+            raise ValueError("Unexpected TUM publisher redirect")
+    if expected_bytes < 1 or expected_bytes > TUM_MAX_COMPRESSED_BYTES:
+        raise ValueError("TUM archive size is missing or exceeds the 512 MiB transfer limit")
+
+    partial = archive.with_name(archive.name + "." + uuid4().hex + ".part")
+    received = 0
+    get_request = urllib.request.Request(TUM_DESK_URL, method="GET")
+    with urllib.request.urlopen(get_request, timeout=60) as response, partial.open("xb") as target:
+        resolved_url = response.url
+        if not _trusted_tum_url(resolved_url):
+            raise ValueError("Unexpected TUM download redirect")
+        while block := response.read(CHUNK):
+            received += len(block)
+            if received > expected_bytes or received > TUM_MAX_COMPRESSED_BYTES:
+                raise ValueError("TUM download exceeds its publisher length or transfer limit")
+            target.write(block)
+    if received != expected_bytes:
+        raise ValueError("TUM download length differs from publisher HEAD; partial retained")
+
+    metadata = {
+        "source_url": TUM_DESK_URL,
+        "publisher_page": TUM_DOWNLOAD_PAGE,
+        "resolved_url": resolved_url,
+        "bytes": received,
+        "local_sha256": sha256(partial),
+        "retrieved_utc": datetime.now(UTC).isoformat(),
+        "licence": "CC BY 4.0 unless otherwise specified",
+        "licence_source": TUM_LICENCE_PAGE,
+        "attribution": "Sturm et al., TUM RGB-D Dataset, IROS 2012",
+        "checksum_status": "local content hash only; publisher checksum not listed",
+        "publisher_length_source": "HTTPS HEAD Content-Length; checked against GET bytes",
+        "max_compressed_bytes": TUM_MAX_COMPRESSED_BYTES,
+    }
+    temporary_metadata = partial.with_name(partial.name + ".json")
+    temporary_metadata.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    os.link(partial, archive)
+    try:
+        os.link(temporary_metadata, metadata_path)
+    except OSError:
+        archive.unlink(missing_ok=True)
+        raise
+    temporary_metadata.unlink()
+    partial.unlink()
+    return metadata
+
+
+def _trusted_tum_url(url: str) -> bool:
+    parsed = urlparse(url)
+    return parsed.scheme == "https" and parsed.hostname in TUM_PUBLISHER_HOSTS
 
 
 def main() -> None:

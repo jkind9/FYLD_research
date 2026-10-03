@@ -1,5 +1,11 @@
 # Six independent scene-mapping experiments
 
+## Implementation and inspectable runs
+
+Task 03 implements the first geometry control in [geometry validation source](geometry_validation/src/) and reusable [shared modules](shared/README.md). Each experiment owns `src/`, `tests/` and `runs/`. Each run owns `input/`, `output/`, `debug/` and `metadata/`, with stable input identifiers connecting the folders. Save every distinct numerical stage together with its diagnostic visuals. Original input bytes, exact ordered selection, settings/provenance, timings, implementation version, dirty source snapshots, dependency/hardware records and artifact hashes support reproduction. Publish completion only after artifacts validate. Generated runs stay local and outside Git.
+
+Keep mathematics, dataset handling, estimator/backend adapters and exports separate. Begin estimator comparisons on GPU where appropriate, while retaining an array/record boundary usable by edge or hosted implementations. Ask the user before each GPU run; the initial geometry control and tests use CPU only. [Geometry control implementation and usage](geometry_validation/README.md#implemented-geometry-control) explains the first concrete run format.
+
 The objective is to find out whether a phone capture can produce a repeatable, measurable representation of the visible work area and identify distinct objects across repeated views. We will build and evaluate six pieces independently, then connect them. The first prototype is preserved in [the Task 00 archive](../archive/task00_prototype/README.md).
 
 The six pieces are camera capture and delivery, stereo depth, camera tracking, 3D reconstruction, bird's-eye mapping and object recognition with persistent counting. Capture and delivery share one experiment because the first practical question is whether useful camera observations can reach an experiment. Its camera tests and network tests still have separate measurements.
@@ -10,12 +16,59 @@ The six pieces are camera capture and delivery, stereo depth, camera tracking, 3
 |---|---|---|---|
 | [01: Camera capture and delivery](01_camera_capture_delivery/README.md) | Selected phone, camera settings and recording request | Images with camera identity, capture times and available calibration; delivery records | Inspect saved phone captures; replay known files to test delivery separately |
 | [02: Stereo depth](02_stereo_depth/README.md) | Paired images and stereo calibration | Depth in metres, valid-pixel mask and confidence if the method supplies it | Recorded calibrated stereo and reference disparities; no phone or tracking required |
-| [03: Camera tracking](03_tracking/README.md) | Images, calibration, time and optional depth or motion-sensor readings | Camera positions and orientations, tracking status | Dataset observations with held-out reference poses; no stereo implementation required |
-| [04: 3D reconstruction](04_reconstruction/README.md) | Depth observations, camera poses and calibration | Observed scene geometry and observation evidence | Supplied depth and exact poses against a separate reference surface; no tracker required |
+| [03: Camera pose estimation](03_camera_pose_estimation/README.md) | Images, calibration, time and optional depth or motion-sensor readings | Camera positions and orientations, tracking status | Dataset observations with held-out reference poses; no stereo implementation required |
+| [04: Surface reconstruction](04_surface_reconstruction/README.md) | Depth observations, camera poses and calibration | Observed scene geometry and observation evidence | Supplied depth and exact poses against a separate reference surface; no tracker required |
 | [05: Bird's-eye mapping](05_birds_eye_mapping/README.md) | Geometry, a declared reference plane and selected region | Top-down views, heights, observed coverage and defined area measurements | Analytic shapes with known heights, boundaries and holes; no reconstruction required |
 | [06: Object recognition and counting](06_object_recognition/README.md) | Images, optional depth/poses and prior object observations | Object labels, persistent identities, supporting views and distinct counts | Checked detections and known poses first; separately labelled revisits and inventory |
 
 The [dataset guide](datasets/README.md) explains suitable recorded inputs, references, permissions and download status. The [research reading guide](../research/sources/README.md) explains the underlying methods.
+
+## Folder structure and processing flow
+
+```text
+experiments/
+  shared/                         geometry, portable records and run exporting
+  geometry_validation/            supplied-depth/supplied-pose control
+    src/                          dataset adapter, control, review and scene views
+    tests/
+    runs/<unique-id>/             input/, output/, debug/, metadata/, review.html
+  01_camera_capture_delivery/
+  02_stereo_depth/
+  03_camera_pose_estimation/       camera position and orientation estimation
+  04_surface_reconstruction/      combine depth observations into surfaces
+  05_birds_eye_mapping/
+  06_object_recognition/
+  datasets/                       acquisition and recorded-input guidance
+```
+
+The geometry control is implemented. Stages 03 and 04 currently contain their plans; their proposed source, test and run directories will be populated during implementation. Work-task IDs describe pieces of work, while experiment numbers describe pipeline stages. Work task 03 delivered geometry validation; work task 05 will implement pipeline stage 03.
+
+```mermaid
+flowchart TD
+    A[01 Capture and deliver calibrated images] --> B[02 Estimate depth]
+    A --> C[03 Estimate camera position and orientation]
+    B --> C
+    B --> D[04 Reconstruct observed surfaces]
+    C --> D
+    D --> E[05 Produce bird's-eye maps and measurements]
+    A --> F[06 Detect and identify objects across views]
+    B --> F
+    C --> F
+    D --> F
+    G[Recorded observations and known reference inputs] --> B
+    G --> C
+    G --> D
+```
+
+Depth is optional for some camera estimators. Supplied benchmark depth and poses allow each stage to be tested independently. Geometry validation supports stages 03 and 04 through shared coordinate conventions; it is a control, rather than an extra estimation stage. Object tracking means retaining object identity across observations; camera tracking means estimating camera motion.
+
+## Established backends inside these boundaries
+
+A complete SLAM implementation, which estimates camera motion and maintains a map, can be used inside stage 03. For example, [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) provides matching, pose estimation, map optimisation, recovery and correction when revisiting a place. Its visual-landmark map overlaps with mapping, but does not itself establish the dense measured surfaces or object inventory required here. [Open3D depth integration](https://www.open3d.org/docs/0.19.0/tutorial/pipelines/rgbd_integration.html) shows how depth and camera poses can separately produce a surface. No ORB-SLAM3 backend has been installed or validated by these controls.
+
+An implementation that supplies both poses and dense surfaces may serve stages 03 and 04 through one adapter. Keep their outputs and independent evaluation separate. We are defining reviewable experiment boundaries, not requiring every stage to be a separate process or rebuilding a package's internals.
+
+The benefit is being able to swap backends and isolate depth, motion and reconstruction errors using known inputs. The cost is adapters and integration. Revised historical poses require affected surfaces to be updated or rebuilt. Tracking resets require explicit segment/world identities. Preserve those records whether computation runs on a phone, an edge computer or a hosted backend.
 
 ## Development data coverage
 
@@ -23,12 +76,12 @@ Each experiment README names its initial inputs and independent reference. Curre
 
 | Experiment | Development inputs | Independent reference | Readiness |
 | --- | --- | --- | --- |
-| Camera capture and delivery | S23/Redmi recordings for capture; acquired Middlebury images for file delivery replay | Actual device capability/timing records; original file hashes and frame identifiers for delivery | Phone recordings and replay tests remain part of implementation |
+| Camera capture and delivery | S23/Redmi recordings for capture; acquired Middlebury images for file delivery replay | Actual device capability/timing records; original file hashes and frame identifiers for delivery | WSL p4a toolchain built and verified a minimal arm64 APK; both phone captures and replay tests remain outstanding |
 | Stereo depth | Acquired Middlebury quarter-resolution training pairs | Published disparity, masks and scene calibration | Data ready; choose development/held-out scenes before tuning |
-| Camera tracking | Acquired TUM Freiburg1 xyz colour/depth | Motion-capture poses kept outside tracker inputs | Development data ready; selected Freiburg1 desk remains to be acquired before held-out evaluation |
-| Reconstruction | Acquired ICL living-room trajectory 2 depth/poses, matched IDs 1..880 | Separate acquired living-room reference point cloud | Data ready; task 03 must verify geometry before scoring |
+| Camera tracking | Acquired TUM Freiburg1 xyz colour/depth | Motion-capture poses kept outside tracker inputs | 30-frame CPU trial completed: 6.93 mm position error and 2.14 image pairs/s; full xyz and selected desk evaluation remain |
+| Reconstruction | Acquired ICL living-room trajectory 2 depth/poses, matched IDs 1..880 | Separate acquired living-room reference point cloud | Nine-frame CPU baseline: 7.85 mm mean error, 22.29% whole-reference coverage within 5 cm |
 | Bird's-eye mapping | Independently specified known shapes; acquired ICL point cloud as a later complex input | Expected dimensions, heights, areas and observation masks from fixture definitions | Known-shape fixtures must be created with the first tests |
-| Object recognition and counting | Existing images for geometry association controls; labelled object walkthrough still needed | Manually checked masks, persistent object identities and inventory | No task-specific recognition or revisit benchmark has been acquired |
+| Object recognition and counting | Checked identity-store controls; labelled object walkthrough still needed | Manually checked masks, persistent object identities and inventory | 10 persistence controls pass; no task-specific recognition model or revisit benchmark has been acquired |
 
 No KITTI download is needed to begin these independent stages. Recorded car-mounted observations cannot resolve phone camera access or replace exact expected map measurements. Outdoor validation and a later comparison using stereo depth inside tracking still need suitable data; neither is claimed complete by this initial development coverage.
 
@@ -89,7 +142,7 @@ Start with controls and a simple baseline. Test normal inputs, boundaries and a 
 
 Numeric product acceptance limits, processing budgets and tunable settings have not been selected. Agree and record them before running a comparison. A completed experiment may conclude that a method is unsuitable; completion is an evidenced decision, not a requirement for a positive result.
 
-Only promote code to [shared src](../src/README.md) after its behaviour is established and another experiment needs it. Until then, implementation belongs with the experiment that owns the question.
+Reusable geometry, records and run exporting live in [experiments/shared](shared/README.md). Keep estimator-specific code with its experiment; promote a helper only when another experiment needs the same behaviour. The root [src placeholder](../src/README.md) does not own a second implementation.
 
 ## Build order
 
@@ -106,12 +159,23 @@ The main implementation starts with a verified observation/pose contract and a r
 | Task | Purpose | Dependency |
 |---|---|---|
 | [02: research and standard reference data](../task_list/closed/02_verify_standard_tracking_and_reconstruction_refere.md) | Complete: formats/permissions checked, both ICL assets acquired, held-out TUM sequence selected | None |
-| [03: known-geometry contracts](../task_list/open/03_define_observation_and_pose_contracts_with_known_g.md) | Define units, timestamps, transforms and segments; establish independent controls | 02 |
-| [04: supplied-pose reconstruction](../task_list/open/04_evaluate_reconstruction_with_supplied_depth_and_po.md) | Measure fusion/surface error without a tracker | 03 |
-| [05: supplied-depth tracking](../task_list/open/05_evaluate_tracking_with_supplied_benchmark_depth.md) | Measure camera movement error without stereo estimation | 03 |
+| [03: known-geometry contracts](../task_list/closed/03_define_observation_and_pose_contracts_with_known_g.md) | Complete: units, transforms and segments checked; CPU geometry controls exported | 02 |
+| [04: supplied-pose reconstruction](../task_list/closed/04_evaluate_reconstruction_with_supplied_depth_and_po.md) | Complete: point-surface error and coverage measured without a tracker | 03 |
+| [05: supplied-depth tracking](../task_list/closed/05_evaluate_tracking_with_supplied_benchmark_depth.md) | Measure camera movement error without stereo estimation | 03 |
 | [08: phone feasibility](../task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Inspect both phones and retain capture/calibration evidence | None; run alongside geometry work |
 | [09: recognition and persistent counting](../task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Test labels, identities and revisit counts independently | 03 for 3D association; 04 for reconstructed-map integration |
 
-Task 04 is the first reconstruction implementation after task 03. Task 05 can proceed independently after task 03. Task 08 is an early device check; task 09 can begin label and fixture planning before reconstruction, but map integration follows task 04. These remain open plans. Actual test paths, tunable settings and numerical acceptance limits must be recorded before code or experiment runs.
+Geometry validation and Task 04's supplied-input point-surface baseline are complete. Nine CPU views have measured reference error and whole-reference coverage, with saved inputs and a surface preview. Task 05 has completed a 30-frame CPU tracking trial with independent scoring and shared timing metadata. Task 13 now has the selected desk archive and verified 573 timestamp pairs; full development and held-out tracking evaluations remain outstanding. Task 08's WSL build setup now produces a verified arm64 APK, but camera support on both phones remains untested. Task 09 now has a checked-input persistent identity store; it has not run object recognition or labelled inventory evaluation. Record settings and numerical acceptance limits before experiment runs.
 
-These are plans, not newly executed experiments. Task 00 supplied literature and preliminary desktop results. Its integrated implementation is archived; final code review, package validation, coverage measurement and post-fix reruns were unfinished when the objective changed. Any reused code must be validated in its new owning experiment.
+The tracking trial is a short development result; later phone and site assemblies remain plans. Task 00 supplied literature and preliminary desktop results. Its integrated implementation is archived; final code review, package validation, coverage measurement and post-fix reruns were unfinished when the objective changed. Any reused code must be validated in its new owning experiment.
+
+
+## Visual evidence and reference labels
+
+Every implemented stage should show the mapping from its inputs to its outputs. Camera estimation needs a view of position and orientation over successive observations, with its independent reference path. Surface reconstruction needs a three-dimensional point view with the supplied camera views and source images. A distance map shows the error calculated by our code against a reference; it is an evaluated output.
+
+Use four explicit labels in both the views and saved metadata: observed input, ground truth, predicted output and evaluated output. Measured TUM Kinect depth is observed input even though the benchmark supplies it. TUM reference camera poses and clean synthetic ICL depth and poses are ground truth. Display conversion and preview sampling must be stated, with links to full numerical artifacts. Point clouds without triangle faces are point surfaces. They are not completed meshes.
+
+Task 05 closes the 30-observation CPU tracking baseline. Task 13 retains the full development and held-out evaluation. Task 14 adds labelled inspection. Task 08 has prepared and verified the WSL p4a build route; no phone has been connected or measured yet.
+
+Verified interactive inspections: [camera motion](03_camera_pose_estimation/runs/20261002T195923.778722Z_8bcaf965d8dc496192563205df59d85c/viewer.html) and [reconstructed point surface](04_surface_reconstruction/runs/20261002T195928.219822Z_55d2d0bfa455453eb2289a5e717490c1/viewer.html). These are local run artifacts; datasets and generated runs are excluded from repository publication.

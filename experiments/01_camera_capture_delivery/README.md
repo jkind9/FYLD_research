@@ -1,6 +1,6 @@
 # Experiment 01: camera capture and delivery
 
-[Task 08](../../task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
+[Task 08](../../task_list/pending_review/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
 
 ## The piece we are testing
 
@@ -30,9 +30,28 @@ Use Python for test sequencing, result recording and optional delivery. Access A
 
 The first app should enumerate camera identities and capabilities, save that report, obtain camera permission, record a single-camera control and then attempt a supported pair. Save original images and capture metadata locally before adding stream delivery. If using a small Kivy interface, keep it limited to starting tests, showing status and exporting results. Native libraries such as OpenCV require a supported cross-compilation recipe; verify dependency support before adding them. The backend receiver can use desktop OpenCV independently.
 
-On this Windows workstation, plan a verified Linux build environment with Android SDK/NDK and Java. The [official quickstart](https://python-for-android.readthedocs.io/en/latest/quickstart.html) directs Windows users to a Linux virtual machine. WSL is a possible environment to investigate, but an installed executable does not establish a usable distribution or build toolchain. Pin the packaging and SDK versions after checking their compatibility; the quickstart contains examples from different tool versions, so do not copy those numbers blindly.
+### Workstation build environment
 
-The p4a repository identifies its code licence as MIT. Dependencies, copied Android samples and helper code need their own licence records. No build environment, APK or phone test has been completed in this plan.
+The selected build route now runs in Ubuntu 24.04.4 on WSL2. This prepares the workstation for APK builds, but does not prove either phone exposes compatible cameras.
+
+| Tool | Installed version | Check |
+|---|---|---|
+| Host Python | 3.12.3 | p4a installed in an isolated virtual environment |
+| python-for-android | 2026.05.09, release commit `58d21141f17c889bf8585f5665921d72028f8831` | GitHub release marks the commit signature verified; PyPI wheel SHA-256 `79a58606a78ed3cec1aba110876a414d4aa988f082385d68393e208d009e1e94` |
+| OpenJDK | 17.0.20.1 | From Ubuntu's signed package repositories; required by Android Gradle Plugin 8.11.0 |
+| Android command-line tools | revision 15859902 | Publisher SHA-256 `4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583` |
+| Android SDK platform | API 36 | Installed from Google's SDK repository |
+| Android build-tools | 35.0.0 | Installed from Google's SDK repository |
+| Android platform-tools | 37.0.1 | Installed from Google's SDK repository |
+| Android NDK | r28c, `28.2.13676358` | Publisher SHA-1 `a7b54a5de87fecd125a17d54f73c446199e72a64`; API 24 compile target |
+| Gradle wrapper | 8.14.3 | p4a release template pairs it with Android Gradle Plugin 8.11.0, which requires Gradle 8.13 or newer; wrapper archive SHA-256 `ed1a8d686605fd7c23bdf62c7fc7add1c5b23b2bbc3721e661934ef4a4911d7c` |
+| Android Python recipe | 3.14.2 | Version pinned by the selected p4a release; distinct from host Python 3.12.3 |
+
+The command-line tools and NDK archives, both Gradle archives, and the p4a wheel were checked against publisher values before extraction or installation. The SDK manager installed API 36, build-tools 35.0.0 and platform-tools from Google's repository. The p4a release template uses Android Gradle Plugin 8.11.0 and Gradle 8.14.3. Android's compatibility table lists Gradle 8.13 as the minimum for plugin 8.11, so the selected wrapper is compatible.
+
+Two no-device checks passed. NDK clang compiled an ELF64 AArch64 Android shared library for API 24. p4a built a minimal debug APK for `arm64-v8a`; APK signature verification passed, and its manifest reports min API 24 and target API 36. The smoke APK and build files are kept in the WSL home directory. No emulator or GPU was used.
+
+The p4a repository identifies its code licence as MIT. Dependencies, copied Android samples and helper code need their own licence records. The smoke APK confirms workstation packaging only. It contains no camera implementation, and neither target phone has been connected or tested. Google's current command-line tools report that `sdkmanager` is deprecated and recommend `android sdk` for future SDK maintenance.
 
 ### Alternative implementation routes
 
