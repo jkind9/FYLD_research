@@ -1,6 +1,10 @@
 """CPU tracking contracts, independent reference scoring and publication."""
 
+import gc
+import hashlib
 import importlib
+import json
+import weakref
 from dataclasses import fields
 
 import numpy as np
@@ -180,7 +184,7 @@ def test_pipeline_reference_separation_and_required_artifacts(tmp_path, monkeypa
     from experiments.shared.runs import verify_run
 
     runner = importlib.import_module(package + ".run")
-    root = tmp_path / "dataset"
+    root = tmp_path / "rgbd_dataset_freiburg1_desk"
     root.mkdir()
     for name in ("rgb", "depth"):
         (root / name).mkdir()
@@ -191,18 +195,26 @@ def test_pipeline_reference_separation_and_required_artifacts(tmp_path, monkeypa
         Image.fromarray(np.full((480, 640), 10000, np.uint16)).save(
             root / f"depth/{i}.png"
         )
-    (root / "rgb.txt").write_text("\n".join(f"{i*.03} rgb/{i}.png" for i in range(3)))
+    (root / "rgb.txt").write_text(
+        "\n".join(f"{i * 0.03} rgb/{i}.png" for i in range(3))
+    )
     (root / "depth.txt").write_text(
-        "\n".join(f"{i*.03} depth/{i}.png" for i in range(3))
+        "\n".join(f"{i * 0.03} depth/{i}.png" for i in range(3))
     )
     (root / "groundtruth.txt").write_text(
-        "\n".join(f"{i*.03} {i*.1} 0 0 0 0 0 1" for i in range(3))
+        "\n".join(f"{i * 0.03} {i * 0.1} 0 0 0 0 0 1" for i in range(3))
     )
     original = evaluation.read_references
     called = []
 
     def guarded(path):
         assert len(called) == 2
+        run_path = next(result_path.iterdir())
+        saved = json.loads((run_path / "output/poses.json").read_text())
+        assert len(saved["records"]) == 3
+        assert all(
+            row["status"] in {"initialized", "tracked"} for row in saved["records"]
+        )
         return original(path)
 
     class GuardedBackend:
@@ -210,9 +222,23 @@ def test_pipeline_reference_separation_and_required_artifacts(tmp_path, monkeypa
             called.append(target.frame_id)
             return backend.PairResult(True, translation(-0.1), "test")
 
+    result_path = tmp_path / "runs"
     monkeypatch.setattr(evaluation, "read_references", guarded)
-    result = runner.execute(root, tmp_path / "runs", count=3, engine=GuardedBackend())
+    result = runner.execute(root, result_path, count=3, engine=GuardedBackend())
     assert verify_run(result)["status"] == "complete"
+    configuration = json.loads((result / "metadata/configuration.json").read_text())
+    assert configuration["sequence"] == "rgbd_dataset_freiburg1_desk"
+    assert configuration["selected_frames"] == 3
+    assert (
+        configuration["hyperparameters"]["sequence"]["value"]
+        == configuration["sequence"]
+    )
+    assert configuration["hyperparameters"]["frames"]["value"] == 3
+    manifest = json.loads((result / "metadata/manifest.json").read_text())
+    manifest_files = set(manifest["files"])
+    for row in json.loads((result / "output/associations.json").read_text())["rows"]:
+        for kind in ("rgb", "depth"):
+            assert f"input/observations/{row[kind]}" in manifest_files
     assert (result / "review.html").exists()
     (result / "output/metrics.json").unlink()
     with pytest.raises(ValueError):
@@ -228,12 +254,243 @@ def test_pipeline_reference_separation_and_required_artifacts(tmp_path, monkeypa
     monkeypatch.setattr(runner, "validate_outputs", missing_output)
     with pytest.raises(ValueError, match="Required tracking artifact"):
         runner.execute(root, tmp_path / "failed_runs", count=3, engine=GuardedBackend())
-    import json
-
     failed = next((tmp_path / "failed_runs").iterdir())
     assert (
         json.loads((failed / "metadata/status.json").read_text())["status"] == "failed"
     )
+
+
+@pytest.mark.parametrize(
+    ("dataset_name", "frames"),
+    [("rgbd_dataset_freiburg1_xyz", "792"), ("rgbd_dataset_freiburg1_desk", "573")],
+)
+def test_cli_accepts_full_sequence_counts(monkeypatch, tmp_path, dataset_name, frames):
+    runner = importlib.import_module(package + ".run")
+    dataset_root = tmp_path / dataset_name
+    dataset_root.mkdir()
+    run_root = tmp_path / "runs"
+    selected = []
+    verified_identity = {
+        "status": (
+            "archive provenance checked; completed runs hash selected inputs "
+            "in the run manifest"
+        ),
+        "sequence": dataset_name,
+        "archive_sha256": "a" * 64,
+    }
+
+    def execute(root, runs, count, sequence_identity):
+        selected.append((root, runs, count, sequence_identity))
+        return runs
+
+    monkeypatch.setattr(runner, "execute", execute)
+    monkeypatch.setattr(
+        runner, "_archive_provenance", lambda root, repo: verified_identity
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "tracking",
+            "--dataset",
+            str(dataset_root),
+            "--frames",
+            frames,
+            "--runs",
+            str(run_root),
+        ],
+    )
+    runner.main()
+    assert len(selected) == 1
+    root, runs, count, identity = selected[0]
+    assert (root, runs, count) == (dataset_root, run_root, int(frames))
+    assert identity["sequence"] == dataset_name
+    assert identity["status"].startswith("archive provenance checked")
+    assert identity["archive_sha256"]
+
+
+def test_cli_rejects_named_but_unverified_dataset_path(monkeypatch, tmp_path):
+    runner = importlib.import_module(package + ".run")
+    dataset_root = tmp_path / "rgbd_dataset_freiburg1_xyz"
+    dataset_root.mkdir()
+    monkeypatch.setattr(
+        "sys.argv",
+        ["tracking", "--dataset", str(dataset_root), "--frames", "792"],
+    )
+    with pytest.raises(SystemExit) as error:
+        runner.main()
+    assert error.value.code == 2
+
+
+@pytest.mark.parametrize(
+    ("dataset_name", "archive_name"),
+    [
+        ("rgbd_dataset_freiburg1_xyz", "rgbd_dataset_freiburg1_xyz.tgz"),
+        ("rgbd_dataset_freiburg1_desk", "rgbd_dataset_freiburg1_desk.tgz"),
+    ],
+)
+def test_archive_provenance_binds_receipts_to_archive_bytes(
+    tmp_path, dataset_name, archive_name
+):
+    from pathlib import Path
+
+    runner = importlib.import_module(package + ".run")
+    repo = tmp_path
+    relative_root = (
+        Path("data/tum/rgbd_dataset_freiburg1_xyz")
+        if dataset_name == "rgbd_dataset_freiburg1_xyz"
+        else Path("data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk")
+    )
+    relative_secondary = (
+        relative_root / "provenance.json"
+        if dataset_name == "rgbd_dataset_freiburg1_xyz"
+        else relative_root.parent / "EXTRACTION.json"
+    )
+    relative_acquisition = Path("data/archives") / f"{archive_name}.json"
+    dataset_root = repo / relative_root
+    dataset_root.mkdir(parents=True)
+    archive_path = repo / "data/archives" / archive_name
+    archive_path.parent.mkdir(parents=True, exist_ok=True)
+    archive = b"verified archive fixture"
+    archive_path.write_bytes(archive)
+    digest = hashlib.sha256(archive).hexdigest()
+    official_url = "https://cvg.cit.tum.de/rgbd/dataset/freiburg1/" + archive_name
+    resolved_url = (
+        "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg1/" + archive_name
+    )
+    acquisition = {
+        "source_url": official_url,
+        "resolved_url": resolved_url,
+        "local_sha256": digest,
+    }
+    secondary = {"local_sha256": digest}
+    if dataset_name == "rgbd_dataset_freiburg1_xyz":
+        acquisition["size_bytes"] = len(archive)
+        secondary.update({"source_url": official_url, "size_bytes": len(archive)})
+    else:
+        acquisition["bytes"] = len(archive)
+        secondary.update({"archive": archive_name, "compressed_bytes": len(archive)})
+    (repo / relative_acquisition).write_text(json.dumps(acquisition))
+    secondary_path = repo / relative_secondary
+    secondary_path.parent.mkdir(parents=True, exist_ok=True)
+    secondary_path.write_text(json.dumps(secondary))
+
+    identity = runner._archive_provenance(dataset_root, repo)
+    assert identity["sequence"] == dataset_name
+    assert identity["archive_sha256"] == digest
+    acquisition["source_url"] = "https://untrusted.example/" + archive_name
+    (repo / relative_acquisition).write_text(json.dumps(acquisition))
+    with pytest.raises(ValueError, match="receipts do not match"):
+        runner._archive_provenance(dataset_root, repo)
+
+
+def test_archive_provenance_rejects_archive_receipt_hash_mismatch(tmp_path):
+    runner = importlib.import_module(package + ".run")
+    repo = tmp_path
+    dataset_root = repo / "data/tum/rgbd_dataset_freiburg1_xyz"
+    dataset_root.mkdir(parents=True)
+    archive_path = repo / "data/archives/rgbd_dataset_freiburg1_xyz.tgz"
+    archive_path.parent.mkdir(parents=True)
+    archive_path.write_bytes(b"changed archive")
+    official_url = (
+        "https://cvg.cit.tum.de/rgbd/dataset/freiburg1/rgbd_dataset_freiburg1_xyz.tgz"
+    )
+    resolved_url = (
+        "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg1/"
+        "rgbd_dataset_freiburg1_xyz.tgz"
+    )
+    receipt = {
+        "source_url": official_url,
+        "resolved_url": resolved_url,
+        "local_sha256": "a" * 64,
+        "size_bytes": len(b"changed archive"),
+    }
+    (repo / "data/archives/rgbd_dataset_freiburg1_xyz.tgz.json").write_text(
+        json.dumps(receipt)
+    )
+    (dataset_root / "provenance.json").write_text(
+        json.dumps(
+            {
+                "source_url": official_url,
+                "local_sha256": "a" * 64,
+                "size_bytes": len(b"changed archive"),
+            }
+        )
+    )
+
+    with pytest.raises(ValueError, match="receipts do not match"):
+        runner._archive_provenance(dataset_root, repo)
+
+
+@pytest.mark.parametrize(
+    ("acquisition", "secondary"),
+    [([], {}), ({"local_sha256": None}, {}), ({}, [])],
+)
+def test_archive_provenance_rejects_malformed_receipt_fields(
+    tmp_path, acquisition, secondary
+):
+    runner = importlib.import_module(package + ".run")
+    repo = tmp_path
+    dataset_root = repo / "data/tum/rgbd_dataset_freiburg1_xyz"
+    dataset_root.mkdir(parents=True)
+    acquisition_path = repo / "data/archives/rgbd_dataset_freiburg1_xyz.tgz.json"
+    secondary_path = dataset_root / "provenance.json"
+    acquisition_path.parent.mkdir(parents=True)
+    acquisition_path.write_text(json.dumps(acquisition))
+    secondary_path.write_text(json.dumps(secondary))
+
+    with pytest.raises((TypeError, ValueError), match="Dataset receipt"):
+        runner._archive_provenance(dataset_root, repo)
+
+
+def test_runner_rejects_more_frames_than_available_before_backend_calls(tmp_path):
+    from PIL import Image
+
+    runner = importlib.import_module(package + ".run")
+    root = tmp_path / "rgbd_dataset_freiburg1_xyz"
+    root.mkdir()
+    for name in ("rgb", "depth"):
+        (root / name).mkdir()
+    for index in range(2):
+        Image.fromarray(np.full((480, 640, 3), 128, np.uint8)).save(
+            root / f"rgb/{index}.png"
+        )
+        Image.fromarray(np.full((480, 640), 10000, np.uint16)).save(
+            root / f"depth/{index}.png"
+        )
+    (root / "rgb.txt").write_text("0 rgb/0.png\n0.03 rgb/1.png\n")
+    (root / "depth.txt").write_text("0 depth/0.png\n0.03 depth/1.png\n")
+
+    class MustNotRun:
+        def estimate(self, source, target):
+            raise AssertionError("backend ran before selection validation")
+
+    with pytest.raises(ValueError, match="Insufficient associated frames"):
+        runner.execute(root, tmp_path / "runs", count=3, engine=MustNotRun())
+    assert not (tmp_path / "runs").exists()
+
+
+def test_tracking_consumes_long_stream_without_retaining_old_images():
+    references = {"colour": [], "depth": [], "valid": []}
+    maximum_live_arrays = {name: 0 for name in references}
+
+    def frames():
+        for index in range(80):
+            current = frame(index)
+            for name, rows in references.items():
+                rows.append(weakref.ref(getattr(current, name)))
+            yield current
+
+    class StreamingBackend:
+        def estimate(self, source, target):
+            gc.collect()
+            for name, rows in references.items():
+                live_arrays = sum(reference() is not None for reference in rows)
+                maximum_live_arrays[name] = max(maximum_live_arrays[name], live_arrays)
+            return backend.PairResult(True, translation(-0.1), "streaming fixture")
+
+    records = tracking.track(frames(), StreamingBackend())
+    assert len(records) == 80
+    assert all(count <= 3 for count in maximum_live_arrays.values())
 
 
 def test_dataset_association_resolution_and_zero_count(tmp_path):
@@ -302,19 +559,19 @@ def test_runner_associations_use_snapshot_tables(tmp_path, monkeypatch):
     for name in ("rgb.txt", "depth.txt"):
         (root / name).write_text("0 rgb.png\n")
     seen = []
+    original = dataset.associations
 
     def association(path, count):
         seen.append(path)
-        assert (
-            path != root
-            and (path / "rgb.txt").read_bytes() == (root / "rgb.txt").read_bytes()
-        )
+        if path == root:
+            return original(path, count)
+        assert (path / "rgb.txt").read_bytes() == (root / "rgb.txt").read_bytes()
         raise ValueError("fixture stop")
 
     monkeypatch.setattr(dataset, "associations", association)
     with pytest.raises(ValueError, match="fixture stop"):
         runner.execute(root, tmp_path / "runs", count=1, engine=FakeBackend([]))
-    assert len(seen) == 1
+    assert seen == [root, next((tmp_path / "runs").iterdir()) / "input/observations"]
 
 
 def test_depth_truncation_boundary_is_not_usable():

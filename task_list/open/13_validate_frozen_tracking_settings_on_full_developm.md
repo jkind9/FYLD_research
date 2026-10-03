@@ -46,15 +46,16 @@ The verified baseline covers only 30 observations and 1.136 seconds. It does not
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
 | CPU settings and stage timing already exist | run.HYPERPARAMETERS and execute | benchmark runs | experiments/03_camera_pose_estimation/src/run.py:21 |
-| CLI currently restricts inference to the approved 30-frame xyz trial | main | extended runner | experiments/03_camera_pose_estimation/src/run.py:204 |
+| CLI accepts positive counts only for the configured xyz and desk paths; it checks official source URLs and matches archive size and SHA-256 against both local receipts | main and archive-provenance check | full-sequence runs | experiments/03_camera_pose_estimation/src/run.py:233 |
+| Run configuration records the selected sequence and actual association-row count | execute | run readers and scoring receipts | experiments/03_camera_pose_estimation/src/run.py:165 |
 | Dataset association and pose-free decoding exist | associations and load_frame | tracker | experiments/03_camera_pose_estimation/src/dataset.py:78 |
 | Independent fixed-scale scoring exists | evaluate | run output | experiments/03_camera_pose_estimation/src/evaluation.py:46 |
 | Shared publication rejects incomplete or changed artifacts | verify_run | evaluation receipts | experiments/shared/runs.py:60 |
 | Bounded safe extraction exists; downloader remains ICL-specific | `publish_archive` in the existing acquisition module | TUM-specific download and receipt handling in that module; its tests | experiments/datasets/acquisition.py:111 |
 
-1. Run the hyperparameter audit and record exact full-sequence selections and any runtime caps before execution. Preserve all numerical backend settings from Task05; new selections need explicit dated approval. Full xyz has 798 listed RGB and depth rows, of which 792 pairs associate one-to-one at the inherited 0.02-second tolerance; use all 792 if the user approves this selection. Desk frame count is unknown until its archive is verified. Do not run either sequence while desk count or resource caps remain unstamped.
-2. Extend the existing CLI and tests rather than introducing a second estimator. Ensure recorded frame selections equal the actual selected count and enforce dataset/source provenance.
-3. Extend the existing acquisition module and tests with TUM-specific download and receipt handling. Acquire desk from its official HTTPS publisher, compare the exact GET byte count with the publisher's HTTPS HEAD length, record a local SHA-256 because no publisher checksum is listed, extract safely to a fresh destination and retain provenance. Never overwrite development observations.
+1. Run the hyperparameter audit and record exact full-sequence selections and runtime caps before execution. Preserve all numerical backend settings from Task05; full-run selections and caps need explicit dated approval. The acquired xyz data has 798 RGB rows and 798 depth rows, with 792 one-to-one pairs at the inherited 0.02-second tolerance. The acquired desk data has 613 RGB rows and 595 depth rows, with 573 one-to-one pairs at that tolerance. Use every associated pair only after the user approves each selection. Do not run either sequence while selections or resource caps remain unstamped.
+2. Extend the existing CLI and tests rather than introducing a second estimator. The CLI accepts either configured local Freiburg1 data path and a positive frame count. It checks the exact official source URLs and matches archive size and SHA-256 against acquisition and extraction/provenance receipts. Preflight the selected association rows before backend loading; require the input snapshot to reproduce them. Hash the selected input copies in the run manifest. Record the actual sequence and row count in both run configuration and hyperparameters. Keep reference poses unopened until every estimate has been saved. Preserve the frozen backend settings and bounded image-pair processing.
+3. Desk acquisition is complete. The archive was obtained from the official HTTPS publisher; its GET byte count matched the HTTPS HEAD length, its local SHA-256 is recorded because no publisher checksum is listed, and bounded extraction produced a verified fresh destination. Keep the archive and extraction receipts with the held-out data. Never overwrite development observations.
 4. Freeze settings on xyz before desk. Score desk only after estimation, without retuning against its reference poses. A desk-driven settings change needs a new independent held-out sequence.
 5. Publish both complete runs with statuses, segment-aware scores, stage timing/FPS, memory and inspectable reports. Keep no-loop-closure and no-map-recovery limitations explicit. Do not infer phone performance from desktop benchmarks.
 
@@ -108,10 +109,12 @@ Before: 0 complete full-sequence or held-out evaluations. Target: 2 complete rep
 
 | Field | Value |
 |---|---|
-| Closing commit | Not started |
-| Files changed | `experiments/datasets/acquisition.py`, `experiments/datasets/tests/test_acquisition.py`, `data/README.md`, `experiments/datasets/README.md`, `experiments/03_camera_pose_estimation/README.md`, `experiments/README.md`, `README.md`, `task_list/README.md`; ignored TUM desk archive and extracted input tree |
-| Test status | Full repository suite: 162 passed; acquisition tests include 28 controls; tracking evaluation not run |
+| Closing commit | None; task remains in progress |
+| Files changed | `experiments/datasets/acquisition.py`, `experiments/datasets/tests/test_acquisition.py`, `data/README.md`, `experiments/datasets/README.md`, `experiments/03_camera_pose_estimation/README.md`, `experiments/03_camera_pose_estimation/src/run.py`, `experiments/03_camera_pose_estimation/tests/test_tracking.py`, `experiments/README.md`, `README.md`, `task_list/README.md`, this task record; ignored TUM desk archive and extracted input tree |
+| Test status | Earlier full repository suite: 162 passed; current tracking suite: 33 passed; Ruff lint and formatting passed; task plan lint passed; full tracking evaluation not run |
 | Before measurement | 0 full-sequence or held-out evaluations |
-| After measurement | Still 0 full-sequence or held-out evaluations; desk archive verified, 573 paired images decode at 640x480, and 25.44% missing depth measurements remain invalid |
-| Delta | 0 evaluations; held-out inputs acquired, structurally checked and decoded without filling missing measurements |
-| Outcome | Continue only after frozen selection and user-confirmed runtime and memory limits; no inference has run |
+| After measurement | Still 0 full-sequence or held-out evaluations; desk archive verified, 573 paired images decode at 640x480, and 25.44% missing depth measurements remain invalid. The CLI now checks the configured local data path and archive provenance; each run hashes its actual selected input copies and records the sequence and count. |
+| Delta | 0 evaluations; held-out inputs acquired and checked; CLI, metadata, reference separation and streaming-memory contracts extended |
+| Outcome | No full-sequence inference has run. Continue after dated approval of both selections and resource caps, then implement cap enforcement before execution. |
+
+still open because full-sequence selections and resource caps await explicit approval, and cap enforcement must be implemented before inference.

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import psutil
 
+from experiments.datasets.acquisition import sha256
 from experiments.shared.geometry import validate_transform
 from experiments.shared.runs import Run, verify_run, write_json
 
@@ -132,25 +133,60 @@ def _observations(root: Path, rows: list[dict], run: Run):
         yield frame
 
 
-def execute(root: Path, run_root: Path, count: int = 30, engine=None) -> Path:
+def _selected_hyperparameters(sequence: str, count: int) -> dict:
+    selected = {name: dict(value) for name, value in HYPERPARAMETERS.items()}
+    selected.update(
+        {
+            "frames": {
+                "value": count,
+                "source": "actual selected observations recorded in run metadata",
+            },
+            "sequence": {
+                "value": sequence,
+                "source": "dataset directory name recorded in run metadata",
+            },
+            "selection": {
+                "value": f"first {count} consecutive associated observations; no stride",
+                "source": "actual association rows recorded in run metadata",
+            },
+        }
+    )
+    return selected
+
+
+def execute(
+    root: Path,
+    run_root: Path,
+    count: int = 30,
+    engine=None,
+    sequence_identity: dict | None = None,
+) -> Path:
     repo = Path(__file__).resolve().parents[3]
+    selected_rows, selected_counts = dataset.associations(root, count)
+    sequence = root.name
     configuration = {
-        "hyperparameters": HYPERPARAMETERS,
-        "selected_frames": count,
+        "hyperparameters": _selected_hyperparameters(sequence, len(selected_rows)),
+        "sequence": sequence,
+        "selection": "first consecutive associated observations; no stride",
+        "selected_frames": len(selected_rows),
         "dataset": str(root.resolve()),
+        "dataset_provenance": sequence_identity
+        or {"status": "unverified direct runner input"},
         "device": "CPU",
         "gpu": "not used",
     }
     process = psutil.Process()
     with Run(run_root, repo, configuration) as run:
-        with run.measure("backend_load", frames=0):
-            engine = CPUOdometry() if engine is None else engine
         for name in ("rgb.txt", "depth.txt"):
             copy_checked(root / name, run.path / "input/observations" / name)
         rows, counts = dataset.associations(run.path / "input/observations", count)
+        if rows != selected_rows or counts != selected_counts:
+            raise ValueError("Dataset associations changed after run configuration")
         write_json(
             run.path / "output/associations.json", {"rows": rows, "counts": counts}
         )
+        with run.measure("backend_load", frames=0):
+            engine = CPUOdometry() if engine is None else engine
         records = tracking.track(
             _observations(root, rows, run), engine, run, origin_namespace=run.path.name
         )
@@ -194,6 +230,94 @@ def execute(root: Path, run_root: Path, count: int = 30, engine=None) -> Path:
     return run.path
 
 
+def _archive_provenance(root: Path, repo: Path) -> dict[str, str]:
+    known_sequences = {
+        "rgbd_dataset_freiburg1_xyz": (
+            Path("data/tum/rgbd_dataset_freiburg1_xyz"),
+            Path("data/archives/rgbd_dataset_freiburg1_xyz.tgz.json"),
+            Path("data/tum/rgbd_dataset_freiburg1_xyz/provenance.json"),
+            "rgbd_dataset_freiburg1_xyz.tgz",
+        ),
+        "rgbd_dataset_freiburg1_desk": (
+            Path("data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk"),
+            Path("data/archives/rgbd_dataset_freiburg1_desk.tgz.json"),
+            Path("data/tum/rgbd_dataset_freiburg1_desk/EXTRACTION.json"),
+            "rgbd_dataset_freiburg1_desk.tgz",
+        ),
+    }
+    selected_root = root.resolve(strict=True)
+    for sequence, (
+        relative_root,
+        relative_acquisition_receipt,
+        relative_secondary_receipt,
+        archive_name,
+    ) in known_sequences.items():
+        expected_root = (repo / relative_root).resolve()
+        if selected_root != expected_root:
+            continue
+        acquisition_path = repo / relative_acquisition_receipt
+        secondary_path = repo / relative_secondary_receipt
+        acquisition = json.loads(acquisition_path.read_text(encoding="utf-8"))
+        secondary = json.loads(secondary_path.read_text(encoding="utf-8"))
+        if not isinstance(acquisition, dict) or not isinstance(secondary, dict):
+            raise TypeError("Dataset receipts must contain JSON objects")
+        declared_sha256 = acquisition.get("local_sha256")
+        declared_bytes = acquisition.get("bytes", acquisition.get("size_bytes"))
+        secondary_sha256 = secondary.get("local_sha256")
+        if (
+            not isinstance(declared_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", declared_sha256)
+            or type(declared_bytes) is not int
+            or declared_bytes < 1
+            or not isinstance(secondary_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", secondary_sha256)
+        ):
+            raise ValueError("Dataset receipt has invalid hash or byte-count fields")
+        official_url = "https://cvg.cit.tum.de/rgbd/dataset/freiburg1/" + archive_name
+        resolved_url = (
+            "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg1/" + archive_name
+        )
+        archive_path = repo / "data/archives" / archive_name
+        actual_bytes = archive_path.stat().st_size
+        actual_sha256 = sha256(archive_path)
+        if sequence == "rgbd_dataset_freiburg1_xyz":
+            secondary_matches = secondary.get("source_url") == official_url
+            secondary_bytes = secondary.get("size_bytes")
+        else:
+            secondary_matches = (
+                secondary.get("archive") == archive_name
+                and secondary.get("compressed_bytes") == declared_bytes
+            )
+            secondary_bytes = secondary.get("compressed_bytes")
+        if (
+            acquisition.get("source_url") != official_url
+            or acquisition.get("resolved_url") != resolved_url
+            or actual_bytes != declared_bytes
+            or actual_sha256 != declared_sha256
+            or not secondary_matches
+            or secondary_sha256 != actual_sha256
+            or type(secondary_bytes) is not int
+            or secondary_bytes != actual_bytes
+        ):
+            raise ValueError("Dataset archive and acquisition receipts do not match")
+        return {
+            "status": (
+                "archive provenance checked; completed runs hash selected inputs "
+                "in the run manifest"
+            ),
+            "sequence": sequence,
+            "acquisition_receipt": relative_acquisition_receipt.as_posix(),
+            "acquisition_receipt_sha256": sha256(acquisition_path),
+            "secondary_receipt": relative_secondary_receipt.as_posix(),
+            "secondary_receipt_sha256": sha256(secondary_path),
+            "archive_bytes": str(actual_bytes),
+            "archive_sha256": actual_sha256,
+        }
+    raise ValueError(
+        "Dataset must use one of the configured local Freiburg1 data paths"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, required=True)
@@ -203,11 +327,19 @@ def main() -> None:
     )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    if args.frames != 30 or args.dataset.name != "rgbd_dataset_freiburg1_xyz":
-        parser.error(
-            "Current authorized development trial is first 30 Freiburg1 xyz frames"
-        )
-    path = execute(args.dataset, args.runs, args.frames)
+    if args.frames < 1:
+        parser.error("--frames must be a positive integer")
+    repo = Path(__file__).resolve().parents[3]
+    try:
+        sequence_identity = _archive_provenance(args.dataset, repo)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
+        parser.error(str(error))
+    path = execute(
+        args.dataset,
+        args.runs,
+        args.frames,
+        sequence_identity=sequence_identity,
+    )
     LOGGER.info("Review: %s", path / "review.html")
     LOGGER.info("Metrics: %s", path / "output/metrics.json")
     LOGGER.info("Timing: %s", path / "metadata/timing.json")
