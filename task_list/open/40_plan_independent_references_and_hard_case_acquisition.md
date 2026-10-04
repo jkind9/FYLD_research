@@ -54,7 +54,21 @@ Proposed comparison: First inventory existing references, independence and metad
 
 Necessary data/reference: Owner access to objects/room, capture permission, calibrated sensors or verified existing recording, timestamps/depth lineage, independent instrument/surface reference, human annotation/review labour. Apple LiDAR or outdoor driving acquisition is optional separate Task37/38 decision. Preserve Task13 hold-out and frozen settings.
 
-Measurements: Reference coverage matrix, identity certainty/disagreement, masks usable for formal scoring, instrument uncertainty, coordinate/time consistency, independent session/view coverage, acquisition costs and exact unavailable cases. No experiment accuracy result is claimed by the plan.
+### Owner inputs before the first reference-backed comparison
+
+The current six-frame TUM desk set already supplies a white-cup look-away/return case and two similar-looking monitor enclosures that are distinct in the inspected views. It is one previously inspected session. Its identity labels are provisional, its polygon masks are coarse, and it has no surveyed object centre or physical-size reference. Reuse those cases only for descriptive checks until a human reviews the labels; do not score mask accuracy or physical-position error from them.
+
+For a new controlled scene, the owner needs to provide:
+
+1. **Scene access and identity decisions.** Choose stationary objects the owner can inspect, including one object to revisit and a similar-looking but distinct neighbour. Record which objects are physically identical, distinct or genuinely ambiguous. Keep object identity separate from the object's measured location if it is moved.
+2. **A physical coordinate reference and frame link.** Mark a stable origin and axes using visible room or table edges. For each stationary object, measure a defined physical anchor such as the centre of its support footprint relative to that origin. Record the measurement instrument, units, displayed resolution, calibration/check information, repeated readings and a justified uncertainty that includes known instrument and setup limits. Record the reference frame ID, axis direction and transform into the method's world frame, including the transform source and uncertainty. Determine this transform from independently measured control data that is not used as a scored object anchor. If no independent frame link is available, mark absolute position error unavailable and report only the relative or repeatability measures that remain valid; do not use the phone's own map as physical truth.
+3. **Observed dimensions.** Measure the dimensions that are fully visible and name the endpoints used. Record length, width and height separately. Mark a dimension unavailable when its endpoints or surfaces cannot be independently measured; do not call a partial view the object's full size.
+4. **Human image references.** Review instance identities in the source RGB images without looking at model predictions. Draw a per-instance foreground mask for frames used in mask scoring. Record visibility, occlusion and ambiguity; preserve reviewer disagreements instead of forcing a label. Keep these evaluator annotations separate from method inputs.
+5. **Independent capture sessions.** After the Redmi's capabilities are known, repeat the static scene from translated viewpoints in separately started sessions. Keep each session intact. If any setting or calibration is selected from data, reserve separate sessions for enrollment, validation and held-out evaluation; never use the held-out session to choose settings. The already inspected TUM session can remain a development/reference control, but it cannot count as a blind held-out session. Include a look-away/return, co-visible similar neighbours, an occlusion and changed object orientation where available. Confirm the number of sessions and captures before acquisition without splitting adjacent frames across partitions.
+
+The minimum owner-supplied physical measurements are therefore an independently measured anchor and observable dimensions for each chosen object, with instrument details and uncertainty, plus an independently justified transform from the survey frame to the method frame if absolute position error is required. The capture protocol does not set a frame count, accuracy threshold or acceptance tolerance; those remain owner decisions before numerical comparison.
+
+Measurements: Reference coverage matrix, identity certainty/disagreement, masks usable for formal scoring, instrument uncertainty, survey-to-method frame transform and its uncertainty, registration versus scored-anchor separation, coordinate/time consistency, independent session/view coverage, acquisition costs and exact unavailable cases. No experiment accuracy result is claimed by the plan.
 
 Dependencies: None for research/design; acquisition/execution still require authorisation. Completed controls remain historical evidence, not reopened work. Task16 broad-protocol approval and new settings/model/data permissions remain separate prerequisites where relevant.
 
@@ -81,7 +95,7 @@ hyperparameters n/a: planning only; no values selected or run. Before numerical 
 
 ## Verification
 
-Planned contract: Every proposed score has a compatible independent reference and declared uncertainty or is explicitly unavailable; co-visible/disjoint identical cases are separately labelled; no derived method estimate is reused as its own truth; Task13 inputs/settings remain untouched.
+Planned contract: Every proposed score has a compatible independent reference and declared uncertainty or is explicitly unavailable; absolute-position scoring has a recorded independent survey-to-method frame transform whose control targets are excluded from scored object anchors; validation and held-out sessions are separate whenever settings are selected from data; co-visible/disjoint identical cases are separately labelled; no derived method estimate is reused as its own truth; Task13 inputs/settings remain untouched.
 
 Before: 6 provisional frames; 0 independent desk physical-centre references. After: no new measurement yet. Provide primary-source traceability, explicit acquisition gaps and a reviewable decision; no runtime result is implied.
 
@@ -93,10 +107,10 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 |---|---|
 | Closing commit | Not started; plan created during Task30 |
 | Files changed | Task file only; future scope proposed |
-| Test status | No implementation tests or experiment executed |
+| Test status | Plan lint passed; fresh-context plan review recorded PASS on 2026-10-04. No implementation tests or experiment executed. |
 | Before measurement | 6 provisional frames; 0 independent desk physical-centre references |
 | After measurement | No new experimental result |
 | Delta | 0 executed comparisons |
-| Decision-gate outcome | Proposed; review/settings/references/acquisition authorisation outstanding |
+| Decision-gate outcome | Plan review passed. Owner decision, reference measurements, session acquisition and any numerical settings remain outstanding; no acquisition or comparison is authorised. |
 
 still open because the investigation and its reference/decision requirements are not complete.

@@ -113,10 +113,10 @@ Task30 checks plan completeness and board consistency only. This HIGH/stateful p
 |---|---|
 | Closing commit | Not started; plan created during Task30 |
 | Files changed | Task file only; future scope proposed |
-| Test status | No implementation tests or experiment executed |
+| Test status | Task-plan lint passed; fresh-context plan review recorded PASS on 2026-10-04. No implementation tests or experiment executed. |
 | Before measurement | 90 book proposals unresolved outside gate; 0 evaluated provisional-birth comparisons |
 | After measurement | No new experimental result |
 | Delta | 0 executed comparisons |
-| Decision-gate outcome | Proposed; review/settings/references/acquisition authorisation outstanding |
+| Decision-gate outcome | Plan review passed; comparison not authorised. Tasks16, 21 and 22 remain pending review; Task40 has no approved independent reference acquisition or scoring cases. Owner approval for the bounded comparison and schema migration is still required. Confirm any new thresholds or settings before numerical scoring. |
 
-still open because the investigation and its reference/decision requirements are not complete.
+still open because the comparison has no owner authorisation or independent scoring cases, and Tasks16, 21 and 22 remain in pending review.
