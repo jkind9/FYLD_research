@@ -15,14 +15,28 @@ def build_review(path: Path, metrics: dict, frames: list[dict]) -> None:
         points = np.array([p for frame in scene["frames"] for p in frame["points"]])
         colours = np.array([c for frame in scene["frames"] for c in frame["colours"]])
         _cloud_preview(path / "debug/surface.png", points, colours)
+    depth_legends = {
+        record["path"]: record
+        for record in scene["roles"]
+        if record.get("path", "").endswith("/depth_metres.png")
+    }
     rows = []
     for frame in frames:
         key = html.escape(frame["frame_id"])
+        depth_path = f"debug/{key}/depth_metres.png"
+        depth_legend = depth_legends[depth_path]
+        valid_pixels = depth_legend["total_pixels"] - depth_legend["missing_pixels"]
         rows.append(
             f'<article><h2>Frame {key}: {frame["points"]:,} observed points</h2>'
             f"<p>Observed input: colour. Ground truth: synthetic depth. Evaluated output: distance.</p>"
+            f"<p>Depth validity mask: white means valid depth; black means missing depth. "
+            f"This is not an object mask. {valid_pixels:,} valid, "
+            f"{depth_legend['missing_pixels']:,} missing of "
+            f"{depth_legend['total_pixels']:,} pixels.</p>"
             f'<img src="input/{key}/rgb.png" alt="Observed input RGB frame {key}">'
             f'<img src="debug/{key}/depth_metres.png" alt="Ground truth synthetic depth in metres">'
+            f'<img src="debug/{key}/{html.escape(depth_legend["valid_mask"])}" '
+            f'alt="Depth validity mask for frame {key}: white valid, black missing">'
             f'<img src="debug/{key}/distance.png" alt="Distance to reference in metres">'
             f'<p><a href="debug/{key}/depth_metres.json">Depth colour scale</a> · '
             f'<a href="debug/{key}/legends.json">Distance scale</a> · '
@@ -66,6 +80,9 @@ table{{border-collapse:collapse}} td,th{{padding:10px;border:1px solid #bbb;text
 </style><h1>Surface built from supplied depth and camera poses</h1>
 <p>This CPU baseline accumulates observations as coloured points. It does not estimate camera
 motion, predict depth, merge duplicates or fill holes. Each file retains its source frame and pixel.</p>
+<h2>Interactive accumulated point surface</h2>
+<iframe title="Interactive 3D point surface" src="viewer.html" loading="lazy"
+style="width:100%;height:720px;border:1px solid #99a8b8"></iframe>
 {control_note}
 <p><a href="viewer.html">Open labelled interactive 3D point surface</a> · <a href="metadata/artifact_roles.json">Artifact roles</a></p>
 <h2>Evaluated output: accumulated point surface</h2><img style="width:80%" src="debug/surface.png" alt="Evaluated output: point surface in reference coordinates">

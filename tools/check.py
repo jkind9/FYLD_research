@@ -26,6 +26,12 @@ def main() -> None:
         "experiments/datasets/tests",
         "experiments/04_surface_reconstruction/tests",
         "experiments/03_camera_pose_estimation/tests",
+        "experiments/06_object_recognition/shared/tests",
+        "experiments/06_object_recognition/datasets/tests",
+        "experiments/06_object_recognition/experiments/01_detection/tests",
+        "experiments/06_object_recognition/experiments/02_segmentation/tests",
+        "experiments/06_object_recognition/experiments/03_appearance/tests",
+        "experiments/06_object_recognition/experiments/04_geometry_identity/tests",
     ]
     command = [
         sys.executable,

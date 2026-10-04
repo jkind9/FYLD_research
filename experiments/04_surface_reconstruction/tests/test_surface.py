@@ -423,6 +423,14 @@ def test_run_complete_inputs_scores_and_tampering(dataset, tmp_path):
     index = json.loads((path / "output/surface.json").read_text())
     assert [s["frame_id"] for s in index["shards"]] == ["1", "2"]
     assert (path / "review.html").is_file()
+    review = (path / "review.html").read_text(encoding="utf-8")
+    assert '<iframe title="Interactive 3D point surface" src="viewer.html"' in review
+    assert "1 valid, 1 missing of 2 pixels" in review
+    assert 'src="debug/1/depth_metres_valid.png"' in review
+    assert (
+        "white means valid depth; black means missing depth. This is not an object mask."
+        in review
+    )
     (path / "output/metrics.json").write_text("{}")
     with pytest.raises(ValueError):
         verify_run(path)

@@ -2,6 +2,7 @@
 
 import html
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -135,16 +136,26 @@ def depth_preview(
     return result
 
 
-def write_viewer(root: Path, scene: dict) -> None:
+def render_viewer(scene: dict) -> str:
+    """Render inline scene and drawing assets without writing run artifacts."""
     payload = (
         json.dumps(scene, allow_nan=False)
         .replace("<", "\\u003c")
         .replace("&", "\\u0026")
     )
     template = Path(__file__).with_name("viewer.html").read_text(encoding="utf-8")
-    page = template.replace("__TITLE__", html.escape(scene["title"]))
-    page = page.replace("__SCENE__", payload)
-    page = page.replace("__SCRIPT__", Path(__file__).with_name("viewer.js").read_text())
+    replacements = {
+        "__TITLE__": html.escape(scene["title"]),
+        "__SCENE__": payload,
+        "__SCRIPT__": Path(__file__).with_name("viewer.js").read_text(encoding="utf-8"),
+    }
+    return re.sub(
+        r"__(?:TITLE|SCENE|SCRIPT)__", lambda match: replacements[match[0]], template
+    )
+
+
+def write_viewer(root: Path, scene: dict) -> None:
+    page = render_viewer(scene)
     write_json(root / "debug/scene.json", scene)
     (root / "viewer.html").write_text(page, encoding="utf-8")
     import shutil

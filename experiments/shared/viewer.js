@@ -8,7 +8,7 @@
   const segment = document.getElementById('segment');
   const reference = document.getElementById('reference');
   reference.checked = !scene.reference_points;
-  let state = {yaw: -0.55, pitch: -0.25, zoom: 1};
+  let state = {yaw: -0.55, pitch: -0.25, zoom: 1, panX: 0, panY: 0};
   let dragging = null;
   const frames = scene.frames;
   slider.max = Math.max(0, frames.length - 1);
@@ -37,7 +37,7 @@
     const c = Math.cos(state.pitch)*y - Math.sin(state.pitch)*b;
     const d = Math.sin(state.pitch)*y + Math.cos(state.pitch)*b;
     const scale = 440*state.zoom/span;
-    return [canvas.width/2+a*scale, canvas.height/2-c*scale, d];
+    return [canvas.width/2+state.panX+a*scale, canvas.height/2+state.panY-c*scale, d];
   }
   function line(a,b,colour,width=2) {
     const p=project(a),q=project(b); ctx.strokeStyle=colour;ctx.lineWidth=width;
@@ -81,11 +81,12 @@
   slider.addEventListener('input', () => {const f=frames[Number(slider.value)];if(f && f.segment!==null) segment.value=f.segment;draw();});
   segment.addEventListener('change',draw);reference.addEventListener('change',draw);
   ['previous','next'].forEach(id => document.getElementById(id).addEventListener('click',() => {slider.value=Math.min(frames.length-1,Math.max(0,Number(slider.value)+(id==='next'?1:-1)));slider.dispatchEvent(new Event('input'));}));
-  document.getElementById('reset').addEventListener('click',() => {state={yaw:-.55,pitch:-.25,zoom:1};draw();});
-  canvas.addEventListener('pointerdown',e=>{dragging=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId);});
-  canvas.addEventListener('pointermove',e=>{if(!dragging)return;state={...state,yaw:state.yaw+(e.clientX-dragging[0])*.008,pitch:Math.max(-1.5,Math.min(1.5,state.pitch+(e.clientY-dragging[1])*.008))};dragging=[e.clientX,e.clientY];draw();});
+  document.getElementById('reset').addEventListener('click',() => {state={yaw:-.55,pitch:-.25,zoom:1,panX:0,panY:0};draw();});
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  canvas.addEventListener('pointerdown',e=>{if(![0,1,2].includes(e.button))return;dragging={x:e.clientX,y:e.clientY,mode:e.button===0&&!e.shiftKey?'orbit':'pan'};canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-dragging.x,dy=e.clientY-dragging.y;if(dragging.mode==='pan'){const bounds=canvas.getBoundingClientRect();state={...state,panX:state.panX+dx*canvas.width/bounds.width,panY:state.panY+dy*canvas.height/bounds.height};}else{state={...state,yaw:state.yaw+dx*.008,pitch:Math.max(-1.5,Math.min(1.5,state.pitch+dy*.008))};}dragging={...dragging,x:e.clientX,y:e.clientY};draw();});
   canvas.addEventListener('pointerup',()=>{dragging=null;});
   canvas.addEventListener('wheel',e=>{e.preventDefault();state={...state,zoom:Math.max(.2,Math.min(10,state.zoom*Math.exp(-e.deltaY*.001)))};draw();},{passive:false});
-  canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();state={...state,yaw:state.yaw+(e.key==='ArrowLeft'?-.1:e.key==='ArrowRight'?.1:0),pitch:state.pitch+(e.key==='ArrowUp'?-.1:e.key==='ArrowDown'?.1:0)};draw();});
+  canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();if(e.shiftKey){state={...state,panX:state.panX+(e.key==='ArrowLeft'?24:e.key==='ArrowRight'?-24:0),panY:state.panY+(e.key==='ArrowUp'?24:e.key==='ArrowDown'?-24:0)};}else{state={...state,yaw:state.yaw+(e.key==='ArrowLeft'?-.1:e.key==='ArrowRight'?.1:0),pitch:state.pitch+(e.key==='ArrowUp'?-.1:e.key==='ArrowDown'?.1:0)};}draw();});
   draw();
 })();
