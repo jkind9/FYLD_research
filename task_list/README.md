@@ -14,7 +14,7 @@ This board separates measured controls and bounded proofs of concept from untest
 | [05: tracking baseline](closed/05_evaluate_tracking_with_supplied_benchmark_depth.md) | Closed baseline | Thirty TUM observations; 6.93 mm camera-position error and 2.14 image pairs/s |
 | [06: recovered research](closed/06_recover_interrupted_research_and_review_current_or.md) | Closed | Original research and source corrections preserved |
 | [07: mobile mapping products](closed/07_review_mobile_stereo_mapping_products_against_the_.md) | Closed | Product evidence and map-rate/depth-rate limits separated |
-| [08: phone feasibility](open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Open, waiting for devices | WSL arm64 packaging control exists; cameras/calibration/capture on both phones untested |
+| [08: phone feasibility](open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Open, awaiting Redmi run | WSL smoke APK and native Camera2 APK handoff are verified; Redmi capability/capture checks remain untested, and Samsung availability is unconfirmed |
 | [09: inventory umbrella](open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Open | Checked persistence plus bounded child trials; independent inventory and wider cases remain |
 | [10: repository publication](closed/10_prepare_research_repository_and_publish_initial_main.md) | Closed | Initial main snapshot and publication exclusions recorded |
 | [11: geometry review](closed/11_explain_geometry_control_outputs_and_show_supplied.md) | Closed | Explained supplied-input/source-coordinate views |
@@ -69,7 +69,7 @@ Task09 retains the inventory objective and checked-store history. Tasks31-35 own
 6. **Task35 sequential error/fusion.** Perturb one stage at a time, then combine; compare individual and growing estimates. Independent measurement lineage matters more than frame count. Real pose-correction comparisons wait for Task13/25 separately.
 7. **Task36 representation controls.** Denser display then fixed-depth/pose patches/mesh; texture/photogrammetry/splat/NeRF later with separate geometry/visual references and resource approval. Task23 remains the current review-controls owner.
 
-Tasks37 and 38 are independent research/selection streams, followed by separately authorised Android/Apple or KITTI/nuScenes acquisitions if justified. Task08 phone work needs connected devices; Task24 build recovery needs its own continuation. Task39 requires later review of user journeys/data contracts before a separate implementation task. No task is started merely because it appears first here.
+Tasks37 and 38 are independent research/selection streams, followed by separately authorised Android/Apple or KITTI/nuScenes acquisitions if justified. Task08 has a verified native Camera2 APK handoff and needs the Redmi connected for phone evidence; Samsung availability is unconfirmed. A browser preview can check basic streaming but cannot measure native concurrent-camera support. Task24's clean dependency and container build follow-up remains in pending review. Task39 requires later review of user journeys/data contracts before a separate implementation task. No task is started merely because it appears first here.
 
 The adapter excludes depth at/beyond 4 m. Indoor controls do not justify outdoor gates or accuracy. Acceptance thresholds, sample sizes, instrument tolerances and model settings remain owner decisions before execution, not numbers invented during documentation.
 

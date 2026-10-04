@@ -2,7 +2,7 @@
 
 This folder (experiment 01) is layer 1 of the five-layer pipeline described in the [root README](../../README.md). It answers: **can a phone record what the other layers need, and get it to wherever those layers run?** It does not compute depth, camera position or objects. It supplies the raw material for all of them, so its mistakes, such as wrong timestamps or missing calibration, show up as errors in every later layer.
 
-**Status:** the Android build toolchain works and a packaging-only test app has been exported to [mobile deployment/](../../mobile%20deployment/). No camera code exists yet, and neither phone has recorded anything. Other layers use public benchmark recordings as a stand-in.
+**Status:** the WSL Android build route produced a verified arm64 print-only smoke APK and a separate native Camera2 APK handoff. The Redmi app has not been installed or run, so no phone capture has been measured. Other layers use public benchmark recordings as a stand-in.
 
 ## How capture works
 
@@ -35,7 +35,7 @@ In the **hosted** route the phone only records and uploads; everything else runs
 | ARCore recorder app (Kotlin) using [Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) | Both | Images, IMU, ARCore camera position and depth in one replayable file | Recommended first recorder. Gives layers 2 and 3 a phone-made stand-in straight away. |
 | [Camera2](https://developer.android.com/media/camera/camera2) or [CameraX](https://developer.android.com/media/camera/camerax) native app | Both | Full-resolution frames, manual focus and exposure, choice of physical lens, two-lens attempts | Needed for stereo and for high-resolution captures. |
 | [OpenCamera Sensors](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors) | Both | Research recorder that saves video with synchronised IMU readings | Existing open-source option to compare against; check its licence and current Android support. |
-| [python-for-android](https://github.com/kivy/python-for-android) app (current build route) | On the phone | Python test sequencing and result saving, with camera access through a Java bridge | Build toolchain verified; only a packaging test app exists. [Chaquopy](https://chaquo.com/chaquopy/doc/current/android.html) is the main alternative for Python inside a normal Android app. |
+| [python-for-android](https://github.com/kivy/python-for-android) app with a native Java Camera2 Activity (current build route) | On the phone | Camera capability checks, single-camera control, advertised concurrent-set attempts and ZIP export | Warm-built arm64 APK handed off; phone run and the clean/container builds remain outstanding. [Chaquopy](https://chaquo.com/chaquopy/doc/current/android.html) is the main alternative for Python inside a normal Android app. |
 | Upload to a server, for example behind FYLD's existing [BentoML](https://docs.bentoml.com/) serving | Hosted | Resumable upload of recordings with hashes | Keep capture time and upload time separate. |
 | Live streaming ([WebRTC](https://webrtc.org/), RTSP) | Hosted | Frames arrive while filming | Later condition; measure loss and delay separately from algorithm time. |
 | Calibration with [Kalibr](https://github.com/ethz-asl/kalibr) or OpenCV ChArUco boards | Setup step | Measured lens and lens-to-IMU calibration for each phone | Checks the calibration the phone reports. |
@@ -69,11 +69,11 @@ The sections below are the detailed experiment record: the test plan, the Androi
 
 Can a phone provide camera observations that another component can use, from a saved recording or a live connection? This piece owns obtaining and delivering observations. It does not estimate depth or camera movement.
 
-The available devices are a Samsung S23 and a Redmi Note 11 Pro. Record the Redmi's exact model and 4G/5G variant before testing. Installing a native test application is acceptable. Neither device is assumed to expose a usable simultaneous rear-camera pair.
+The confirmed phone is a Redmi Note 11 Pro 4G, model 2201116TG, running Android 13 with 6 GB RAM and a Helio G96 processor. It is available but has not been connected for testing. The Samsung S23 is not confirmed available. Installing the native test application is acceptable. Neither phone is assumed to expose a usable simultaneous rear-camera pair.
 
 ## Development inputs and references
 
-Camera capture is developed against recordings and capability reports from the Samsung S23 and Redmi Note 11 Pro. These recordings do not exist yet; collecting them is part of this experiment. A public driving dataset cannot establish which camera combinations, timing or calibration these phones expose.
+Camera capture needs recordings and capability reports from the Redmi Note 11 Pro; they do not exist yet. The Samsung S23 is a separate possible test device, but its availability is unconfirmed. A public driving dataset cannot establish which camera combinations, timing or calibration the Redmi exposes.
 
 Delivery can be developed independently by replaying the acquired Middlebury quarter-resolution image pairs under `data/middlebury/dataset/MiddEval3/trainingQ/`. Compare delivered files and frame identifiers with the originals, including their file hashes, ordering and loss records. These files test delivery; their lack of capture timestamps does not test live camera synchronization. The replay bundle and interruption tests still need to be implemented. [Acquisition records](../../data/README.md).
 
@@ -89,7 +89,7 @@ Calibration describes focal lengths and principal point in pixels, distortion, a
 
 The user selected [python-for-android](https://github.com/kivy/python-for-android) as the planned packaging route. It can bundle Python and its dependencies into an installable Android package (APK). The first deliverable is a small foreground test app that runs Python experiments and saves results, rather than the full mapping pipeline.
 
-Use Python for test sequencing, result recording and optional delivery. Access Android camera APIs through the Java bridge [PyJNIus](https://python-for-android.readthedocs.io/en/latest/apis.html), adding a small Java helper if camera callbacks or lifecycle handling require it. This bridge is a proposed implementation route, not a tested dual-camera wrapper. Packaging Python does not bypass the handset's camera restrictions.
+Use Python for workstation build checks, test sequencing and result review. The current camera prototype uses a custom Java Activity at `native/camera/java/org/fyld/capture/CameraActivity.java` and calls Camera2 directly. Its pinned profile is `build/camera-profile.json`; it adds only camera permission and does not include PyJNIus or ARCore. It now has a verified arm64 APK, but it has not yet been installed or run on a phone. Packaging Python does not bypass the handset's camera restrictions.
 
 The first app should enumerate camera identities and capabilities, save that report, obtain camera permission, record a single-camera control and then attempt a supported pair. Save original images and capture metadata locally before adding stream delivery. If using a small Kivy interface, keep it limited to starting tests, showing status and exporting results. Native libraries such as OpenCV require a supported cross-compilation recipe; verify dependency support before adding them. The backend receiver can use desktop OpenCV independently.
 
@@ -125,6 +125,8 @@ A minimal native Kotlin/Java test app based on [Android's camera APIs](https://d
 OpenCV receiving is a separate choice. Two readable stream URLs can feed separate desktop readers, but do not establish synchronization, calibration or physical-camera availability. The Android/native bridge question must be verified on the actual phones before committing to a streaming implementation.
 
 ### Capture and delivery controls
+
+A local browser page can provide an earlier check of camera permission, preview, lens selection and sending video to a workstation. Camera access in the browser requires a secure page; a phone opening a workstation's LAN address needs HTTPS with a certificate the phone trusts. The page can stream through WebRTC or send recorded chunks to a local service. This does not report Camera2 concurrent-camera sets or the sensor and calibration fields required here, so it cannot establish stereo feasibility. See [MDN's camera API](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) for the browser security requirement and [CameraManager](https://developer.android.com/reference/android/hardware/camera2/CameraManager#getConcurrentCameraIds()) for native concurrent-camera support.
 
 1. Identify both phones and inspect accessible camera combinations through native APIs.
 2. Save a single-camera control recording. Attempt simultaneous rear-camera capture.
@@ -186,5 +188,7 @@ The exact verifier commands and their outputs are preserved in the handoff's `ve
 The local offline handoff is in `mobile deployment/smoke_20261004_reviewed/`. It contains the APK, `verification.json` and installation notes. The directory is ignored by Git so generated APKs and signing material are not committed. Transfer the APK to the handset, install it, and open it to check the package launch; this is only a packaging smoke test, not a camera test.
 
 The separate fresh dependency build, limited to already-cached downloads, stopped because the `sdl2_image` recipe lacks its JPEG source archive and attempted a network clone. The build blocked network access, so no source was downloaded. Docker was available, but no local image matched Ubuntu 24.04.4, Python 3.12.3 and Java 17.0.20.1; no image was downloaded and no container build was claimed. Task24 remains in review with the container route as an explicit follow-up. Task08 can use the verified cached route meanwhile.
+
+Task08's native Camera2 APK was built from the pinned Java source with that cached WSL toolchain. The offline bundle is `mobile deployment/camera_20261004_camera_redmi_run6/`. Its APK is `unnamed_dist_1-debug.apk`, SHA-256 `35e2c420e38d3b857747ac255a1fd7f81791959c3e44d0a99911913af149c29a`; the receipt verifies package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, the CAMERA permission and launcher `org.fyld.capture.CameraActivity`. This is a warm cached build, not a clean dependency or container build. The Redmi was not connected during packaging; APK installation, capability results and capture/export still need handset verification. Transfer the APK from that bundle by USB or email when preparing the device run.
 
 All 110 Task24 tests passed in WSL. Branch coverage across the five build modules was 82%, and Ruff passed. Run project tests through `python -B tools/check.py ...`; it sends pytest scratch, coverage data and tool caches to a unique system temporary directory. `pytest.ini` disables pytest's repository cache and excludes known scratch folder names from test discovery. `.gitignore` also catches accidental pytest scratch folders. The separate Task13 scratch directory is retained as historical evidence.
