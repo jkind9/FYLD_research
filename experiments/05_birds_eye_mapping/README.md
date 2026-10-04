@@ -1,45 +1,83 @@
-# Experiment 05: bird's-eye mapping
+# Layer 4b: bird's-eye map and area measurement
 
-## The piece we are testing
+This folder is part of layer 4, environment visualisation, in the five-layer pipeline described in the [root README](../../README.md). The other part of layer 4, building the 3D surface, lives in [experiments/04_surface_reconstruction](../04_surface_reconstruction/README.md).
 
-Can supplied three-dimensional geometry produce a top-down representation preserving dimensions, heights and unknown regions? This piece owns projection and interpretation. It does not reconstruct surfaces or estimate camera poses.
+This folder answers: **given a 3D model of the site, can we produce a top-down map that gives correct heights, boundaries and areas in metres, and shows clearly what was never seen?** This is where the brief's "estimate the size of the worksite" becomes a number.
 
-Start with analytically defined known geometry, generated independently of any reconstruction implementation. This needs no phone or preceding piece. A projection error should be diagnosable independently of capture and tracking. Experiment 04's surface can later replace the fixture through the same agreement. See the [dataset and fixture plan](../datasets/README.md).
+**Status:** planned. No code or test shapes exist yet.
 
-## Development fixtures and reference
+## How a bird's-eye map works
 
-Develop against independently specified shapes: a plane, steps, a rectangular depression, holes and overhanging surfaces. Their definitions must provide expected dimensions, heights, areas and observation masks separately from the projection implementation. Record dimensions, coordinate frames and grid settings before generating them. These fixtures do not exist yet; creating them with independent expected answers is the first implementation step. No public dataset download is needed.
+1. **Choose the ground.** Decide which way is up and where the reference plane is. "Up" can come from gravity measured by the phone's motion sensors (ARCore already reports a gravity-aligned world), from fitting a plane to the floor points, or from a person declaring it. Record which was used, because a tilted plane makes every height wrong.
+2. **Lay a grid over the ground.** Pick a cell size, such as 5 cm. Every 3D point falls into one cell when viewed from above.
+3. **Summarise each cell.** Choose a rule: the highest surface in the cell, the lowest, or the surfaces within a height band (a slice). Record the rule. The cell also keeps a count of how many observations it got.
+4. **Mark what was seen.** A cell with no points is **unknown**, not empty ground. A blank area on the map means "never filmed", never "clear" or "safe".
+5. **Measure.** Select a region and add up the area of its observed cells. Report the footprint (area on the ground), the surface area and any volume separately, and report the unknown area alongside them.
 
-The acquired ICL living-room reference point cloud at `data/icl_nuim/reference_surface/living-room.ply` is available for later realistic geometry input. Its projection does not supply independent expected map measurements, so it cannot replace the known-shape fixtures. Reconstructed ICL surfaces and phone captures are later inputs after the projection checks pass. [Available reference geometry](../../data/README.md#icl-acquisition-and-verified-contents).
+Common traps:
+- A highest-surface map hides a floor under an overhang, such as a scaffold board over a trench.
+- Area in square metres needs a 3D model in real metres. A model with arbitrary scale, as single-camera methods can produce, gives a picture, not an area.
+- Outlier points, such as a reflection, can create false walls or false holes.
 
-## Input and output agreement
+The outputs are a height map (an image where each pixel is a height), a top-down colour image (an orthographic view, with no perspective) and the observed/unknown mask, all with the cell size and the grid's position recorded.
 
-Input is geometry with declared units and frame, plus a reference plane and up direction. Record their origin: measured site control, gravity observations, fitted plane or user declaration. Unverified declarations remain visible in metadata.
+## Methods: hosted and on the phone
 
-Output is a grid or orthographic image with cell size and extents in supplied units. Preserve observed and unknown masks. Declare the height rule for each observed cell, such as highest observed surface above the plane. Optional colour and observation counts are descriptive, not confidence probabilities or evidence of free space.
+| Method | Route | What it does | Notes |
+|---|---|---|---|
+| Plane fitting with [Open3D](https://www.open3d.org/docs/0.19.0/tutorial/geometry/pointcloud.html#Plane-segmentation) (RANSAC) | Either | Finds the ground plane in a point cloud | MIT licence. The planned first step for the hosted route. |
+| Grid projection in NumPy, or [PDAL](https://pdal.io/) for large clouds | Hosted | Turns points into height maps and top-down images | Simple, inspectable code is the planned baseline. |
+| [OpenDroneMap](https://opendronemap.org/) or [COLMAP](https://colmap.github.io/) | Hosted | Builds a true top-down photo (orthomosaic) from overlapping images | Needs good overlap and an independent scale. |
+| Elevation mapping ([ANYbotics elevation_mapping](https://github.com/ANYbotics/elevation_mapping)) | Hosted or edge | Height map that carries uncertainty from the camera position | Robotics method; useful for uneven ground and trenches. |
+| [OctoMap](https://octomap.github.io/) | Hosted or edge | 3D grid that marks space as occupied, free or unknown | Keeps "never seen" separate from "empty". |
+| [ARCore planes](https://developers.google.com/ar/reference/java/com/google/ar/core/Plane) | On the phone | ARCore detects floor and wall planes live and gives each floor plane an outline | Gives a rough footprint and area on site with no server. Accuracy on these phones is unmeasured. |
+| [RTAB-Map for Android](https://github.com/introlab/rtabmap) | On the phone | Builds a live 2D occupancy map and mesh using ARCore's camera position | BSD-3 core licence. Useful for a coverage-gap view on site. |
 
-Define grid orientation, origin and coordinate-to-cell mapping. Metric dimensions and area require established metric scale. Arbitrary-scale geometry supports a visual map, not square metres.
+## Top 5 sources
 
-## Proposed steps and comparisons
+| Source | What it is | Why it matters here |
+|---|---|---|
+| [Construction progress from top-down images](../../research/sources/20_construction_orthographic_progress.md) | Research using orthographic views to track construction work | Shows top-down views are useful on real sites. Its completion results do not measure geometry accuracy. |
+| [OctoMap](https://octomap.github.io/octomap/doc/index.html) | A widely used 3D mapping library | Its occupied, free and unknown states are the model for keeping unseen areas visible. |
+| [ANYbotics elevation_mapping](https://github.com/ANYbotics/elevation_mapping) | Height mapping for walking robots | Handles uneven ground and carries position uncertainty into heights. |
+| [ARCore planes](https://developers.google.com/ar/reference/java/com/google/ar/core/Plane) | Android's live plane detection | The cheapest on-phone area estimate on both test phones. |
+| [Apple RoomPlan](../../research/sources/07_apple_roomplan.md) | Apple's room-scanning API | Shows a finished floor-plan product. It needs Apple hardware with a laser sensor, which our phones lack, and it models rooms as boxes rather than measured surfaces. |
 
-1. Project fixtures containing a plane, steps, holes, objects and overhanging surfaces.
-2. Check axes, heights, boundaries and cell assignment against known geometry.
-3. Compare highest-surface projection with explicitly labelled height slices.
-4. Vary cell size to measure detail and observed information per cell.
-5. Apply validated projection to controlled reconstruction, then repeated phone captures when available.
+## How this layer will be tested
 
-Keep activity recognition separate. Identifying completed work requires additional definitions and evidence beyond a top-down image.
+### Test shapes with known answers
 
-## Measurements, failures and decision
+The first tests use simple made-up shapes defined in advance: a flat plane, steps, a rectangular pit, holes and an overhang. Their true dimensions, heights, areas and visibility masks come from the shape definitions, written separately from the projection code. This way a bug in the projection cannot also produce the "expected" answer. Record dimensions, coordinate frames and grid settings before generating them. No download is needed.
 
-Measure height error, boundary error, dimensions, observed area and repeated-capture agreement. Report unknown area separately. Agree numeric limits for the intended first output before claiming success.
+The real ICL-NUIM living-room model at `data/icl_nuim/reference_surface/living-room.ply` can be used later as a realistic input. It cannot replace the test shapes, because its true floor areas and heights are not independently given. [ICL acquisition record](../../data/README.md#icl-acquisition-and-verified-contents). After that come reconstructed surfaces from layer 4 and then phone captures.
 
-Test empty input, invalid coordinates, wrong units, tilted reference plane, outliers and overlapping surfaces. Highest-surface views can hide a floor beneath an overhang. Blank cells mean unobserved, not clear or safe ground. Invalid-data and bounds checks must prevent misleading maps.
+### Inputs and outputs
 
-Decide which views support inspection and which explanations accompany them. An uncertain plane permits a labelled overview without established height or area accuracy.
+- **Input:** 3D geometry with declared units and coordinate frame, a reference plane and an up direction. Record where the plane and up direction came from: a measured site marker, gravity, a fitted plane or a person's declaration. Unverified choices stay visible in the output metadata.
+- **Output:** a grid or orthographic image with cell size, extent, origin and orientation in the input's units. Observed and unknown masks. The height rule used for each cell. Colour and observation counts are descriptive only; they are not confidence values or evidence of free space.
 
-## Research and reuse
+### Steps
 
-[Orthographic construction progress](../../research/sources/20_construction_orthographic_progress.md) motivates useful viewing directions; its completion result is not geometry accuracy. [RoomPlan](../../research/sources/07_apple_roomplan.md) illustrates a different indoor semantic output. [FYLD public context](../../research/sources/21_fyld_public_context.md) frames inspection needs, not thresholds.
+1. Project test shapes containing a plane, steps, holes, objects and an overhang.
+2. Check axes, heights, boundaries and cell assignment against the known shapes.
+3. Compare highest-surface maps with labelled height slices.
+4. Vary cell size and measure how detail and observed area change.
+5. Apply the checked projection to reconstructed surfaces, then to repeated phone captures.
 
-Promote projection utilities after fixture tests and interpretation rules pass. They consume geometry independently of its origin. This plan has not been executed. See the [experiment guide](../README.md).
+### Measurements and failure cases
+
+Measure height error, boundary error, dimensions, observed area and agreement between repeated captures. Always report unknown area next to measured area. Agree numeric limits for the first real output before claiming success.
+
+Test empty input, invalid coordinates, wrong units, a tilted reference plane, outliers and overlapping surfaces. Bad input must stop with a clear error rather than produce a misleading map. With an uncertain reference plane, a labelled overview is possible but heights and areas are not established.
+
+Recognising whether work is finished is a separate task. It needs its own definitions and evidence beyond a top-down image.
+
+## What can be improved
+
+- **Build the test shapes and projection first.** This layer has no measured result yet; the known-shape tests are the cheapest way to get one.
+- **Score ARCore plane areas on both phones** against a tape-measured floor. If close enough, this becomes the on-site size check.
+- **Carry uncertainty into area.** Camera drift and depth noise both blur boundaries. Report an area range, not just a single number.
+- **Handle multi-level sites**, such as trenches and stacked materials, with height slices rather than one highest surface.
+- **Combine repeated visits.** Align maps from different days only after their coordinate frames are linked by a checked transform.
+
+Projection code will move to [experiments/shared](../shared/README.md) once its tests pass, so any geometry source can use it. See the [experiment guide](../README.md) for how the layers connect.

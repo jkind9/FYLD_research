@@ -1,4 +1,67 @@
-# Experiment 04: surface reconstruction
+# Layer 4a: surface reconstruction
+
+This folder (experiment 04) is the main part of layer 4, environment visualisation, in the five-layer pipeline described in the [root README](../../README.md). It answers: **can depth images and camera positions be combined into one 3D model of the visible site that is accurate in metres?** The top-down map and area measurement built from this model live in [experiments/05_birds_eye_mapping](../05_birds_eye_mapping/README.md).
+
+This model is what the site is measured from. It is also the shared 3D space that the object layer places objects into.
+
+**Status:** a point surface built from 9 views of a synthetic room, with supplied depth and camera positions, has been measured: **7.8 mm** mean distance to the room's separate reference model, and 22.3% of the whole room covered within 5 cm. Meshes, splats and real-scene scoring are planned.
+
+## How surface reconstruction works
+
+**From pixel to point.** Each depth pixel becomes a 3D point. With the camera's focal lengths `fx, fy` and image centre `cx, cy`, a pixel at column `u`, row `v` with depth `Z` sits at `X = (u − cx)·Z/fx`, `Y = (v − cy)·Z/fy`, `Z` in the camera's own frame. The camera pose from layer 3 then moves it into the shared world frame. The [geometry check](../geometry_validation/README.md) tests exactly this step.
+
+From there, there are several ways to build a model:
+
+| Representation | How it works | Good at | Weak at |
+|---|---|---|---|
+| **Point surface** | Keep every point from every frame | Simple; every point traces back to its source pixel. The current baseline. | Repeated views pile up duplicates. Noise is not averaged. No surface between points. |
+| **Fused volume and mesh** (TSDF) | Divide space into small cubes (voxels). Each stores its distance to the nearest surface, averaged over every view that saw it. A triangle mesh is extracted where the distance is zero. | Averages noise, gives a watertight surface, standard since KinectFusion | Voxel size trades detail against memory. Smooths thin parts. Fills nothing that was never seen. |
+| **Oriented patches** (surfels) | Small discs with a position, direction and size, merged as views repeat | Light, handles corrections well | Less common tooling for export |
+| **Photogrammetry** | Find matching points across ordinary photos, solve cameras and 3D points together, then densify and texture | Needs no depth sensor; photo-real textures | Needs good overlap and texture. Has no real-world scale without an extra reference. Slow. |
+| **Gaussian splats and NeRFs** | Optimise millions of soft blobs (splats) or a neural network (NeRF) until rendered views match the photos | Very realistic views, smooth navigation | Looking right does not mean correct size. Geometry must be checked separately. Variants such as 2DGS target accurate surfaces. |
+| **Feed-forward 3D** | A network outputs 3D points for many frames in one pass (VGGT, MapAnything, Depth Anything 3) | Fast, works without calibration | Scale and accuracy must be checked against references. |
+
+**What to score.** Accuracy: how far model points are from a reference surface. Coverage: how much of the reference has a model point nearby. Report both, because a small accurate patch can hide a mostly missing room. Visual realism is scored separately from geometry. Unseen areas stay marked as unknown, never as empty.
+
+**When the camera path changes.** If layer 3 corrects its path after recognising a revisited place, every surface built from the old path must be rebuilt or marked out of date. Each model records which path version it used.
+
+## Methods: hosted and on the phone
+
+| Method | Route | What it does | Licence and notes |
+|---|---|---|---|
+| Direct point accumulation (this folder) | Either | Every valid depth pixel placed in the world | Current baseline. |
+| [Open3D TSDF integration](https://www.open3d.org/docs/0.19.0/tutorial/pipelines/rgbd_integration.html) | Hosted | Fused volume and mesh from depth and poses on CPU or GPU | MIT. Planned first fusion comparison. |
+| [nvblox](https://github.com/nvidia-isaac/nvblox) | Hosted or edge | GPU fused volume and mesh; NVIDIA reports 2.63 mesh updates per second live on a Jetson robot | Apache-2.0. The main edge-box option. |
+| [COLMAP](https://colmap.github.io/) with [OpenMVS](https://github.com/cdcseacave/openMVS) | Hosted | Photogrammetry: cameras, dense points, mesh and texture from photos | COLMAP BSD; check OpenMVS terms. Needs an independent scale. |
+| [Nerfstudio](https://docs.nerf.studio/) with [gsplat](https://github.com/nerfstudio-project/gsplat) | Hosted | Gaussian splat and NeRF training from posed images | Apache-2.0. The original Inria 3DGS code is non-commercial. |
+| [2DGS](https://github.com/hbb1/2d-gaussian-splatting) | Hosted | Splats shaped as flat discs, giving more accurate surfaces | Derived from the Inria code; check terms. |
+| [MapAnything](https://arxiv.org/abs/2509.13414), [Depth Anything 3](https://arxiv.org/abs/2511.10647) | Hosted | Feed-forward 3D points and cameras | Check checkpoint terms. |
+| ARCore depth points and planes | On the phone | Rough live point cloud plus floor and wall planes | Quick coverage and size preview on site. |
+| [RTAB-Map for Android](https://github.com/introlab/rtabmap) | On the phone | Live mesh built on ARCore's position and depth | BSD-3 core. |
+| [SuperSplat](https://github.com/playcanvas/supersplat) or a glTF viewer | Viewing on the phone | Shows a model built on the server in a phone browser | Display only; does not measure anything. |
+
+## Top 5 sources
+
+| Source | What it is | Why it matters here |
+|---|---|---|
+| [KinectFusion](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/ismar2011.pdf) | The 2011 paper that made live depth fusion standard | Explains the fused-volume method that Open3D and nvblox follow. |
+| [nvblox](https://arxiv.org/abs/2311.00626) | GPU fused mapping (ICRA 2024) | The realistic route to live meshes on an edge computer. |
+| [3D Gaussian splatting](https://arxiv.org/abs/2308.04079) | The 2023 paper behind splat scenes | The leading way to make realistic, navigable views. |
+| [2D Gaussian splatting](https://arxiv.org/abs/2403.17888) | A splat variant designed for accurate surfaces | Closes some of the gap between realistic and measurable. |
+| [COLMAP](https://colmap.github.io/) and the [project note](../../research/sources/11_colmap.md) | The standard photogrammetry toolkit | Image-only reconstruction and final camera refinement. |
+
+More background: [Open3D RGB-D note](../../research/sources/13_open3d_rgbd.md), [ICL-NUIM note](../../research/sources/18_icl_nuim.md), [ElasticFusion](https://thomaswhelan.ie/Whelan16ijrr.pdf) for patches with drift correction, and the [edge mapping products review](../../research/edge_products/README.md).
+
+## What can be improved
+
+- **Fuse, then compare.** Run Open3D TSDF on the same 9 views and compare accuracy, coverage, file size and time against the point surface.
+- **Swap in tracked camera paths.** Rebuild with layer 3's estimated path instead of the reference path. The change in error is the tracker's contribution.
+- **Get a real-scene reference.** The TUM desk replay has no reference surface. A scanned or tape-measured scene is needed before real-scene accuracy can be claimed.
+- **Compare splats and meshes fairly.** Same capture, geometry scored against the reference, realism scored on held-out views, as separate numbers.
+- **Scale up.** Run whole sequences and record memory and time growth.
+- **Export for viewing.** A simplified GLB scene for phones and headsets, kept separate from the full-detail measurement model.
+
+The sections below are the detailed experiment record.
 
 ## Implemented CPU baseline
 

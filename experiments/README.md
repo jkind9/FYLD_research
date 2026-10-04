@@ -1,4 +1,19 @@
-# Six independent scene-mapping experiments
+# Experiments: the five layers
+
+The project is built as five layers, each tested on its own with known inputs before being connected. The [root README](../README.md) explains the problem, the layers, the hosted-versus-phone options and the results in plain terms. This guide covers how the experiment folders are organised, the rules every experiment follows, and how the layers connect.
+
+| Layer | Folder | What it answers | Status |
+|---|---|---|---|
+| 🟦 1. Camera capture | [01_camera_capture_delivery](01_camera_capture_delivery/README.md) | Can a phone record what the other layers need and deliver it? | Android build works; no phone capture yet |
+| 🟪 2. Depth estimation | [02_stereo_depth](02_stereo_depth/README.md) | How far away is each pixel, in metres? | Test data ready; no method run |
+| 🟩 3. Camera position estimation | [03_camera_pose_estimation](03_camera_pose_estimation/README.md) | Where was the camera for each frame? | 30-frame trial: 6.9 mm error |
+| 🟧 4. Environment visualisation | [04_surface_reconstruction](04_surface_reconstruction/README.md) and [05_birds_eye_mapping](05_birds_eye_mapping/README.md) | What does the site look like in 3D, and how big is it? | Point surface: 7.8 mm error; top-down map planned |
+| 🟥 5. Object isolation | [06_object_recognition](06_object_recognition/README.md) | Which objects are there, where, and how many distinct ones? | Early trials and a 60-frame replay |
+| Support | [geometry_validation](geometry_validation/README.md), [shared](shared/README.md), [datasets](datasets/README.md) | Coordinate checks, shared records and run export, test data guidance | In use |
+
+Each layer README starts with a guide: how the layer works from first principles, hosted and on-phone method options with licences, its top 5 sources and what can be improved. The detailed experiment record follows.
+
+Folder numbers are experiment numbers, not layer numbers: layer 4 has two folders, so the object layer is folder 06. Work-task numbers in the records below are a third, separate numbering used by the project's task tracker.
 
 ## Implementation and inspectable runs
 
@@ -8,7 +23,7 @@ Keep mathematics, dataset handling, estimator/backend adapters and exports separ
 
 The objective is to find out whether a phone capture can produce a repeatable, measurable representation of the visible work area and identify distinct objects across repeated views. We will build and evaluate six pieces independently, then connect them. The first prototype is preserved in [the Task 00 archive](../archive/task00_prototype/README.md).
 
-The six pieces are camera capture and delivery, stereo depth, camera tracking, 3D reconstruction, bird's-eye mapping and object recognition with persistent counting. Capture and delivery share one experiment because the first practical question is whether useful camera observations can reach an experiment. Its camera tests and network tests still have separate measurements.
+The six pieces are camera capture and delivery, stereo depth, camera tracking, 3D reconstruction, bird's-eye mapping and object recognition with persistent counting. 3D reconstruction and bird's-eye mapping together make up layer 4, environment visualisation, so six experiment folders cover five layers. Capture and delivery share one experiment because the first practical question is whether useful camera observations can reach an experiment. Its camera tests and network tests still have separate measurements.
 
 ## The pieces
 
@@ -43,42 +58,58 @@ experiments/
 
 The geometry control is implemented. Stage 03 has a short CPU camera-tracking baseline; stage 04 has a supplied-input point-surface baseline. Their source, tests and local runs exist. Work-task IDs describe pieces of work, while experiment numbers describe pipeline stages. Work task 03 delivered geometry validation; work task 05 delivered the first pipeline stage 03 baseline.
 
+Each coloured block is one layer. Solid boxes work today; dashed boxes are planned. "Stand-in" and "control" mean a known-correct input from benchmark data used in place of a layer that is not built yet.
+
 ```mermaid
 flowchart TD
-    I["Benchmark or captured images, calibration and timestamps"] --> D["06 Detection: YOLO26x bounded POC"]
-    I --> Z["02 Stereo depth: data acquired; method planned"]
-    I --> C["03 Estimated camera poses: short control; full Task13 unfinished"]
-    I --> M["Optional segmentation: classical controls; learned planned"]
-    D --> M
-    I --> DEP["Supplied measured depth: exercised control"]
-    Z -.-> DEP
-    M --> G["Depth-supported camera geometry: completed control/POC"]
-    DEP --> G
-    R["Supplied poses: explicit reference control"] --> W["World observations"]
-    G --> W
-    C -.-> W
-    I --> A["06 Appearance: ZNCC/YOLO tested; ResNet50/context planned"]
-    D --> A
-    W --> ID["06 Identity association: bounded POC; uncertainty/policy planned"]
-    A --> ID
-    ID --> O["Individual observations and histories"]
-    O --> F["Object position/shape estimates: medians; calibrated fusion planned"]
-    W --> S["04 Point surfaces: measured ICL control and desk POC"]
-    S -.-> X["Patches/meshes/textures/novel-view methods: planned"]
-    S --> V["Offline review and portable outputs: completed"]
-    O --> V
-    F --> V
-    S -.-> E["05 Top-down measurements: planned"]
-    T["Temporal observations"] --> O
-    Q["Pose corrections: Task25 planned after Task13"] -.-> W
-    Q -.-> F
-    Q -.-> S
-    REF["Independent masks/identities/anchors/surfaces: partial or missing"] -.-> SCORE["Scoring: error, coverage, repeatability, association and costs"]
-    F -.-> SCORE
-    X -.-> SCORE
-    E -.-> SCORE
-    P["01 Phone capture: untested"] -.-> I
+    subgraph L1["1 · CAMERA CAPTURE"]
+        direction LR
+        c1["Phone walkthrough<br/><i>planned</i>"] ~~~ c2["Benchmark recordings<br/><b>stand-in</b>"] ~~~ c3["Delivery to edge or cloud<br/><i>planned</i>"]
+    end
+
+    subgraph L2["2 · DEPTH ESTIMATION"]
+        direction LR
+        d1["Stereo from two lenses<br/><i>planned</i>"] ~~~ d2["Phone depth API<br/><i>planned</i>"] ~~~ d3["Recorded sensor depth<br/><b>stand-in</b>"]
+    end
+
+    subgraph L3["3 · CAMERA POSITION ESTIMATION"]
+        direction LR
+        p1["Visual tracking<br/><b>6.9 mm error</b>"] ~~~ p2["Reference camera path<br/><b>control</b>"] ~~~ p3["Drift correction<br/><i>planned</i>"]
+    end
+
+    subgraph L4["4 · ENVIRONMENT VISUALISATION"]
+        direction LR
+        e1["Point surfaces<br/><b>7.8 mm error</b>"] ~~~ e2["Meshes · splats<br/><i>planned</i>"] ~~~ e3["Bird's-eye map and area<br/><i>planned</i>"]
+    end
+
+    subgraph L5["5 · OBJECT ISOLATION"]
+        direction LR
+        o1["Detection<br/><b>early trial</b>"] --> o2["Segmentation<br/><b>early trial</b>"] --> o3["Similarity<br/><b>early trial</b>"] --> o4["Tracking and counting<br/><b>early trial</b>"]
+    end
+
+    subgraph OUT["WHAT IT ANSWERS"]
+        direction LR
+        q1(["How big is the site?"]) ~~~ q2(["How many of each object?"])
+    end
+
+    L1 --> L2 --> L3 --> L4 --> L5 --> OUT
+
+    classDef default fill:#ffffff,stroke:#444,stroke-width:1.5px,color:#1a1a1a
+    classDef planned fill:#ffffff,stroke:#999,stroke-width:1.5px,stroke-dasharray:6 4,color:#666
+    classDef answer fill:#263238,stroke:#263238,color:#ffffff
+    class c1,c3,d1,d2,p3,e2,e3 planned
+    class q1,q2 answer
+    linkStyle 8,9,10 stroke:#444,stroke-width:2px
+
+    style L1 fill:#DCEBFB,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
+    style L2 fill:#E9E3F6,stroke:#5E35B1,stroke-width:2px,color:#311B92
+    style L3 fill:#DBF0EE,stroke:#00897B,stroke-width:2px,color:#004D40
+    style L4 fill:#FDEEDB,stroke:#FB8C00,stroke-width:2px,color:#BF360C
+    style L5 fill:#FADDE8,stroke:#D81B60,stroke-width:2px,color:#880E4F
+    style OUT fill:#ECEFF1,stroke:#546E7A,stroke-width:2px,color:#263238
 ```
+
+Each layer can use the output of any layer above it. The object layer uses images, depth and camera positions directly, and its objects sit in the same 3D space as the layer 4 model. Inside each experiment, benchmark depth and reference camera paths stand in for unfinished layers, so every layer can be tested alone. Camera-path corrections, when they arrive, must flow down to every surface and object position built from the old path.
 
 Depth is optional for some camera estimators. Supplied benchmark depth and poses allow each stage to be tested independently. Geometry validation supports stages 03 and 04 through shared coordinate conventions; it is a control, rather than an extra estimation stage. Object tracking means retaining object identity across observations; camera tracking means estimating camera motion.
 

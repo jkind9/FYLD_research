@@ -73,3 +73,17 @@ The shared inspection adapter exports an offline three-dimensional viewer using 
 `visualization.py` owns finite drawing geometry, paired display sampling and colour depth previews. `inspection.py` adapts saved camera and surface outputs. `publication.py` creates a new verified run from a complete source. All copied numerical files retain their original bytes. Original computation configuration and timings are archived beneath `metadata/computation/`; nested inspection copies resolve the original computation recursively. `metadata/publication.json` links the numerical timing record. New publication timing reports no processing FPS.
 
 Run `python -B -m experiments.shared.publication --source <complete-run> --stage 03 --runs <stage-runs>` or use stage `04`. Open the returned `viewer.html` directly in a browser. It needs no server or network packages. Drag to orbit, scroll to zoom and step observations with the controls. Display sampling is deterministic and recorded alongside full counts. It changes no scores or stored point arrays. GPU use is not required. Optional browser tests use Playwright and Edge with GPU and WebGL disabled; unavailable browser dependencies produce explicit skips.
+
+## Share a viewer as one file
+
+Export a completed inspection with:
+
+```powershell
+python -B -m experiments.shared.share --source <complete-inspection-run> --output <destination-outside-source>/viewer.html
+```
+
+Send the resulting HTML file. Recipients save it and open it in a JavaScript-enabled browser. All scene geometry, drawing code and preview images are embedded; no server, internet connection or neighbouring files are needed. Frame stepping, orbit, zoom and the reference overlay work as in the original viewer. This export uses the existing display samples and performs no inference or scoring.
+
+Images are RGB PNG previews with a maximum edge of 320 pixels and no upscaling. Nearest-neighbour resizing preserves missing-depth colours. Use `--max-edge <pixels>` to change display resolution. Captions preserve input/reference/result labels and include per-frame distance bounds and colour encoding. Preview links open the reduced picture; original depth, arrays, source code and workstation metadata are omitted. The source run identifier and manifest hash remain for traceability. This file is for inspection, not numerical measurement.
+
+The exporter verifies the source inventory before and after conversion. It rejects incomplete or changed sources, non-contained images and output paths inside the source. Publication replaces the destination atomically after validation. Existing completed runs remain unchanged. Generated share files are local artifacts under ignored `runs/shareable/` folders; a fresh clone needs a complete inspection run before it can regenerate them.

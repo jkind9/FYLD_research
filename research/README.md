@@ -4,6 +4,8 @@ Original source review: 1 October 2026. [Recovered Claude research](session_reco
 
 Start with the [reading guide and 21 individual source summaries](sources/README.md). The [background explanation](sources/00_start_here.md) introduces depth, camera movement, reconstruction and the different measurements needed to assess a site map.
 
+For a quick start by topic, each layer README opens with its top 5 sources and a table of hosted and on-phone methods with licences: [capture](../experiments/01_camera_capture_delivery/README.md), [depth](../experiments/02_stereo_depth/README.md), [camera position](../experiments/03_camera_pose_estimation/README.md), [surfaces](../experiments/04_surface_reconstruction/README.md), [top-down map](../experiments/05_birds_eye_mapping/README.md) and [objects](../experiments/06_object_recognition/README.md). Those tables add 2025–2026 methods checked on 4 October 2026 (for example SAM 3, Depth Anything 3, MapAnything and FoundationStereo); the detailed notes below remain the deeper review.
+
 The current [six-piece experiment plan](../experiments/README.md) connects research to independent tests. Start with verified geometry and supplied-input reconstruction; inspect phones alongside this work. The new [object recognition and persistent counting plan](../experiments/06_object_recognition/README.md) relates the supplied recognition papers to multi-view labels, moving-feature removal and revisit identities. Its ScienceDirect source remains unverified. The [dataset guide](../experiments/datasets/README.md) explains reference inputs for each stage. Earlier implementation and local outputs are preserved in [the prototype archive](../archive/task00_prototype/README.md).
 
 | File | Purpose |
@@ -24,6 +26,33 @@ The current [six-piece experiment plan](../experiments/README.md) connects resea
 Historical prototype results used TUM supplied depth for scale and an image-only branch with arbitrary scale. Current bounded controls and desk replay are recorded in the root and experiment READMEs. Their receipts do not establish full pipeline or site validation; do not substitute paper benchmarks for local measurements.
 
 The proposed area output describes observed surfaces. Unseen space remains unknown. It does not establish safe clearance, hidden utilities, structural condition or whether a person can safely enter an area.
+
+## Candidate test datasets, 4 October 2026
+
+The existing experiments run on three local datasets: TUM RGB-D (indoor desk, depth camera), ICL-NUIM (synthetic living room) and Middlebury (indoor stereo pairs). None is outdoors, none is filmed on a phone, and none contains worksite objects. The datasets below can fill those gaps. Most were already found during earlier research, and some newer ones were checked on 4 October 2026, but none has been downloaded or tried. Licence entries are what earlier research recorded; several still need the full terms read before use.
+
+A dedicated task will investigate these datasets and trial the existing experiments on them to inspect the outputs. It is filed in the project's task tracker as "Investigate candidate test datasets and trial existing experiments on them".
+
+| Dataset | What it contains | Layers it can test | Why it matters here | Licence as recorded | Local status |
+|---|---|---|---|---|---|
+| [TUM RGB-D](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) | Indoor colour, depth-camera depth and a motion-capture camera path | 3, 4, 5 | Current tracking and object data | CC BY 4.0 | Two sequences local |
+| [ICL-NUIM](https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html) | Synthetic room with exact depth, camera path and reference model | 4 | Current surface scoring data | See [data records](../data/README.md) | Living room local |
+| [Middlebury v3](https://vision.middlebury.edu/stereo/submit3/) | Indoor stereo pairs with exact disparity | 2 | Current stereo scoring data | Publisher permission, citation requested | Quarter resolution local |
+| [ADVIO](https://github.com/AaltoVision/ADVIO) | iPhone, Google Pixel and Tango recordings, indoors and outdoors, with ARKit and ARCore paths and an independent reference path ([paper](https://arxiv.org/abs/1807.09828)) | 1, 3 | Real phone sensors, and lets ARCore's own path be scored against a reference | CC BY-NC 4.0 | Not downloaded |
+| [ScanNet++](https://arxiv.org/abs/2308.11417) | 460 indoor scenes: laser scans, DSLR images, iPhone colour and depth video, labelled object instances | 2, 3, 4, 5 | Phone video with an independent surface and object instances, which fixes the "no independent reference" gap for surfaces and counting | Non-commercial research terms; full agreement not yet read | Not downloaded |
+| [ARKitScenes](https://github.com/apple/ARKitScenes) | iPad colour and LiDAR depth, laser-scan reference and 3D object boxes | 2, 4, 5 | Phone-class capture with object boxes and reference geometry | Non-commercial plus a conditional commercial grant | Not downloaded |
+| [LaMAria](https://github.com/cvg/lamaria) | About 22 hours and 70 km of head-mounted walking recordings with survey-grade control points ([paper](https://arxiv.org/abs/2509.26639)) | 3 | Walking-scale outdoor tracking with lighting changes and moving people | CC BY 4.0 data, MIT code | Not downloaded |
+| [TUM VI](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset) | Handheld stereo camera with IMU and a reference path | 3 | Visual-inertial tracking, which phones and ARCore rely on | CC BY 4.0 | Not downloaded |
+| [Hilti SLAM challenge 2022](https://hilti-challenge.com/dataset-2022.html) | Handheld multi-camera, LiDAR and IMU on construction sites with a surveyed reference | 3, 4 | Construction-site scale and clutter | CC BY-NC-SA 3.0 | Not downloaded |
+| [ConSLAM](https://github.com/mac137/ConSLAM) | Repeated construction-site captures with laser-scan reference | 3, 4 | Same site revisited over time, close to repeat site visits | Academic use only; terms conflicting | Not downloaded |
+| [TartanGround](https://tartanair.org/) `ConstructionSite` | Synthetic construction-site stereo, depth, camera paths and reference point clouds | 2, 3, 4 | Site-like scenes with exact answers. The full set is about 15 TB, so only a small subset is practical | CC BY 4.0 | Not downloaded |
+| [ETH3D](https://eth3d.ethz.ch/) | Stereo and depth-camera SLAM benchmarks with laser references | 2, 3 | Indoor and outdoor scenes with independent references | CC BY-NC-SA 4.0 | Not downloaded |
+| [Middlebury 2021 mobile](https://vision.middlebury.edu/stereo/data/scenes2021/) | Phone-camera stereo moved by a robot arm, with exact disparity | 2 | Phone camera optics for stereo | Publisher permission, citation requested | Not downloaded |
+| [ROADWork](https://arxiv.org/abs/2406.07661) (CMU, ICCV 2025) | Road work-zone images and video with work-zone objects and signs annotated | 5 | The closest public match to street works objects such as cones, barriers and signs. US roads | Check terms | Not downloaded |
+| [Mapillary Vistas v2](https://blog.mapillary.com/update/2018/07/30/mapillary-vistas-dataset-extension.html) | Street-level images from many countries, 124 classes including temporary barriers | 5 | Street-object detection and segmentation across countries | Check terms | Not downloaded |
+| [KITTI](https://www.cvlibs.net/datasets/kitti/), [nuScenes](https://arxiv.org/abs/1903.11027) | Car-mounted stereo, LiDAR, GPS and object tracks | 2, 3, 5 | Longer range and moving objects; see section H below | CC BY-NC-SA 3.0; non-commercial | Not downloaded |
+
+Two further sources matter most and do not exist yet. One is a few street-works-like scenes filmed on the Samsung S23 and Redmi Note 11 Pro, with tape-measured distances and hand counts. The other is a small sample of the kind of short site videos FYLD field workers already record, if they can be shared. Planning those references is covered by the existing independent-references task (task 40).
 
 ## Task16 shortlist and experiment protocol
 

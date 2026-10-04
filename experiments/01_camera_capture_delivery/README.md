@@ -1,6 +1,69 @@
-# Experiment 01: camera capture and delivery
+# Layer 1: camera capture and delivery
 
-[Task 08](../../task_list/pending_review/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
+This folder (experiment 01) is layer 1 of the five-layer pipeline described in the [root README](../../README.md). It answers: **can a phone record what the other layers need, and get it to wherever those layers run?** It does not compute depth, camera position or objects. It supplies the raw material for all of them, so its mistakes, such as wrong timestamps or missing calibration, show up as errors in every later layer.
+
+**Status:** the Android build toolchain works and a packaging-only test app has been exported to [mobile deployment/](../../mobile%20deployment/). No camera code exists yet, and neither phone has recorded anything. Other layers use public benchmark recordings as a stand-in.
+
+## How capture works
+
+A useful capture is more than a video file. Each frame needs:
+
+| Item | What it is | Why later layers need it |
+|---|---|---|
+| Image | The original frame, uncompressed or lightly compressed | Everything starts here. Heavy video compression smears edges that depth and tracking rely on. |
+| Capture time | When the sensor took the frame, with its clock source and units | Depth, motion sensors and a second camera are paired by time. Arrival time on a server is a different number and must be kept separately. |
+| Calibration | Focal length and image centre in pixels, lens distortion, and for two lenses the offset between them in metres | Turns pixels into directions and distances. Calibration is only valid for the image size it was measured at, so crops and resizes must be recorded. |
+| Motion sensors (IMU) | Accelerometer and gyroscope readings, typically 100–500 per second | Help the camera tracker through fast turns and blur, and give the direction of gravity. |
+| Phone's own estimates | ARCore's camera position, depth and confidence for each frame, if used | A ready-made stand-in for layers 2 and 3 on the phone, and a comparison for our own methods. |
+
+Phones change images in ways that matter for measurement. Autofocus changes the focal length slightly. Image stabilisation shifts the picture. Most phone sensors read out row by row (rolling shutter), so fast motion bends straight lines. For measurement, lock focus and exposure and turn stabilisation off where the phone allows it, and record the settings used.
+
+**Using two lenses at once.** Android groups physical lenses behind a "logical" camera. Whether an app may stream two rear lenses at the same moment is decided by the manufacturer for each phone. Android's [multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) reports it. Having three rear lenses does not mean stereo is available, so this must be checked on both phones before stereo depth is planned around them.
+
+**ARCore.** Google's augmented-reality toolkit runs its own tracker and depth on the phone. Its [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback) saves the camera images, motion sensors and ARCore data into one MP4 that can be replayed later on a desktop. The default image it records for tracking is 640×480; higher resolution needs extra configuration. Both test phones are on Google's [ARCore supported devices list](https://developers.google.com/ar/devices) with depth support (checked 4 October 2026). The list is Google's claim, not a measurement on our handsets.
+
+**Delivery.** The safest pattern is save first, upload later: record to the phone, check the file, then upload over Wi-Fi with file hashes so losses are detected. Live streaming is a separate, harder condition. It adds dropped frames and delay, and needs capture time kept apart from arrival time.
+
+**Capture technique.** Walk slowly, overlap views, film the same spot from different positions, and return to the start at the end. Revisits let the tracker correct drift. [Construction capture guidance](../../research/sources/19_construction_capture_guidance.md) covers this for real sites.
+
+## Methods: hosted and on the phone
+
+In the **hosted** route the phone only records and uploads; everything else runs on a server. In the **on-phone** route the phone also runs quick offline checks. Capture itself always happens on the phone.
+
+| Method | Route | What it gives | Notes |
+|---|---|---|---|
+| ARCore recorder app (Kotlin) using [Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) | Both | Images, IMU, ARCore camera position and depth in one replayable file | Recommended first recorder. Gives layers 2 and 3 a phone-made stand-in straight away. |
+| [Camera2](https://developer.android.com/media/camera/camera2) or [CameraX](https://developer.android.com/media/camera/camerax) native app | Both | Full-resolution frames, manual focus and exposure, choice of physical lens, two-lens attempts | Needed for stereo and for high-resolution captures. |
+| [OpenCamera Sensors](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors) | Both | Research recorder that saves video with synchronised IMU readings | Existing open-source option to compare against; check its licence and current Android support. |
+| [python-for-android](https://github.com/kivy/python-for-android) app (current build route) | On the phone | Python test sequencing and result saving, with camera access through a Java bridge | Build toolchain verified; only a packaging test app exists. [Chaquopy](https://chaquo.com/chaquopy/doc/current/android.html) is the main alternative for Python inside a normal Android app. |
+| Upload to a server, for example behind FYLD's existing [BentoML](https://docs.bentoml.com/) serving | Hosted | Resumable upload of recordings with hashes | Keep capture time and upload time separate. |
+| Live streaming ([WebRTC](https://webrtc.org/), RTSP) | Hosted | Frames arrive while filming | Later condition; measure loss and delay separately from algorithm time. |
+| Calibration with [Kalibr](https://github.com/ethz-asl/kalibr) or OpenCV ChArUco boards | Setup step | Measured lens and lens-to-IMU calibration for each phone | Checks the calibration the phone reports. |
+
+## Top 5 sources
+
+| Source | What it is | Why it matters here |
+|---|---|---|
+| [ARCore Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) | Google's API for saving and replaying an ARCore session | One file holds images, IMU, camera position and depth from the phone. |
+| [Android multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) | Official documentation for using several lenses | Decides whether phone stereo is possible on each handset. |
+| [ARCore supported devices](https://developers.google.com/ar/devices) | Google's list of phones and their ARCore features | Both test phones are listed with depth support. |
+| [MobiDepth](../../research/sources/01_mobidepth.md) | Research on stereo depth from two phone cameras | Explains lens differences and timing problems on real phones. |
+| [Construction capture guidance](../../research/sources/19_construction_capture_guidance.md) | Evidence about taking useful site photos | How to film a site so later layers can reconstruct it. |
+
+## What can be improved
+
+- **Write a capability report for both phones**: exact model and variant, camera IDs, which lens pairs can stream together, ARCore depth availability and supported image sizes.
+- **Build the ARCore recorder first.** It is the quickest way to get real phone data with depth and camera position into layers 2 to 5.
+- **Calibrate each phone** with a ChArUco board or Kalibr, and compare against the calibration the phone reports.
+- **Measure timing**: the offset between camera and IMU clocks, frame drops, and the gap between two lenses if stereo is possible.
+- **Add on-site capture checks**: warnings for blur, dark frames, fast motion, tracking loss and unfilmed areas.
+- **Make upload robust**: resumable transfer, hashes on both ends, and a clear record of anything lost.
+
+The sections below are the detailed experiment record: the test plan, the Android build environment and the build handover.
+
+## Experiment record
+
+[Task 08](../../task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
 
 ## The piece we are testing
 
@@ -96,3 +159,32 @@ The simplest receiving experiment can open two supported stream URLs in separate
 Keep original camera images separate from display previews. Front/back views, stitched previews and screenshots do not become calibrated overlapping stereo merely because they arrive together. No linked sample has been installed or executed on either handset. Check the exact revision and code terms before reuse; article access does not establish a code licence.
 
 Promote the observation format and reader when another experiment consumes them unchanged. Keep phone and network adapters separate. This is the device-dependent piece; the other pieces can start with datasets or analytic fixtures without these phones. See the [dataset plan](../datasets/README.md) and [experiment guide](../README.md). This plan has not been executed.
+
+## Android package build and offline handoff
+
+[Task24](../../task_list/pending_review/24_recover_and_reproduce_android_apk_build_inside_cap.md) owns the first-party p4a build and export helpers in `build/`, the package-only app in `app/main.py`, the native compile control in `native/smoke.c`, and build checks in `tests/`. Its cached WSL packaging route passed; clean dependency and container builds remain follow-ups. The app only prints `42`. It requests no camera permission and does not inspect camera or depth APIs. Task08 owns the separate capability and capture app.
+
+The reproduced route reused Android libraries already built on this workstation (a warm build). It uses Ubuntu 24.04.4, host Python 3.12.3, Java 17.0.20.1, python-for-android (p4a) `2026.05.09`, Android SDK API 36, build tools 35.0.0, NDK `28.2.13676358` and Gradle 8.14.3. The APK verifies as package `org.fyld.toolchainsmoke`, version `0.1` (10241), minimum Android API 24, target API 36, and 64-bit ARM (`arm64`) only. The final run took 27.34 seconds. Its SHA-256 is `2a1f1f821408d637cbb8416e465b273245c5813013a73684f7f70dab45fc26e5`; the packaged source matches `app/main.py` SHA-256 `58a44735ffdfa6b14977516ad6e6e642d477999cd361537028f2d6b99e07ad68`; the debug certificate SHA-256 is `45e634374292b269842a381e50dc1bb08d6b30db388ed4572a880d9b1670e1c3`. Signature, package metadata, arm64 native libraries and the 68-entry compressed Python bundle passed verification.
+
+This workstation's inputs are `/home/jkind/.venvs/p4a-2026.05.09` (p4a environment), `/home/jkind/Android/Sdk` (SDK and NDK), `/home/jkind/android-prep` (read-only predecessor source/distribution), and `/home/jkind/.gradle` (read-only Gradle cache copied into scratch). The successful run used `/tmp/fyld-task24-20261004-reviewed` for scratch and wrote its local handoff to `/mnt/c/Users/jkind/Documents/02_Work/01_fyld/mobile_depth_estimation_tracking/mobile deployment/smoke_20261004_reviewed/`.
+
+The command for that run was:
+
+```sh
+wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-apk.sh \
+  --p4a-env /home/jkind/.venvs/p4a-2026.05.09 \
+  --sdk /home/jkind/Android/Sdk \
+  --predecessor-root /home/jkind/android-prep \
+  --gradle-cache /home/jkind/.gradle \
+  --scratch /tmp/fyld-task24-20261004-reviewed \
+  --output-root '/mnt/c/Users/jkind/Documents/02_Work/01_fyld/mobile_depth_estimation_tracking/mobile deployment' \
+  --run-id 20261004_reviewed --mode warm
+```
+
+The exact verifier commands and their outputs are preserved in the handoff's `verification.json`. The debug APK is signed for testing, not for release.
+
+The local offline handoff is in `mobile deployment/smoke_20261004_reviewed/`. It contains the APK, `verification.json` and installation notes. The directory is ignored by Git so generated APKs and signing material are not committed. Transfer the APK to the handset, install it, and open it to check the package launch; this is only a packaging smoke test, not a camera test.
+
+The separate fresh dependency build, limited to already-cached downloads, stopped because the `sdl2_image` recipe lacks its JPEG source archive and attempted a network clone. The build blocked network access, so no source was downloaded. Docker was available, but no local image matched Ubuntu 24.04.4, Python 3.12.3 and Java 17.0.20.1; no image was downloaded and no container build was claimed. Task24 remains in review with the container route as an explicit follow-up. Task08 can use the verified cached route meanwhile.
+
+All 110 Task24 tests passed in WSL. Branch coverage across the five build modules was 82%, and Ruff passed. Run project tests through `python -B tools/check.py ...`; it sends pytest scratch, coverage data and tool caches to a unique system temporary directory. `pytest.ini` disables pytest's repository cache and excludes known scratch folder names from test discovery. `.gitignore` also catches accidental pytest scratch folders. The separate Task13 scratch directory is retained as historical evidence.

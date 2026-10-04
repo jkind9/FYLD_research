@@ -1,4 +1,69 @@
-# Experiment 03: camera pose estimation
+# Layer 3: camera position estimation
+
+This folder (experiment 03) is layer 3 of the five-layer pipeline described in the [root README](../../README.md). It answers: **where was the camera, and which way was it pointing, for every frame?** This is called camera tracking or pose estimation.
+
+Every later layer depends on it. The surface layer places each frame's depth into one shared 3D space using these positions. The object layer uses them to tell whether a returning object is in the same place as before. A wrong camera path bends walls and makes one object look like two. Recognising a place the camera has seen before is also how a site is identified on a return visit.
+
+**Status:** a CPU tracker built on Open3D has been measured on 30 frames: **6.9 mm** camera-position error against a motion-capture reference. Full-length runs on 792 development frames and 573 held-out frames are approved and prepared, but have not run yet.
+
+## How camera tracking works
+
+A **camera pose** is a position (x, y, z in metres) and an orientation (which way the camera points) for one frame. Poses are given relative to a world origin, usually the first frame.
+
+**Frame-to-frame tracking (visual odometry).** The tracker compares each new frame with the last one and works out how the camera moved. There are two main ways:
+- **Feature-based:** find distinctive spots, such as corners, in both frames (ORB and SIFT are common detectors), match them, and solve for the movement that best explains the matches.
+- **Direct:** shift one frame's pixels until their brightness and depth line up with the other frame. The current baseline here works this way.
+
+**Scale.** With one camera and nothing else, the path's shape can be found but not its size in metres. Depth (layer 2), a second lens or the motion sensors supply the real scale.
+
+**Drift and loop closure.** Each step has a small error, and the errors add up, so the path slowly wanders. When the camera returns to a place it has seen, the tracker can recognise it (place recognition), check the match geometrically, and then adjust the whole path so the two visits agree. This is loop closure. A tracker that also keeps a map is called SLAM (simultaneous localisation and mapping).
+
+**Motion sensors (visual-inertial tracking).** The phone's gyroscope and accelerometer (the IMU) measure rotation and acceleration hundreds of times a second. They carry tracking through blur and fast turns, and give the direction of gravity. ARCore on the phone works this way.
+
+**Learned trackers.** Newer methods use neural networks to match frames or predict 3D geometry directly, such as DROID-SLAM, MASt3R-SLAM and VGGT-SLAM. They handle hard footage well but need a large GPU.
+
+**When tracking fails.** If the tracker loses its place, the next frames start a new segment with their own origin. Segments are never silently joined. A recorded, checked transform is needed before two segments share one map.
+
+**Scoring.** Absolute trajectory error compares every estimated position with the reference after lining up the first pose, with scale fixed. Relative pose error measures the error of each small step, which shows drift.
+
+## Methods: hosted and on the phone
+
+| Method | Route | What it does | Licence and notes |
+|---|---|---|---|
+| [Open3D RGB-D odometry](https://www.open3d.org/docs/0.19.0/tutorial/pipelines/rgbd_odometry.html) | Either | Direct colour-and-depth frame-to-frame tracking | MIT. The current baseline here. No loop closure. |
+| [ORB-SLAM3](https://github.com/UZ-SLAMLab/ORB_SLAM3) | Hosted or edge | Feature-based SLAM for single camera, stereo or depth, with or without IMU; loop closure and several maps | GPLv3. The main classical reference. |
+| [RTAB-Map](https://github.com/introlab/rtabmap) | Hosted, edge or phone | Depth-camera SLAM with strong place recognition and long-term memory; an Android app runs on top of ARCore's position | BSD-3 core. Rank 2 for drift correction in the project's research. |
+| [OpenVINS](https://docs.openvins.com/), [Basalt](https://gitlab.com/VladyslavUsenko/basalt) | Hosted or edge | Visual-inertial tracking with careful calibration and timing | GPLv3 and BSD-3 respectively. |
+| [DROID-SLAM](https://github.com/princeton-vl/DROID-SLAM) | Hosted | Learned dense tracking | BSD-3 code; needs 11 GB or more of GPU memory. |
+| [MASt3R-SLAM](https://github.com/rmurai0610/MASt3R-SLAM) | Hosted | Learned matching with dense geometry and loop closure | Non-commercial licence. |
+| [VGGT-SLAM 2.0](https://github.com/MIT-SPARK/VGGT-SLAM) | Hosted | Feed-forward dense submaps joined into one path, without needing calibration | BSD-2 wrapper; the original VGGT weights are non-commercial. |
+| [COLMAP](https://colmap.github.io/) or [GLOMAP](https://arxiv.org/abs/2407.20219) | Hosted | Offline refinement over all frames at once (bundle adjustment) | BSD. Slow but accurate for a final camera path after upload. |
+| [ARCore motion tracking](https://developers.google.com/ar/develop/fundamentals) | On the phone | Built-in visual-inertial tracking, live | Google terms. Both test phones are ARCore-supported; accuracy on them is unmeasured. |
+| [Jetson-ORB-SLAM3](https://github.com/ClarityLab-Org/Jetson-ORB-SLAM3) | Edge box | ORB-SLAM3 with its front end on an NVIDIA Jetson GPU | GPLv3. Authors report 32 frames per second on a 7 W Jetson Orin Nano. |
+
+For a deeper comparison, including Android ports and why most are not ready to use, see the [ORB-SLAM research note](../../research/orb_slam/README.md) and the [Android SLAM review](../../research/orb_slam/android/README.md).
+
+## Top 5 sources
+
+| Source | What it is | Why it matters here |
+|---|---|---|
+| [ORB-SLAM3](https://arxiv.org/abs/2007.11898) | The standard feature-based SLAM paper and code (2021) | The classical reference for tracking, revisits and multiple maps. |
+| [MASt3R-SLAM](https://arxiv.org/abs/2412.12392) | Learned dense SLAM (CVPR 2025) | The strongest learned comparison when a GPU is available. |
+| [VGGT-SLAM 2.0](https://arxiv.org/abs/2601.19887) | Feed-forward SLAM (2026) | Works without calibration and also runs on a Jetson edge computer. |
+| [RTAB-Map](https://github.com/introlab/rtabmap) and the [project note](../../research/sources/12_rtabmap.md) | Long-term SLAM with place recognition | Best route to correcting drift on revisits, including on Android. |
+| [TUM RGB-D benchmark](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) and the [project note](../../research/sources/15_tum_rgbd.md) | Recordings with a motion-capture reference path | The scoring data for this layer. |
+
+## What can be improved
+
+- **Run the approved full-length tests.** 792 development frames and 573 held-out frames give the first numbers beyond a 1-second clip.
+- **Seed tracking with features.** Use ORB or SIFT matches with depth to give Open3D a starting guess, and compare against the current start-from-no-motion setting on the same frames.
+- **Add drift correction.** Compare RTAB-Map and ORB-SLAM3 loop closure on recordings that revisit places, and measure drift before and after.
+- **Add the IMU.** Test visual-inertial tracking on a dataset with motion sensors (EuRoC or TUM-VI) and on phone recordings.
+- **Score ARCore's own path.** On phone recordings with a reference, check whether ARCore's position is good enough to skip running our own tracker on site.
+- **Pass corrections downstream.** When the path is corrected, rebuild every surface and object position that used the old path, and record which version of the path each result used.
+- **Speed.** The baseline runs at 2.14 image pairs per second on a CPU. Live use needs a GPU tracker, an edge box or ARCore.
+
+The sections below are the detailed experiment record.
 
 ## Current status and role
 
@@ -62,13 +127,13 @@ python -m venv .venv-tracking
 
 The pinned packages work in the current Windows Python 3.12 environment. A clean environment install has not been tested. Before importing Open3D, the adapter reads its build configuration and rejects CUDA or SYCL builds. It requires the actual geometry implementation to be the CPU module. No GPU is required or used.
 
-The CLI accepts a positive `--frames` count only for the workspace's Freiburg1 xyz and desk paths. It checks each official source URL and compares the archive's size and SHA-256 with both acquisition and extraction/provenance receipts. A run copies its selected images and association tables, then hashes those copies in its manifest. Each run also records the sequence and actual selected count in its configuration and hyperparameters; the Open3D settings remain unchanged. The proposed full selections are 792 xyz observations and 573 desk observations. Task 13 still requires dated approval of both selections and per-sequence resource caps before a full sequence runs. No full-sequence inference has run.
+The CLI accepts a positive `--frames` count only for the workspace's Freiburg1 xyz and desk paths. It checks each official source URL and compares archive size and SHA-256 with acquisition and extraction receipts. The checked-in [member hash record](../datasets/tum_freiburg1_member_hashes.json) links the selected images, timestamp tables and reference trajectory to the verified archives. The run checks selected observations before tracking and checks the reference hash only after all estimates are saved. It then hashes the copied inputs in the run manifest. Each run also records the sequence, actual selected count and resource limits in its configuration and hyperparameters; the Open3D settings remain unchanged. On 3 October 2026, the user approved all 792 xyz observations and all 573 desk observations, with a 30-minute wall-clock limit and a 2 GiB per-process memory limit per sequence. A separate supervisor holds the worker until its Windows Job Object limit is installed. The worker checks that limit and rechecks archive provenance before inference. It also has a deadline watchdog. The supervisor terminates over-time work, records a failed receipt before detail files, and does not accept incomplete estimates. A valid artifact completed just after the deadline keeps its original hashes; an adjacent supervisor receipt marks it rejected. Parent-side archive hash checks happen before the 30-minute clock starts. Worker imports, source capture, estimation, scoring and reports happen inside it. Full-sequence inference has not yet run.
 
 For fresh data acquisition, download the official [Freiburg1 xyz archive](https://cvg.cit.tum.de/rgbd/dataset/freiburg1/rgbd_dataset_freiburg1_xyz.tgz). Check the final HTTPS publisher host, successful response, content length against downloaded bytes, archive completeness and SHA-256. Keep the provenance alongside the archive. Use `experiments.datasets.acquisition.publish_archive` for bounded safe extraction into a fresh destination. Its downloader is specific to ICL data and must not be used for this TUM archive. The existing workspace dataset already has verified acquisition receipts.
 
 Every selected image gets a status and colour/depth thumbnail. Failed observations have no pose. The next usable observation starts a new origin. Gaps above 0.1 seconds also reset the origin. Identity anchors are not counted as tracked edges. Poses map camera coordinates into their own segment's world, in metres. The backend's relative transform is inverted before accumulation.
 
-The review page links scores, poses and shared timing metadata. Loading, backend pairs, evaluation and reporting have separate timing stages. The `odometry_pairs` stage counts attempted image pairs, including a backend call that returns tracking failure. Its rate is pairs per second. End-to-end throughput counts the 30 unique selected images and includes snapshots, backend loading, scoring and reporting. The shared timing record declares that final manifest hashing and completion publication are excluded. Process memory includes the desktop backend and plotting, so these measurements do not establish phone performance. The estimator retains a current image pair and stores small pose records, without a map.
+The review page links scores, poses and shared timing metadata. Loading, backend pairs, evaluation and reporting have separate timing stages. The `odometry_pairs` stage counts attempted image pairs, including a backend call that returns tracking failure. Its rate is pairs per second. End-to-end throughput counts the selected images and includes snapshots, backend loading, scoring and reporting. The shared timing record declares that final manifest hashing and completion publication are excluded; the supervisor wall clock includes them. Process resources record sampled resident memory, peak Windows working set and peak Job Object process commit. These desktop measurements do not establish phone performance. The estimator retains a current image pair and stores small pose records, without a map.
 
 Scoring places each segment into the reference frame using its first matched reference pose, with scale fixed at one. Anchor-only segments have unavailable accuracy. Relative errors use only adjacent successful matched observations within a segment. Scores pool squared errors by sample count and retain separate segment scores. This baseline has no loop closure or map recovery.
 
@@ -141,3 +206,15 @@ TUM Kinect depth is observed sensor input, not ground-truth depth or a model pre
 The questioned image `1305031102.160407.png` exactly matches the downloaded dataset. It has 77,325 missing pixels out of 307,200 (25.17 percent). Across the selected 30 frames, missing depth averages 25.12 percent. [Publisher format](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/file_formats) defines zero as missing and raw values divided by 5000 as metres. Task 13 retains full development and held-out validation.
 
 [Open the verified labelled 3D inspection](runs/20261002T195923.778722Z_8bcaf965d8dc496192563205df59d85c/viewer.html). This new publication preserves the numerical run and its original input files. The original computation timing and the separate visual-publication timing are both linked.
+
+## Proposed feature and revisit comparisons
+
+[Task25](../../task_list/open/25_compare_feature_seeded_odometry_and_verified_camer.md) follows the frozen full-development/held-out baseline in Task13. The current adapter uses direct projected-pixel intensity/depth alignment and identity pair initialisation, not ORB/SIFT descriptors. The approved 30-frame trial is a short baseline only; the full sequence is unfinished. Do not change Task13 settings or run its full sequence as part of Task16.
+
+The first local comparison should extract masked ORB and SIFT correspondences, pair each RGB feature with valid calibrated depth, reject invalid/out-of-range points and estimate a metric rigid transform with a robust solver. Use that transform and its inlier support to initialise/refine the existing Open3D RGB-D odometry. Compare against the existing identity-initialised Open3D path on exactly the same pairs. Freeze feature detector, descriptor, match filtering, robust solver and Open3D settings before held-out evaluation. Image similarity alone is only a retrieval score and never a camera transform.
+
+For revisits, rank earlier keyframes with an appearance descriptor such as ORB bag-of-words or a masked image embedding, optionally followed by masked ZNCC. Keep retrieval separate from geometric verification. For each candidate, establish calibrated feature correspondences with valid depth and fit a metric SE(3) constraint. Record correspondence IDs, valid-depth count, inliers and inlier ratio, image reprojection and 3D residual distributions, overlap, transform uncertainty/information, reverse-pair consistency and graph residual. Reject weak-parallax or degenerate geometry, dynamic-only matches, inconsistent reverse/cycle transforms and candidates whose graph residual is an outlier. A low appearance distance is not grounds to add a pose-graph edge.
+
+Compare this local feature-seeded Open3D route with pinned releases of RTAB-Map 0.22.1 (BSD-3-Clause; RGB-D loop retrieval and graph correction) and ORB-SLAM3 v1.0-release (RGB-D relocalisation and loop closure; GPLv3, so licence/build suitability must be checked). RTAB-Map builds may inherit OpenCV nonfree/SURF terms depending on configuration. The upstream sources and qualified claims are linked in the [Task16 research shortlist](../../research/README.md#camera-correction-shortlist). Neither backend has a local result in this project. Use matching inputs, reference-pose isolation, timing scope and failure reporting. Do not compare a vendor or paper rate with the project's end-to-end rate.
+
+Accept a correction only after geometric verification, then create an explicit new pose revision. Keep original observations and earlier pose revisions immutable. Recompute or invalidate all dependent object positions and surface geometry against the same committed revision; do not publish mixed generations. Measure absolute trajectory error, relative pose error, drift before/after revisit, valid loop precision/recall, false loop edges, recovery after tracking loss, corrected downstream geometry, full processing time and memory. Reference poses are evaluator-only. Exact retrieval, inlier, residual, overlap, uncertainty and graph thresholds remain unselected and must be recorded by Task25 before a run. The later owner direction delegates choices and GPU tests; Task13 remains preserved and unfinished. Task16's research design remains pending owner review and this comparison has not executed tracking. No feature-seeded or loop-corrected local result is claimed.

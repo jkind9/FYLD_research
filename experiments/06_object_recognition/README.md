@@ -1,4 +1,71 @@
-# Experiment 06: object recognition and persistent inventory
+# Layer 5: object isolation and counting
+
+This folder (experiment 06) is layer 5 of the five-layer pipeline described in the [root README](../../README.md). It answers: **which objects are in the scene, where are they in 3D, and how many distinct ones are there, even when one leaves the camera view and comes back?**
+
+This is the brief's object-counting problem. Counting detections in 2D video over-counts, because a cone that leaves the frame and returns looks like a new cone. Giving each object a 3D position, using depth (layer 2) and the camera path (layer 3), lets a returning object be matched to the one already counted. The brief also notes that SAM, Meta's segmentation model, works but is heavy; this layer tests where cheaper steps are good enough.
+
+**Status:** early trial on recorded indoor desk video, using the benchmark's reference camera path. Detection, masks, appearance matching and identity rules have each been tried on a small reviewed set, and a 60-frame replay processed 457 detections. There is no blind, human-checked test yet. Results are in [What is established](#what-is-established) below.
+
+## How object isolation works
+
+The layer is a chain. Each step can be swapped independently.
+
+1. **Detection.** A neural network draws a box round each object it recognises, with a class name and a confidence score. A *closed-set* detector, such as YOLO or RF-DETR, knows a fixed list of classes; the common COCO list has 80 everyday classes and no traffic cones or barriers, so site objects need fine-tuning. An *open-vocabulary* detector, such as Grounding DINO or SAM 3, finds objects named in plain text instead.
+2. **Segmentation.** Pick out the object's own pixels inside the box. This matters because depth read from the whole box includes the wall behind the object, which pulls its 3D position backwards. Classical methods (GrabCut, filled outlines) need no model. Learned methods are the SAM family: SAM and SAM 2 outline whatever a box or point points at, SAM 2 follows it through video, and SAM 3 finds every instance of a named concept. Small versions (MobileSAM, EdgeSAM, EfficientSAM) trade some quality for speed.
+3. **3D placement.** Take the depth at the object's pixels, convert to a 3D point in the camera's frame, then move it into the world with the camera pose. The result is a point on the object's *visible surface*. It moves as the camera moves round the object, so it is not the object's centre.
+4. **Appearance similarity.** Describe how the object looks so two sightings can be compared. Options range from comparing image patches directly (template matching, ZNCC), through distinctive-spot matching (ORB, SIFT), to learned descriptions (DINOv2, ResNet). Appearance helps when positions are uncertain. It cannot separate two identical objects.
+5. **Association.** Decide, for each new sighting, which known object it is, or that it is new.
+   - *Short-term tracking*, such as ByteTrack, links boxes between consecutive frames by overlap and motion. It drops an object after it has been out of view for a while, so it cannot handle long absences.
+   - *Persistent identity* keeps a record for every object: 3D position, size, appearance and every sighting. A new sighting is matched to records by position and appearance, one-to-one within a frame (the Hungarian algorithm), with "new object" always an allowed answer. ConceptGraphs is a research system built this way.
+6. **Counting.** Count object records, not detections. An unmatched sighting first becomes a *provisional* object until more evidence confirms it. Duplicates, missed objects and wrong merges are reported separately, because a correct total can hide one duplicate and one miss.
+
+**Why SAM on every frame should not be needed.** Detection plus 3D position does most of the identity work. Outlines matter mainly where background depth pollutes an object's position. So the efficient design runs a small detector, adds masks only on chosen frames or tricky objects, and measures whether the masks change the answer. Running detection on a subset of frames rather than all 30 per second is another saving to test. Every step's cost is recorded separately so this can be decided with numbers.
+
+## Methods: hosted and on the phone
+
+| Method | Route | What it does | Licence and notes |
+|---|---|---|---|
+| [SAM 3](https://arxiv.org/abs/2511.16719) | Hosted | Finds, outlines and follows every instance of a text-named object through video | Meta's SAM licence; check terms. Heavy; GPU server. |
+| [Grounding DINO](https://arxiv.org/abs/2303.05499) + [SAM 2](https://arxiv.org/abs/2408.00714) | Hosted | Text-prompted boxes, then outlines followed through video | Both Apache-2.0. |
+| [YOLO26](https://docs.ultralytics.com/models/yolo26) x | Hosted | Closed-set detector. The YOLO26x checkpoint is the one used in the trials so far. | AGPL-3.0 or a paid enterprise licence. |
+| [RF-DETR](https://github.com/roboflow/rf-detr) | Either | Closed-set detector, sizes from Nano to 2x-large | Apache-2.0 for Nano to Large. The project research ranks Nano first for the next detector comparison. |
+| [DINOv2](https://github.com/facebookresearch/dinov2) / [DINOv3](https://arxiv.org/abs/2508.10104) | Hosted, or small variant on the phone | Appearance descriptions for matching sightings | DINOv2 Apache-2.0 (ViT-S/14 has 21 million parameters); DINOv3 has its own licence. |
+| [ConceptGraphs](https://concept-graphs.github.io/) | Hosted | A 3D map of individual objects from posed colour and depth | Research code; check terms. A design reference for persistent counting. |
+| [BoT-SORT](https://github.com/NirAharon/BoT-SORT) | Hosted | Short-term tracking with camera-motion compensation and appearance | Check terms. |
+| [ByteTrack](https://github.com/ifzhang/ByteTrack) | On the phone | Light short-term tracking from boxes alone | MIT. |
+| ARCore pose and depth | On the phone | Places each detection in 3D live, so a returning object can be matched on site | Both test phones are ARCore-supported; accuracy unmeasured. |
+| [MobileSAM](https://github.com/ChaoningZhang/MobileSAM), [EdgeSAM](https://github.com/chongzhou96/EdgeSAM), [EfficientSAM](https://github.com/yformer/EfficientSAM) | On the phone, chosen frames only | Small prompted outline models | MobileSAM and EfficientSAM Apache-2.0; EdgeSAM uses the NTU S-Lab licence. EdgeSAM's authors report 38.7 frames per second on an iPhone 14. |
+| OpenCV GrabCut and contours | Either | Classical outlines from a box, no model | Apache-2.0. Already tested here. |
+
+Phone models run through [LiteRT](https://ai.google.dev/edge/litert), [ONNX Runtime Mobile](https://onnxruntime.ai/docs/tutorials/mobile/), [ExecuTorch](https://pytorch.org/executorch) or [Qualcomm AI Hub](https://aihub.qualcomm.com/). None has been timed on the test phones. Published speeds come from the authors' hardware.
+
+## Top 5 sources
+
+| Source | What it is | Why it matters here |
+|---|---|---|
+| [SAM 3](https://arxiv.org/abs/2511.16719) | Segment Anything with Concepts (ICLR 2026) | Finds, outlines and keeps identities for named objects in video. The strongest hosted option, and the benchmark for "is SAM needed". |
+| [RF-DETR](https://arxiv.org/abs/2511.09554) | Real-time detection transformer (ICLR 2026) | A permissively licensed small detector for the phone route and for fine-tuning on site objects. |
+| [ConceptGraphs](https://arxiv.org/abs/2309.16650) | 3D object maps from posed colour and depth | The closest published design to persistent 3D counting. |
+| [ByteTrack](https://arxiv.org/abs/2110.06864) | Short-term multi-object tracking | The light frame-to-frame tracker; shows why short-term tracks alone re-count returning objects. |
+| [DINOv2](https://arxiv.org/abs/2304.07193) | Self-supervised image features | The main learned option for comparing object appearance across views. |
+
+More background: [mobile mapping and counting review](../../research/edge_products/README.md), [Fusion++](https://arxiv.org/abs/1808.08378) for persistent object maps, [Deep SORT](https://arxiv.org/abs/1703.07402), and the [ranked model shortlist](../../research/README.md#ranked-shortlist) with versions and licences.
+
+## What can be improved
+
+- **Softer identity rule.** The current rule blocks a second object of the same class, which left 90 of 95 book detections unassigned. Compare it with provisional identities and recorded possible duplicates.
+- **Independent references.** Hand-checked identities and masks, surveyed object positions and sizes, and a blind test set. Without them, none of the comparisons below can be scored.
+- **Site object classes.** Fine-tune a detector on cones, barriers, pipes and plant, or test open-vocabulary detection, on worksite footage.
+- **Is segmentation useful at all?** Measure whether outlines make positions more accurate against surveyed positions, not just different. Compare plain boxes, classical masks and hand-checked masks first, then learned masks starting with the SAM family (SAM 2 and SAM 3 on a server, MobileSAM or EdgeSAM for phone cost).
+- **SAM 3 as a counting baseline.** Run SAM 3 end to end on the same clips, using its own video identities, and compare its counts with the 3D identity approach. If it counts returning objects correctly on short clips, the 3D machinery is only needed for longer or multi-visit captures.
+- **Uncertainty.** Replace single-point positions with regions, and check that the regions contain the true position as often as they claim.
+- **Appearance.** Compare template matching, detector features and DINOv2, with and without background, on the same crops.
+- **Errors through the chain.** Measure how box, depth and camera-path errors add up, and whether more views of an object reduce error or repeat the same bias.
+- **Real camera paths.** Repeat the replay with layer 3's tracked path instead of the reference path.
+- **Moving objects.** People and vehicles need short-term tracking, kept separate from the stationary inventory.
+- **Cost.** Time each step on a server and on the phones, and test detection on fewer frames.
+
+The sections below are the detailed experiment record.
 
 ## What is established
 

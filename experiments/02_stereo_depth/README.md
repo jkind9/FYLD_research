@@ -1,43 +1,116 @@
-# Experiment 02: stereo depth estimation
+# Layer 2: depth estimation
 
-## The piece we are testing
+This folder is layer 2 of the five-layer pipeline described in the [root README](../../README.md). It answers one question: **how far away is each pixel, in metres?**
 
-Given two images and their camera geometry, can we estimate useful distance at image locations? This piece owns depth quality. Its inputs can come from a recording, phone or backend. Phone execution is a later placement comparison, not a condition of the method.
+A phone video is flat. Without depth, nothing in it can be measured. Depth is what turns pixels into points in space. The surface layer (layer 4) needs it to build a 3D model. The object layer (layer 5) needs it to give each object a position. The camera tracker (layer 3) can use it to fix the real-world scale of the camera path.
 
-Start with recorded fixtures so network or camera changes cannot silently change comparisons. Public calibrated stereo data supports initial testing without a phone or Experiment 01 implementation. Experiment 01 can later supply Samsung S23 or Redmi recordings. See the [dataset plan](../datasets/README.md).
+**Status:** planned. The test data is downloaded and checked; no depth method has been run in this folder yet. Other layers currently use depth recorded by a depth sensor in public benchmark data as a stand-in.
 
-## Development dataset and reference
+**Route decision: stereo if possible, otherwise single video.**
+1. Layer 1 checks whether either phone lets an app record two rear lenses at the same moment. If one does, this layer computes stereo depth from the pair.
+2. If neither does, this layer uses single-camera methods:
+   - ARCore depth on the phone.
+   - Learned video depth on a server, such as Depth Anything 3 or MapAnything.
+   - Real-world scale from ARCore, GPS or objects of known size.
+3. Phone lenses are only 1–2 cm apart, so stereo adds little beyond a few metres. The single-video route is developed alongside the stereo check rather than after it. It is also the only route that works on ordinary video recorded without a special app.
 
-Develop against the acquired Middlebury version 3 quarter-resolution training data at `data/middlebury/dataset/MiddEval3/trainingQ/`. Its 15 scenes have left/right images, scene calibration, left-view reference disparity and evaluation masks. Use the supplied disparity and masks only for evaluation, converting disparity to metres with each scene's calibration and principal-point offset. Inputs and reference files are already extracted and verified. [Local data and receipts](../../data/README.md).
+The folder keeps its original name, `02_stereo_depth`, but covers both routes.
 
-Choose and record development and held-out scenes from these 15 labelled scenes before method tuning. The separately acquired test images have no public reference disparity, so they cannot provide a local accuracy score. The geometry adapter, scene split and estimator tests still need to be implemented. Middlebury supports initial independent development; outdoor and real phone performance remain later validation questions.
+## How depth estimation works
 
-## Input and output agreement
+A depth image has one value per pixel: the distance in metres from the camera to the surface seen at that pixel, measured along the camera's forward axis. Pixels where the method has no answer are marked invalid. Invalid is not the same as far away.
 
-Input comprises two images, camera identifiers, capture timestamps, intrinsics, distortion and relative camera pose. Calibration translation is in metres. Record crop, resize and rotation transformations; image coordinates refer to the declared processed images.
+There are four ways to get depth.
 
-Output comprises depth in metres, a validity mask, and confidence only if provided. Define depth as distance along the selected camera's forward axis, or declare another convention. Preserve reference camera, timestamp and calibration identity. Failed matches are invalid. A stereo method's pixel displacement must be converted using the matching calibration before being called metric depth.
+| Approach | How it works | Strengths | Weaknesses |
+|---|---|---|---|
+| **Two-camera stereo** | Two cameras a known distance apart (the baseline) see the same point. The point appears shifted sideways between the two images. That shift, in pixels, is the disparity. Depth = focal length × baseline ÷ disparity. | Real metric scale from the calibration alone. Works on a single moment, so moving objects are fine. | Phone lenses sit 1–2 cm apart, so the shift is tiny beyond a few metres and error grows with the square of distance. Fails on blank walls, repeated patterns, reflections and glare. Both lenses must capture at the same instant, which many phones do not allow apps to do. |
+| **Depth from motion** | One camera moves. Frames taken from different positions act like a stereo pair with a longer baseline. ARCore's depth works this way on most phones. | Needs only one camera. A longer baseline helps at range. | Needs accurate camera motion (layer 3). Moving objects confuse it. |
+| **Active depth sensors** | The device emits light and measures its return: time-of-flight, LiDAR or a projected pattern. The Kinect used in the TUM benchmark works this way. | Accurate at short range, even on blank walls. | Most Android phones have no such sensor. Sunlight and range limit it outdoors. |
+| **Learned single-image depth** | A neural network estimates depth from one image, using what it has learned about how scenes look. | Dense, sharp, works anywhere a camera does. | The shape is often right while the scale is wrong, unless the model is trained to output metres ("metric" depth) and that claim is checked. Errors are hard to predict. |
 
-## Proposed steps and comparisons
+Modern systems mix these. For example, a learned model gives dense, sharp depth, and a few reliable measured points (from ARCore or stereo) fix its scale.
 
-1. Establish image alignment and calibration checks on static recorded pairs.
-2. Run a conventional stereo baseline with settings recorded.
-3. Compare against independently measured distances and visible boundaries.
-4. Examine a learned stereo alternative after checking code and weight permissions.
-5. Run the same inputs and method at alternative execution locations. Separate preprocessing, inference and delivery time.
+Every depth result also needs the calibration of the camera that took it: focal length and image centre in pixels, lens distortion and, for stereo, the offset between the two cameras. Without calibration, depth cannot be turned into metres.
 
-Available native phone depth can be a comparison. Label its origin; it is not independent stereo ground truth.
+## Methods: hosted and on the phone
 
-## Measurements, failures and decision
+**Hosted** means the phone only records and a server with a large GPU computes depth. **On the phone** means it runs on the handset with no internet, mainly for quick checks on site. See the root README for how the two routes fit together.
 
-Report distance error by range, valid coverage, edge error, timing sensitivity, runtime and memory. Phone execution adds sustained performance and thermal observations. Paper frame rates are not acceptance limits for our devices.
+| Method | Route | What it does | Licence and notes |
+|---|---|---|---|
+| [FoundationStereo](https://arxiv.org/abs/2501.09898) (NVIDIA, CVPR 2025) | Hosted | Stereo depth that works on new scenes without retraining. [Fast-FoundationStereo](https://arxiv.org/abs/2512.11130) is a faster variant. | NVIDIA research licence; check terms. Needs two lenses that capture together. |
+| [RAFT-Stereo](https://arxiv.org/abs/2109.07547) | Hosted | A well-established learned stereo baseline. | Check code and weight terms before use. |
+| [Depth Anything 3](https://arxiv.org/abs/2511.10647) | Hosted | Depth and camera rays from any number of frames, with or without known camera positions. | Licence differs by model size; check per checkpoint. |
+| [MapAnything](https://arxiv.org/abs/2509.13414) (Meta) | Hosted | Metric 3D geometry and cameras from images, optionally using known calibration, depth or poses as extra input. | Check code and checkpoint terms. |
+| [Depth Pro](https://arxiv.org/abs/2410.02073) (Apple) | Hosted | Metric depth from a single image, with sharp edges. | Apple sample-code licence; check terms. |
+| [ARCore Depth API](https://developers.google.com/ar/develop/java/depth/raw-depth) | On the phone | Depth from motion, plus a per-pixel confidence. Uses a depth sensor if the phone has one. Both test phones are listed by Google as supporting it ([device list](https://developers.google.com/ar/devices), checked 4 October 2026). | Google terms. Confidence values are not calibrated error bars. Quality on our phones is unmeasured. |
+| OpenCV semi-global block matching ([StereoSGBM](https://docs.opencv.org/4.x/d2/d85/classcv_1_1StereoSGBM.html)) | Either | Classical stereo matching with no learned weights. The planned first baseline. | Apache-2.0. Runs on a CPU. |
+| [MobileStereoNet](https://arxiv.org/abs/2108.09770), [HITNet](https://arxiv.org/abs/2007.12140), [BANet](../../research/sources/04_banet.md) | On the phone | Learned stereo networks designed to be small and fast. | Check code and weight terms for each. |
+| [Depth Anything V2](https://arxiv.org/abs/2406.09414) Small | On the phone | Small single-image depth model. Relative depth by default; metric versions exist. | The Small model is Apache-2.0; larger models are non-commercial. |
 
-Include weak texture, occlusion, reflections, motion and differing exposure. Reject incompatible calibration and image dimensions explicitly. Distinguish inaccurate depth from unavailable depth.
+On-phone models run through a mobile runtime: [LiteRT](https://ai.google.dev/edge/litert) (formerly TensorFlow Lite), [ONNX Runtime Mobile](https://onnxruntime.ai/docs/tutorials/mobile/), [ExecuTorch](https://pytorch.org/executorch) or the precompiled models on [Qualcomm AI Hub](https://aihub.qualcomm.com/). Published speeds come from the authors' hardware and do not predict speed on these phones.
 
-Agree quality and coverage requirements before acceptance trials. A desktop success does not establish phone performance; fast phone execution does not establish accuracy.
+## Top 5 sources
 
-## Research and reuse
+| Source | What it is | Why it matters here |
+|---|---|---|
+| [ARCore Raw Depth](https://developers.google.com/ar/develop/java/depth/raw-depth) and the [project note](../../research/sources/06_arcore_raw_depth.md) | Google's documentation for phone depth with confidence | The cheapest route to depth on both test phones. It separates fresh depth from depth reused from earlier frames. |
+| [FoundationStereo](https://arxiv.org/abs/2501.09898) | A 2025 stereo model trained on 1 million synthetic pairs | The strongest hosted option if the phones can capture two lenses at once. |
+| [Depth Anything 3](https://arxiv.org/abs/2511.10647) | A 2025 model that predicts consistent depth across many views | The strongest hosted option for single-lens video. |
+| [MobiDepth](../../research/sources/01_mobidepth.md) | Research on stereo depth from two phone cameras | Explains how lens differences and capture timing on real phones affect depth. |
+| [Middlebury stereo, version 3](https://vision.middlebury.edu/stereo/submit3/) | A stereo benchmark with exact reference depth | The scoring data for this layer. |
 
-[MobiDepth](../../research/sources/01_mobidepth.md) and [HiMoDepth](../../research/sources/02_himodepth.md) inform timing and mobile processing. [MobileStereoNet](../../research/sources/03_mobilestereonet.md) and [BANet](../../research/sources/04_banet.md) are candidate references. [ARCore raw depth](../../research/sources/06_arcore_raw_depth.md) provides a separate comparison route.
+More background: [HiMoDepth](../../research/sources/02_himodepth.md) on keeping image detail in phone stereo, [MobileStereoNet](../../research/sources/03_mobilestereonet.md), [BANet](../../research/sources/04_banet.md) and [HyperSight](../../research/sources/05_hypersight.md) on using camera motion for longer range.
 
-Promote a depth interface when tracking or reconstruction consumes its fixtures without knowing where inference ran. No method or result is claimed here. See the [experiment guide](../README.md).
+## Where this layer stands
+
+- The Middlebury version 3 quarter-resolution training data is downloaded and checked at `data/middlebury/dataset/MiddEval3/trainingQ/`. It has 15 indoor scenes with left and right images, calibration, reference disparity and masks. [Download records](../../data/README.md).
+- No depth method, scene split or adapter code exists in this folder yet.
+- Layers 3, 4 and 5 currently use depth from the TUM and ICL-NUIM benchmark recordings. The object layer ignores depth at or beyond 4 m. Nothing here establishes accuracy at worksite distances.
+
+## How this layer will be tested
+
+### Data and reference
+
+Use the 15 Middlebury training scenes. Choose development and held-out scenes before tuning anything, and record the choice. The separate Middlebury test images have no public reference disparity, so they cannot be scored locally.
+
+The reference disparity and masks are used only for scoring. Convert disparity to depth with each scene's calibration:
+
+`depth_mm = baseline_mm × focal_length_px ÷ (disparity_px + doffs_px)`
+
+Here `doffs` is the horizontal offset between the two image centres. Leaving it out gives wrong depth. [Middlebury calibration description](https://vision.middlebury.edu/stereo/data/scenes2014/).
+
+### Inputs and outputs
+
+- **Input:** two images, camera identifiers, capture times, focal lengths, image centres, distortion and the relative pose between the cameras with translation in metres. Any crop, resize or rotation is recorded, because calibration only applies to the image size it was measured for.
+- **Output:** depth in metres, a validity mask, and a confidence only if the method provides one. Depth is distance along the reference camera's forward axis unless another definition is declared. Failed matches are invalid, not zero distance.
+
+### Steps
+
+1. Check image alignment and calibration on static recorded pairs.
+2. Run the classical StereoSGBM baseline with its settings recorded.
+3. Score depth error by distance range, valid coverage and error at object edges.
+4. Compare a learned stereo model after checking code and weight licences.
+5. Run the same input on the phone and on a server. Time preprocessing, inference and delivery separately.
+
+ARCore phone depth can be compared on phone recordings. Label where it came from; it is not an independent reference.
+
+### Measurements and failure cases
+
+Report depth error by distance band, valid coverage, edge error, sensitivity to capture timing, runtime and memory. On the phone, add sustained speed and heat. Paper frame rates are not targets for these devices.
+
+Test weak texture, occlusion, reflections, motion and mismatched exposure. Reject incompatible calibration and image sizes with a clear error. Keep "inaccurate depth" separate from "no depth".
+
+No numeric pass mark is set yet. Agree quality and coverage limits before acceptance trials. Good desktop accuracy does not show phone performance, and fast phone speed does not show accuracy.
+
+## What can be improved
+
+- **Start the baseline.** Run StereoSGBM on a fixed Middlebury split to get the first measured number for this layer.
+- **Measure ARCore depth on both phones.** Film a scene with tape-measured distances and score ARCore depth and confidence against it. This decides whether on-phone depth is good enough for site checks.
+- **Combine learned and measured depth.** Use ARCore or stereo points to fix the scale of a dense learned depth map, and measure whether the result beats either alone.
+- **Test range.** Error grows with distance. Worksites need checks beyond the current 4 m indoor limit, with outdoor references.
+- **Calibrate confidence.** Check whether low-confidence pixels really are the wrong ones before using confidence to weight later layers.
+- **Find a sequence with stereo and a reference camera path.** TUM has no stereo pair and Middlebury has no camera path, so neither can test how stereo depth affects tracking. A synchronised stereo dataset or a measured phone recording is needed for that swap.
+
+Once tracking or reconstruction can read this layer's output without knowing where it was computed, promote the depth record format into [experiments/shared](../shared/README.md). See the [experiment guide](../README.md) for how the layers connect.
