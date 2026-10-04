@@ -1,7 +1,7 @@
 ---
 id: "30"
 title: Reconcile experimental evidence and research backlog
-status: in_progress
+status: closed
 priority: MED
 type: decision
 blocked_by: []
@@ -84,13 +84,13 @@ tests n/a: documentation/research only; existing implementation test receipts re
 
 | Field | Value |
 |---|---|
-| Closing commit | Documentation evidence commit pending below; no implementation commit in this task |
+| Closing commit | de324e59842247edf01529c6492a7ed7a6205178 (documentation/evidence commit; task closure is recorded in the following board commit) |
 | Files changed | Root/data/experiment/research READMEs; stage06 evidence READMEs; board and Tasks08/09/24/25; new proposed Tasks31-40; .gitignore and .gitattributes. Frozen source annotation and unchanged historical board receipts included for publication links. |
 | Test status | Documentation checks: 16 READMEs, 226 local destinations/fragments, 0 broken; 4 Mermaid blocks structurally checked, 0 fence/quote/bracket errors. No rendered-diagram/browser retest or implementation suite. |
 | Before measurement | 1 stale root inference statement; nine requested workstream owners absent; current board included nonexistent mobile-deployment documentation declarations |
 | After measurement | Stale root statement removed; all 9 workstreams plus shared reference acquisition have 10 open proposed owners, each with question/evidence/comparison/reference/measures/dependencies/cost/decision. Task lint: 41 tasks, 0 errors/warnings. |
 | Delta | +10 scoped plans; stale visibility/status/ownership and 2 broken fragment links corrected; missing mobile-deployment docs redirected to stage01; no experiment measurement changed |
-| Decision-gate outcome | Documentation/research complete and reviewed with concrete fixes applied. User authorised tidy/ignore/commit/push; scoped publication in progress. Task13 preserved; Task16/21/22 pending review; Tasks31-40 unstarted. |
+| Decision-gate outcome | Documentation/research complete and reviewed with concrete fixes applied. User authorised tidy/ignore/commit/push; reviewed documentation committed; this task closes without starting another experiment. Task13 preserved; Task16/21/22 pending review; Tasks31-40 unstarted. |
 
 Evidence checks: fresh agent verified Task17 publication hashes and Task18/19/20/21/27/22 manifests (103/206/140/172/72/258 members respectively), with no size/hash failures. Task29's five receipt-listed hashes matched; copied HTML equals source; six ZIP members passed CRC. CSV recomputation from all 19 cup proposals confirmed the 16 assigned observations: box RMS 72.785494 mm, maximum pair 291.669423 mm; centre RMS 82.285053 mm, maximum pair 317.024892 mm. Independently counted 95 books as 1 new/4 matched/90 unresolved outside gate and traced restrictive birth policy; source depth cutoff remains <4 m.
 
@@ -102,6 +102,6 @@ Preservation check: 17 protected initial dirty code/configuration files, Task13/
 
 Read-only audit: 185 findings = 153 inherited size findings, 25 explicit waiver/open notes, 5 unstamped proposed HIGH plans and 2 planned Task24/25 test paths. The HIGH plans require review before start; inherited vendor/saved-source/unfinished files remain preserved. The unratified constitution remains a draft. These findings are not waived as experimental success.
 
-Remaining publication step: commit the reviewed documentation/board/ignore files, record the evidence commit, close this documentation task and push the closure. Unrelated dirty implementation stays outside these commits.
+Publication scope: 47 files committed in de324e59842247edf01529c6492a7ed7a6205178. Only READMEs, task records, ignore/attribute settings and the unchanged frozen annotation were included. The staged credential-pattern scan found 0 matches, staged whitespace checks passed, and the frozen annotation Git blob equals the original SHA256. Unrelated dirty implementation stays outside these commits. The closure commit and requested remote push are checked during final handback.
 
-Publication byte check caught automatic CRLF-to-LF normalization of the newly tracked frozen annotation. A path-specific -text attribute preserves its exact sealed SHA256 a786adc5f814ad9773712397f46ba79d8d40dc5c174fe17045336440cdffd920 in Git. The working file and completed receipts are unchanged; index-byte agreement is checked before committing.
+Publication byte check caught automatic CRLF-to-LF normalization of the newly tracked frozen annotation. A path-specific -text attribute preserves its exact sealed SHA256 a786adc5f814ad9773712397f46ba79d8d40dc5c174fe17045336440cdffd920 in Git. The working file and completed receipts are unchanged; index-byte agreement was checked before committing.

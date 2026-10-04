@@ -2,7 +2,7 @@
 
 ## Current records, 4 October 2026
 
-This board separates measured controls and bounded proofs of concept from untested investigations. Task30 reconciles documentation/research only. Preserve Task13 frozen settings and unfinished code; leave Task16/21/22 pending review. Closed receipts are historical evidence and are not rewritten by the new backlog.
+This board separates measured controls and bounded proofs of concept from untested investigations. Task30 completed documentation/research only. Preserve Task13 frozen settings and unfinished code; leave Task16/21/22 pending review. Closed receipts are historical evidence and are not rewritten by the new backlog.
 
 | Task | State | Evidence or outstanding question |
 |---|---|---|
@@ -36,7 +36,7 @@ This board separates measured controls and bounded proofs of concept from untest
 | [27: xyz cup localisation](closed/27_localise_yolo_cup_detections_in_recorded_rgbd.md) | Closed | One YOLO26x detection projected with measured depth and supplied poses; separate from desk cup |
 | [28: desk cup replay](closed/28_replay_cup_revisits_with_persistent_object_ids.md) | Closed | Sixty sampled desk frames; persistent cup ID across detector gap/return, not continuous physical absence |
 | [29: portable replay and spread](closed/29_export_replay_and_review_reconstruction_and_identi.md) | Closed | All nineteen cup proposals exported; sixteen assigned box RMS 72.8 mm / centre RMS 82.3 mm; surface repeatability only |
-| [30: documentation reconciliation](open/30_reconcile_experimental_evidence_and_research_backl.md) | In progress for this session | Evidence/source review and proposed backlog only; no experiment started |
+| [30: documentation reconciliation](closed/30_reconcile_experimental_evidence_and_research_backl.md) | Closed | Evidence/source review complete; 226 local links/anchors checked and ten proposed follow-ups; no experiment started |
 
 Implementation tests, coverage and hash checks remain in owning receipts. They support software correctness; experimental progress is explained through data, measurements, references and limitations.
 
