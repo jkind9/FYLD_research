@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "package": "org.fyld.capturecheck",
+  "name": "FYLD Camera Capture",
+  "version": "0.1",
+  "version_code": 10242,
+  "activity_class_name": "org.fyld.capture.CameraActivity",
+  "permissions": [
+    "android.permission.CAMERA"
+  ],
+  "java_sources": [
+    {
+      "path": "native/camera/java/org/fyld/capture/CameraActivity.java",
+      "sha256": "2a4fd16cb771387abdb5145be52ee767afe7c9a2c919bdc044ff25af85d9a0e5"
+    },
+    {
+      "path": "native/camera/java/org/fyld/capture/CameraCapture.java",
+      "sha256": "169329f6cce451b03a511926bb77275c369f6b775ba2dc28274def3ae45178f9"
+    },
+    {
+      "path": "native/camera/java/org/fyld/capture/CameraReport.java",
+      "sha256": "d9477e4a07b3822cdd2cd436e1dc3a14b8d49665930c290cf6108d3e73b43fc0"
+    }
+  ]
+}
