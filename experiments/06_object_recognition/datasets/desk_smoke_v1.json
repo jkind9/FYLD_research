@@ -1,0 +1,702 @@
+{
+  "schema_version": 1,
+  "name": "desk_smoke_v1",
+  "calibration": {
+    "width": 640,
+    "height": 480,
+    "fx": 525.0,
+    "fy": 525.0,
+    "cx": 319.5,
+    "cy": 239.5,
+    "axes": "x-right_y-down_z-forward"
+  },
+  "depth_policy": {
+    "units_per_metre": 5000,
+    "raw_missing": 0,
+    "processed_max_m": 4,
+    "registration": "same_pixel_grid"
+  },
+  "source_records": [
+    {
+      "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/rgb.txt",
+      "sha256": "d1bc510ecca08540e03be8df55af8857753b614d8a5c38526bc669ce6c802284"
+    },
+    {
+      "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/depth.txt",
+      "sha256": "e56f037046113192151abebded5513709d03a57b46624b8343eb4efd4419f14c"
+    },
+    {
+      "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/groundtruth.txt",
+      "sha256": "48c4fa61f5d78310ea579f404d31d296738c4210c19c2bdac4a5cdf6bff50831"
+    }
+  ],
+  "provenance": {
+    "annotation_author": "Codex root; RGB-only visual drawing",
+    "review_status": "agent_reviewed_with_limits",
+    "human_reviewed": false,
+    "model_outputs_used": false,
+    "boundary_quality": "coarse provisional polygons; exclude formal segmentation scoring",
+    "identity_basis": "White cup and fixed scene landmarks; black and silver adjacent monitor enclosures. Independent reference IDs, not model IDs.",
+    "reviewer": "Independent Task17 RGB reviewer; original RGB only",
+    "review_receipt": "Same cup positives and distinct black/silver monitors PASS. Corrected gap original1305031463.059810 frame268 PASS. Initial frame205 rejected (cup partly visible); frame405 support tightened to rim; foreground monitor edge corrected. Coarse supports remain excluded from segmentation scoring. No human review."
+  },
+  "split_policy": {
+    "claim": "within_session_smoke",
+    "tuning": false,
+    "validation_frames": 0,
+    "unseen_identities": 0,
+    "note": "Views already inspected; no blind accuracy or new-object/session generalisation claim."
+  },
+  "frames": [
+    {
+      "session_id": "tum_freiburg1_desk",
+      "frame_id": "23",
+      "timestamp_s": 1305031454.127701,
+      "visit_id": "before",
+      "partition": "enrollment",
+      "rgb": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/rgb/1305031454.127701.png",
+        "sha256": "e7d9ebe77a418b083cad3d775cc8470ad3cb3fc99d3b8485f40e6c26ba60ad96"
+      },
+      "depth": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/depth/1305031454.141030.png",
+        "sha256": "e1ead03801f0a4df6da091e9d0f575f33df8ad8b540a0ff47a398f5d091c1213",
+        "timestamp_s": 1305031454.14103
+      },
+      "label_coverage": {
+        "cup": "complete",
+        "tv": "subset"
+      },
+      "labels": [
+        {
+          "instance_id": "reference-cup",
+          "category": "cup",
+          "polygon": [
+            [
+              63,
+              386
+            ],
+            [
+              77,
+              374
+            ],
+            [
+              94,
+              371
+            ],
+            [
+              112,
+              377
+            ],
+            [
+              117,
+              390
+            ],
+            [
+              111,
+              418
+            ],
+            [
+              98,
+              434
+            ],
+            [
+              82,
+              427
+            ],
+            [
+              74,
+              408
+            ]
+          ],
+          "bbox_xyxy": [
+            63,
+            371,
+            118,
+            435
+          ],
+          "mask_status": "provisional",
+          "support": "visible_cup"
+        },
+        {
+          "instance_id": "reference-monitor_black",
+          "category": "tv",
+          "polygon": [
+            [
+              0,
+              174
+            ],
+            [
+              248,
+              95
+            ],
+            [
+              287,
+              249
+            ],
+            [
+              28,
+              382
+            ],
+            [
+              0,
+              325
+            ]
+          ],
+          "bbox_xyxy": [
+            0,
+            95,
+            288,
+            383
+          ],
+          "mask_status": "provisional",
+          "support": "visible_display_enclosure"
+        },
+        {
+          "instance_id": "reference-monitor_silver",
+          "category": "tv",
+          "polygon": [
+            [
+              263,
+              100
+            ],
+            [
+              450,
+              93
+            ],
+            [
+              448,
+              222
+            ],
+            [
+              288,
+              247
+            ]
+          ],
+          "bbox_xyxy": [
+            263,
+            93,
+            451,
+            248
+          ],
+          "mask_status": "provisional",
+          "support": "visible_display_enclosure"
+        }
+      ],
+      "source_selection_index": 0
+    },
+    {
+      "session_id": "tum_freiburg1_desk",
+      "frame_id": "104",
+      "timestamp_s": 1305031457.091655,
+      "visit_id": "before",
+      "partition": "enrollment",
+      "rgb": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/rgb/1305031457.091655.png",
+        "sha256": "41aa9b3ab08c477ec7e9de740dc30e55c8a0c6fba5ebc117d4407b22fa19a3fb"
+      },
+      "depth": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/depth/1305031457.076011.png",
+        "sha256": "86d68cf7afec872e78304d2cf1bb276086b3e064bebc51264b909e25f5949738",
+        "timestamp_s": 1305031457.076011
+      },
+      "label_coverage": {
+        "cup": "complete",
+        "tv": "subset"
+      },
+      "labels": [
+        {
+          "instance_id": "reference-cup",
+          "category": "cup",
+          "polygon": [
+            [
+              424,
+              120
+            ],
+            [
+              427,
+              113
+            ],
+            [
+              441,
+              109
+            ],
+            [
+              458,
+              110
+            ],
+            [
+              470,
+              115
+            ],
+            [
+              473,
+              124
+            ],
+            [
+              463,
+              155
+            ],
+            [
+              452,
+              168
+            ],
+            [
+              441,
+              162
+            ],
+            [
+              434,
+              147
+            ]
+          ],
+          "bbox_xyxy": [
+            424,
+            109,
+            474,
+            169
+          ],
+          "mask_status": "provisional",
+          "support": "visible_cup"
+        }
+      ],
+      "source_selection_index": 9
+    },
+    {
+      "session_id": "tum_freiburg1_desk",
+      "frame_id": "268",
+      "timestamp_s": 1305031463.05981,
+      "visit_id": "look_away",
+      "partition": "evaluation",
+      "rgb": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/rgb/1305031463.059810.png",
+        "sha256": "247e49318c75281e6dafe038c14752ab5a0367eadcb88f15bc7585063c75fe62"
+      },
+      "depth": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/depth/1305031463.050783.png",
+        "sha256": "83de844ab3226820d32fec3881d937061b1fa282249a5e3ef854d893418999af",
+        "timestamp_s": 1305031463.050783
+      },
+      "label_coverage": {
+        "cup": "complete",
+        "tv": "subset"
+      },
+      "labels": [],
+      "source_selection_index": 27
+    },
+    {
+      "session_id": "tum_freiburg1_desk",
+      "frame_id": "359",
+      "timestamp_s": 1305031466.09584,
+      "visit_id": "return",
+      "partition": "evaluation",
+      "rgb": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/rgb/1305031466.095840.png",
+        "sha256": "658438c9ff7bc26d2d5b72a462e52381ed8af62bd02a1f4237b0cfa9dc8208f1"
+      },
+      "depth": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/depth/1305031466.083913.png",
+        "sha256": "300953ab6d2f0a51db8023dee0a021dba98fc8f8f0c909c0822916c259fbcfbd",
+        "timestamp_s": 1305031466.083913
+      },
+      "label_coverage": {
+        "cup": "complete",
+        "tv": "subset"
+      },
+      "labels": [
+        {
+          "instance_id": "reference-cup",
+          "category": "cup",
+          "polygon": [
+            [
+              445,
+              264
+            ],
+            [
+              450,
+              255
+            ],
+            [
+              466,
+              252
+            ],
+            [
+              480,
+              256
+            ],
+            [
+              486,
+              265
+            ],
+            [
+              479,
+              284
+            ],
+            [
+              465,
+              297
+            ],
+            [
+              452,
+              292
+            ]
+          ],
+          "bbox_xyxy": [
+            445,
+            252,
+            487,
+            298
+          ],
+          "mask_status": "provisional",
+          "support": "visible_cup"
+        },
+        {
+          "instance_id": "reference-monitor_black",
+          "category": "tv",
+          "polygon": [
+            [
+              433,
+              77
+            ],
+            [
+              490,
+              37
+            ],
+            [
+              499,
+              194
+            ],
+            [
+              459,
+              259
+            ],
+            [
+              409,
+              247
+            ],
+            [
+              398,
+              196
+            ],
+            [
+              406,
+              102
+            ]
+          ],
+          "bbox_xyxy": [
+            398,
+            37,
+            500,
+            260
+          ],
+          "mask_status": "provisional",
+          "support": "visible_display_enclosure"
+        },
+        {
+          "instance_id": "reference-monitor_silver",
+          "category": "tv",
+          "polygon": [
+            [
+              496,
+              54
+            ],
+            [
+              607,
+              25
+            ],
+            [
+              605,
+              153
+            ],
+            [
+              507,
+              174
+            ]
+          ],
+          "bbox_xyxy": [
+            496,
+            25,
+            608,
+            175
+          ],
+          "mask_status": "provisional",
+          "support": "visible_display_enclosure"
+        }
+      ],
+      "source_selection_index": 37
+    },
+    {
+      "session_id": "tum_freiburg1_desk",
+      "frame_id": "405",
+      "timestamp_s": 1305031467.627532,
+      "visit_id": "return",
+      "partition": "evaluation",
+      "rgb": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/rgb/1305031467.627532.png",
+        "sha256": "5ccbc95664199c31e1231049599cf418745f3a27cee5900d2506ce49052fbfc9"
+      },
+      "depth": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/depth/1305031467.618680.png",
+        "sha256": "914736e343de18a3f93bedaf7fd554e3ccdce91aba6c02307b4a848d838ba9cd",
+        "timestamp_s": 1305031467.61868
+      },
+      "label_coverage": {
+        "cup": "complete",
+        "tv": "subset"
+      },
+      "labels": [
+        {
+          "instance_id": "reference-cup",
+          "category": "cup",
+          "polygon": [
+            [
+              372,
+              147
+            ],
+            [
+              380,
+              144
+            ],
+            [
+              391,
+              146
+            ],
+            [
+              402,
+              151
+            ],
+            [
+              398,
+              162
+            ],
+            [
+              386,
+              167
+            ],
+            [
+              376,
+              164
+            ]
+          ],
+          "bbox_xyxy": [
+            372,
+            144,
+            403,
+            168
+          ],
+          "mask_status": "provisional",
+          "support": "visible_cup"
+        },
+        {
+          "instance_id": "reference-monitor_black",
+          "category": "tv",
+          "polygon": [
+            [
+              366,
+              0
+            ],
+            [
+              525,
+              0
+            ],
+            [
+              517,
+              108
+            ],
+            [
+              376,
+              144
+            ]
+          ],
+          "bbox_xyxy": [
+            366,
+            0,
+            526,
+            145
+          ],
+          "mask_status": "provisional",
+          "support": "visible_display_enclosure"
+        },
+        {
+          "instance_id": "reference-monitor_silver",
+          "category": "tv",
+          "polygon": [
+            [
+              535,
+              0
+            ],
+            [
+              639,
+              0
+            ],
+            [
+              639,
+              102
+            ],
+            [
+              521,
+              110
+            ]
+          ],
+          "bbox_xyxy": [
+            521,
+            0,
+            640,
+            111
+          ],
+          "mask_status": "provisional",
+          "support": "visible_display_enclosure"
+        }
+      ],
+      "source_selection_index": 42
+    },
+    {
+      "session_id": "tum_freiburg1_desk",
+      "frame_id": "560",
+      "timestamp_s": 1305031472.79564,
+      "visit_id": "return",
+      "partition": "evaluation",
+      "rgb": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/rgb/1305031472.795640.png",
+        "sha256": "3c623aaae0662aaaf224d955bb93e73a3a00fd891235731c8925b5e4b0207c1e"
+      },
+      "depth": {
+        "path": "data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/depth/1305031472.792775.png",
+        "sha256": "b2ef795a8f1686dd19e2672514b13a9c2fc319f9c409a2f77e6b5b3917cb21a1",
+        "timestamp_s": 1305031472.792775
+      },
+      "label_coverage": {
+        "cup": "complete",
+        "tv": "subset"
+      },
+      "labels": [
+        {
+          "instance_id": "reference-cup",
+          "category": "cup",
+          "polygon": [
+            [
+              325,
+              22
+            ],
+            [
+              332,
+              14
+            ],
+            [
+              350,
+              10
+            ],
+            [
+              367,
+              14
+            ],
+            [
+              378,
+              22
+            ],
+            [
+              374,
+              39
+            ],
+            [
+              356,
+              60
+            ],
+            [
+              330,
+              60
+            ],
+            [
+              327,
+              47
+            ]
+          ],
+          "bbox_xyxy": [
+            325,
+            10,
+            379,
+            61
+          ],
+          "mask_status": "provisional",
+          "support": "visible_cup"
+        }
+      ],
+      "source_selection_index": 59
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "stationary_return",
+      "status": "present",
+      "evidence": "Same white cup relative to pen holder, telephone, keyboard and monitor stands before and after look-away."
+    },
+    {
+      "name": "similar_distinct_objects",
+      "status": "present",
+      "evidence": "Two separate nearby monitor enclosures; no second physical cup checked."
+    },
+    {
+      "name": "scene_absence",
+      "status": "unusable",
+      "evidence": "Camera exclusion does not establish scene absence."
+    },
+    {
+      "name": "viewpoint",
+      "status": "present",
+      "evidence": "Before and return camera viewpoints differ."
+    },
+    {
+      "name": "object_rotation",
+      "status": "absent",
+      "evidence": "No controlled object rotation."
+    },
+    {
+      "name": "lighting",
+      "status": "absent",
+      "evidence": "No controlled lighting change."
+    },
+    {
+      "name": "background",
+      "status": "present",
+      "evidence": "Uncontrolled background change from viewpoint."
+    },
+    {
+      "name": "partial_occlusion",
+      "status": "present",
+      "evidence": "Cup partly hidden by pen holder and objects; coarse boundaries provisional."
+    },
+    {
+      "name": "full_occlusion_recovery",
+      "status": "unusable",
+      "evidence": "Cup leaves view; not proven occluded by another object."
+    },
+    {
+      "name": "moved_object",
+      "status": "absent",
+      "evidence": "No verified relocation."
+    },
+    {
+      "name": "depth_holes",
+      "status": "present",
+      "evidence": "Raw missing depth is retained."
+    },
+    {
+      "name": "origin_reset",
+      "status": "absent",
+      "evidence": "Continuous supplied pose origin; synthetic controls separate."
+    },
+    {
+      "name": "phone_capture",
+      "status": "absent",
+      "evidence": "No phone recording."
+    }
+  ],
+  "revisits": [
+    {
+      "instance_id": "reference-cup",
+      "before_frame_id": "104",
+      "gap_frame_id": "268",
+      "return_frame_id": "359"
+    }
+  ]
+}

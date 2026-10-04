@@ -41,23 +41,43 @@ experiments/
   datasets/                       acquisition and recorded-input guidance
 ```
 
-The geometry control is implemented. Stages 03 and 04 currently contain their plans; their proposed source, test and run directories will be populated during implementation. Work-task IDs describe pieces of work, while experiment numbers describe pipeline stages. Work task 03 delivered geometry validation; work task 05 will implement pipeline stage 03.
+The geometry control is implemented. Stage 03 has a short CPU camera-tracking baseline; stage 04 has a supplied-input point-surface baseline. Their source, tests and local runs exist. Work-task IDs describe pieces of work, while experiment numbers describe pipeline stages. Work task 03 delivered geometry validation; work task 05 delivered the first pipeline stage 03 baseline.
 
 ```mermaid
 flowchart TD
-    A[01 Capture and deliver calibrated images] --> B[02 Estimate depth]
-    A --> C[03 Estimate camera position and orientation]
-    B --> C
-    B --> D[04 Reconstruct observed surfaces]
-    C --> D
-    D --> E[05 Produce bird's-eye maps and measurements]
-    A --> F[06 Detect and identify objects across views]
-    B --> F
-    C --> F
-    D --> F
-    G[Recorded observations and known reference inputs] --> B
-    G --> C
-    G --> D
+    I["Benchmark or captured images, calibration and timestamps"] --> D["06 Detection: YOLO26x bounded POC"]
+    I --> Z["02 Stereo depth: data acquired; method planned"]
+    I --> C["03 Estimated camera poses: short control; full Task13 unfinished"]
+    I --> M["Optional segmentation: classical controls; learned planned"]
+    D --> M
+    I --> DEP["Supplied measured depth: exercised control"]
+    Z -.-> DEP
+    M --> G["Depth-supported camera geometry: completed control/POC"]
+    DEP --> G
+    R["Supplied poses: explicit reference control"] --> W["World observations"]
+    G --> W
+    C -.-> W
+    I --> A["06 Appearance: ZNCC/YOLO tested; ResNet50/context planned"]
+    D --> A
+    W --> ID["06 Identity association: bounded POC; uncertainty/policy planned"]
+    A --> ID
+    ID --> O["Individual observations and histories"]
+    O --> F["Object position/shape estimates: medians; calibrated fusion planned"]
+    W --> S["04 Point surfaces: measured ICL control and desk POC"]
+    S -.-> X["Patches/meshes/textures/novel-view methods: planned"]
+    S --> V["Offline review and portable outputs: completed"]
+    O --> V
+    F --> V
+    S -.-> E["05 Top-down measurements: planned"]
+    T["Temporal observations"] --> O
+    Q["Pose corrections: Task25 planned after Task13"] -.-> W
+    Q -.-> F
+    Q -.-> S
+    REF["Independent masks/identities/anchors/surfaces: partial or missing"] -.-> SCORE["Scoring: error, coverage, repeatability, association and costs"]
+    F -.-> SCORE
+    X -.-> SCORE
+    E -.-> SCORE
+    P["01 Phone capture: untested"] -.-> I
 ```
 
 Depth is optional for some camera estimators. Supplied benchmark depth and poses allow each stage to be tested independently. Geometry validation supports stages 03 and 04 through shared coordinate conventions; it is a control, rather than an extra estimation stage. Object tracking means retaining object identity across observations; camera tracking means estimating camera motion.
@@ -72,7 +92,7 @@ The benefit is being able to swap backends and isolate depth, motion and reconst
 
 ## Development data coverage
 
-Each experiment README names its initial inputs and independent reference. Current coverage on 2 October 2026 is:
+Each experiment README names its initial inputs and independent reference. Current coverage reconciled on 4 October 2026 is:
 
 | Experiment | Development inputs | Independent reference | Readiness |
 | --- | --- | --- | --- |
@@ -81,7 +101,7 @@ Each experiment README names its initial inputs and independent reference. Curre
 | Camera tracking | Acquired TUM Freiburg1 xyz colour/depth | Motion-capture poses kept outside tracker inputs | 30-frame CPU trial completed: 6.93 mm position error and 2.14 image pairs/s; full xyz and selected desk evaluation remain |
 | Reconstruction | Acquired ICL living-room trajectory 2 depth/poses, matched IDs 1..880 | Separate acquired living-room reference point cloud | Nine-frame CPU baseline: 7.85 mm mean error, 22.29% whole-reference coverage within 5 cm |
 | Bird's-eye mapping | Independently specified known shapes; acquired ICL point cloud as a later complex input | Expected dimensions, heights, areas and observation masks from fixture definitions | Known-shape fixtures must be created with the first tests |
-| Object recognition and counting | Checked identity-store controls; labelled object walkthrough still needed | Manually checked masks, persistent object identities and inventory | 10 persistence controls pass; no task-specific recognition model or revisit benchmark has been acquired |
+| Object recognition and counting | Acquired TUM xyz/desk RGB-D, existing YOLO26x, six provisional desk reference frames | Agent-reviewed selected cup coverage and monitor positive subset; human mask/identity and independent physical anchors remain gaps | Bounded detection, classical masks, appearance, identity and 60-frame/457-proposal replay completed; no blind inventory accuracy |
 
 No KITTI download is needed to begin these independent stages. Recorded car-mounted observations cannot resolve phone camera access or replace exact expected map measurements. Outdoor validation and a later comparison using stereo depth inside tracking still need suitable data; neither is claimed complete by this initial development coverage.
 
@@ -165,7 +185,7 @@ The main implementation starts with a verified observation/pose contract and a r
 | [08: phone feasibility](../task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Inspect both phones and retain capture/calibration evidence | None; run alongside geometry work |
 | [09: recognition and persistent counting](../task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Test labels, identities and revisit counts independently | 03 for 3D association; 04 for reconstructed-map integration |
 
-Geometry validation and Task 04's supplied-input point-surface baseline are complete. Nine CPU views have measured reference error and whole-reference coverage, with saved inputs and a surface preview. Task 05 has completed a 30-frame CPU tracking trial with independent scoring and shared timing metadata. Task 13 now has the selected desk archive and verified 573 timestamp pairs; full development and held-out tracking evaluations remain outstanding. Task 08's WSL build setup now produces a verified arm64 APK, but camera support on both phones remains untested. Task 09 now has a checked-input persistent identity store; it has not run object recognition or labelled inventory evaluation. Record settings and numerical acceptance limits before experiment runs.
+Geometry validation and Task 04's supplied-input point-surface baseline are complete. Nine CPU views have measured reference error and whole-reference coverage, with saved inputs and a surface preview. Task 05 has completed a 30-frame CPU tracking trial with independent scoring and shared timing metadata. Task 13 now has the selected desk archive and verified 573 timestamp pairs; full development and held-out tracking evaluations remain outstanding. Task 08's WSL build setup now produces a verified arm64 APK, but camera support on both phones remains untested. Task09 remains the inventory umbrella. Tasks17-22 have delivered provisional reference controls and bounded recognition/replay evidence; independent inventory accuracy and wider conditions remain untested. Record settings and numerical acceptance limits before experiment runs.
 
 The tracking trial is a short development result; later phone and site assemblies remain plans. Task 00 supplied literature and preliminary desktop results. Its integrated implementation is archived; final code review, package validation, coverage measurement and post-fix reruns were unfinished when the objective changed. Any reused code must be validated in its new owning experiment.
 
@@ -179,3 +199,11 @@ Use four explicit labels in both the views and saved metadata: observed input, g
 Task 05 closes the 30-observation CPU tracking baseline. Task 13 retains the full development and held-out evaluation. Task 14 adds labelled inspection. Task 08 has prepared and verified the WSL p4a build route; no phone has been connected or measured yet.
 
 Verified interactive inspections: [camera motion](03_camera_pose_estimation/runs/20261002T195923.778722Z_8bcaf965d8dc496192563205df59d85c/viewer.html) and [reconstructed point surface](04_surface_reconstruction/runs/20261002T195928.219822Z_55d2d0bfa455453eb2289a5e717490c1/viewer.html). These are local run artifacts; datasets and generated runs are excluded from repository publication.
+
+## Bounded replay and next investigations, 4 October 2026
+
+The [object experiment](06_object_recognition/README.md) now has the accepted recorded replay: sixty desk frames, 457 baseline proposals and a six-frame automatic comparison, all using supplied poses. Task27's single-view xyz cup is a separate recording, not a verified physical identity shared with desk. Task21 and Task22 remain pending review; Task16 broader-protocol approval is outstanding. Task13 estimated tracking remains unfinished and frozen.
+
+The next comparisons are Task31 provisional identity policy, Task34 mask geometry, Task32 spatial uncertainty, Task33 appearance/context association and Task35 sequential error/fusion, with independent references planned by Task40. Task36 separates surface geometry from realism; Tasks37/38 separately investigate room-mapping platforms and longer-range/driving data. Task39 records future review requirements without implementing an app. The [task board](../task_list/README.md#next-experiment-order-and-gaps) records priorities, blockers and acquisition decisions.
+
+Mobile capture/build remains Tasks08/24; Task23 retains its unfinished review controls. No phone capture or new experiment is started by documentation reconciliation. Model load, acquisition/annotation, component latency, memory/storage, correction/rebuild and unavailable conditions must be recorded alongside measurements. Software tests remain engineering receipts, not the main measure of experimental progress.

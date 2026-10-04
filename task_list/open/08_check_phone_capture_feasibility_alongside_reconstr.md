@@ -1,10 +1,10 @@
 ---
 id: "08"
 title: Check phone capture feasibility alongside reconstruction
-status: pending_review
+status: open
 priority: MED
 type: infra
-blocked_by: []
+blocked_by: ["24"]
 blocks: []
 verification_test: experiments/01_camera_capture_delivery/README.md
 plan_reviewed: null
@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "0 verified phone camera pairs"
   target: "Capability and capture evidence for both available phones"
 created: 2026-10-02
-last_updated: 2026-10-02
+last_updated: 2026-10-04
 superseded_by: null
 ---
 
@@ -30,6 +30,13 @@ superseded_by: null
 ## In plain English
 
 Check whether each available phone can save useful images from two cameras at once. Record what works and what is missing. This check runs alongside reconstruction so camera limitations do not delay benchmark tests.
+
+## Proposed build ownership, 3 October 2026
+
+Task24 recovers the first-party smoke-app/build recipe into stage01 and verifies reproducible WSL/container builds. This task retains the offline camera capability/capture app, phone handoff, on-device result display and both handset checks. Existing WSL installation and arm64 packaging receipts are preserved; a Docker build and camera app are not yet verified. Task24 completes the repo-owned build dependency before camera implementation in this checkout.
+
+
+Documentation reconciliation: the previously declared mobile deployment directory/README does not exist. The existing stage01 README owns capture/build/handoff instructions; no separate documentation directory is created. Historical WSL/APK receipts remain unchanged.
 
 ## What
 
@@ -51,6 +58,7 @@ Several rear lenses do not establish simultaneous access, synchronization or use
 4. Compare single-camera control with simultaneous capture. Assess overlap and independently check calibration.
 5. Report stereo feasible, infeasible or unresolved. Compare supported ARCore depth or external stereo if needed, with input differences explicit.
 6. Keep capture tests separate from delivery replay and sustained algorithm benchmarks.
+7. Put any APK prepared for phone handoff in the repository's `mobile deployment/` folder. Design it to work without a connection to the PC. Show the result of every test the APK runs on the phone, including pass, fail or skipped status and a short reason. The user will transfer and install the APK. The existing smoke APK has no camera feature and does not meet this handoff requirement.
 
 ## Invariants and recovery
 
@@ -76,7 +84,7 @@ Before: 0 verified target-phone camera pairs. Target: capability and capture evi
 | Delta | 0 camera pairs; one arm64 APK smoke build verified |
 | Outcome | Workstation preparation complete; open because neither phone is connected and camera feasibility remains untested |
 
-still open because both target phones still need to be connected for camera capability and simultaneous-pair checks.
+still open because both target phones still need to be connected for camera capability and simultaneous-pair checks, and a self-contained APK with on-device test results has not been prepared.
 
 ### Workstation preparation, 2026-10-02
 

@@ -135,3 +135,31 @@ The offline viewer accumulates sampled coloured points through the selected fram
 The viewer is a point surface, with no triangles, hole filling or duplicate fusion. Numerical arrays and full point files remain unchanged. Metadata gives separate full and display counts for reconstructed and reference points. Frame IDs have no saved capture timestamps, so stepping shows observation order rather than measured playback speed. Depth colour scales and distance scales have separate links. The static accumulated surface preview is now shown for ordinary runs too.
 
 [Open the verified labelled 3D inspection](runs/20261002T195928.219822Z_55d2d0bfa455453eb2289a5e717490c1/viewer.html). This new publication preserves the numerical run and its original input files. The original computation timing and the separate visual-publication timing are both linked.
+
+## Reconciled research boundary, 4 October 2026
+
+The measured ICL control above remains a point-surface reconstruction with supplied depth/poses. The [desk replay](../06_object_recognition/experiments/05_replay/README.md) also accumulates measured points using supplied TUM poses, but has no acquired independent dense reference surface. Its visual coverage cannot inherit ICL's accuracy score. [Task36](../../task_list/open/36_compare_surface_representations_and_visual_realism.md) owns new points/patches/mesh/texture/photogrammetry/splat/NeRF comparisons. [Task35](../../task_list/open/35_measure_error_propagation_and_sequential_fusion.md) owns error/fusion/correction assessment; Task25 owns later camera corrections. Task23's partial viewer work remains unfinished and is preserved.
+
+```mermaid
+flowchart TD
+    I["Calibrated depth/RGB and timestamps: acquired inputs"] --> G["Per-view camera geometry: completed control"]
+    P["Supplied poses: completed control"] --> W["World observations"]
+    G --> W
+    C["Estimated poses: short control; full Task13 unfinished"] -.-> W
+    W --> S["Accumulated point surface: measured ICL control / desk POC"]
+    S --> V["Offline surface/camera/replay review: completed"]
+    S -.-> F["Task36 patches/fused mesh/textures: planned"]
+    RGB["Overlapping translated RGB views and metric scale: acquisition needed"] -.-> N["Photogrammetry/splat/NeRF: planned"]
+    T["Further views with depth lineage"] -.-> F
+    Q["Task25 corrected pose revision: planned"] -.-> W
+    Q -.-> F
+    R["Independent reference surface: ICL acquired; real desk missing"] --> E["Surface distance and coverage scoring"]
+    S --> E
+    F -.-> E
+    N -.-> E
+    HR["Held-out images and review questions: planned"] -.-> VE["Visual realism/navigation scoring"]
+    N -.-> VE
+    F -.-> VE
+```
+
+Geometry proximity, observed coverage, missing/false surfaces and cost are separate from visual realism. Full-object dimensions need independent references and adequate surface coverage. Densifying display changes presentation, not captured information. No representation or correction experiment was started in documentation Task30.

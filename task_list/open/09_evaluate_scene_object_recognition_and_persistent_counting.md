@@ -4,10 +4,12 @@ title: Evaluate scene object recognition and persistent counting
 status: open
 priority: MED
 type: experiment
-blocked_by: []
+blocked_by: ["22", "31", "32", "33", "34", "35", "40"]
 blocks: []
 verification_test: experiments/06_object_recognition/tests/test_identity_store.py
 plan_reviewed: 2026-10-02 PASS
+plan_review_scope: checked identity-store slice only
+approval_status: broader follow-up plan proposed
 files:
   - experiments/06_object_recognition/**
   - pytest.ini
@@ -22,7 +24,7 @@ baseline_metric:
   baseline_value: "0 labelled revisit/counting evaluations"
   target: "Independent identity controls and held-out inventory evaluation"
 created: 2026-10-02
-last_updated: 2026-10-02
+last_updated: 2026-10-04
 superseded_by: null
 ---
 
@@ -31,6 +33,16 @@ superseded_by: null
 ## In plain English
 
 Recognise objects in a walkthrough and remember which ones have already been seen. Looking away and returning should not automatically count an object twice. Start with checked examples, then measure what changes when recognition and camera positions are estimated.
+
+## Follow-up ownership reconciled, 4 October 2026
+
+This task remains the stage06 umbrella and preserves the completed checked-store receipts below. The new plan is in the experiment README. Tasks 16/17 own research and labelled agreements; 18/19/20 own detection, segmentation and appearance; 21 owns automatic identity association; 22 owns matched-frame replay. Tasks17-20 have completed bounded provisional-reference trials; Tasks21/22 engineering has bounded results pending review. Their existence does not establish independent inventory accuracy. Task09 cannot close until those named evidence obligations land or are explicitly revised by the owner. The existing review stamp applies to persistence only; new stateful work requires its own plan/diff reviews.
+
+## Reconciled follow-ups, 4 October 2026
+
+Task09 remains the inventory umbrella, not a second implementation owner for the new comparisons. Task31 owns provisional births/duplicates and history-preserving unification; Task32 spatial supports/calibration; Task33 appearance/context association; Task34 mask-to-position/extent accuracy; Task35 sequential errors/fusion. Task40 owns shared independent reference/capture planning. Tasks37/38 research platforms/range separately; Task39 records future app requirements only.
+
+Existing evidence: Task21 geometry-only and combined rules both resolve eleven provisional observations; Task20 has one wrong YOLO monitor ranking; Task29 reports 72.8/82.3 mm surface spread without independent centre truth. Necessary next data include human pixel/identity review, defined surveyed anchors/extents, session-disjoint hard cases and reference uncertainty. Measure false merges/splits/unresolved inventory and absolute error separately from repeatability. Acquisition, new weights and numerical gates remain decisions for the owning tasks. Existing checked-store receipts below are launch-history evidence and remain unchanged.
 
 ## What
 

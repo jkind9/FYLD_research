@@ -5,6 +5,14 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 pytest-cache-files-*/
+.pytest-tmp/
+.task13_pytest_tmp_*/
+.task18_test_first/
+python_review_tmp/
+task_list/.pytest-temp/
+experiments/**/.pytest-tmp/
+experiments/**/tests/.pytest-temp/
+experiments/**/tests/.test-*.sqlite3*
 .pytest-work-*/
 .test_tmp*/
 experiments/**/runs/
@@ -21,6 +29,7 @@ data/*
 !data/README.md
 checkpoints/
 outputs/
+mobile deployment/
 build/
 dist/
 .env
@@ -56,3 +65,7 @@ data/**/*
 !data/**/*.json
 !data/README.md
 data/**/review_temp/
+
+# Derived object-reference publication stays local; its frozen source manifest
+# lives under experiments/06_object_recognition/datasets/.
+data/object_revisits/desk_smoke_v1/
