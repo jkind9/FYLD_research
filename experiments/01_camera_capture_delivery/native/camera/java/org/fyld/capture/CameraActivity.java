@@ -4,12 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.view.View;
+import android.view.Surface;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -28,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -40,6 +38,9 @@ public final class CameraActivity extends Activity {
     private Handler uiHandler;
     private TextView status;
     private File latestSession;
+    private CameraCapture activeCapture;
+    private final List<Button> actionButtons = new ArrayList<>();
+    private boolean busy;
     private Runnable permissionAction;
     private static final String STATE_SESSION_PATH = "capture_session_path";
     private static final String PROCESS_ID = java.util.UUID.randomUUID().toString();
@@ -67,6 +68,7 @@ public final class CameraActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (activeCapture != null) activeCapture.cancel("Activity stopped during camera capture");
         if (cameraThread != null) cameraThread.quitSafely();
         super.onDestroy();
     }
@@ -94,8 +96,29 @@ public final class CameraActivity extends Activity {
     private void addButton(LinearLayout parent, String label, View.OnClickListener action) {
         Button button = new Button(this);
         button.setText(label);
-        button.setOnClickListener(action);
+        actionButtons.add(button);
+        button.setOnClickListener(view -> {
+            if (busy) return;
+            setBusy(true);
+            action.onClick(view);
+        });
         parent.addView(button);
+    }
+
+    private void setBusy(boolean value) {
+        busy = value;
+        if (isDestroyed()) return;
+        for (Button button : actionButtons) button.setEnabled(!value);
+    }
+
+    private int displayRotationDegrees() {
+        switch (getWindowManager().getDefaultDisplay().getRotation()) {
+            case Surface.ROTATION_90: return 90;
+            case Surface.ROTATION_180: return 180;
+            case Surface.ROTATION_270: return 270;
+            case Surface.ROTATION_0:
+            default: return 0;
+        }
     }
 
     private void withCameraPermission(Runnable action) {
@@ -131,7 +154,7 @@ public final class CameraActivity extends Activity {
             CameraReport.addCheck(report, "camera2_enumeration", cameras.length() == 0 ? "FAIL" : "PASS",
                     cameras.length() == 0 ? "Camera2 returned no camera IDs" : null, details);
             saveReport(report, "Camera2 capability report saved. Use Export latest session to transfer it.");
-        } catch (CameraAccessException | IOException | JSONException error) {
+        } catch (IOException | JSONException error) {
             showError("Camera inspection failed: " + error.getMessage());
         }
     }
@@ -165,7 +188,7 @@ public final class CameraActivity extends Activity {
                             showError("Could not record the single-camera result: " + failure.getMessage());
                         }
                     });
-        } catch (CameraAccessException | IOException | JSONException error) {
+        } catch (IOException | JSONException error) {
             showError("Could not start single-camera control: " + error.getMessage());
         }
     }
@@ -173,14 +196,17 @@ public final class CameraActivity extends Activity {
     private void capturePairs() {
         try {
             JSONObject report = newSessionReport();
-            CameraManager manager = (CameraManager) getSystemService(CAMERA_SERVICE);
             if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R) {
                 CameraReport.addCheck(report, "advertised_camera_pairs", "SKIPPED",
                         "Concurrent camera sets require Android 11 or newer", null);
                 saveReport(report, "Concurrent camera sets are unavailable on this Android version.");
                 return;
             }
-            List<List<String>> groups = sortedGroups(manager.getConcurrentCameraIds());
+            if (hasFailedCheck(report, "concurrent_camera_inventory")) {
+                saveReport(report, "Camera2 could not read concurrent camera sets. The error was saved.");
+                return;
+            }
+            List<List<String>> groups = sortedGroups(report.getJSONArray("concurrent_camera_sets"));
             if (groups.isEmpty()) {
                 CameraReport.addCheck(report, "advertised_camera_pairs", "SKIPPED",
                         "The Camera2 service advertises no concurrent camera ID sets", null);
@@ -189,7 +215,7 @@ public final class CameraActivity extends Activity {
             }
             status.setText("Attempting " + groups.size() + " advertised concurrent set(s)…");
             capturePairAt(report, groups, 0);
-        } catch (CameraAccessException | IOException | JSONException error) {
+        } catch (IOException | JSONException error) {
             showError("Could not enumerate concurrent camera sets: " + error.getMessage());
         }
     }
@@ -224,17 +250,24 @@ public final class CameraActivity extends Activity {
     private void runCapture(JSONObject report, List<String> ids, String captureName,
                             String statusText, CaptureDone done) {
         CameraCapture capture = new CameraCapture(this, cameraHandler, latestSession,
-                captureName, ids, new CameraCapture.Callback() {
+                captureName, ids, displayRotationDegrees(), new CameraCapture.Callback() {
             @Override
             public void onComplete(JSONArray frames) {
-                uiHandler.post(() -> done.done(report, frames, null));
+                uiHandler.post(() -> {
+                    activeCapture = null;
+                    done.done(report, frames, null);
+                });
             }
 
             @Override
             public void onFailure(String reason, JSONArray partialFiles) {
-                uiHandler.post(() -> done.done(report, partialFiles, reason));
+                uiHandler.post(() -> {
+                    activeCapture = null;
+                    done.done(report, partialFiles, reason);
+                });
             }
         });
+        activeCapture = capture;
         status.setText(statusText);
         capture.start();
     }
@@ -255,15 +288,16 @@ public final class CameraActivity extends Activity {
         }
     }
 
-    private JSONObject newSessionReport() throws CameraAccessException, IOException, JSONException {
-        latestSession = CameraReport.newSessionDirectory(this);
+    private JSONObject newSessionReport() throws IOException, JSONException {
         JSONObject report = CameraReport.create(this);
+        latestSession = CameraReport.newSessionDirectory(this);
         report.put("session_id", latestSession.getName());
         report.put("session_process_id", PROCESS_ID);
         report.put("status", "incomplete");
         report.put("session_directory", latestSession.getName());
         CameraReport.addCheck(report, "arcore_depth_and_pose", "SKIPPED",
                 "This APK does not include the ARCore SDK; no runtime depth or pose result was collected", null);
+        CameraReport.addCheck(report, "camera_permission", "PASS", null, null);
         CameraReport.writeReport(latestSession, report);
         return report;
     }
@@ -272,7 +306,8 @@ public final class CameraActivity extends Activity {
         try {
             report.put("status", "complete");
             CameraReport.writeReport(latestSession, report);
-            status.setText(message + "\nSession: " + latestSession.getName());
+            showReport(report, message);
+            setBusy(false);
         } catch (IOException | JSONException error) {
             showError("Could not write camera report: " + error.getMessage());
         }
@@ -299,7 +334,8 @@ public final class CameraActivity extends Activity {
             CameraReport.addCheck(report, "arcore_depth_and_pose", "SKIPPED",
                     "This APK does not include the ARCore SDK; no runtime depth or pose result was collected", null);
             CameraReport.writeReport(latestSession, report);
-            status.setText("Camera permission was denied. The result is saved in this session.");
+            showReport(report, "Camera permission was denied. The result is saved in this session.");
+            setBusy(false);
         } catch (IOException | JSONException error) {
             showError("Could not record permission result: " + error.getMessage());
         }
@@ -325,19 +361,29 @@ public final class CameraActivity extends Activity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/zip");
         intent.putExtra(Intent.EXTRA_TITLE, latestSession.getName() + ".zip");
-        startActivityForResult(intent, EXPORT_REQUEST);
+        try {
+            startActivityForResult(intent, EXPORT_REQUEST);
+        } catch (RuntimeException error) {
+            showError("Could not open the export destination picker: " + error.getMessage());
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != EXPORT_REQUEST || resultCode != RESULT_OK || data == null || data.getData() == null) return;
+        if (requestCode != EXPORT_REQUEST) return;
+        if (resultCode != RESULT_OK || data == null || data.getData() == null) {
+            setBusy(false);
+            return;
+        }
         try (OutputStream output = getContentResolver().openOutputStream(data.getData(), "w")) {
             if (output == null) throw new IOException("The selected destination could not be opened");
             zipSession(latestSession, output, System.currentTimeMillis());
             status.setText("Export complete. Transfer the ZIP to the workstation and verify its hashes.");
         } catch (IOException error) {
             showError("Export failed: " + error.getMessage());
+        } finally {
+            setBusy(false);
         }
     }
 
@@ -433,10 +479,14 @@ public final class CameraActivity extends Activity {
         }
     }
 
-    private List<List<String>> sortedGroups(Set<Set<String>> groups) {
+    private List<List<String>> sortedGroups(JSONArray groups) throws JSONException {
         List<List<String>> sorted = new ArrayList<>();
-        for (Set<String> group : groups) {
-            List<String> ids = new ArrayList<>(group);
+        for (int groupIndex = 0; groupIndex < groups.length(); groupIndex++) {
+            JSONArray group = groups.getJSONArray(groupIndex);
+            List<String> ids = new ArrayList<>();
+            for (int idIndex = 0; idIndex < group.length(); idIndex++) {
+                ids.add(group.getString(idIndex));
+            }
             Collections.sort(ids);
             sorted.add(ids);
         }
@@ -444,8 +494,32 @@ public final class CameraActivity extends Activity {
         return sorted;
     }
 
+    private boolean hasFailedCheck(JSONObject report, String id) throws JSONException {
+        JSONArray checks = report.getJSONArray("checks");
+        for (int index = 0; index < checks.length(); index++) {
+            JSONObject check = checks.getJSONObject(index);
+            if (id.equals(check.getString("id")) && "FAIL".equals(check.getString("status"))) return true;
+        }
+        return false;
+    }
+
     private void showError(String message) {
         status.setText(message);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        setBusy(false);
+    }
+
+    private void showReport(JSONObject report, String message) throws JSONException {
+        StringBuilder summary = new StringBuilder(message)
+                .append("\nSession: ").append(latestSession.getName());
+        JSONArray checks = report.getJSONArray("checks");
+        for (int index = 0; index < checks.length(); index++) {
+            JSONObject check = checks.getJSONObject(index);
+            summary.append("\n\n").append(check.getString("status"))
+                    .append("  ").append(check.getString("id"));
+            String reason = check.optString("reason");
+            if (!reason.isEmpty()) summary.append("\n").append(reason);
+        }
+        status.setText(summary.toString());
     }
 }

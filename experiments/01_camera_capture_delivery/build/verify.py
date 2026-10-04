@@ -118,8 +118,16 @@ def parse_camera_declarations(result: subprocess.CompletedProcess, profile: dict
     if result.returncode != 0 or not isinstance(result.stdout, str):
         raise ValueError("Camera APK manifest tool failed")
     output = result.stdout
-    permissions = re.findall(r"^uses-permission: name='([^']+)'$", output, re.MULTILINE)
-    if permissions != profile["permissions"]:
+    permission_lines = [line for line in output.splitlines()
+                        if re.match(r"^uses-permission(?:-sdk-\d+)?:", line)]
+    declarations = []
+    for line in permission_lines:
+        match = re.fullmatch(r"(uses-permission(?:-sdk-\d+)?): name='([^']+)'", line)
+        if match is None:
+            raise ValueError("Camera APK permissions do not match the reviewed package profile")
+        declarations.append((match.group(1), match.group(2)))
+    expected = [("uses-permission", permission) for permission in profile["permissions"]]
+    if declarations != expected:
         raise ValueError("Camera APK permissions do not match the reviewed package profile")
     permission = "uses-permission: name='android.permission.CAMERA'"
     activities = re.findall(r"^launchable-activity: name='([^']+)'", output, re.MULTILINE)
@@ -222,7 +230,8 @@ def verify_apk(apk: Path, settings: dict, source: Path, hostpython: Path,
     return {"schema_version": 1, "status": "verified", "apk_sha256": original_hash,
             "source_sha256": source_hash, "settings": settings, "signature": signature,
             "manifest": manifest, "archive": archive,
-            **({"camera_profile": camera} if camera is not None else {}),
+            **({"camera_profile": camera_profile, "camera_manifest": camera}
+               if camera is not None else {}),
             "bytecode": {**bytecode, "command": bytecode_command,
                          "stdout": bytecode_result.stdout, "stderr": bytecode_result.stderr,
                          "hostpython_sha256": sha256(hostpython)}}

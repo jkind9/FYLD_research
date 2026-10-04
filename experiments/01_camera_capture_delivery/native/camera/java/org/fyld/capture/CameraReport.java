@@ -7,6 +7,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.util.Size;
+import android.util.SizeF;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +28,7 @@ final class CameraReport {
 
     private CameraReport() { }
 
-    static JSONObject create(Context context) throws CameraAccessException, JSONException {
+    static JSONObject create(Context context) throws JSONException {
         CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         JSONObject report = new JSONObject();
         report.put("schema_version", SCHEMA_VERSION);
@@ -35,12 +36,31 @@ final class CameraReport {
         report.put("device", deviceFields());
         report.put("permission", "granted");
         JSONArray cameras = new JSONArray();
-        for (String id : manager.getCameraIdList()) {
-            cameras.put(cameraFields(manager, id));
-        }
+        JSONArray checks = new JSONArray();
         report.put("cameras", cameras);
-        report.put("concurrent_camera_sets", concurrentSets(manager));
-        report.put("checks", new JSONArray());
+        report.put("checks", checks);
+        try {
+            for (String id : manager.getCameraIdList()) {
+                cameras.put(cameraFields(manager, id));
+            }
+            addCheck(report, "camera_inventory", "PASS", null, cameras);
+        } catch (CameraAccessException error) {
+            addCheck(report, "camera_inventory", "FAIL", error.toString(), cameras);
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            report.put("concurrent_camera_sets", new JSONArray());
+            addCheck(report, "concurrent_camera_inventory", "SKIPPED",
+                    "Concurrent camera inventory requires Android 11 or newer", null);
+        } else {
+            try {
+                report.put("concurrent_camera_sets", concurrentSets(manager));
+                addCheck(report, "concurrent_camera_inventory", "PASS", null,
+                        report.getJSONArray("concurrent_camera_sets"));
+            } catch (CameraAccessException error) {
+                report.put("concurrent_camera_sets", new JSONArray());
+                addCheck(report, "concurrent_camera_inventory", "FAIL", error.toString(), null);
+            }
+        }
         report.put("captures", new JSONArray());
         report.put("files", new JSONObject());
         return report;
@@ -83,7 +103,9 @@ final class CameraReport {
                 characteristics.get(CameraCharacteristics.LENS_POSE_ROTATION)));
         camera.put("pose_translation_m", metadata(
                 characteristics.get(CameraCharacteristics.LENS_POSE_TRANSLATION)));
-        camera.put("sync_type", syncType(characteristics.get(CameraCharacteristics.LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE)));
+        camera.put("sync_type", Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                ? syncType(characteristics.get(CameraCharacteristics.LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE))
+                : "unavailable_before_api_28");
         camera.put("physical_camera_ids", Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
                 ? strings(characteristics.getPhysicalCameraIds()) : JSONObject.NULL);
         camera.put("stream_configurations", streams(characteristics.get(
@@ -111,14 +133,15 @@ final class CameraReport {
             }
             JSONObject configuration = new JSONObject();
             configuration.put("format", format);
-            configuration.put("format_name", android.graphics.ImageFormat.getFormatName(format));
+            configuration.put("format_name", formatName(format));
             configuration.put("sizes", entries);
             output.put(configuration);
         }
         return output;
     }
 
-    private static JSONArray concurrentSets(CameraManager manager) throws JSONException {
+    private static JSONArray concurrentSets(CameraManager manager)
+            throws CameraAccessException, JSONException {
         JSONArray sets = new JSONArray();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             return sets;
@@ -260,6 +283,28 @@ final class CameraReport {
         metadata.put("value", values == null ? JSONObject.NULL : floats(values));
         if (values == null) metadata.put("reason", "Camera2 did not report this field");
         return metadata;
+    }
+
+    private static Object metadata(SizeF value) throws JSONException {
+        JSONObject metadata = new JSONObject();
+        metadata.put("available", value != null);
+        metadata.put("value", value == null ? JSONObject.NULL
+                : new JSONArray().put(value.getWidth()).put(value.getHeight()));
+        if (value == null) metadata.put("reason", "Camera2 did not report this field");
+        return metadata;
+    }
+
+    private static String formatName(int format) {
+        switch (format) {
+            case android.graphics.ImageFormat.JPEG: return "JPEG";
+            case android.graphics.ImageFormat.YUV_420_888: return "YUV_420_888";
+            case android.graphics.ImageFormat.RAW_SENSOR: return "RAW_SENSOR";
+            case android.graphics.ImageFormat.PRIVATE: return "PRIVATE";
+            case android.graphics.ImageFormat.DEPTH16: return "DEPTH16";
+            case android.graphics.ImageFormat.RAW10: return "RAW10";
+            case android.graphics.ImageFormat.RAW12: return "RAW12";
+            default: return "unknown:" + format;
+        }
     }
 
     private static JSONArray floats(float[] values) throws JSONException {

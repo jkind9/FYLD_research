@@ -24,6 +24,7 @@ recipe = importlib.import_module("recipe")
 verify = importlib.import_module("verify")
 export = importlib.import_module("export")
 bytecode = importlib.import_module("verify_bytecode")
+warm = importlib.import_module("warm")
 
 SOURCE = b"print(42)\n"
 FILENAME = "/scratch/app/main.py"
@@ -94,6 +95,10 @@ def apk(tmp_path):
 
 def tool_result(stdout, code=0):
     return CompletedProcess([], code, stdout, "")
+
+
+def verifier_dir(evidence):
+    return Path(evidence["manifest"]["command"][0]).parent
 
 
 @pytest.fixture
@@ -199,6 +204,8 @@ def test_camera_manifest_requires_declared_permission_and_custom_launch_activity
         valid.replace("uses-permission: name='android.permission.CAMERA'\n", ""),
         valid + "uses-permission: name='android.permission.CAMERA'\n",
         valid + "uses-permission: name='android.permission.RECORD_AUDIO'\n",
+        valid + "uses-permission: name='android.permission.RECORD_AUDIO' maxSdkVersion='32'\n",
+        valid + "uses-permission-sdk-23: name='android.permission.RECORD_AUDIO'\n",
         valid.replace("org.fyld.capture.CameraActivity", "org.kivy.android.PythonActivity"),
     ):
         with pytest.raises(ValueError):
@@ -343,15 +350,118 @@ def test_bytecode_rejects_unsupported_flags_and_oversized_source(tmp_path, monke
 def test_export_complete_bundle_and_refuse_overwrite(verified, tmp_path):
     apk, evidence, _ = verified
     output = tmp_path / "offline"
-    published = export.publish_bundle(apk, evidence, output, "fixture-001")
+    published = export.publish_bundle(apk, evidence, output, "fixture-001", verifier_dir(evidence))
     assert published == output / "smoke_fixture-001"
     assert recipe.sha256(published / apk.name) == recipe.sha256(apk)
     assert json.loads((published / "verification.json").read_text())["apk_sha256"] == recipe.sha256(apk)
     assert (published / "README.md").is_file()
     before = (published / "verification.json").read_bytes()
     with pytest.raises(FileExistsError):
-        export.publish_bundle(apk, evidence, output, "fixture-001")
+        export.publish_bundle(apk, evidence, output, "fixture-001", verifier_dir(evidence))
     assert (published / "verification.json").read_bytes() == before
+
+
+def _camera_receipt(apk, evidence):
+    """Re-shape verified smoke evidence as the Task08 camera APK's manifest receipt."""
+    camera = json.loads(json.dumps(evidence))
+    camera["manifest"].update({
+        "package": "org.fyld.capturecheck",
+        "version_code": 10242,
+        "stdout": BADGING.replace("org.fyld.toolchainsmoke", "org.fyld.capturecheck")
+        .replace("versionCode='10241'", "versionCode='10242'")
+        + "uses-permission: name='android.permission.CAMERA'\n"
+          "launchable-activity: name='org.fyld.capture.CameraActivity' label='FYLD Camera Capture'\n",
+    })
+    camera["camera_profile"] = warm.load_camera_profile(BUILD.parent)
+    camera["camera_manifest"] = {
+        "permission": "uses-permission: name='android.permission.CAMERA'",
+        "launch_activity": "org.fyld.capture.CameraActivity",
+    }
+    return camera
+
+
+def test_camera_export_revalidates_and_publishes_camera_receipt(verified, tmp_path, monkeypatch):
+    apk, evidence, _ = verified
+    camera = _camera_receipt(apk, evidence)
+    actual_run = export.subprocess.run
+
+    def camera_badging(args, **kwargs):
+        if Path(args[0]).name == "aapt":
+            return tool_result(camera["manifest"]["stdout"])
+        return actual_run(args, **kwargs)
+
+    monkeypatch.setattr(export.subprocess, "run", camera_badging)
+
+    export.validate_evidence(apk, camera, verifier_dir(evidence))
+    published = export.publish_bundle(apk, camera, tmp_path / "offline", "redmi-001",
+                                      verifier_dir(evidence))
+
+    assert published == tmp_path / "offline" / "camera_redmi-001"
+    saved = json.loads((published / "verification.json").read_text(encoding="utf-8"))
+    assert saved == camera
+    assert "Camera2 capability checks" in (published / "README.md").read_text(encoding="utf-8")
+    assert recipe.sha256(published / apk.name) == recipe.sha256(apk)
+
+
+def test_camera_export_rejects_smoke_apk_with_forged_camera_receipt(verified):
+    apk, evidence, _ = verified
+    camera = _camera_receipt(apk, evidence)
+
+    with pytest.raises(ValueError, match="manifest does not match"):
+        export.validate_evidence(apk, camera, verifier_dir(evidence))
+
+
+def test_null_camera_profile_cannot_label_smoke_bundle(verified, tmp_path):
+    apk, evidence, _ = verified
+    forged = dict(evidence, camera_profile=None)
+
+    with pytest.raises(ValueError, match="profile is malformed"):
+        export.publish_bundle(apk, forged, tmp_path / "offline", "forged",
+                              verifier_dir(evidence))
+
+
+def test_export_does_not_run_receipt_supplied_verifier(verified, tmp_path, monkeypatch):
+    apk, evidence, _ = verified
+    altered = json.loads(json.dumps(evidence))
+    untrusted_dir = tmp_path / "untrusted"
+    untrusted_dir.mkdir()
+    forged_aapt = untrusted_dir / "aapt"
+    forged_aapt.write_bytes(b"untrusted executable")
+    altered["manifest"]["command"][0] = str(forged_aapt)
+    altered["manifest"]["tool_sha256"] = recipe.sha256(forged_aapt)
+
+    def forbid_untrusted_aapt(args, **kwargs):
+        if Path(args[0]).name == "apksigner":
+            return tool_result(SIGNATURE)
+        raise AssertionError("receipt-supplied executable must not run")
+
+    monkeypatch.setattr(export.subprocess, "run", forbid_untrusted_aapt)
+    with pytest.raises(ValueError, match="verifier provenance"):
+        export.validate_evidence(apk, altered, verifier_dir(evidence))
+
+
+@pytest.mark.parametrize(("old", "new", "message"), [
+    ("uses-permission: name='android.permission.CAMERA'",
+     "uses-permission: name='android.permission.CAMERA'\n"
+     "uses-permission: name='android.permission.RECORD_AUDIO'", "(?i)manifest"),
+    ("org.fyld.capture.CameraActivity", "org.kivy.android.PythonActivity", "(?i)manifest"),
+])
+def test_camera_export_rejects_tampered_permission_or_activity(
+        verified, old, new, message, monkeypatch):
+    apk, evidence, _ = verified
+    camera = _camera_receipt(apk, evidence)
+    actual_manifest = camera["manifest"]["stdout"]
+    camera["manifest"]["stdout"] = camera["manifest"]["stdout"].replace(old, new)
+
+    def camera_badging(args, **kwargs):
+        if Path(args[0]).name == "aapt":
+            return tool_result(actual_manifest)
+        return export.subprocess.CompletedProcess(args, 0, SIGNATURE, "")
+
+    monkeypatch.setattr(export.subprocess, "run", camera_badging)
+
+    with pytest.raises(ValueError, match=message):
+        export.validate_evidence(apk, camera, verifier_dir(evidence))
 
 
 @pytest.mark.parametrize("change", [{"status": "passed"}, {"apk_sha256": "0" * 64},
@@ -360,12 +470,15 @@ def test_export_complete_bundle_and_refuse_overwrite(verified, tmp_path):
 def test_export_rejects_incomplete_or_unbound_receipts(verified, tmp_path, change):
     apk, evidence, _ = verified
     with pytest.raises(ValueError):
-        export.publish_bundle(apk, dict(evidence, **change), tmp_path / "offline", "fixture")
+        export.publish_bundle(apk, dict(evidence, **change), tmp_path / "offline", "fixture",
+                              verifier_dir(evidence))
     assert not list((tmp_path / "offline").glob("smoke_*"))
 
 
 @pytest.mark.parametrize(("section", "key", "value", "match"), [
     ("signature", "certificate_sha256", ["00" * 32], "Signature transcript"),
+    ("signature", "stdout", "forged transcript", "Signature transcript"),
+    ("signature", "stderr", "forged diagnostic", "Signature transcript"),
     ("manifest", "debuggable", False, "Manifest transcript"),
     ("archive", "abis", ["x86_64"], "archive does not match"),
     ("bytecode", "optimize", 1, "embedded source verification"),
@@ -378,20 +491,21 @@ def test_export_rejects_tampered_verification_claims(verified, section, key, val
     altered = json.loads(json.dumps(evidence))
     altered[section][key] = value
     with pytest.raises(ValueError, match=match):
-        export.validate_evidence(apk, altered)
+        export.validate_evidence(apk, altered, verifier_dir(evidence))
 
 
 @pytest.mark.parametrize("run_id", ["", "../escape", "a/b", "a\\b", "CON", " a", "a."])
 def test_export_rejects_unsafe_run_id(verified, tmp_path, run_id):
     apk, evidence, _ = verified
     with pytest.raises(ValueError):
-        export.publish_bundle(apk, evidence, tmp_path / "offline", run_id)
+        export.publish_bundle(apk, evidence, tmp_path / "offline", run_id,
+                              verifier_dir(evidence))
 
 
 def test_export_interruption_preserves_prior_bundle(verified, tmp_path, monkeypatch):
     apk, evidence, _ = verified
     output = tmp_path / "offline"
-    prior = export.publish_bundle(apk, evidence, output, "prior")
+    prior = export.publish_bundle(apk, evidence, output, "prior", verifier_dir(evidence))
     before = (prior / apk.name).read_bytes()
 
     def interrupt(*args):
@@ -399,7 +513,7 @@ def test_export_interruption_preserves_prior_bundle(verified, tmp_path, monkeypa
 
     monkeypatch.setattr(export, "_publish", interrupt)
     with pytest.raises(OSError, match="simulated interruption"):
-        export.publish_bundle(apk, evidence, output, "interrupted")
+        export.publish_bundle(apk, evidence, output, "interrupted", verifier_dir(evidence))
     assert not (output / "smoke_interrupted").exists()
     assert (prior / apk.name).read_bytes() == before
     assert not (output / ".publish.lock").exists()
@@ -410,7 +524,8 @@ def test_export_copy_failure_and_changed_bytes(verified, tmp_path, monkeypatch):
     apk, evidence, _ = verified
     monkeypatch.setattr(export.shutil, "copyfile", lambda src, dst: Path(dst).write_bytes(b"bad"))
     with pytest.raises(ValueError, match="hash"):
-        export.publish_bundle(apk, evidence, tmp_path / "offline", "badcopy")
+        export.publish_bundle(apk, evidence, tmp_path / "offline", "badcopy",
+                              verifier_dir(evidence))
     assert not (tmp_path / "offline" / "smoke_badcopy").exists()
 
 
@@ -420,7 +535,7 @@ def test_export_stale_legacy_lock_does_not_block_recovery(verified, tmp_path):
     output.mkdir()
     stale_lock = output / ".publish.lock"
     stale_lock.write_text("owner process terminated")
-    published = export.publish_bundle(apk, evidence, output, "recovered")
+    published = export.publish_bundle(apk, evidence, output, "recovered", verifier_dir(evidence))
     assert published.is_dir()
     assert (published / "verification.json").is_file()
     assert stale_lock.read_text() == "owner process terminated"
@@ -438,7 +553,8 @@ def test_export_same_run_race_has_one_complete_winner(verified, tmp_path, monkey
 
     monkeypatch.setattr(export.uuid, "uuid4", synchronized_uuid)
     with ThreadPoolExecutor(max_workers=2) as pool:
-        futures = [pool.submit(export.publish_bundle, apk, evidence, output, "race") for _ in range(2)]
+        futures = [pool.submit(export.publish_bundle, apk, evidence, output, "race",
+                               verifier_dir(evidence)) for _ in range(2)]
         published, errors = [], []
         for future in futures:
             try:
@@ -461,17 +577,20 @@ def test_export_cli_reruns_verifiers_before_offline_handoff(verified, tmp_path, 
     receipt.write_text(json.dumps(prior))
     calls = []
 
-    def reverify(*args):
-        calls.append(args)
+    def reverify(*args, **kwargs):
+        calls.append((args, kwargs))
         return evidence
 
     monkeypatch.setattr(export, "verify_apk", reverify)
     monkeypatch.setattr(sys, "argv", ["export.py", str(apk), str(receipt), str(source),
-                                       str(tmp_path / "offline"), "cli-run"])
+                                       str(tmp_path / "offline"), "cli-run", "--hostpython",
+                                       str(tmp_path / "hostpython"), "--build-tools",
+                                       str(tmp_path / "tools")])
     export.main()
     target = tmp_path / "offline/smoke_cli-run"
     assert len(calls) == 1
-    assert calls[0][0:3] == (apk, evidence["settings"], source)
+    assert calls[0][0][0:3] == (apk, evidence["settings"], source)
+    assert calls[0][1] == {"camera_profile": None}
     assert target.is_dir()
     assert recipe.sha256(target / apk.name) == recipe.sha256(apk)
     assert str(target) in capsys.readouterr().out

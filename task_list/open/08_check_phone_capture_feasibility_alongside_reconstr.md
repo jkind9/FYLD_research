@@ -98,13 +98,23 @@ Before: 0 verified target-phone camera pairs. Target: capability and capture evi
 |---|---|
 | Closing commit | Not started |
 | Files changed | Existing workstation setup and README preparation; new `app/capture_report.py` and `tests/test_capture_report.py` validate report structure and exported file integrity |
-| Test status | NDK arm64 compile passed and prior package smoke APK verified; current report tests: 15 passed, 1 symlink test skipped because Windows denied symlink creation; 100% branch coverage for `capture_report.py`; Python review passed; no phone run |
+| Test status | Camera build/export tests: 124 passed on Windows, with the Linux-only atomic rename race test deselected; cached WSL warm build compiled Java, verified APK signature/source/manifest and published the handoff; no phone run |
 | Before measurement | 0 verified target-phone camera pairs |
-| After measurement | 0 verified target-phone camera pairs; workstation package smoke build verified; report contract covered by 12 passing tests |
+| After measurement | 0 verified target-phone camera pairs; Task08 camera APK verified and handed off; report/export contracts covered by passing tests |
 | Delta | 0 camera pairs; report/export checks now reject malformed timing or enum values, incomplete sessions, unsafe paths, empty image files and changed bytes |
 | Outcome | Report/export foundation is in place. Camera access, APK rebuild and phone feasibility remain untested |
 
-still open because the Redmi is not connected and the camera-test APK is not prepared; Samsung S23 availability is unconfirmed.
+still open because the Redmi is not connected for installation and capture; Samsung S23 availability is unconfirmed.
+
+### Native camera prototype progress, 2026-10-04
+
+Added a separate Java Camera2 Activity and a pinned `camera-profile.json`; the Task24 print-only smoke profile remains unchanged. The report records permission, camera inventory and concurrent-camera inventory results, including `SKIPPED` below Android 11 and saved `FAIL` outcomes when Camera2 inventory calls fail. APK manifest verification rejects extra or SDK-gated permissions, and source staging verifies all three Java hashes against the pinned profile.
+
+Verification: direct Python syntax and focused validation passed for strict permission parsing, non-string source-hash rejection and all three current Java fingerprints. Java compilation and the cached WSL camera APK build passed. The exporter verifies aapt and apksigner output against the actual APK and publishes `camera_20261004_camera_redmi_run6`; 124 build/export tests passed on Windows, with its Linux-only atomic rename race test deselected. The Redmi remains disconnected, so installation, runtime camera results and bundle export from the phone remain unverified. Samsung S23 availability is unconfirmed.
+
+### Camera APK handoff, 4 October 2026
+
+The bundle is `mobile deployment/camera_20261004_camera_redmi_run6/`; it contains `unnamed_dist_1-debug.apk`, `verification.json` and installation notes. The APK is arm64, package `org.fyld.capturecheck`, version 0.1 (10242), minimum API 24, target API 36, and requests only `android.permission.CAMERA`. Its launcher is `org.fyld.capture.CameraActivity`; APK SHA-256 is `35e2c420e38d3b857747ac255a1fd7f81791959c3e44d0a99911913af149c29a`. The build used cached WSL dependencies; clean dependency and container builds remain Task24 follow-ups. ADB reports no attached device. Transfer/install and actual-device capture are the next Task08 steps.
 
 ### Workstation preparation, 2026-10-02
 

@@ -43,6 +43,7 @@ final class CameraCapture {
     private final File sessionDirectory;
     private final String captureName;
     private final List<String> cameraIds;
+    private final int displayRotationDegrees;
     private final Callback callback;
     private final Map<String, CameraDevice> devices = new HashMap<>();
     private final Map<String, CameraCaptureSession> sessions = new HashMap<>();
@@ -52,13 +53,19 @@ final class CameraCapture {
     private boolean finished;
 
     CameraCapture(Context context, Handler handler, File sessionDirectory,
-                  String captureName, List<String> cameraIds, Callback callback) {
+                  String captureName, List<String> cameraIds, int displayRotationDegrees,
+                  Callback callback) {
         this.manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         this.handler = handler;
         this.sessionDirectory = sessionDirectory;
         this.captureName = safeName(captureName);
         this.cameraIds = new ArrayList<>(cameraIds);
+        this.displayRotationDegrees = displayRotationDegrees;
         this.callback = callback;
+    }
+
+    void cancel(String reason) {
+        handler.post(() -> fail(reason));
     }
 
     void start() {
@@ -146,15 +153,15 @@ final class CameraCapture {
                         CameraDevice.TEMPLATE_STILL_CAPTURE);
                 request.addTarget(readers.get(id).getSurface());
                 request.setTag(id);
-                Integer orientation = manager.getCameraCharacteristics(id).get(
-                        CameraCharacteristics.SENSOR_ORIENTATION);
-                if (orientation != null) request.set(CaptureRequest.JPEG_ORIENTATION, orientation);
+                CameraCharacteristics characteristics = manager.getCameraCharacteristics(id);
+                int jpegOrientation = jpegOrientation(characteristics);
+                request.set(CaptureRequest.JPEG_ORIENTATION, jpegOrientation);
                 sessions.get(id).capture(request.build(), new CameraCaptureSession.CaptureCallback() {
                     @Override
                     public void onCaptureCompleted(CameraCaptureSession session,
                                                    CaptureRequest request,
                                                    TotalCaptureResult result) {
-                        captureResult(id, result);
+                        captureResult(id, result, request.get(CaptureRequest.JPEG_ORIENTATION));
                     }
 
                     @Override
@@ -171,7 +178,7 @@ final class CameraCapture {
         }
     }
 
-    private void captureResult(String id, TotalCaptureResult result) {
+    private void captureResult(String id, TotalCaptureResult result, Integer requestedRotation) {
         try {
             JSONObject value = new JSONObject();
             Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
@@ -182,11 +189,14 @@ final class CameraCapture {
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(id);
             value.put("timestamp_source", CameraReport.timestampSource(
                     characteristics.get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE)));
-            Integer orientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+            Integer resultRotation = result.get(CaptureResult.JPEG_ORIENTATION);
+            Integer orientation = resultRotation == null ? requestedRotation : resultRotation;
             value.put("rotation_degrees", orientation == null ? JSONObject.NULL : orientation);
+            value.put("rotation_source", resultRotation == null ? "capture_request" : "capture_result");
+            value.put("display_rotation_degrees", displayRotationDegrees);
             captureResults.put(id, value);
             completeIfReady();
-        } catch (JSONException error) {
+        } catch (CameraAccessException | JSONException error) {
             fail("Could not record capture result for " + id + ": " + error.getMessage());
         }
     }
@@ -229,6 +239,8 @@ final class CameraCapture {
                 frame.put("crop_region", result.get("crop_region"));
                 frame.put("timestamp_source", result.get("timestamp_source"));
                 frame.put("rotation_degrees", result.get("rotation_degrees"));
+                frame.put("rotation_source", result.get("rotation_source"));
+                frame.put("display_rotation_degrees", result.get("display_rotation_degrees"));
                 frames.put(frame);
             }
             for (int index = 0; index < frames.length(); index++) {
@@ -264,6 +276,8 @@ final class CameraCapture {
                         image.put("crop_region", result.opt("crop_region"));
                         image.put("timestamp_source", result.opt("timestamp_source"));
                         image.put("rotation_degrees", result.opt("rotation_degrees"));
+                        image.put("rotation_source", result.opt("rotation_source"));
+                        image.put("display_rotation_degrees", result.opt("display_rotation_degrees"));
                     }
                     partial.put(image);
                 }
@@ -293,6 +307,19 @@ final class CameraCapture {
                     < (long) selected.getWidth() * selected.getHeight()) selected = size;
         }
         return selected;
+    }
+
+    private int jpegOrientation(CameraCharacteristics characteristics) {
+        Integer sensor = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+        Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+        int sensorDegrees = sensor == null ? 0 : sensor;
+        int orientation = sensorDegrees;
+        if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
+            orientation += displayRotationDegrees;
+        } else if (facing != null && facing == CameraCharacteristics.LENS_FACING_BACK) {
+            orientation -= displayRotationDegrees;
+        }
+        return ((orientation % 360) + 360) % 360;
     }
 
     private static JSONArray rect(android.graphics.Rect value) {

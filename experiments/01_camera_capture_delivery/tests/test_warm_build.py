@@ -90,7 +90,7 @@ def test_camera_packaging_is_opt_in_and_declares_java_activity_permission(tmp_pa
     common = (config, tmp_path / "p4a", tmp_path / "sdk", tmp_path / "ndk",
               tmp_path / "app", tmp_path / "storage")
     smoke = runner.packaging_arguments(*common)
-    assert not any(argument.startswith(("--activity-class-name", "--add-source", "--permission"))
+    assert not any(argument.startswith(("--android-entrypoint", "--add-source", "--permission"))
                    for argument in smoke)
     profile = {
         "package": "org.fyld.capturecheck",
@@ -104,7 +104,7 @@ def test_camera_packaging_is_opt_in_and_declares_java_activity_permission(tmp_pa
     camera = runner.packaging_arguments(*common, camera_profile=profile,
                                        java_source_root=camera_source)
     assert "--package=org.fyld.capturecheck" in camera
-    assert "--activity-class-name=org.fyld.capture.CameraActivity" in camera
+    assert "--android-entrypoint=org.fyld.capture.CameraActivity" in camera
     assert f"--add-source={camera_source}" in camera
     assert "--permission=android.permission.CAMERA" in camera
     assert "--numeric-version=10242" in camera
@@ -134,9 +134,8 @@ def test_camera_source_manifest_rejects_non_string_hash():
         "path": "native/camera/java/org/fyld/capture/CameraActivity.java",
         "sha256": 123,
     }]})
-    with patch.object(Path, "read_text", return_value=payload):
-        with pytest.raises(ValueError, match="hash"):
-            runner.checked_camera_sources(Path("source"), Path("manifest"))
+    with patch.object(Path, "read_text", return_value=payload), pytest.raises(ValueError, match="hash"):
+        runner.checked_camera_sources(Path("source"), Path("manifest"))
 
 
 @pytest.mark.parametrize("source_path", ["../escape.java", "C:/escape.java", "native\\escape.java"])
@@ -226,7 +225,7 @@ def test_warm_run_publishes_only_after_packaging_and_verification(tmp_path, monk
     monkeypatch.setattr(runner, "packaging_arguments", lambda *_, **__: ["fixture-p4a", "apk"])
     monkeypatch.setattr(runner, "validate_gradle", lambda *_: None)
     monkeypatch.setattr(runner, "assert_preserved", lambda _: None)
-    monkeypatch.setattr(verify, "verify_apk", lambda *values: {
+    monkeypatch.setattr(verify, "verify_apk", lambda *values, **kwargs: {
         "status": "verified", "settings": settings, "bytecode": {"filename": values[-1]},
     })
     published = tmp_path / "published"

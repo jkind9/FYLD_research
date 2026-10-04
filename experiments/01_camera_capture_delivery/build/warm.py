@@ -87,7 +87,7 @@ def checked_camera_sources(source_root: Path, manifest_source: Path | dict) -> l
         source_hash = entry["sha256"]
         if (not isinstance(relative, str) or not isinstance(source_hash, str)
                 or "\\" in relative or
-                not re.fullmatch(r"[0-9a-f]{64}", entry["sha256"])):
+                not re.fullmatch(r"[0-9a-f]{64}", source_hash)):
             raise ValueError("Unsafe camera source path or hash")
         posix = PurePosixPath(relative)
         if posix.is_absolute() or ".." in posix.parts or "." in posix.parts or not relative.startswith("native/camera/java/") or posix.suffix != ".java":
@@ -187,7 +187,7 @@ def packaging_arguments(config: dict[str, Any], p4a: Path, sdk: Path,
     arguments = [str(p4a), "apk", *(f"--{key}={value}" for key, value in values.items()),
                  "--ignore-setup-py"]
     if camera_profile is not None:
-        arguments.append(f"--activity-class-name={camera_profile['activity_class_name']}")
+        arguments.append(f"--android-entrypoint={camera_profile['activity_class_name']}")
         arguments.append(f"--add-source={java_source_root}")
         arguments.extend(f"--permission={permission}" for permission in camera_profile["permissions"])
     if reuse_distribution:
@@ -379,7 +379,8 @@ def run(args: argparse.Namespace) -> Path:
         evidence = {**evidence, "build": {**receipt, "status": "verified",
                     "preserved_predecessor": True, "elapsed_seconds": time.monotonic() - started}}
         receipt_path.write_text(json.dumps(evidence, indent=2))
-        return publish_bundle(apk, evidence, args.output_root, args.run_id)
+        return publish_bundle(apk, evidence, args.output_root, args.run_id,
+                              args.sdk / "build-tools" / config["build_tools"])
     finally:
         assert_preserved(info["protected"])
         assert_preserved(info["cache_artifacts"])
