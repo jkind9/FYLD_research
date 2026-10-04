@@ -50,6 +50,8 @@ Existing evidence: Task19 compared 45 classical/rectangle masks and measured coo
 
 Proposed comparison: Freeze boxes/depth/poses and compare rectangles, inherited classical masks and independently checked foreground masks as an explicit oracle control. Then add authorised learned masks with identical prompts; separate detector-prompt quality from mask quality. Assess thin/touching/clipped objects, background mixing, empty masks and absent depth. Do not retune geometry at the same time.
 
+Clarification, 4 October 2026 (owner): this task is the test of whether segmentation is useful at all. The learned-mask branch was assumed to start with the SAM family: SAM 2 and SAM 3 as hosted options, and MobileSAM or EdgeSAM for phone cost. Separately, record SAM 3's own video identities as an end-to-end counting baseline on the same clips, for comparison with the 3D identity rules in tasks 31 and 33. Owner direction is investigation only: no operating thresholds are needed to report the outcome.
+
 Necessary data/reference: Task40 human-checked pixel foreground masks, reference visible surfaces/physical anchors and uncertainty, surveyed dimensions and multiple viewpoint coverage. Foreground control inputs and evaluator masks must be separately labelled; physical centre and box centre are not interchangeable. Whole-size claims require complete coverage or independently assessed completion assumptions.
 
 Measurements: Mask overlap/boundary error, foreground depth contamination, missing/empty supports, positional repeatability, absolute anchor/surface error, observed extent and complete-size error only when referenced; prompt-to-mask/projection cost and failure counts.

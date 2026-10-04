@@ -1,12 +1,12 @@
 ---
 id: "08"
 title: Check phone capture feasibility alongside reconstruction
-status: open
+status: in_progress
 priority: MED
 type: infra
-blocked_by: ["24"]
+blocked_by: []
 blocks: []
-verification_test: experiments/01_camera_capture_delivery/README.md
+verification_test: experiments/01_camera_capture_delivery/tests/test_capture_report.py
 plan_reviewed: null
 files:
   - experiments/01_camera_capture_delivery/**
@@ -33,10 +33,18 @@ Check whether each available phone can save useful images from two cameras at on
 
 ## Proposed build ownership, 3 October 2026
 
-Task24 recovers the first-party smoke-app/build recipe into stage01 and verifies reproducible WSL/container builds. This task retains the offline camera capability/capture app, phone handoff, on-device result display and both handset checks. Existing WSL installation and arm64 packaging receipts are preserved; a Docker build and camera app are not yet verified. Task24 completes the repo-owned build dependency before camera implementation in this checkout.
+Task24 recovered the first-party smoke-app build recipe and verified cached WSL packaging. Its clean dependency build and container route remain in pending review because the required JPEG source archive and a compatible local container image are unavailable. That optional follow-up does not block this task: reuse the verified WSL route for the offline camera app, handset handoff, on-device results and phone checks.
 
 
 Documentation reconciliation: the previously declared mobile deployment directory/README does not exist. The existing stage01 README owns capture/build/handoff instructions; no separate documentation directory is created. Historical WSL/APK receipts remain unchanged.
+
+## Redmi pre-check, 4 October 2026
+
+The owner identified the available phone as Redmi Note 11 Pro, model 2201116TG, Android 13, 6 GB RAM and Helio G96; it is not connected to the workstation yet. The APK may be transferred by email, and USB connection is also acceptable.
+
+Google's current ARCore device list names both “Redmi Note 11 Pro” and “Redmi Note 11 Pro 5G” as supporting the Depth API. The listed non-5G name is consistent with the owner's 2201116TG/Helio G96 description, but Google's public table does not show the product code, so runtime support still needs checking on this handset. This certification does not establish a dedicated depth sensor or usable simultaneous camera pair. Google's Raw Depth guide says its confidence image is available with sparse depth, and image/frame timestamps distinguish new depth from a reprojected image. At runtime, record those timestamps and confidence instead of inferring them from the certification label.
+
+Sources: [Xiaomi Redmi Note 11 Pro specifications](https://www.mi.com/ae-en/product/redmi-note-11-pro/specs/), [Google ARCore supported devices](https://developers.google.com/ar/devices) and [Google Raw Depth API guide](https://developers.google.com/ar/develop/java/depth/raw-depth). No ARCore SDK package has been acquired for this test.
 
 ## What
 
@@ -51,18 +59,26 @@ Several rear lenses do not establish simultaneous access, synchronization or use
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
 | Capture already has a plan | Experiment 01 | Stereo and tracking | experiments/01_camera_capture_delivery/README.md:1 |
+| APK packaging route is reusable, but currently copies and hash-pins only the smoke app | Task24 stage01 build helpers | This task's separate camera package profile and source provenance | experiments/01_camera_capture_delivery/build/warm.py:198; experiments/01_camera_capture_delivery/build/recipe.py:34 |
 
-1. Follow the capture plan; verify the build route before selecting versions.
-2. Record model/variant, operating system, camera IDs, supported stream combinations and synchronization metadata.
-3. Save original observations, capture timestamps, dimensions, crop/orientation and available calibration. Mark missing fields explicitly.
-4. Compare single-camera control with simultaneous capture. Assess overlap and independently check calibration.
-5. Report stereo feasible, infeasible or unresolved. Compare supported ARCore depth or external stereo if needed, with input differences explicit.
-6. Keep capture tests separate from delivery replay and sustained algorithm benchmarks.
-7. Put any APK prepared for phone handoff in the repository's `mobile deployment/` folder. Design it to work without a connection to the PC. Show the result of every test the APK runs on the phone, including pass, fail or skipped status and a short reason. The user will transfer and install the APK. The existing smoke APK has no camera feature and does not meet this handoff requirement.
+1. Reuse the Task24 p4a build and export route with a Task08-owned package profile, source manifest and Java `CameraActivity`. The pinned p4a release supports adding Java source, a custom Activity class and declared permissions; use those built-in options to run native Camera2 directly. Keep the Task24 smoke-app profile, source hashes and receipt intact. Do not add PyJNIus, ARCore or other packages without owner approval; the Camera2 app must remain useful without them.
+2. Show each check as PASS, FAIL or SKIPPED with a short reason. Report manufacturer/model/build, permission state, Camera2 IDs, lens facing and level, physical IDs, stream sizes and frame durations, timestamp source, sync type, intrinsics/distortion/pose arrays and fields that are absent.
+3. Use Camera2's concurrent-camera sets to select actual supported pairs, configure each advertised combination and save returned capture-result sensor timestamps and original images. Run one rear-camera capture as a control. Record requested and actual dimensions, crop/rotation, frame numbers and per-frame/session errors. Do not claim stereo from a pair existing in the supported-ID list alone.
+4. Save an export bundle with the device report, original image samples and integrity hashes. Keep capture time and export/arrival time separate. Give the user a share/export action that works without a live PC connection; verify the received bundle against its hashes.
+5. Check the public ARCore device listing against the exact Redmi model and record that listing separately from runtime evidence. The ARCore SDK has not been acquired. Unless separately approved and made available, report runtime depth/camera-pose checks as SKIPPED because the app does not package the ARCore SDK; do not label this as device incompatibility. If later enabled, separately record full and raw depth, raw confidence, camera pose and image/frame timestamps. Label timestamps that show reprojected depth instead of new measurements.
+6. Compare single-camera control with simultaneous capture. Assess view overlap and independently check calibration.
+7. Report stereo feasible, infeasible or unresolved. Keep capture checks separate from delivery replay and sustained algorithm benchmarks. Do not select performance thresholds or claim physical accuracy from API availability.
+8. Put the APK and handoff report in the repository's `mobile deployment/` folder. The existing print-only smoke APK has no camera feature and does not meet this handoff requirement.
 
 ## Invariants and recovery
 
-Raw observations remain unchanged. Capture and arrival times stay distinct. Interrupted recordings remain incomplete. Before implementation, document permission denial, camera disconnect and app interruption. Dataset controls remain usable without a phone.
+| Producer/owner | Consumer | Representation | Survives restart? | Evidence/implementation contract |
+|---|---|---|---|---|
+| Camera2 `ImageReader` and capture results | App-private capture session | Original image bytes; sensor timestamp in ns with source; dimensions, crop/rotation and request/frame identifiers | Completed frames survive process death in the session directory; an interrupted session stays incomplete | Android build fields and Camera2 APIs are inventoried at runtime; image and arrival times stay distinct |
+| App session recorder | On-device status screen and export action | Versioned JSON report with each check's `PASS`/`FAIL`/`SKIPPED`, reason, camera IDs, stream details, metadata availability and file hashes | A finalized report and files are retained; an interrupted session is marked and cannot be exported as complete | Export code validates file paths and hashes before sharing |
+| Android share/storage action | Workstation evidence intake | One ZIP/report bundle containing original samples and JSON; no unit conversion or timestamp replacement | Bundle is reusable after transfer; partial transfer fails hash validation | Workstation import rechecks every listed hash before accepting any observation |
+
+The source of truth is the immutable camera image and its sensor metadata. Capture and export/arrival times remain separate. If the process stops during a session, the next launch labels it interrupted and starts a new session; no prior report is silently finalized or overwritten. If permission is denied, a camera disconnects, stream configuration fails or export is interrupted, show the failed/skipped check and preserve any completed evidence as an incomplete session. Fresh deployment installs the arm64 APK, records device build fields and permission outcome, runs a single-camera control, enumerates and attempts only advertised concurrent configurations, then exports and revalidates a versioned bundle. Keep the first report schema backward-readable when fields are added; never reinterpret missing depth or calibration as a valid measurement. Dataset-only controls remain usable without a phone.
 
 ## Hyperparameters
 
@@ -70,21 +86,25 @@ hyperparameters n/a: workstation preparation and the packaging smoke build do no
 
 ## Verification
 
-Before: 0 verified target-phone camera pairs. Target: capability and capture evidence for both phones, including explicit failure records. Replace the plan-only verification path with scoped tests before implementation. Infeasible stereo is a valid feasibility finding.
+Contract test: `experiments/01_camera_capture_delivery/tests/test_capture_report.py` must assert that every emitted check has exactly one `PASS`, `FAIL` or `SKIPPED` result; skipped checks carry a non-empty reason; each original capture has a sensor timestamp with clock source, dimensions and crop/orientation; absent calibration/depth is recorded as unavailable rather than replaced with a method estimate; incomplete sessions cannot be exported as complete; and imported bundle hashes match their contents.
+
+On-device contract: confirm model number `2201116TG` in the handset settings and record the app's Android build model/device/product fields plus Android 13. The report lists each Camera2 ID and supported stream size, reports any concurrent pair only after both capture sessions succeed, preserves image and sensor timestamps, and exports a bundle whose hashes revalidate on the workstation. Unsupported combinations are recorded as `FAIL` or `SKIPPED` with the device/API reason. This does not establish camera accuracy or physical-depth accuracy.
+
+Before: 0 verified target-phone camera pairs. Target: capability and capture evidence for both phones, including explicit failure records. Infeasible stereo is a valid feasibility finding. No numerical performance threshold is selected in this task; confirm new settings before any scored comparison.
 
 ## Receipts
 
 | Field | Value |
 |---|---|
 | Closing commit | Not started |
-| Files changed | WSL build tools installed; Task 08, experiment 01 and overview READMEs updated |
-| Test status | NDK arm64 compile passed; minimal p4a APK built and signature/manifest verified; no phone run |
+| Files changed | Existing workstation setup and README preparation; new `app/capture_report.py` and `tests/test_capture_report.py` validate report structure and exported file integrity |
+| Test status | NDK arm64 compile passed and prior package smoke APK verified; current report tests: 15 passed, 1 symlink test skipped because Windows denied symlink creation; 100% branch coverage for `capture_report.py`; Python review passed; no phone run |
 | Before measurement | 0 verified target-phone camera pairs |
-| After measurement | 0 verified target-phone camera pairs; workstation build verified |
-| Delta | 0 camera pairs; one arm64 APK smoke build verified |
-| Outcome | Workstation preparation complete; open because neither phone is connected and camera feasibility remains untested |
+| After measurement | 0 verified target-phone camera pairs; workstation package smoke build verified; report contract covered by 12 passing tests |
+| Delta | 0 camera pairs; report/export checks now reject malformed timing or enum values, incomplete sessions, unsafe paths, empty image files and changed bytes |
+| Outcome | Report/export foundation is in place. Camera access, APK rebuild and phone feasibility remain untested |
 
-still open because both target phones still need to be connected for camera capability and simultaneous-pair checks, and a self-contained APK with on-device test results has not been prepared.
+still open because the Redmi is not connected and the camera-test APK is not prepared; Samsung S23 availability is unconfirmed.
 
 ### Workstation preparation, 2026-10-02
 

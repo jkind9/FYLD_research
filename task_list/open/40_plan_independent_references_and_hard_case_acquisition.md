@@ -8,7 +8,7 @@ approval_status: proposed; no execution authorised by Task30
 blocked_by: []
 blocks: []
 verification_test: ""
-plan_reviewed: null
+plan_reviewed: 2026-10-04 PASS
 files:
   - experiments/06_object_recognition/datasets/README.md
 docs:
@@ -45,9 +45,10 @@ Existing evidence: Task17 has six provisional agent-reviewed frames, complete se
 
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
-| Provisional annotation and scenario gaps already exist | Task17 dataset | all new evaluators | experiments/06_object_recognition/datasets/README.md:5 |
-| Current desk spread is not absolute error | Task29 JSON | anchor/reference design | experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_repeatability.json:19 |
-| Independent ICL surface already acquired | stage04 | first surface control | experiments/04_surface_reconstruction/README.md:88 |
+| Frozen provisional labels, calibration and scenario gaps already exist | `desk_smoke_v1.json`, prepared by the dataset publisher | all new evaluators | experiments/06_object_recognition/datasets/desk_smoke_v1.json:2; experiments/06_object_recognition/datasets/prepare.py:23,201-203 |
+| Source RGB/depth payload is copied and checked against frozen hashes | Acquired TUM Freiburg1 desk files | dataset publisher | experiments/06_object_recognition/datasets/prepare.py:101-111; experiments/06_object_recognition/datasets/README.md:25 |
+| Current desk spread is not absolute error | Task29 JSON | anchor/reference design | experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_repeatability.json:16 |
+| Independent ICL surface already acquired | stage04 | first surface control | experiments/04_surface_reconstruction/README.md:151 |
 
 Proposed comparison: First inventory existing references, independence and metadata. Design human-checked pixel masks and physical identity review with disagreements; survey explicitly defined anchors, visible surfaces and complete dimensions with recorded instrument uncertainty/frame transforms. Plan a minimal static capture bank with similar co-visible neighbours, duplicate boxes, identical objects only in separate views, look-away/return, occlusion, changed lighting/rotation, moved objects, missing depth and camera reset. Plan independent translated viewpoints/new sessions and source-disjoint enrollment/validation/test; do not invent frame counts, tolerances or thresholds.
 
@@ -67,8 +68,10 @@ Primary sources are linked in research/README.md under the corresponding A-I wor
 
 | Producer/owner | Consumer | Representation | Survives restart? |
 |---|---|---|---|
-| experiments/06_object_recognition/datasets/README.md:5 | Isolated comparison/evaluator | Immutable evidence; metres/grid/frame/revision/lineage where applicable | Verified sources retained |
-| Proposed runner | New publication/readers | Versioned derived records; unavailable outcomes explicit | Complete verified runs only |
+| `desk_smoke_v1.json` | `prepare.py` | Frozen labels, calibration, partitions, source hashes and scenarios | Frozen annotation file persists | experiments/06_object_recognition/datasets/prepare.py:23 |
+| Acquired TUM Freiburg1 desk payload | `prepare.py` | Original RGB/depth bytes checked against the annotation hashes | Original files persist outside derived publication | experiments/06_object_recognition/datasets/prepare.py:101-111 |
+| `prepare.py` | Isolated comparison/evaluator | Versioned publication containing method inputs separately from evaluator annotations | Staging output is verified and renamed to its final destination; failed output remains unpublished | experiments/06_object_recognition/datasets/prepare.py:201-203,208 |
+| Proposed reference owner | Future evaluator | Independently reviewed labels and measurements with units, frames and uncertainty | Versioned reference files persist; disagreement and unavailable values remain explicit | experiments/06_object_recognition/datasets/README.md:33 |
 
 Reference owner → immutable versioned annotations/survey calibration → evaluator-only datasets. Visible/full geometry and physical anchor definitions have units/frame/source. Annotator disagreements remain explicit; frozen revisions never overwritten. No acquisition in Task30. A later failed capture/annotation publication remains incomplete and cannot score methods; restart publishes a new verified version. Existing Task17 references remain readable historical evidence.
 
