@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.pytest*/
 .mypy_cache/
 .ruff_cache/
 pytest-cache-files-*/
@@ -14,6 +15,7 @@ experiments/**/.pytest-tmp/
 experiments/**/tests/.pytest-temp/
 experiments/**/tests/.test-*.sqlite3*
 .pytest-work-*/
+.tmp_task*_pytest_*/
 .test_tmp*/
 experiments/**/runs/
 .kilo/
@@ -31,6 +33,12 @@ checkpoints/
 outputs/
 mobile deployment/
 build/
+!experiments/01_camera_capture_delivery/build/
+!experiments/01_camera_capture_delivery/build/*.py
+!experiments/01_camera_capture_delivery/build/*.json
+!experiments/01_camera_capture_delivery/build/*.sh
+!experiments/01_camera_capture_delivery/build/*.ps1
+!experiments/01_camera_capture_delivery/build/Dockerfile
 dist/
 .env
 
@@ -69,3 +77,13 @@ data/**/review_temp/
 # Derived object-reference publication stays local; its frozen source manifest
 # lives under experiments/06_object_recognition/datasets/.
 data/object_revisits/desk_smoke_v1/
+
+# Generated outputs are never pushed: images, arrays, rendered pages and result records.
+# Source pages and input or provenance JSON that code reads are listed as exceptions.
+*.png
+*.npy
+*.html
+!experiments/shared/*.html
+experiments/**/output/
+experiments/**/debug/
+experiments/01_camera_capture_delivery/build/container-readiness.json
