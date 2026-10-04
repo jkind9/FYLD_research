@@ -83,12 +83,16 @@ invariants n/a: offline generator writing standalone files; no shared state. Re-
 
 | field | value |
 |---|---|
-| closing commit | (fill in) |
-| files changed | (fill in) |
-| test | (fill in) |
-| before / after | (fill in) |
-| result | (fill in) |
+| closing commit | 6c6dfe2 (feat: add shareable demo pages built from exported results) |
+| files changed | tools/demos/ (9 Python modules, 8 web files, tests/test_demos.py), demo_outputs/README.md, pytest.ini (demo tests in default suite; .worktrees excluded) |
+| test | tools/demos/tests/test_demos.py: 12 passed. Mutation check: flipping back-projection y sign, swapping splat sigmas and ignoring min_count each made the matching test fail. Full suite in this worktree: 483 passed, 4 skipped, 4 failed only because the worktree lacks local data/runs (data/object_revisits/... and pilot run manifests), which exist in the main checkout. Headless Chromium, network off: 7 of 7 pages load with 0 script errors and 0 requests, in light and dark mode; at 390 px width no page scrolls sideways. Downloaded splat .ply parses: 269,645 vertices, 17 float properties, unit quaternions, all finite. |
+| before / after | Before: 0 demo pages. After: 7 single-file pages, 0.2–6.8 MB each (overview 0.23, depth 1.21, camera 0.79, surface 6.76, splats 5.17, map 0.23, objects 4.14 MB), all under the 15 MB budget |
+| result | Done. Pages regenerate in about 15 s with `python -B -m tools.demos.build --source-root .` |
 
 Notes / caveats / follow-ups:
 
--
+- Splats are built from merged measured depth (0.8 cm cells, flat Gaussians along the surface normal). They are not trained: Gaussian splatting optimisation needs a GPU run, and project practice is to ask before GPU runs. Follow-up: trained 3DGS (for example gsplat or Nerfstudio) on the same 60 desk frames with supplied poses, once a GPU run is approved, compared on held-out views.
+- Meshes (TSDF fusion) are not demonstrated; the overview marks them planned.
+- The bird's-eye map and splats are illustrations without independent references; the pages say so. Measured results shown are the camera path (6.9 mm), room surface (7.8 mm mean, 22.3% coverage) and cup repeatability (72.8 mm spread over 16 sightings).
+- The root README was not edited because another session had uncommitted changes to it; a one-line pointer to demo_outputs/ can be added once that work is committed.
+- Generated pages are git-ignored (owner rule: no HTML/PNG/NPY/JSON outputs in git); demo_outputs/README.md is tracked and lists the pinned source runs.
