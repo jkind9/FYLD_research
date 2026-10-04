@@ -1,7 +1,7 @@
 ---
 id: "43"
 title: Build shareable demo visualisations from exported results
-status: in_progress
+status: closed
 priority: MED
 type: infra
 blocked_by: []
