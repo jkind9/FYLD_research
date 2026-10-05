@@ -10,18 +10,21 @@ verification_test: experiments/01_camera_capture_delivery/tests/test_capture_rep
 plan_reviewed: null
 files:
   - experiments/01_camera_capture_delivery/**
+  - task_list/open/40_plan_independent_references_and_hard_case_acquisition.md
+  - experiments/06_object_recognition/datasets/README.md
 docs:
   - experiments/01_camera_capture_delivery/README.md
   - experiments/README.md
   - README.md
   - task_list/README.md
+  - experiments/06_object_recognition/datasets/README.md
 baseline_metric:
   source: experiments/README.md
   field: tested target phones
   baseline_value: "0 verified phone camera pairs"
   target: "Capability and capture evidence for both available phones"
 created: 2026-10-02
-last_updated: 2026-10-04
+last_updated: 2026-10-05
 superseded_by: null
 ---
 
@@ -96,15 +99,35 @@ Before: 0 verified target-phone camera pairs. Target: capability and capture evi
 
 | Field | Value |
 |---|---|
-| Closing commit | Not started |
-| Files changed | Existing workstation setup and README preparation; new `app/capture_report.py` and `tests/test_capture_report.py` validate report structure and exported file integrity |
-| Test status | Camera build/export tests: 124 passed on Windows, with the Linux-only atomic rename race test deselected; cached WSL warm build compiled Java, verified APK signature/source/manifest and published the handoff; no phone run |
+| Closing commit | Not closed; implementation committed in `63b48a7`, handoff docs in `e634ece`; this intake records partial device evidence |
+| Files changed | Capture/root/experiment/task READMEs, this receipt and Task40/reference README hardware constraints; supplied JSON moved unchanged into stage01's ignored local runs |
+| Test status | Prior camera build/export tests: 124 passed on Windows, with the Linux-only atomic rename race test deselected. Current received session passes `capture_report.validate_export`; capabilities bytes/hash and repeated device/camera/concurrent fields match. Focused report tests: 15 passed, 1 skipped (Windows symlink unavailable); first restricted run hit system-temp access denial, then rerun with approved temp access passed |
 | Before measurement | 0 verified target-phone camera pairs |
-| After measurement | 0 verified target-phone camera pairs; Task08 camera APK verified and handed off; report/export contracts covered by passing tests |
-| Delta | 0 camera pairs; report/export checks now reject malformed timing or enum values, incomplete sessions, unsafe paths, empty image files and changed bytes |
-| Outcome | Report/export foundation is in place. Camera access, APK rebuild and phone feasibility remain untested |
+| After measurement | 1 target-phone capability export verified; 2 exposed camera IDs; 0 advertised concurrent sets; 0 image captures in the supplied session; 0 verified camera pairs |
+| Delta | +1 actual Redmi capability report; negative advertised-pair finding; no new image/timing/depth/accuracy measurement |
+| Outcome | Redmi app launch, permission, camera inventory and capability export have device evidence. Original image capture, measured timing/calibration and Samsung obligations remain open. ARCore is skipped because SDK absent |
+| Review | Fresh read-only documentation review on 2026-10-05: APPROVE, 0 substantive defects; raw evidence, source behavior, hashes, links and task states checked |
 
-still open because the Redmi is not connected for installation and capture; Samsung S23 availability is unconfirmed.
+still open because the supplied Redmi session has no original image or single-camera-control result, measured timing and independent calibration are absent, and Samsung S23 availability is unconfirmed. Runtime ARCore depth/pose needs a separately approved SDK-enabled test.
+
+### Actual Redmi session intake, 2026-10-05
+
+The owner supplied `session-1791186245035_f881c553`. Retained byte-for-byte at `experiments/01_camera_capture_delivery/runs/redmi/session-1791186245035_f881c553/`, outside Git. The report identifies Xiaomi/Redmi `2201116TG`, `viva`/`viva_eea`, Android 13/API 33, build `TP1A.220624.014`, with granted permission. Creation/export UTC milliseconds are `1791186245030`/`1791186267522`; these are handset wall-clock values, not independently checked capture times.
+
+| File | Bytes | Intake SHA-256 |
+|---|---|---|
+| capabilities.json | 39856 | `523aea34acef64831bc46f8325e4179ee0ee4077d97fb4390342c0ccd5961cdd` |
+| report.json | 86469 | `af98ca47aade243ec4fde470f930932cc096da623aae3ae24be1fe649fab9a27` |
+
+`validate_export` passes: the capabilities file agrees with its report-declared size/hash. The report hash is computed at intake, not an embedded signature. Repeated device/camera/concurrent fields agree. The report contains no package/version/binary hash attestation, so it does not independently prove the installed APK equals the handed-off binary.
+
+Checks: `camera_inventory`, `concurrent_camera_inventory` and `camera_permission` PASS; `advertised_camera_pairs` SKIPPED because `concurrent_camera_sets=[]`; `arcore_depth_and_pose` SKIPPED because this APK does not include ARCore. No FAIL check. IDs `0` rear and `1` front are FULL/realtime, with empty physical-camera IDs and unavailable sync metadata. Both advertise RAW_SENSOR/JPEG/PRIVATE/YUV_420_888 and numeric format `842094169`, unidentified by the app; neither advertises DEPTH16. Rear intrinsics are `[2872.360595703125, 2872.361083984375, 2000, 1500, 0]`, with zero distortion/translation and rotation `[1,0,0,0]`; front calibration/distortion/pose unavailable. These are characteristics, not verified stereo geometry, calibrated measurement quality or measured frame rate.
+
+This is the advertised-pairs attempt session. `captures=[]`, only capabilities are in `files`, and `single_camera_control` is absent. `CameraActivity.java:198` starts a fresh pair session; `:209` saves a skipped result for an empty set. `:164` starts a separate single control; export uses only the latest session at `:344`. `status=complete` means that operation saved (`:305`), not that every Task08 gate passed. Do not infer whether the owner made another single-camera session from this export alone.
+
+Next physical step: select **Capture one rear-camera control**, then immediately **Export latest session**, returning its original JPEG and capture-result timestamp/crop/orientation/frame metadata. Preserve this report separately. The current Camera2 route offers no advertised simultaneous pair; vendor-specific routes and ARCore remain unresolved, not globally ruled out.
+
+Documentation-only intake; tests n/a: no source behavior changed. The existing validator and focused contract tests verify this intake without adding an implementation-mirroring test. Pytest root-scratch scan found 0 directories on 5 October; existing `tools/check.py` system-temp routing, disabled cache provider and ignore rules remain in place. No download, SDK acquisition, GPU inference or new comparison was run.
 
 ### Native camera prototype progress, 2026-10-04
 

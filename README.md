@@ -28,7 +28,7 @@ FYLD suggested three research areas:
 
 | Suggested area | How this project relates to it |
 |---|---|
-| Deployment pipelines for cloud and edge devices. MLflow and BentoML are used for cloud today; there is no plan for edge devices yet. | **Supporting, not the main focus.** Every layer reads and writes saved records in a shared format, so the same layer can run on the phone, a nearby edge computer or a cloud server. Each experiment records model load time, processing time and memory separately, which is the evidence an edge-versus-cloud decision needs. A Python test app for Android has been built, but nothing has been measured on a phone yet. |
+| Deployment pipelines for cloud and edge devices. MLflow and BentoML are used for cloud today; there is no plan for edge devices yet. | **Supporting, not the main focus.** Every layer reads and writes saved records in a shared format, so the same layer can run on the phone, a nearby edge computer or a cloud server. Each experiment records model load time, processing time and memory separately, which is the evidence an edge-versus-cloud decision needs. The Android capability app has run on the Redmi; image capture and sustained phone performance remain unverified. |
 | Identify a worksite from a first-person video walkthrough, then estimate its size. | **Main focus, layers 1 to 4.** A normal video is flat. To measure a site you need to know how far away each pixel is (depth, layer 2) and where the camera was for each frame (camera position, layer 3). Together these place every pixel in one shared 3D space in metres (layer 4). Size, area and a top-down map then come from that 3D model. Recognising a site on a return visit is part of layer 3: the camera tracker must notice it is somewhere it has been before. |
 | Count objects in first-person video where an object can leave and re-enter the frame many times, efficiently. SAM works but is very heavy. | **Main focus, layer 5.** Counting in 2D fails because the same cone or barrier looks like a new object each time it comes back into view. Once objects have a position in the shared 3D space, a returning object comes back at the same place, so position and appearance together can decide "same object" or "new object". On efficiency, the experiments test whether cheap boxes or simple masks are good enough before reaching for a heavy segmentation model, and record the cost of every step. |
 
@@ -138,7 +138,7 @@ Check each licence before anything ships. Each layer README lists more options, 
 - **In:** a chosen phone, camera settings and a recording request.
 - **Out:** a saved bundle of images, each with camera identity, capture time and calibration (focal length, image centre, lens distortion and the offset between lenses).
 - **Phone available:** Redmi Note 11 Pro 4G, model 2201116TG, Android 13; Samsung S23 availability is unconfirmed.
-- **Where it stands:** the verified 64-bit print-only package is a build smoke test. A separate native Camera2 capture app has a verified arm64 APK handoff, but it has not yet been installed or run. No phone capture has been recorded or measured. A local browser preview and video-stream test is possible over HTTPS, but it cannot report the native concurrent-camera support and sensor details needed to assess stereo.
+- **Where it stands:** the native Camera2 app ran on the Redmi. Its exported report lists one rear camera and one front camera, with no advertised simultaneous-camera sets. The supplied session contains no image captures. A separate rear-camera control export is still needed; runtime depth and camera position remain untested. A local browser preview and video-stream test is possible over HTTPS, but it cannot report the native concurrent-camera support and sensor details needed to assess stereo.
 - **Stand-in today:** public benchmark recordings (see [Data used for testing](#data-used-for-testing)).
 - **Key sources:** [ARCore Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) · [Android multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) · [ARCore supported devices](https://developers.google.com/ar/devices) · [MobiDepth, phone stereo timing](research/sources/01_mobidepth.md) · [Construction photo capture guidance](research/sources/19_construction_capture_guidance.md)
 - **Details:** [experiments/01_camera_capture_delivery](experiments/01_camera_capture_delivery/README.md)
@@ -234,7 +234,7 @@ Packaging took 27.34 seconds using the installed Android tools and cached librar
 
 ## What is still unknown
 
-- **Phones.** Neither phone's camera access, depth support, timing, calibration, battery use or heat has been measured.
+- **Phones.** The Redmi's camera permission and camera inventory are verified from its exported report. Original image capture, runtime depth, measured timing, independent calibration, battery use and heat remain untested. Samsung availability is unconfirmed.
 - **Worksites.** All tests are indoors. The current depth reader ignores anything 4 m away or more. Street-scale and outdoor accuracy are untested.
 - **True object positions and sizes.** There is no surveyed reference for where the desk objects really are, or their full dimensions. A detected position is a point on the object's visible surface, not its centre. Visible size and full size are different measurements and need separate references.
 - **Confidence.** Detector scores, similarity scores and the spread of depth points are not probabilities. None has been calibrated against real errors.
@@ -260,7 +260,7 @@ A reference used for scoring is never fed to the method being scored, unless a r
 
 By layer:
 
-- **1. Camera capture:** record which cameras each phone exposes, record a short calibrated capture on both, and test sending recordings to another machine.
+- **1. Camera capture:** export a separate rear-camera control from the Redmi, check its original image and timestamps, then plan a calibrated recording. Test the Samsung separately if it becomes available. The Redmi report advertises no simultaneous-camera sets.
 - **2. Depth:** find out whether the phones allow two-lens stereo. Run a conventional stereo baseline on fixed Middlebury scenes, and in parallel try single-camera video depth with real-world scale from ARCore, GPS or known objects.
 - **3. Camera position:** finish the full-length and held-out tracking runs; then compare drift correction on revisited places. Corrected camera paths must update every surface and object position built from them.
 - **4. Environment:** compare points, meshes and splats on the same input; build the bird's-eye map on known test shapes first.

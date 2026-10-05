@@ -4,7 +4,7 @@ The project is built as five layers, each tested on its own with known inputs be
 
 | Layer | Folder | What it answers | Status |
 |---|---|---|---|
-| 🟦 1. Camera capture | [01_camera_capture_delivery](01_camera_capture_delivery/README.md) | Can a phone record what the other layers need and deliver it? | Android build works; no phone capture yet |
+| 🟦 1. Camera capture | [01_camera_capture_delivery](01_camera_capture_delivery/README.md) | Can a phone record what the other layers need and deliver it? | Redmi capability export verified; image capture still missing |
 | 🟪 2. Depth estimation | [02_stereo_depth](02_stereo_depth/README.md) | How far away is each pixel, in metres? | Test data ready; no method run |
 | 🟩 3. Camera position estimation | [03_camera_pose_estimation](03_camera_pose_estimation/README.md) | Where was the camera for each frame? | 30-frame trial: 6.9 mm error |
 | 🟧 4. Environment visualisation | [04_surface_reconstruction](04_surface_reconstruction/README.md) and [05_birds_eye_mapping](05_birds_eye_mapping/README.md) | What does the site look like in 3D, and how big is it? | Point surface: 7.8 mm error; top-down map planned |
@@ -127,7 +127,7 @@ Each experiment README names its initial inputs and independent reference. Curre
 
 | Experiment | Development inputs | Independent reference | Readiness |
 | --- | --- | --- | --- |
-| Camera capture and delivery | S23/Redmi recordings for capture; acquired Middlebury images for file delivery replay | Actual device capability/timing records; original file hashes and frame identifiers for delivery | WSL p4a toolchain built and verified a minimal arm64 smoke APK; a separate warm-built native Camera2 APK is handed off; both phone captures and replay tests remain outstanding |
+| Camera capture and delivery | Redmi capability export; S23 availability unconfirmed; acquired Middlebury images for file delivery replay | Actual device capability/timing records; original file hashes and frame identifiers for delivery | Warm-built Camera2 app ran on Redmi; valid report exposes rear/front IDs with no concurrent sets. Original image capture and delivery replay tests remain outstanding |
 | Stereo depth | Acquired Middlebury quarter-resolution training pairs | Published disparity, masks and scene calibration | Data ready; choose development/held-out scenes before tuning |
 | Camera tracking | Acquired TUM Freiburg1 xyz colour/depth | Motion-capture poses kept outside tracker inputs | 30-frame CPU trial completed: 6.93 mm position error and 2.14 image pairs/s; full xyz and selected desk evaluation remain |
 | Reconstruction | Acquired ICL living-room trajectory 2 depth/poses, matched IDs 1..880 | Separate acquired living-room reference point cloud | Nine-frame CPU baseline: 7.85 mm mean error, 22.29% whole-reference coverage within 5 cm |
@@ -163,11 +163,11 @@ These are proposed combinations. None has been validated on the available phones
 | Device reported by the user | What is established | First checks |
 |---|---|---|
 | Samsung S23 | Availability not confirmed | If available, record exact model identifier, operating-system version, exposed physical cameras and simultaneous stream support |
-| Redmi Note 11 Pro 4G, model 2201116TG | Available, Android 13, 6 GB RAM, Helio G96; not connected yet | Run the handed-off Task08 APK and inspect exposed cameras, streams, timing and calibration |
+| Redmi Note 11 Pro 4G, model 2201116TG | Report confirms Android 13/API 33, camera permission, rear/front IDs and no concurrent sets; 6 GB RAM and Helio G96 are owner-reported | Export a separate rear-camera control with its original JPEG and metadata; runtime depth and independent calibration remain unchecked |
 
 Multiple rear lenses do not establish simultaneous access to a useful stereo pair. Android's [multi-camera documentation](https://developer.android.com/media/camera/camera2/multi-camera) makes support dependent on the device implementation and camera grouping. The first experiment records actual support on both devices. Strong internet is helpful but does not establish capture timing, sustained upload performance or camera calibration.
 
-Task08 uses [python-for-android](https://github.com/kivy/python-for-android) for its WSL build route and a custom Java Activity that calls Camera2 directly. Its arm64 APK checks capabilities, captures a single-camera control, attempts advertised concurrent sets and exports a report ZIP. It does not bundle ARCore; depth and pose results remain untested. [Experiment 01](01_camera_capture_delivery/README.md) records the build route and handoff. The APK has not yet run on the Redmi.
+Task08 uses [python-for-android](https://github.com/kivy/python-for-android) for its WSL build route and a custom Java Activity that calls Camera2 directly. Its arm64 APK checks capabilities, captures a single-camera control, attempts advertised concurrent sets and exports a report ZIP. The supplied Redmi session passes export validation but contains no images. ARCore depth and pose are skipped because the SDK is absent, not because the handset is proven incompatible. [Experiment 01](01_camera_capture_delivery/README.md#redmi-device-result-5-october-2026) records the actual result and next export step.
 
 ## The information pieces must exchange
 
@@ -216,7 +216,7 @@ The main implementation starts with a verified observation/pose contract and a r
 | [08: phone feasibility](../task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Inspect both phones and retain capture/calibration evidence | None; run alongside geometry work |
 | [09: recognition and persistent counting](../task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Test labels, identities and revisit counts independently | 03 for 3D association; 04 for reconstructed-map integration |
 
-Geometry validation and Task 04's supplied-input point-surface baseline are complete. Nine CPU views have measured reference error and whole-reference coverage, with saved inputs and a surface preview. Task 05 has completed a 30-frame CPU tracking trial with independent scoring and shared timing metadata. Task 13 now has the selected desk archive and verified 573 timestamp pairs; full development and held-out tracking evaluations remain outstanding. Task 08 has a verified arm64 packaging smoke APK and a separate warm-built native Camera2 APK handoff; neither has been run on a phone. Task09 remains the inventory umbrella. Tasks17-22 have delivered provisional reference controls and bounded recognition/replay evidence; independent inventory accuracy and wider conditions remain untested. Record settings and numerical acceptance limits before experiment runs.
+Geometry validation and Task 04's supplied-input point-surface baseline are complete. Nine CPU views have measured reference error and whole-reference coverage, with saved inputs and a surface preview. Task 05 has completed a 30-frame CPU tracking trial with independent scoring and shared timing metadata. Task 13 now has the selected desk archive and verified 573 timestamp pairs; full development and held-out tracking evaluations remain outstanding. Task 08 has a verified APK handoff and actual Redmi capability evidence; its separate image-control export is still missing. Task09 remains the inventory umbrella. Tasks17-22 have delivered provisional reference controls and bounded recognition/replay evidence; independent inventory accuracy and wider conditions remain untested. Record settings and numerical acceptance limits before experiment runs.
 
 The tracking trial is a short development result; later phone and site assemblies remain plans. Task 00 supplied literature and preliminary desktop results. Its integrated implementation is archived; final code review, package validation, coverage measurement and post-fix reruns were unfinished when the objective changed. Any reused code must be validated in its new owning experiment.
 
@@ -227,7 +227,7 @@ Every implemented stage should show the mapping from its inputs to its outputs. 
 
 Use four explicit labels in both the views and saved metadata: observed input, ground truth, predicted output and evaluated output. Measured TUM Kinect depth is observed input even though the benchmark supplies it. TUM reference camera poses and clean synthetic ICL depth and poses are ground truth. Display conversion and preview sampling must be stated, with links to full numerical artifacts. Point clouds without triangle faces are point surfaces. They are not completed meshes.
 
-Task 05 closes the 30-observation CPU tracking baseline. Task 13 retains the full development and held-out evaluation. Task 14 adds labelled inspection. Task 08 has prepared and verified the WSL p4a packaging route and a separate native Camera2 APK handoff; no phone has been connected or measured yet.
+Task 05 closes the 30-observation CPU tracking baseline. Task 13 retains the full development and held-out evaluation. Task 14 adds labelled inspection. Task 08 has verified the WSL p4a packaging route and the Redmi capability export; original image capture, timing measurements and Samsung checks remain outstanding.
 
 Verified interactive inspections: [camera motion](03_camera_pose_estimation/runs/20261002T195923.778722Z_8bcaf965d8dc496192563205df59d85c/viewer.html) and [reconstructed point surface](04_surface_reconstruction/runs/20261002T195928.219822Z_55d2d0bfa455453eb2289a5e717490c1/viewer.html). These are local run artifacts; datasets and generated runs are excluded from repository publication.
 

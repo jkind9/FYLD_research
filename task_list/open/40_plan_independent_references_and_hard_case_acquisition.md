@@ -19,7 +19,7 @@ baseline_metric:
   baseline_value: "6 provisional frames; 0 independent desk physical-centre references"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-04
+last_updated: 2026-10-05
 superseded_by: null
 ---
 
@@ -49,6 +49,7 @@ Existing evidence: Task17 has six provisional agent-reviewed frames, complete se
 | Source RGB/depth payload is copied and checked against frozen hashes | Acquired TUM Freiburg1 desk files | dataset publisher | experiments/06_object_recognition/datasets/prepare.py:101-111; experiments/06_object_recognition/datasets/README.md:25 |
 | Current desk spread is not absolute error | Task29 JSON | anchor/reference design | experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_repeatability.json:16 |
 | Independent ICL surface already acquired | stage04 | first surface control | experiments/04_surface_reconstruction/README.md:151 |
+| Redmi exposes no advertised concurrent set; this is capability evidence, not an image or physical reference | Task08 device intake | Conditional RGB acquisition proposal | experiments/01_camera_capture_delivery/runs/redmi/session-1791186245035_f881c553/report.json:2966 |
 
 Proposed comparison: First inventory existing references, independence and metadata. Design human-checked pixel masks and physical identity review with disagreements; survey explicitly defined anchors, visible surfaces and complete dimensions with recorded instrument uncertainty/frame transforms. Plan a minimal static capture bank with similar co-visible neighbours, duplicate boxes, identical objects only in separate views, look-away/return, occlusion, changed lighting/rotation, moved objects, missing depth and camera reset. Plan independent translated viewpoints/new sessions and source-disjoint enrollment/validation/test; do not invent frame counts, tolerances or thresholds.
 
@@ -67,6 +68,12 @@ For a new controlled scene, the owner needs to provide:
 5. **Independent capture sessions.** After the Redmi's capabilities are known, repeat the static scene from translated viewpoints in separately started sessions. Keep each session intact. If any setting or calibration is selected from data, reserve separate sessions for enrollment, validation and held-out evaluation; never use the held-out session to choose settings. The already inspected TUM session can remain a development/reference control, but it cannot count as a blind held-out session. Include a look-away/return, co-visible similar neighbours, an occlusion and changed object orientation where available. Confirm the number of sessions and captures before acquisition without splitting adjacent frames across partitions.
 
 The minimum owner-supplied physical measurements are therefore an independently measured anchor and observable dimensions for each chosen object, with instrument details and uncertainty, plus an independently justified transform from the survey frame to the method frame if absolute position error is required. The capture protocol does not set a frame count, accuracy threshold or acceptance tolerance; those remain owner decisions before numerical comparison.
+
+### Redmi constraint from Task08, 5 October 2026
+
+Task08's received `session-1791186245035_f881c553` passes export validation and confirms model 2201116TG/Android 13. Only rear ID `0` and front ID `1` are exposed, with no physical IDs or advertised concurrent sets. Its pair attempt is SKIPPED. No DEPTH16 stream is advertised; ARCore is absent from the APK, so runtime depth/pose is untested. The session contains no images. The capture README's "Redmi device result, 5 October 2026" section owns the full result and intake hashes; the raw source is listed in the reuse evidence table above.
+
+The smallest useful next device check is a separately exported single-rear-camera control. If that passes, propose stationary-object RGB views first: revisit one object, show its similar neighbour in the same view, and include identical-looking objects seen only in separate views with owner-supplied identity evidence. Acquire separately started sessions as described above after settings/splits are agreed. A longer recorder still needs implementation or a separately verified recording tool; this one-shot APK is not a walkthrough recorder. Do not require stereo in that proposal or assume depth/poses exist. RGB can support reviewed identity/mask evidence; metric position needs a separately verified depth/pose route and independent survey frame link. The required anchors, dimensions, uncertainty and human reviews above remain absent.
 
 Measurements: Reference coverage matrix, identity certainty/disagreement, masks usable for formal scoring, instrument uncertainty, survey-to-method frame transform and its uncertainty, registration versus scored-anchor separation, coordinate/time consistency, independent session/view coverage, acquisition costs and exact unavailable cases. No experiment accuracy result is claimed by the plan.
 
@@ -106,11 +113,11 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 | Field | Value |
 |---|---|
 | Closing commit | Not started; plan created during Task30 |
-| Files changed | Task file only; future scope proposed |
+| Files changed | Reviewed task plan and reference README; Task08 handset constraints added on 2026-10-05; no acquisition or comparison implemented |
 | Test status | Plan lint passed; fresh-context plan review recorded PASS on 2026-10-04. No implementation tests or experiment executed. |
 | Before measurement | 6 provisional frames; 0 independent desk physical-centre references |
-| After measurement | No new experimental result |
+| After measurement | 1 validated Redmi capability session informs acquisition constraints; 0 new independent identity/mask/survey references or phone image captures |
 | Delta | 0 executed comparisons |
-| Decision-gate outcome | Plan review passed. Owner decision, reference measurements, session acquisition and any numerical settings remain outstanding; no acquisition or comparison is authorised. |
+| Decision-gate outcome | Plan review passed. Redmi Camera2 report advertises no concurrent set, so plan single-rear RGB acquisition conditionally on a successful control. Owner decision, reference measurements, session acquisition, verified metric inputs and any numerical settings remain outstanding; no acquisition or comparison is authorised. |
 
 still open because the investigation and its reference/decision requirements are not complete.

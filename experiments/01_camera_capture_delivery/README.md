@@ -2,7 +2,7 @@
 
 This folder (experiment 01) is layer 1 of the five-layer pipeline described in the [root README](../../README.md). It answers: **can a phone record what the other layers need, and get it to wherever those layers run?** It does not compute depth, camera position or objects. It supplies the raw material for all of them, so its mistakes, such as wrong timestamps or missing calibration, show up as errors in every later layer.
 
-**Status:** the WSL Android build route produced a verified arm64 print-only smoke APK and a separate native Camera2 APK handoff. The Redmi app has not been installed or run, so no phone capture has been measured. Other layers use public benchmark recordings as a stand-in.
+**Status:** the WSL Android build route produced a verified arm64 print-only smoke APK and a separate native Camera2 APK handoff. The Redmi app has now run and returned a valid capability report. It exposes one rear camera and one front camera, with no advertised simultaneous-camera sets. The received session has no image captures; a separate rear-camera control export is still needed. Other layers use public benchmark recordings as a stand-in.
 
 ## How capture works
 
@@ -69,11 +69,11 @@ The sections below are the detailed experiment record: the test plan, the Androi
 
 Can a phone provide camera observations that another component can use, from a saved recording or a live connection? This piece owns obtaining and delivering observations. It does not estimate depth or camera movement.
 
-The confirmed phone is a Redmi Note 11 Pro 4G, model 2201116TG, running Android 13 with 6 GB RAM and a Helio G96 processor. It is available but has not been connected for testing. The Samsung S23 is not confirmed available. Installing the native test application is acceptable. Neither phone is assumed to expose a usable simultaneous rear-camera pair.
+The confirmed phone is a Redmi Note 11 Pro 4G, model 2201116TG, running Android 13 with 6 GB RAM and a Helio G96 processor. Its exported report confirms model 2201116TG and Android 13; RAM and processor are owner-reported. USB debugging and file transfer were enabled, but Xiaomi's Install via USB setting required a SIM and workstation USB transfer was not verified. The Samsung S23 is not confirmed available. The Redmi's reported camera inventory provides no advertised simultaneous-camera set.
 
 ## Development inputs and references
 
-Camera capture needs recordings and capability reports from the Redmi Note 11 Pro; they do not exist yet. The Samsung S23 is a separate possible test device, but its availability is unconfirmed. A public driving dataset cannot establish which camera combinations, timing or calibration the Redmi exposes.
+The Redmi capability report is available in the local session below. A verified original image capture is still missing from the received evidence. The Samsung S23 is a separate possible test device, but its availability is unconfirmed. A public driving dataset cannot establish which camera combinations, timing or calibration the Redmi exposes.
 
 Delivery can be developed independently by replaying the acquired Middlebury quarter-resolution image pairs under `data/middlebury/dataset/MiddEval3/trainingQ/`. Compare delivered files and frame identifiers with the originals, including their file hashes, ordering and loss records. These files test delivery; their lack of capture timestamps does not test live camera synchronization. The replay bundle and interruption tests still need to be implemented. [Acquisition records](../../data/README.md).
 
@@ -189,6 +189,29 @@ The local offline handoff is in `mobile deployment/smoke_20261004_reviewed/`. It
 
 The separate fresh dependency build, limited to already-cached downloads, stopped because the `sdl2_image` recipe lacks its JPEG source archive and attempted a network clone. The build blocked network access, so no source was downloaded. Docker was available, but no local image matched Ubuntu 24.04.4, Python 3.12.3 and Java 17.0.20.1; no image was downloaded and no container build was claimed. Task24 remains in review with the container route as an explicit follow-up. Task08 can use the verified cached route meanwhile.
 
-Task08's native Camera2 APK was built from the pinned Java source with that cached WSL toolchain. The offline bundle is `mobile deployment/camera_20261004_camera_redmi_run6/`. Its APK is `unnamed_dist_1-debug.apk`, SHA-256 `35e2c420e38d3b857747ac255a1fd7f81791959c3e44d0a99911913af149c29a`; the receipt verifies package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, the CAMERA permission and launcher `org.fyld.capture.CameraActivity`. This is a warm cached build, not a clean dependency or container build. The Redmi was not connected during packaging; APK installation, capability results and capture/export still need handset verification. Transfer the APK from that bundle by USB or email when preparing the device run.
+Task08's native Camera2 APK was built from the pinned Java source with that cached WSL toolchain. The offline bundle is `mobile deployment/camera_20261004_camera_redmi_run6/`. Its APK is `unnamed_dist_1-debug.apk`, SHA-256 `35e2c420e38d3b857747ac255a1fd7f81791959c3e44d0a99911913af149c29a`; the receipt verifies package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, the CAMERA permission and launcher `org.fyld.capture.CameraActivity`. This is a warm cached build, not a clean dependency or container build. The Redmi was not connected during packaging. Its later on-device capability export is recorded below; the report does not attest the installed APK's version or binary hash.
 
 All 110 Task24 tests passed in WSL. Branch coverage across the five build modules was 82%, and Ruff passed. Run project tests through `python -B tools/check.py ...`; it sends pytest scratch, coverage data and tool caches to a unique system temporary directory. `pytest.ini` disables pytest's repository cache and excludes known scratch folder names from test discovery. `.gitignore` also catches accidental pytest scratch folders. The separate Task13 scratch directory is retained as historical evidence.
+
+## Redmi device result, 5 October 2026
+
+The supplied folder `session-1791186245035_f881c553` was moved unchanged into [the local capture run](runs/redmi/session-1791186245035_f881c553/report.json). Generated runs stay outside Git. The phone records creation at 07:44:05.030 UTC and export at 07:44:27.522 UTC; its wall clock was not independently checked. The existing `app/capture_report.py` export validator passes, and the device, camera inventory and concurrent-set fields agree between the two JSON files.
+
+| Evidence | Result |
+|---|---|
+| Handset | Xiaomi/Redmi 2201116TG, device `viva`, product `viva_eea`, Android 13/API 33, build `TP1A.220624.014` |
+| Checks | Camera inventory, concurrent-camera inventory and permission PASS; advertised-pair attempt SKIPPED because no sets are advertised; ARCore depth/pose SKIPPED because this APK lacks the SDK |
+| Exposed cameras | ID `0` rear and ID `1` front, both FULL hardware level with realtime timestamp source; neither exposes physical-camera IDs or synchronization metadata |
+| Streams | RAW_SENSOR, JPEG, PRIVATE, YUV_420_888 and numeric format `842094169` (unidentified by the app); no DEPTH16 stream advertised |
+| Rear calibration fields | Intrinsics `[2872.360595703125, 2872.361083984375, 2000, 1500, 0]`; zero distortion and translation; rotation `[1, 0, 0, 0]`. These are reported characteristics, not independent calibration or a stereo baseline |
+| Front calibration fields | Intrinsics, distortion and lens pose unavailable |
+| Capture evidence | `captures` is empty and no `single_camera_control` check appears; the only declared payload is `capabilities.json` |
+
+| File | Bytes | SHA-256 |
+|---|---|---|
+| `capabilities.json` | 39,856 | `523aea34acef64831bc46f8325e4179ee0ee4077d97fb4390342c0ccd5961cdd` |
+| `report.json` | 86,469 | `af98ca47aade243ec4fde470f930932cc096da623aae3ae24be1fe649fab9a27` |
+
+The capabilities file matches its report-declared hash and size. The report hash above was computed at workstation intake; the report has no separate signature. A completed session means the selected operation finished and saved, including a skipped pair attempt. It does not mean the full capture task passed. This result establishes no advertised concurrent route through this app's Camera2 inventory; it does not prove every vendor camera route or ARCore depth is unavailable.
+
+For the next check, press **Capture one rear-camera control**, then immediately **Export latest session**. The app starts a new session for each capture action and exports only the latest one, so export each result separately. Return that bundle with its JPEG and sensor metadata for integrity validation. Keep this capability/pair-attempt report. Measured frame timing, original image quality, independent calibration, sustained recording and Samsung checks remain outstanding. ARCore runtime depth, confidence and pose need a separately approved SDK-enabled test.

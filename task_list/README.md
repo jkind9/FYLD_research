@@ -1,6 +1,6 @@
 # Task list
 
-## Current records, 4 October 2026
+## Current records, 5 October 2026
 
 This board separates measured controls and bounded proofs of concept from untested investigations. Task30 completed documentation/research only. Preserve Task13 frozen settings and unfinished code; leave Task16/21/22 pending review. Closed receipts are historical evidence and are not rewritten by the new backlog.
 
@@ -14,7 +14,7 @@ This board separates measured controls and bounded proofs of concept from untest
 | [05: tracking baseline](closed/05_evaluate_tracking_with_supplied_benchmark_depth.md) | Closed baseline | Thirty TUM observations; 6.93 mm camera-position error and 2.14 image pairs/s |
 | [06: recovered research](closed/06_recover_interrupted_research_and_review_current_or.md) | Closed | Original research and source corrections preserved |
 | [07: mobile mapping products](closed/07_review_mobile_stereo_mapping_products_against_the_.md) | Closed | Product evidence and map-rate/depth-rate limits separated |
-| [08: phone feasibility](open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Open, awaiting Redmi run | WSL smoke APK and native Camera2 APK handoff are verified; Redmi capability/capture checks remain untested, and Samsung availability is unconfirmed |
+| [08: phone feasibility](open/08_check_phone_capture_feasibility_alongside_reconstr.md) | In progress, awaiting image-control export | Redmi capability report passes integrity validation; rear/front IDs and no advertised concurrent sets. Supplied session has no images; ARCore skipped because SDK absent; Samsung availability unconfirmed |
 | [09: inventory umbrella](open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Open | Checked persistence plus bounded child trials; independent inventory and wider cases remain |
 | [10: repository publication](closed/10_prepare_research_repository_and_publish_initial_main.md) | Closed | Initial main snapshot and publication exclusions recorded |
 | [11: geometry review](closed/11_explain_geometry_control_outputs_and_show_supplied.md) | Closed | Explained supplied-input/source-coordinate views |
@@ -30,7 +30,7 @@ This board separates measured controls and bounded proofs of concept from untest
 | [21: identity association](pending_review/21_associate_object_identities_with_geometry_and_appe.md) | Pending review | Geometry-only and combined rules each resolve eleven provisional observations; broader necessity unproved |
 | [22: recorded replay](pending_review/22_build_recorded_video_camera_surface_and_inventory_.md) | Pending review | Accepted sixty-frame/457-proposal viewer and six-frame automatic comparison; final browser-launch limit retained |
 | [23: surface review controls](open/23_embed_interactive_surface_review_and_explain_depth.md) | Approved, open, unfinished | Preserve partial edits; acquired publication/source-hash checks and finished reviews remain |
-| [24: APK build recovery](open/24_recover_and_reproduce_android_apk_build_inside_cap.md) | Approved, open | Recover repository-owned build; Task08 keeps device/camera checks |
+| [24: APK build recovery](pending_review/24_recover_and_reproduce_android_apk_build_inside_cap.md) | Pending review | Repository-owned cached WSL build verified; clean dependency and compatible container builds remain blocked. Task08 owns handset checks |
 | [25: camera revisits/correction](open/25_compare_feature_seeded_odometry_and_verified_camer.md) | Approved outline, later | After Task13 and Task16 review; sidecar contract exists, correction production/comparison unperformed |
 | [26: standalone camera/surface](closed/26_export_self_contained_shareable_offline_viewers.md) | Closed | Portable offline viewers preserve supplied-input evidence |
 | [27: xyz cup localisation](closed/27_localise_yolo_cup_detections_in_recorded_rgbd.md) | Closed | One YOLO26x detection projected with measured depth and supplied poses; separate from desk cup |
@@ -69,7 +69,7 @@ Task09 retains the inventory objective and checked-store history. Tasks31-35 own
 6. **Task35 sequential error/fusion.** Perturb one stage at a time, then combine; compare individual and growing estimates. Independent measurement lineage matters more than frame count. Real pose-correction comparisons wait for Task13/25 separately.
 7. **Task36 representation controls.** Denser display then fixed-depth/pose patches/mesh; texture/photogrammetry/splat/NeRF later with separate geometry/visual references and resource approval. Task23 remains the current review-controls owner.
 
-Tasks37 and 38 are independent research/selection streams, followed by separately authorised Android/Apple or KITTI/nuScenes acquisitions if justified. Task08 has a verified native Camera2 APK handoff and needs the Redmi connected for phone evidence; Samsung availability is unconfirmed. A browser preview can check basic streaming but cannot measure native concurrent-camera support. Task24's clean dependency and container build follow-up remains in pending review. Task39 requires later review of user journeys/data contracts before a separate implementation task. No task is started merely because it appears first here.
+Tasks37 and 38 are independent research/selection streams, followed by separately authorised Android/Apple or KITTI/nuScenes acquisitions if justified. Task08 now has actual Redmi capability evidence and needs a separate rear-camera control export with images; Samsung availability is unconfirmed. No concurrent sets are advertised in the supplied report. A browser preview can check basic streaming but cannot measure native concurrent-camera support. Task24's clean dependency and container build follow-up remains in pending review. Task39 requires later review of user journeys/data contracts before a separate implementation task. No task is started merely because it appears first here.
 
 The adapter excludes depth at/beyond 4 m. Indoor controls do not justify outdoor gates or accuracy. Acceptance thresholds, sample sizes, instrument tolerances and model settings remain owner decisions before execution, not numbers invented during documentation.
 
