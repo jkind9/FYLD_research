@@ -155,7 +155,7 @@ flowchart TD
     Q["Task25 pose correction: planned"] -.-> W
     Q -.-> F
     Q -.-> S
-    U["Task32 uncertainty supports: planned"] -.-> ID
+    U["Task32 support component: built; validation pending"] -.-> ID
     U -.-> F
     R["Independent identity/mask/anchor/extent/surface references: Task40 gaps"] -.-> E["Independent scoring: planned broader evaluation"]
     ID -.-> E
@@ -163,7 +163,7 @@ flowchart TD
     S -.-> E
 ```
 
-Uncertainty about an anchor, geometry of its visible surface and hypotheses about complete dimensions are different records. Detector confidence, cosine scores and raw point spread are not calibrated probabilities. Planned spatial support comparisons include simple regions and multiple foreground/background hypotheses.
+Uncertainty about an anchor, geometry of its visible surface and hypotheses about complete dimensions are different records. Detector confidence, cosine scores and raw point spread are not calibrated probabilities. Task32 now has a reusable descriptive support component at `experiments/06_object_recognition/experiments/04_geometry_identity/spatial_support.py`: it summarises finite 3D samples with a regularised covariance and exposes Mahalanobis distance only when its minimum sample guard is met. It does not change current association, claim calibrated uncertainty or select a matching threshold. Validation of whether this representation helps belongs to the parallel evaluation work.
 
 ## Scoped next investigations
 
