@@ -1,7 +1,7 @@
 ---
 id: "46"
 title: Fix late object births and regenerate the object demo
-status: in_progress
+status: closed
 priority: HIGH
 type: bug
 blocked_by: []
@@ -101,12 +101,10 @@ Before: 90 books outside-gate unresolved; 18 IDs; 226 unresolved. Target: 0 outs
 
 | Field | Value |
 |---|---|
-| Closing commit | No commit yet; staging was rejected by automatic approval review after its usage limit was reached. Nothing was staged. |
-| Files changed | 21 scoped source, test, documentation, task and demo files; the 172-file cached run is complete and remains locally ignored. |
+| Closing commit | f16e8eb (fix: allow late object births and refresh offline demos) |
+| Files changed | 20 scoped source, test, documentation, task and demo files; the 172-file cached run is complete and remains locally ignored. |
 | Test status | 101 focused tests passed; seven-page offline browser check passed with zero console/page errors or external requests; Ruff, Black and cached-publisher mypy passed; Python, diff, security and JavaScript reviews passed. |
 | Before measurement | 90/95 books outside-gate unresolved; 18 IDs; 226/457 unresolved |
 | After measurement | All 60 frames/457 proposals retained; 55 provisional identities, 346 matches, 56 unresolved and 0 outside-gate births; books: 6 provisional IDs, 84 matches and 5 unresolved. |
 | Delta | 18 to 55 IDs; 226 to 56 unresolved overall; 1 to 6 book IDs and 90 to 5 unresolved books. |
-| Decision-gate outcome | Plan review PASS; code and security/diff/browser reviews PASS. No independent physical-identity accuracy claim. Implementation and demo are verified locally. Task remains in progress because automatic approval review rejected Git staging at its usage limit; no commit or push exists. |
-
-still open because the automatic approval service rejected the authorized staging command when its usage limit was reached; retry is required before recording a closing commit.
+| Decision-gate outcome | Plan review PASS; code, security, diff and browser reviews PASS. No independent physical-identity accuracy claim. Commit f16e8eb contains the verified implementation and demo. |
