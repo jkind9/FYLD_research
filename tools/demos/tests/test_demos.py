@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import re
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -26,12 +28,103 @@ from tools.demos.page import EXTERNAL_RESOURCE, build_page
 K = Intrinsics(width=64, height=48, fx=50.0, fy=40.0, cx=31.5, cy=23.5)
 
 
+def test_identity_overlay_rejects_wrong_source_hash(tmp_path, monkeypatch):
+    from tools.demos import sources
+
+    baseline = tmp_path / "baseline"
+    (baseline / "input").mkdir(parents=True)
+    (baseline / "metadata").mkdir()
+    source_ledger = baseline / "input/baseline_observations.json"
+    source_ledger.write_text(json.dumps({"frames": []}), encoding="utf-8")
+    manifest = baseline / "metadata/manifest.json"
+    manifest.write_text("{}", encoding="utf-8")
+    overlay = tmp_path / "overlay"
+    (overlay / "output").mkdir(parents=True)
+    (overlay / "output/observations.json").write_text(
+        json.dumps(
+            {
+                "source": {
+                    "run": "baseline",
+                    "ledger_sha256": "0" * 64,
+                    "manifest_sha256": hashlib.sha256(
+                        manifest.read_bytes()
+                    ).hexdigest(),
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(sources, "REPLAY_RUN", "baseline")
+    monkeypatch.setattr(
+        sources, "verify_run", lambda path: {"status": "complete"}, raising=False
+    )
+    with pytest.raises(ValueError, match="source"):
+        sources.load_replay(tmp_path, identity_run=overlay)
+
+
+def test_object_page_explains_late_births_and_preserves_provisional_state(monkeypatch):
+    from tools.demos import pages_results
+
+    monkeypatch.setattr(
+        pages_results, "read_rgb", lambda path: np.zeros((480, 640, 3), dtype=np.uint8)
+    )
+    detection = {
+        "xyxy": [0, 0, 20, 20],
+        "label": "book",
+        "object_id": "object-0002",
+        "association": "new",
+        "confidence": 0.8,
+        "world_position_m": [1, 0, 1],
+        "identity_state": "provisional",
+    }
+    track = {"label": "book", "observation_count": 1, "identity_state": "provisional"}
+    replay = {
+        "ledger": {
+            "tracks": {"object-0002": track},
+            "counts": {"frames": 1, "detections": 1, "object_ids": 1, "unresolved": 0},
+        },
+        "frames": [
+            SimpleNamespace(
+                frame_id="359", pose=np.eye(4), detections=[detection], rgb_path=None
+            )
+        ],
+        "identity_run": "corrected/run",
+    }
+    scene = {
+        "positions": np.array([[1.0, 0, 1]]),
+        "normals": np.array([[0.0, 0, 1]]),
+        "colours": np.array([[255, 0, 0]], dtype=np.uint8),
+        "counts": np.array([4]),
+    }
+    doc, _ = pages_results.objects_in_3d(
+        replay,
+        scene,
+        0.012,
+        {"before": "104", "gap": "268", "after": "359"},
+        {"rms_mm": 72.8, "n": 16},
+    )
+    assert "provisional object identities" in doc
+    assert "New objects can appear at any frame" in doc
+    assert "refuses to create a second identity" not in doc
+    assert '"state":"provisional"' in doc
+    assert "corrected/run" in doc
+    replay["ledger"]["counts"]["frames"] = '<img src=x onerror=alert(1)>'
+    with pytest.raises(ValueError, match="counts"):
+        pages_results.objects_in_3d(
+            replay, scene, 0.012,
+            {"before": "104", "gap": "268", "after": "359"},
+            {"rms_mm": 72.8, "n": 16},
+        )
+
+
 def test_backproject_recovers_known_point() -> None:
     depth = np.zeros((48, 64))
     depth[10, 20] = 2.0
     points, pixels = backproject(depth, K)
     assert pixels.tolist() == [[10, 20]]
-    np.testing.assert_allclose(points[0], [(20 - 31.5) * 2.0 / 50.0, (10 - 23.5) * 2.0 / 40.0, 2.0])
+    np.testing.assert_allclose(
+        points[0], [(20 - 31.5) * 2.0 / 50.0, (10 - 23.5) * 2.0 / 40.0, 2.0]
+    )
 
 
 def test_backproject_rejects_wrong_shape_and_skips_invalid() -> None:
@@ -60,7 +153,9 @@ def test_to_world_applies_rotation_and_translation() -> None:
     pose = np.eye(4)
     pose[:3, :3] = [[0, -1, 0], [1, 0, 0], [0, 0, 1]]
     pose[:3, 3] = [1.0, 2.0, 3.0]
-    np.testing.assert_allclose(to_world(np.array([[1.0, 0.0, 0.0]]), pose), [[1.0, 3.0, 3.0]])
+    np.testing.assert_allclose(
+        to_world(np.array([[1.0, 0.0, 0.0]]), pose), [[1.0, 3.0, 3.0]]
+    )
     with pytest.raises(ValueError):
         to_world(np.zeros((1, 3)), np.eye(3))
 
@@ -80,16 +175,22 @@ def test_voxel_fuse_averages_duplicates_and_drops_singletons() -> None:
 def test_surfel_covariance_is_thin_along_the_normal() -> None:
     normal = np.array([[0.0, 0.6, 0.8]])
     six = surfel_covariance(normal, np.array([0.02]), np.array([0.002]))[0]
-    cov = np.array([[six[0], six[1], six[2]], [six[1], six[3], six[4]], [six[2], six[4], six[5]]])
+    cov = np.array(
+        [[six[0], six[1], six[2]], [six[1], six[3], six[4]], [six[2], six[4], six[5]]]
+    )
     np.testing.assert_allclose(cov @ normal[0], 0.002**2 * normal[0], atol=1e-12)
     tangent = np.array([1.0, 0.0, 0.0])
     np.testing.assert_allclose(cov @ tangent, 0.02**2 * tangent, atol=1e-12)
 
 
 def test_top_down_grid_keeps_highest_point_and_marks_unseen() -> None:
-    points = np.array([[0.0, 0.0, 0.1], [0.0, 0.0, 0.7], [0.25, 0.0, 0.2], [0.0, 0.0, 2.5]])
+    points = np.array(
+        [[0.0, 0.0, 0.1], [0.0, 0.0, 0.7], [0.25, 0.0, 0.2], [0.0, 0.0, 2.5]]
+    )
     colours = np.array([[1, 1, 1], [9, 9, 9], [5, 5, 5], [7, 7, 7]], dtype=np.uint8)
-    grid = top_down_grid(points, colours, up_axis=2, cell_m=0.1, height_range=(0.0, 2.0))
+    grid = top_down_grid(
+        points, colours, up_axis=2, cell_m=0.1, height_range=(0.0, 2.0)
+    )
     assert grid["height"].shape == (1, 3)
     assert grid["height"][0, 0] == pytest.approx(0.7)
     assert grid["colour"][0, 0].tolist() == [9, 9, 9]
@@ -106,13 +207,26 @@ def test_position_packing_round_trips_within_quantisation() -> None:
     restored = lo + q / 65535.0 * (hi - lo)
     assert np.abs(restored - positions).max() <= (hi - lo).max() / 65535.0
     raw = encode_array(np.array([1.5, -2.0], dtype=np.float32))
-    assert raw["dtype"] == "f32" and np.frombuffer(base64.b64decode(raw["b64"]), "<f4").tolist() == [1.5, -2.0]
+    assert raw["dtype"] == "f32" and np.frombuffer(
+        base64.b64decode(raw["b64"]), "<f4"
+    ).tolist() == [1.5, -2.0]
 
 
 def test_page_is_self_contained_and_escapes_embedded_data() -> None:
-    html = build_page("Demo", "One sentence.", "<main>hi</main>", {"label": "</script><b>"}, ["viewer.js"], "")
+    html = build_page(
+        "Demo",
+        "One sentence.",
+        "<main>hi</main>",
+        {"label": "</script><b>"},
+        ["viewer.js"],
+        "",
+    )
     assert not EXTERNAL_RESOURCE.search(html)
-    payload = re.search(r'<script type="application/json" id="demo-data">(.*?)</script>', html, re.DOTALL).group(1)
+    payload = re.search(
+        r'<script type="application/json" id="demo-data">(.*?)</script>',
+        html,
+        re.DOTALL,
+    ).group(1)
     assert json.loads(payload)["label"] == "</script><b>"
     assert "<title>Demo</title>" in html
 
@@ -130,5 +244,11 @@ def test_render_points_keeps_the_nearest_point_per_pixel() -> None:
 
 def test_page_refuses_external_scripts() -> None:
     with pytest.raises(ValueError, match="external resource"):
-        build_page("Bad", "x", '<script src="https://cdn.example.com/x.js"></script>', {}, [], "")
-
+        build_page(
+            "Bad",
+            "x",
+            '<script src="https://cdn.example.com/x.js"></script>',
+            {},
+            [],
+            "",
+        )

@@ -32,6 +32,8 @@ Measure whether better foreground masks improve position and visible dimensions.
 
 ## What
 
+Scheduling update, 5 October 2026: preserve the built component and defer the mask comparison until Task46's late-birth fix and Task32's box-depth association baseline. The parallel validation session owns measuring usefulness. Mask comparison must change pixel selection while holding the association policy fixed.
+
 Question: Does foreground segmentation reduce background-depth contamination and improve repeatability/absolute error or dimensions relative to rectangles?
 
 Build the reusable segmentation block first, without making an accuracy claim. Add `mask_pipeline.py` beside the existing rectangle/GrabCut/Canny controls and focused tests. The block preserves original image grids, carries prompt and frame lineage in its returned value for a future caller, returns explicit empty/failed states, and measures wall-clock cost per mask method. It does not alter the current runner's persisted report, detection, depth or identity code.

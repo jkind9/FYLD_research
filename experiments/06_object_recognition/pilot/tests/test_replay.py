@@ -2,6 +2,7 @@
 
 import importlib
 import inspect
+from copy import deepcopy
 from itertools import pairwise
 from pathlib import Path
 
@@ -116,20 +117,64 @@ def test_global_constraints_can_resolve_a_locally_ambiguous_detection():
     assert all(item["association"] == "matched" for item in assigned)
 
 
-def test_later_same_class_detection_outside_gate_is_not_counted_as_new():
+def test_later_same_class_detection_starts_provisional_id_and_returns():
     first, tracks, next_id = replay.associate_frame(
         [_detection(41, [0.0, 0.0, 1.0])], {}, 1, 0.35, 0.05
     )
 
-    outside_gate, unchanged, next_id = replay.associate_frame(
+    outside_gate, expanded, next_id = replay.associate_frame(
         [_detection(41, [1.0, 0.0, 1.0])], tracks, next_id, 0.35, 0.05
     )
 
     assert first[0]["object_id"] == "object-0001"
-    assert outside_gate[0]["association"] == "unresolved_outside_gate"
-    assert outside_gate[0]["object_id"] is None
-    assert unchanged == tracks
-    assert next_id == 2
+    assert outside_gate[0]["association"] == "new"
+    assert outside_gate[0]["object_id"] == "object-0002"
+    assert outside_gate[0]["identity_state"] == "provisional"
+    assert expanded["object-0002"]["identity_state"] == "provisional"
+    assert expanded["object-0001"] == tracks["object-0001"]
+    assert next_id == 3
+    returned, _, next_id = replay.associate_frame(
+        [_detection(41, [1.05, 0.0, 1.0]), _detection(41, [0.05, 0.0, 1.0])],
+        expanded,
+        next_id,
+        0.35,
+        0.05,
+    )
+    assert [item["object_id"] for item in returned] == ["object-0002", "object-0001"]
+    assert all(item["association"] == "matched" for item in returned)
+    assert next_id == 3
+
+
+@pytest.mark.parametrize("offset, association", [(0.35, "matched"), (0.350001, "new")])
+def test_late_birth_respects_distance_boundary_and_does_not_mutate_inputs(
+    offset, association
+):
+    _, tracks, next_id = replay.associate_frame(
+        [_detection(41, [0.0, 0.0, 1.0])], {}, 1, 0.35, 0.05
+    )
+    detections = [_detection(41, [offset, 0.0, 1.0])]
+    before_tracks, before_detections = deepcopy(tracks), deepcopy(detections)
+    result, _, _ = replay.associate_frame(detections, tracks, next_id, 0.35, 0.05)
+    assert result[0]["association"] == association
+    assert tracks == before_tracks
+    assert detections == before_detections
+
+
+def test_duplicate_candidate_does_not_force_an_extra_birth():
+    _, tracks, next_id = replay.associate_frame(
+        [_detection(41, [0.0, 0.0, 1.0])], {}, 1, 0.35, 0.05
+    )
+    result, updated, next_id = replay.associate_frame(
+        [_detection(41, [0.0, 0.0, 1.0]), _detection(41, [0.2, 0.0, 1.0])],
+        tracks,
+        next_id,
+        0.35,
+        0.05,
+    )
+    assert result[0]["association"] == "matched"
+    assert result[1]["association"] == "unresolved_track_already_assigned"
+    assert result[1]["object_id"] is None
+    assert len(updated) == 1 and next_id == 2
 
 
 def test_ambiguous_or_missing_geometry_does_not_force_an_identity():

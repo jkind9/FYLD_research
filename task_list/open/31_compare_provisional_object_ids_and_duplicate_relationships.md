@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "90 book proposals unresolved outside gate; 0 evaluated provisional-birth comparisons"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-04
+last_updated: 2026-10-05
 superseded_by: null
 ---
 
@@ -32,6 +32,8 @@ superseded_by: null
 Give every detection its own record and let uncertain new objects remain provisional. Compare ways to retain returning identities and possible duplicates without losing their histories. Uncertainty should remain visible instead of forcing a match.
 
 ## What
+
+Owner update, 5 October 2026: Task46 implements the explicitly requested late-birth bug fix and regenerated demo using the full 60-frame cached baseline. It is a bounded first slice of the policy work, with provisional IDs and no new numerical gates. The broader six-frame comparison, duplicate relationships, confirmation and schema migration below remain separate. Historical Task22 results remain intact. After Task46, Task32 box-depth spatial association is the next component; segmentation comparison follows it.
 
 Question: Can provisional births and explicit duplicate relationships retain new/returning objects without inflating confirmed inventory or hiding uncertainty?
 

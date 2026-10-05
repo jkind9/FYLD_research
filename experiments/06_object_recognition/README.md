@@ -8,7 +8,7 @@ This is the brief's object-counting problem. Counting detections in 2D video ove
 
 ## How object isolation works
 
-The layer is a chain. Each step can be swapped independently.
+The intended layer is a chain. Each step can be swapped independently. The corrected replay uses a box-depth median and permits provisional births at any frame. Full 3D support matching and duplicate-review relationships below remain planned behaviour.
 
 1. **Detection.** A neural network draws a box round each object it recognises, with a class name and a confidence score. A *closed-set* detector, such as YOLO or RF-DETR, knows a fixed list of classes; the common COCO list has 80 everyday classes and no traffic cones or barriers, so site objects need fine-tuning. An *open-vocabulary* detector, such as Grounding DINO or SAM 3, finds objects named in plain text instead.
 2. **Segmentation.** Pick out the object's own pixels inside the box. This matters because depth read from the whole box includes the wall behind the object, which pulls its 3D position backwards. Classical methods (GrabCut, filled outlines) need no model. Learned methods are the SAM family: SAM and SAM 2 outline whatever a box or point points at, SAM 2 follows it through video, and SAM 3 finds every instance of a named concept. Small versions (MobileSAM, EdgeSAM, EfficientSAM) trade some quality for speed.
@@ -19,7 +19,13 @@ The layer is a chain. Each step can be swapped independently.
    - *Persistent identity* keeps a record for every object: 3D position, size, appearance and every sighting. A new sighting is matched to records by position and appearance, one-to-one within a frame (the Hungarian algorithm), with "new object" always an allowed answer. ConceptGraphs is a research system built this way.
 6. **Counting.** Count object records, not detections. An unmatched sighting first becomes a *provisional* object until more evidence confirms it. Duplicates, missed objects and wrong merges are reported separately, because a correct total can hide one duplicate and one miss.
 
-**Why SAM on every frame should not be needed.** Detection plus 3D position does most of the identity work. Outlines matter mainly where background depth pollutes an object's position. So the efficient design runs a small detector, adds masks only on chosen frames or tricky objects, and measures whether the masks change the answer. Running detection on a subset of frames rather than all 30 per second is another saving to test. Every step's cost is recorded separately so this can be decided with numbers.
+**Current priority, 5 October 2026.** Task46 fixes late same-class births and rebuilds the demo. Next build box-and-depth 3D matching before comparing segmentation. The replay already converts valid depth pixels inside each box to 3D, but association retains only their median. Task32's spatial-summary component is built and tested; replay does not call it yet. Task32 owns connecting the full samples to world-space regions. Task31 retains broader duplicate-review and confirmation work. Validation belongs to the parallel session. Establish the hosted accuracy and latency baseline before edge comparisons.
+
+The first representation should describe the object's observed surface: its position, spread and competing depth groups. Uncertainty-weighted matching (Mahalanobis distance) is a candidate score. Raw surface spread describes extent and background mixing; it is not a calibrated probability of the object's true centre. A box containing a book and desk can need several regions rather than one broad region. Flat book surfaces also need an explicit treatment because the existing component refuses distance scoring when samples do not span three dimensions. Do not merge neighbouring books merely because broad regions overlap.
+
+In demo 06, `book ?` means that a book was detected but no object identity was assigned. The historical replay had 95 book detections: one new ID, four matches and 90 unresolved outside the position gate. Task46 removes the late-birth veto. On the same cached inputs it creates six provisional book identities, matches 84 sightings and leaves five unresolved. Across all classes, 18 IDs become 55 provisional IDs and 226 unresolved detections become 56. The historical source stays unchanged. Independently reviewed identities are needed to tell correct recovery from accidental merging; fewer question marks alone cannot prove improvement. Compare the corrected point-matching/provisional-birth baseline with spatial-region matching under the same policy next.
+
+The current [demo 06](../../demo_outputs/06_objects_in_3d.html) uses a separate corrected identity publication with the historical RGB/depth/cloud assets. Its 60-frame book evidence is different from Task31's six-frame fixture and Task45's longer detection run. Measured benchmark depth and supplied poses isolate association; predicted single-camera depth remains a separate baseline. Next compare spatial matching, then masks while keeping birth policy fixed. Detection frequency and phone speed are later cost comparisons.
 
 ## Methods: hosted and on the phone
 
@@ -53,8 +59,9 @@ More background: [mobile mapping and counting review](../../research/edge_produc
 
 ## What can be improved
 
-- **Softer identity rule.** The current rule blocks a second object of the same class, which left 90 of 95 book detections unassigned. Compare it with provisional identities and recorded possible duplicates.
-- **Independent references.** Hand-checked identities and masks, surveyed object positions and sizes, and a blind test set. Without them, none of the comparisons below can be scored.
+- **Box-and-depth 3D association, next.** Retain the valid 3D samples, separate competing depth groups and compare same-class spatial regions. Keep one-to-one assignment, unmatched choices and unknown positions explicit. Use Task32's existing component rather than adding another geometry library.
+- **Duplicate review and confirmation.** Task46 removes the late-birth restriction. Task31 still needs explicit possible-duplicate relationships and independent evidence before confirming inventory or unifying identities.
+- **Independent references, parallel validation.** Hand-checked identities and masks, surveyed object positions and sizes, and a blind test set. These enable accuracy scoring; component construction and software controls can proceed separately.
 - **Site object classes.** Fine-tune a detector on cones, barriers, pipes and plant, or test open-vocabulary detection, on worksite footage.
 - **Is segmentation useful at all?** Measure whether outlines make positions more accurate against surveyed positions, not just different. Compare plain boxes, classical masks and hand-checked masks first, then learned masks starting with the SAM family (SAM 2 and SAM 3 on a server, MobileSAM or EdgeSAM for phone cost).
 - **SAM 3 as a counting baseline.** Run SAM 3 end to end on the same clips, using its own video identities, and compare its counts with the 3D identity approach. If it counts returning objects correctly on short clips, the 3D machinery is only needed for longer or multi-visit captures.
@@ -172,9 +179,9 @@ The [task board](../../task_list/README.md#next-experiment-order-and-gaps) owns 
 | Workstream | Owner | Isolated comparison and decision |
 |---|---|---|
 | A: IDs and possible duplicates | Task31 | Restrictive births versus provisional candidates, one-to-one matching and explicit duplicate relationships; decide auditable inventory behaviour |
-| B: Spatial uncertainty | Task32 | Centre gates versus spatial supports/distributions with checked masks/poses; decide whether claimed uncertainty predicts independent errors |
+| B: Spatial uncertainty, next integration | Task32 | Box-depth medians versus full spatial regions with fixed boxes/depth/poses; separate surface extent from location uncertainty and test whether matching improves |
 | C: Appearance/spatial association | Task33 | ZNCC/current YOLO/proposed ResNet50/context; object-only versus context, then spatial/appearance ablations; decide evidence/cost trade-offs |
-| D: Segmentation/position/size | Task34 | Rectangles/classical/independently checked masks, learned methods only when authorised; decide if masks improve error or just change samples |
+| D: Segmentation/position/size, deferred comparison | Task34 | Built component; compare rectangles/classical/independently checked masks after the geometry baseline; decide if masks improve error or just change samples |
 | E: Error and sequential fusion | Task35 | Separate pixel/depth/calibration/pose perturbations, then combined; single view versus growing estimates; decide when extra views help or reinforce bias |
 | F: Surface display/reconstruction | Task36 | Points, patches, fused/textured meshes, photogrammetry, Gaussian/NeRF; score geometry separately from realism |
 | G: AR/VR room mapping | Task37 | ARCore data/API capability; Apple LiDAR controls only with hardware access; decide transferable capture/correction/revisit techniques |

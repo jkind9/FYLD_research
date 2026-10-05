@@ -5,6 +5,7 @@ Every page reads only these completed runs. Nothing here reruns an experiment.
 
 from __future__ import annotations
 
+import importlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,6 +13,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from experiments.datasets.acquisition import sha256
+from experiments.shared.runs import verify_run
 from tools.demos.geometry import (
     Intrinsics,
     backproject,
@@ -22,6 +25,7 @@ from tools.demos.geometry import (
 )
 
 REPLAY_RUN = "experiments/06_object_recognition/experiments/05_replay/runs/20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66"
+IDENTITY_RUN: str | None = "experiments/06_object_recognition/experiments/06_identity_policy/runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16f0f3d53b"
 TRACKING_RUN = "experiments/03_camera_pose_estimation/runs/20261002T164601.734717Z_befb0ccd27ab44daba6d9ac41f9b9ae0"
 SURFACE_RUN = "experiments/04_surface_reconstruction/runs/20261002T145103.184769Z_000165ef2e044376baf54b675172a64e"
 ICL_REFERENCE = "data/icl_nuim/reference_surface/living-room.ply"
@@ -47,22 +51,67 @@ class Frame:
 def require(path: Path) -> Path:
     """Fail clearly when a pinned run file is missing from this checkout."""
     if not path.exists():
-        raise FileNotFoundError(f"missing exported file {path}; pass --source-root pointing at a checkout with local runs")
+        raise FileNotFoundError(
+            f"missing exported file {path}; pass --source-root pointing at a checkout with local runs"
+        )
     return path
 
 
-def load_replay(root: Path) -> dict:
+def load_replay(root: Path, identity_run: Path | None = None) -> dict:
     """Return the replay observation ledger and its 60 frames with poses and detections."""
     run = root / REPLAY_RUN
-    ledger = json.loads(require(run / "input/baseline_observations.json").read_text(encoding="utf-8"))
+    ledger = json.loads(
+        require(run / "input/baseline_observations.json").read_text(encoding="utf-8")
+    )
+    selected = (
+        identity_run
+        if identity_run is not None
+        else (Path(IDENTITY_RUN) if IDENTITY_RUN else None)
+    )
+    if selected is not None:
+        selected = selected if selected.is_absolute() else root / selected
+        verify_run(run)
+        verify_run(selected)
+        corrected = json.loads(
+            require(selected / "output/observations.json").read_text(encoding="utf-8")
+        )
+        source = corrected.get("source", {})
+        if (
+            source.get("ledger_sha256")
+            != sha256(run / "input/baseline_observations.json")
+            or source.get("manifest_sha256") != sha256(run / "metadata/manifest.json")
+            or (root / source.get("run", "")).resolve() != run.resolve()
+        ):
+            raise ValueError("Identity overlay does not match the demo source")
+        policy = importlib.import_module(
+            "experiments.06_object_recognition.experiments.06_identity_policy.cached_replay"
+        )
+        policy.validate_overlay(ledger, corrected)
+        ledger = corrected
     frames = [
-        Frame(index=f["frame_index"], frame_id=str(f["frame_id"]), timestamp_s=float(f["timestamp_s"]),
-              rgb_path=require(run / "input" / f["rgb"]), depth_path=require(run / "input" / f["depth"]),
-              pose=np.asarray(f["pose"]["T_world_camera"], dtype=float), detections=f["detections"])
+        Frame(
+            index=f["frame_index"],
+            frame_id=str(f["frame_id"]),
+            timestamp_s=float(f["timestamp_s"]),
+            rgb_path=require(run / "input" / f["rgb"]),
+            depth_path=require(run / "input" / f["depth"]),
+            pose=np.asarray(f["pose"]["T_world_camera"], dtype=float),
+            detections=f["detections"],
+        )
         for f in ledger["frames"]
     ]
     display = np.load(require(run / "input/cloud_display.npz"))
-    return {"ledger": ledger, "frames": frames, "display_points": display["world_m"], "display_rgb": display["rgb"]}
+    return {
+        "ledger": ledger,
+        "frames": frames,
+        "display_points": display["world_m"],
+        "display_rgb": display["rgb"],
+        "identity_run": (
+            selected.relative_to(root).as_posix()
+            if selected is not None and selected.is_relative_to(root)
+            else str(selected) if selected is not None else None
+        ),
+    }
 
 
 def read_rgb(path: Path) -> np.ndarray:
@@ -95,7 +144,9 @@ def frame_points(frame: Frame, stride: int, edge_jump: float) -> dict[str, np.nd
     }
 
 
-def fused_desk_scene(frames: list[Frame], stride: int, edge_jump: float, voxel_m: float, min_count: int) -> dict:
+def fused_desk_scene(
+    frames: list[Frame], stride: int, edge_jump: float, voxel_m: float, min_count: int
+) -> dict:
     """Fuse every replay frame into one voxel-averaged coloured surface with normals."""
     parts = [frame_points(f, stride, edge_jump) for f in frames]
     points = np.concatenate([p["points"] for p in parts])
@@ -121,16 +172,28 @@ def load_surface(root: Path, per_frame: int, seed: int) -> dict:
     pts, cols, dist, frame_idx, cams = [], [], [], [], []
     for i, fid in enumerate(SURFACE_FRAMES):
         model = np.load(require(out / fid / "model.npy"), mmap_mode="r")
-        pick = np.sort(rng.choice(len(model), size=min(per_frame, len(model)), replace=False))
+        pick = np.sort(
+            rng.choice(len(model), size=min(per_frame, len(model)), replace=False)
+        )
         pts.append(np.asarray(model[pick]))
         cols.append(np.asarray(np.load(out / fid / "rgb.npy", mmap_mode="r")[pick]))
-        dist.append(np.asarray(np.load(out / fid / "reference_distance.npy", mmap_mode="r")[pick]))
+        dist.append(
+            np.asarray(
+                np.load(out / fid / "reference_distance.npy", mmap_mode="r")[pick]
+            )
+        )
         frame_idx.append(np.full(len(pick), i, dtype=np.uint8))
         stages = json.loads((out / fid / "stages.json").read_text(encoding="utf-8"))
         cams.append(stages)
     metrics = json.loads(require(out / "metrics.json").read_text(encoding="utf-8"))
-    return {"points": np.concatenate(pts), "colours": np.concatenate(cols), "distance_m": np.concatenate(dist),
-            "frame": np.concatenate(frame_idx), "stages": cams, "metrics": metrics}
+    return {
+        "points": np.concatenate(pts),
+        "colours": np.concatenate(cols),
+        "distance_m": np.concatenate(dist),
+        "frame": np.concatenate(frame_idx),
+        "stages": cams,
+        "metrics": metrics,
+    }
 
 
 CUP_RECORD = "experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_repeatability.json"
@@ -151,5 +214,9 @@ def load_reference_sample(root: Path, count: int, seed: int) -> dict:
     pts = np.asarray(cloud.points)
     rng = np.random.default_rng(seed)
     pick = rng.choice(len(pts), size=min(count, len(pts)), replace=False)
-    cols = (np.asarray(cloud.colors)[pick] * 255).astype(np.uint8) if cloud.has_colors() else np.full((len(pick), 3), 160, np.uint8)
+    cols = (
+        (np.asarray(cloud.colors)[pick] * 255).astype(np.uint8)
+        if cloud.has_colors()
+        else np.full((len(pick), 3), 160, np.uint8)
+    )
     return {"points": pts[pick], "colours": cols, "total": len(pts)}

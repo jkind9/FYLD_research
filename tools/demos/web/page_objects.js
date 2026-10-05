@@ -52,7 +52,7 @@
       for (const d of f.dets) {
         const c = css(colourOf(d.id)), [x1, y1, x2, y2] = d.box;
         ctx.strokeStyle = c; ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-        const text = d.id ? `${d.label} ${d.id.replace("object-", "#")}` : `${d.label} ?`;
+        const text = d.id ? `${d.label} ${d.id.replace("object-", "#")}${d.state === "provisional" ? " (candidate)" : ""}` : `${d.label} ?`;
         const w = ctx.measureText(text).width + 6;
         ctx.fillStyle = c; ctx.fillRect(x1, Math.max(0, y1 - 14), w, 14);
         ctx.fillStyle = "#fff"; ctx.fillText(text, x1 + 3, Math.max(10, y1 - 3));
@@ -85,7 +85,7 @@
     const inFrame = new Set(f.dets.map((d) => d.id).filter(Boolean));
     labelData = [...sums.entries()].filter(([id]) => inFrame.has(id)).map(([id, s]) => ({ id, label: s.label, pos: s.pos.map((v) => v / s.n) }));
     centres = new Map([...sums.entries()].map(([id, s]) => [id, s.pos.map((v) => v / s.n)]));
-    document.getElementById("count-title").textContent = `${sums.size} object${sums.size === 1 ? "" : "s"} counted so far`;
+    document.getElementById("count-title").textContent = `${sums.size} provisional identit${sums.size === 1 ? "y" : "ies"} so far`;
     document.getElementById("frame-summary").textContent =
       `${f.dets.length} detection${f.dets.length === 1 ? "" : "s"} in this frame. ${seen} detections so far, ${unresolved} not assigned to an object (grey).`;
     document.querySelectorAll(".chip").forEach((chip) => chip.setAttribute("aria-pressed", String(sums.has(chip.dataset.id))));
@@ -95,7 +95,7 @@
   const chips = document.getElementById("chips");
   D.tracks.forEach((t) => {
     const b = document.createElement("button");
-    b.className = "chip"; b.dataset.id = t.id; b.title = `${t.count} sightings; click to centre the view`;
+    b.className = "chip"; b.dataset.id = t.id; b.title = `${t.state || "historical"} identity; ${t.count} sightings; click to centre the view`;
     b.innerHTML = `<i style="background:${css(hexColor(t.colour))}"></i>`;
     b.appendChild(document.createTextNode(`${t.label} ${t.id.replace("object-", "#")} · ${t.count}`));
     b.addEventListener("click", () => {

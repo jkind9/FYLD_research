@@ -222,7 +222,7 @@ All results below are on recorded public data on a desktop computer. None is fro
 
 **How repeatable is an object's position?** In the 60-frame replay, one cup was seen 16 times and kept the same identity. Its 3D positions were spread by **72.8 mm** (root-mean-square) around their middle. The two furthest-apart sightings were 291.7 mm apart. This measures the visible surface of the cup from different angles, which moves as the camera moves. It is not the error against the cup's true centre, because no true centre was surveyed.
 
-**A known weakness:** books were detected 95 times. Only one book identity was created; 4 sightings matched it and 90 were left undecided. This is caused by a deliberately strict rule that stops new identities being created for a class once one exists. A softer rule, which allows provisional identities and records possible duplicates explicitly, is the next comparison.
+**Late-object births fixed, 5 October:** the historical replay blocked new same-class identities after the first object, leaving 90 of 95 book detections undecided. Task46 removes that restriction and replays the same cached boxes, depth and poses. It produces six provisional book identities and leaves five book detections undecided. Across all classes, unresolved detections fall from 226 to 56 and provisional identities rise from 18 to 55. These are policy outcomes, not a verified physical-object count. [Demo 06](demo_outputs/06_objects_in_3d.html) shows the corrected replay; box-and-depth 3D association is the next priority.
 
 Each experiment folder links to interactive viewers for its runs, such as a camera-path viewer, a point-surface viewer and the 60-frame object replay. These are generated locally and are not stored in the repository.
 
@@ -265,12 +265,12 @@ By layer:
 - **3. Camera position:** finish the full-length and held-out tracking runs; then compare drift correction on revisited places. Corrected camera paths must update every surface and object position built from them.
 - **4. Environment:** compare points, meshes and splats on the same input; build the bird's-eye map on known test shapes first.
 - **5. Object isolation:**
-  1. Compare the strict new-identity rule with provisional identities and explicit duplicate links.
-  2. Test whether segmentation is useful at all. Compare plain boxes, simple masks and hand-checked masks for position accuracy, then learned masks starting with the SAM family. Separately, run SAM 3 on its own as a counting baseline, since it already keeps object identities through video, and compare it with the 3D identity approach.
-  3. Replace a single-point position with a region that reflects uncertainty, and check whether that region actually contains the true position as often as it claims.
+  1. Keep the late-birth fix from Task46. New objects may receive provisional identities at any frame; broader duplicate links and confirmation remain later policy work.
+  2. Connect the 3D depth samples inside each box to spatial matching before segmentation. Separate visible extent, background depth and uncertainty in location; test whether repeated sightings retain identities without merging neighbours.
+  3. Then compare segmentation with the same association policy. Change only pixel selection and measure whether masks improve position and identity outcomes. Learned masks and SAM 3 counting remain later comparisons.
   4. Compare appearance features, including ResNet50, with and without the surrounding background.
   5. Measure how errors in each layer add up, and whether more views of an object reduce its position error or repeat the same bias.
-- **Shared:** collect independent references first: hand-checked object identities and masks, surveyed object positions and sizes, and recordings with hard cases. Without these, the comparisons above cannot be scored.
+- **Shared, parallel validation:** collect hand-checked identities and masks, surveyed object positions and sizes, and recordings with hard cases. These are needed for accuracy scoring; component construction and software controls can proceed separately.
 - **Test data:** check the candidate public datasets listed in the research README and run the existing experiments on small samples of them, to see how each layer copes with phone video, outdoor scenes and worksite objects.
 - **ARCore:** examine everything ARCore and the phone's sensors can record, including outdoor labels, building geometry and location, and decide what the capture app should save.
 

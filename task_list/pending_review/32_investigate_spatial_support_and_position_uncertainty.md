@@ -33,6 +33,8 @@ Find out whether regions of possible position match objects better than a single
 
 ## What
 
+Owner update, 5 October 2026: the descriptive component below is built. After Task46 fixes late births, the next slice connects full box-depth samples to world-space supports and association, without requiring segmentation. Reuse pilot/localisation.py:51 and shared/geometry.py:78 for point generation/transforms. Separate competing depth groups, visible extent and location uncertainty; handle planar surfaces explicitly because the current rank guard refuses their Mahalanobis distance. Task31 owns identity policy; validation remains with the parallel session. Reopen and review the expanded file/contract plan before integration; the existing PASS and receipts cover only the completed component.
+
 Question: Which support/distribution representation accounts for position error and improves association without pretending raw depth spread is calibrated uncertainty?
 
 Build the reusable support representation first, without running a comparison. Add `spatial_support.py` beside the existing location estimator and focused tests. The component accepts immutable finite 3D samples plus explicit coordinate-frame/world/segment/pose-revision lineage, returns a mean, regularised covariance, rank and sample count, and computes squared Mahalanobis distance only when the support has enough samples and full 3D rank. Malformed inputs raise a clear validation error; rank-deficient, missing or insufficient support returns an explicit unavailable distance. Do not change the existing association policy or select a threshold in this task.

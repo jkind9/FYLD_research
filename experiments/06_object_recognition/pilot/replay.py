@@ -108,10 +108,10 @@ HYPERPARAMETERS = {
             "max_distance_m": ASSOCIATION_DISTANCE_M,
             "ambiguity_margin_m": AMBIGUITY_MARGIN_M,
             "ambiguity_rule": "unresolved when an alternative full-cardinality assignment is within the margin",
-            "outside_gate": "unresolved after the class has an existing track; do not mint a new ID",
+            "outside_gate": "create provisional identity at any frame when no feasible existing-track candidate exists",
             "retention": "all selected frames; no expiry inside clip",
         },
-        "source": "confirmed 2026-10-03: owner asked us to choose and record initial settings",
+        "source": "inherited numeric settings; birth veto removed by owner request confirmed 2026-10-05",
     },
     "display_sampling": {
         "value": [DISPLAY_FRAME_CAP, DISPLAY_CLOUD_CAP, "integer linspace"],
@@ -253,6 +253,7 @@ def associate_frame(
         frame_index = int(record.get("frame_index", 0))
         record["coordinate_delta_m"] = None
         record["association_distance_m"] = None
+        record["identity_state"] = None
         if index in unresolved:
             record["association"] = unresolved[index]
             record["object_id"] = None
@@ -264,6 +265,9 @@ def associate_frame(
             new_position = [float(value) for value in position]
             record["association"] = "matched"
             record["object_id"] = object_id
+            record["identity_state"] = updated_tracks[object_id].get(
+                "identity_state", "provisional"
+            )
             record["association_distance_m"] = distance
             record["coordinate_delta_m"] = [
                 float(new_position[axis] - old_position[axis]) for axis in range(3)
@@ -280,17 +284,15 @@ def associate_frame(
             record["association"] = "unresolved_track_already_assigned"
             record["object_id"] = None
             continue
-        if any(track["class_id"] == record["class_id"] for track in tracks.values()):
-            record["association"] = "unresolved_outside_gate"
-            record["object_id"] = None
-            continue
         assert position is not None
         object_id = f"object-{next_number:04d}"
         next_number += 1
         record["association"] = "new"
         record["object_id"] = object_id
+        record["identity_state"] = "provisional"
         updated_tracks[object_id] = {
             "object_id": object_id,
+            "identity_state": "provisional",
             "class_id": int(record["class_id"]),
             "label": str(record["label"]),
             "last_position_m": [float(value) for value in position],
