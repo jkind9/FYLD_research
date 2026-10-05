@@ -193,6 +193,8 @@ Start with controls and a simple baseline. Test normal inputs, boundaries and a 
 
 Numeric product acceptance limits, processing budgets and tunable settings have not been selected. Agree and record them before running a comparison. A completed experiment may conclude that a method is unsuitable; completion is an evidenced decision, not a requirement for a positive result.
 
+Per-stage accuracy against reference data is collected in one report by [experiments/evaluation](evaluation/README.md). It re-scores verified runs with each experiment's own scorer, lists every stage (unscored stages are marked unavailable with a reason), records which reference data each score used, and compares two reports stage by stage. New stage measures should report into it rather than inventing another format.
+
 Reusable geometry, records and run exporting live in [experiments/shared](shared/README.md). Keep estimator-specific code with its experiment; promote a helper only when another experiment needs the same behaviour. The root [src placeholder](../src/README.md) does not own a second implementation.
 
 ## Build order
