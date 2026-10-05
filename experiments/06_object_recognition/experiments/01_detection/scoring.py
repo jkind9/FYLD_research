@@ -60,21 +60,32 @@ def iou(first: list[float], second: list[float]) -> float:
     return intersection / (area - intersection)
 
 
-def _validate_scoring_rows(predictions: list[dict], references: list[dict]) -> None:
-    """Validate scoring helpers too, independently of production cache checks."""
+def _validate_scoring_rows(
+    predictions: list[dict],
+    references: list[dict],
+    *,
+    width: int = 640,
+    height: int = 480,
+) -> None:
+    """Validate scoring helpers too, independently of production cache checks.
+
+    Task18 frames are 640x480 (the default); other datasets pass their image size.
+    """
     classes = {
         str(p.get("class_id")): p["label"]
         for p in predictions
         if isinstance(p, dict) and isinstance(p.get("label"), str)
     }
-    validate_predictions(predictions, 640, 480, {**classes, "41": "cup", "62": "tv"})
+    validate_predictions(
+        predictions, width, height, {**classes, "41": "cup", "62": "tv"}
+    )
     if not isinstance(references, list) or any(
         not isinstance(r, dict) for r in references
     ):
         raise ValueError("References must be objects in a list")
     seen = set()
     for reference in references:
-        box(reference.get("bbox_xyxy"), 640, 480)
+        box(reference.get("bbox_xyxy"), width, height)
         identity, category = reference.get("instance_id"), reference.get("category")
         if not isinstance(identity, str) or not identity or identity in seen:
             raise ValueError("Reference instance IDs must be nonempty and unique")
@@ -89,6 +100,9 @@ def score_category(
     category: str,
     coverage: str,
     threshold: float,
+    *,
+    width: int = 640,
+    height: int = 480,
 ) -> dict:
     """Maximise cardinality, then summed IoU; subset outputs have no FP/P/R."""
     if (
@@ -99,7 +113,7 @@ def score_category(
         raise ValueError("IoU threshold must be finite in (0,1]")
     if coverage not in {"complete", "subset"}:
         raise ValueError("Scoring requires complete or subset coverage")
-    _validate_scoring_rows(predictions, references)
+    _validate_scoring_rows(predictions, references, width=width, height=height)
     ps = [(i, p) for i, p in enumerate(predictions) if p["label"] == category]
     rs = [(i, r) for i, r in enumerate(references) if r["category"] == category]
     candidates = [

@@ -1,4 +1,4 @@
-# Task list
+﻿# Task list
 
 ## Current records, 5 October 2026
 
@@ -56,8 +56,8 @@ New Tasks31-40 are open, unstarted and proposed. HIGH priorities indicate eviden
 | [38: Research longer-range fusion and driving evaluation](open/38_research_long_range_fusion_and_driving_evaluation.md) | MED | Research/design independent | Which sensor/data/uncertainty representation can test the intended range, and what can KITTI/nuScenes references actually establish? |
 | [39: Record future 3D review and measurement requirements](open/39_record_future_3d_review_and_measurement_requirements.md) | LOW | Research/design independent | What evidence and measurement interactions are needed for later 3D review without hiding rejected/uncertain observations or overstating accuracy? |
 | [40: Plan independent references and hard-case acquisition](open/40_plan_independent_references_and_hard_case_acquisition.md) | HIGH | Research/design independent | Which independent identity/mask/anchor/extent/surface references and hard cases are necessary and practical for the proposed comparisons? |
-| [44: Build a per-stage accuracy log for end-to-end runs](open/44_build_a_per_stage_accuracy_log_for_end_to_end_runs.md) | HIGH | Implemented 5 October in branch `infra/44-…` (worktree `.worktrees/task-44`); first composite report published, awaiting diff review and merge | One report per run scoring every stage (camera path, detection, segmentation, depth support, 3D position, surface, identity, count) against reference data, marking unscorable stages as unavailable, separating a stage's own error from error passed down from earlier stages, and comparing two runs stage by stage |
-| [45: Measure detection position error in cluttered scenes](open/45_measure_detection_position_error_in_cluttered_scen.md) | HIGH | None; uses COCO val2017 and the local TUM desk recording | How far detector boxes land from true object outlines in clutter, how much they wobble frame to frame on stationary objects, and how much background they include; Task18 measured hit/miss only |
+| [44: Build a per-stage accuracy log for end-to-end runs](pending_review/44_build_a_per_stage_accuracy_log_for_end_to_end_runs.md) | HIGH | Implemented and reviewed 5 October; first composite report published | One report per run scores all eight stages against reference data, marking unscorable stages unavailable and separating a stage's own error from error passed down from earlier stages. Later tasks add the remaining measures. |
+| [45: Measure detection position error in cluttered scenes](pending_review/45_measure_detection_position_error_in_cluttered_scen.md) | HIGH | Implemented and reviewed 5 October; Part A and Part B reruns complete | COCO placement and TUM desk jitter are measured. The corrected desk run reports 449 gone, 60 claimed by another track, 53 without depth and 26 one-to-one jumps. |
 
 Task09 retains the inventory objective and checked-store history. Tasks31-35 own new isolated comparisons rather than silently enlarging Tasks19-22. Task40 owns shared independent-reference/capture design; it does not turn Task17 provisional labels into human gold. Task37 owns room-platform research; Task38 owns driving/range suitability; their research can proceed before optional acquisitions. Task39 is a later application requirement, not a build task. Task23/24 keep their existing scopes. Task25 stays behind frozen Task13 and broader protocol review; Task35 can start with analytic/supplied-pose controls without triggering either camera run.
 
@@ -99,7 +99,7 @@ in is its state:
 | `closed/` | done and signed off |
 | `archive/` | dropped, or rolled into another task |
 
-There's no app and no database — the folder is the board, and `git` is the history.
+There's no app and no database â€” the folder is the board, and `git` is the history.
 
 Manage tasks with the tool (don't move files by hand):
 
@@ -111,14 +111,14 @@ node ~/.claude/task-system/task.js move <id> pending_review
 node ~/.claude/task-system/task.js move <id> closed   # refused until receipts are filled
 ```
 
-**Two frontmatter fields the hooks enforce — `files:` and `docs:`** (YAML lists of
+**Two frontmatter fields the hooks enforce â€” `files:` and `docs:`** (YAML lists of
 repo-relative paths). They link a task to the code it owns *and* the documentation that
 code lives under, so neither is forgotten:
 
-- **`files:`** — the code/test files this task touches. The PreToolUse task-gate
+- **`files:`** â€” the code/test files this task touches. The PreToolUse task-gate
   (`~/.claude/scripts/hooks/task-gate.js`) blocks a 2nd+ code write that isn't matched by
   the single in_progress task's `files:` globs. If the work grows, add the new file here.
-- **`docs:`** — the README(s)/docs that document this task's code. The Stop completion-gate
+- **`docs:`** â€” the README(s)/docs that document this task's code. The Stop completion-gate
   (`~/.claude/scripts/hooks/task-complete-gate.js`) **blocks session end** when a
   code-changing in_progress task either declares no `docs:`, or declares docs that weren't
   updated **this session** (a SessionStart hook, `docs-snapshot.js`, baselines the working
@@ -128,10 +128,10 @@ code lives under, so neither is forgotten:
 The same completion-gate also enforces a **tests floor**: when code changed, a test must have
 been added/updated this session (any `tests/` path, or `test_*` / `_test` / `*.spec` / `*.test`
 naming), or you write a one-line `tests n/a: <reason>` (rename/comment/pure-doc). The gate only
-proves a test was *touched* — the **rigour** is on you (see "Testing standard" below).
+proves a test was *touched* â€” the **rigour** is on you (see "Testing standard" below).
 
 A non-blocking Stop reminder (`deps-surface.js`) also lists, for each changed `.py`, the
-modules that import it — the dependents you may need to update too.
+modules that import it â€” the dependents you may need to update too.
 
 ## Testing standard
 
@@ -139,43 +139,43 @@ The gate checks that a test exists; this section is how you make it a test that 
 catch a bug. Two failure modes to avoid: **incomplete** (you forgot the empty-input case) and
 **tautological** (the test passes no matter what the code does). Different fixes:
 
-**Completeness — walk two checklists.** Don't enumerate hundreds of inputs; test one representative
+**Completeness â€” walk two checklists.** Don't enumerate hundreds of inputs; test one representative
 per *class of behaviour* (equivalence partitioning) plus the *boundaries* between classes.
 
-- **Right-BICEP** — *what* to test: **R**ight (correct result on a known input), **B**oundary
+- **Right-BICEP** â€” *what* to test: **R**ight (correct result on a known input), **B**oundary
   conditions, **I**nverse (round-trip: `decode(encode(x)) == x`), **C**ross-check (agree with a
-  simpler/reference implementation), **E**rror conditions (bad input → the right raise),
+  simpler/reference implementation), **E**rror conditions (bad input â†’ the right raise),
   **P**erformance (only when it matters).
-- **CORRECT** — *which boundaries*: **C**onformance (shape/format), **O**rdering, **R**ange (values
-  in bounds — an invariant), **R**eference (external state; **does it mutate its input?**),
+- **CORRECT** â€” *which boundaries*: **C**onformance (shape/format), **O**rdering, **R**ange (values
+  in bounds â€” an invariant), **R**eference (external state; **does it mutate its input?**),
   **E**xistence (null / empty / zero), **C**ardinality (the 0-1-many rule), **T**ime
   (ordering/timeouts/concurrency).
 
-Walk the rows, keep the ones that apply, say why. A pure numeric transform usually earns 4–8 tests
+Walk the rows, keep the ones that apply, say why. A pure numeric transform usually earns 4â€“8 tests
 (a couple of happy representatives + empty/one/constant/zero boundaries + one per error path), not
 one per row and not one per input.
 
-**Rigour — prove the test is load-bearing.** One of:
+**Rigour â€” prove the test is load-bearing.** One of:
 
-1. **Red-first** — write the test (or confirm it) *failing* before the code exists / the fix lands.
+1. **Red-first** â€” write the test (or confirm it) *failing* before the code exists / the fix lands.
    A test you've watched fail for the right reason is proven to bite.
-2. **Independent review** — a second pass (person or agent) asks: *"would this test still pass if the
+2. **Independent review** â€” a second pass (person or agent) asks: *"would this test still pass if the
    function returned its input unchanged / returned zeros / was a no-op?"* If yes, it's tautological.
-3. **Mutation check** (for load-bearing logic) — flip a `>` to `>=`, a `+` to `-`; the tests must go
+3. **Mutation check** (for load-bearing logic) â€” flip a `>` to `>=`, a `+` to `-`; the tests must go
    red. The objective measure that a test catches bugs.
 
-**Type/return correctness is not a test's job** — assert it with static typing (mypy/pyright), which
+**Type/return correctness is not a test's job** â€” assert it with static typing (mypy/pyright), which
 checks every path for free. Reserve tests for *behaviour*: values, shapes, invariants, and raises.
 
-**Golden master** (freeze a whole output and compare) is the far end of "Right" — reach for it only
+**Golden master** (freeze a whole output and compare) is the far end of "Right" â€” reach for it only
 when the output is too rich to assert any other way (arrays, images, rendered docs), and keep a
 tolerance so float noise doesn't false-fail. Prefer a narrow property/threshold when one exists.
 
-Each task file opens with an **In plain English** section — 2–5 sentences a reader with no
-project context can follow (what is the objective, and how will it be done? — no acronyms, no
+Each task file opens with an **In plain English** section â€” 2â€“5 sentences a reader with no
+project context can follow (what is the objective, and how will it be done? â€” no acronyms, no
 file paths). The completion gate blocks a code-changing session while it is missing or unfilled;
 `task.js start` scaffolds it into older files. The rest of the file is the engineering record:
-**What** we're doing, **Why**, **How** (lead with a **Reuse evidence** table — one row per
+**What** we're doing, **Why**, **How** (lead with a **Reuse evidence** table â€” one row per
 "this already exists" claim, each with a `file:line` in the Evidence column), an
 **Invariants and recovery** section for stateful/HIGH work (or `invariants n/a: <reason>`),
 how we'll **Verify** it, and a **Receipts** table filled in when it closes.
@@ -183,14 +183,14 @@ how we'll **Verify** it, and a **Receipts** table filled in when it closes.
 Before starting a HIGH task, run the plan checks while the plan is still cheap to change:
 `node ~/.claude/scripts/task-plan-lint.js <task-file>` (deterministic checks: scope gaps,
 invariants + reuse-evidence coverage, numeric baseline, vague criteria), `/clarify-task` if
-anything material is vague (≤5 questions, recorded in the file under `## Clarifications`),
+anything material is vague (â‰¤5 questions, recorded in the file under `## Clarifications`),
 then the **plan-reviewer** agent (fresh context, reads the actual code and the project
-`CONSTITUTION.md` if present, hunts for a plan claim the code contradicts) — and record its
+`CONSTITUTION.md` if present, hunts for a plan claim the code contradicts) â€” and record its
 verdict: `task.js review <id> PASS|FAIL`.
 
 Two board-level companions: `task.js audit` is a read-only drift report (declared docs/tests
 that don't exist, HIGH tasks missing invariants or a review stamp, stale README task links,
 and an inventory of every `docs n/a:`/`tests n/a:`/`still open because` waiver);
 `CONSTITUTION.md` is currently an unratified template; it does not yet supply owner-ratified project principles
-(versioned, owner-ratified — plans conflicting with it fail review).
+(versioned, owner-ratified â€” plans conflicting with it fail review).
 Full guide: `~/.claude/task-system/HOWTO.md`.
