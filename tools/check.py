@@ -23,6 +23,7 @@ def main() -> None:
     args = sys.argv[1:] or [
         "experiments/geometry_validation/tests",
         "experiments/shared/tests",
+        "experiments/evaluation/tests",
         "experiments/datasets/tests",
         "experiments/04_surface_reconstruction/tests",
         "experiments/03_camera_pose_estimation/tests",

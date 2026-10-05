@@ -1,7 +1,7 @@
 ---
 id: "44"
 title: Build a per-stage accuracy log for end-to-end runs
-status: open
+status: pending_review
 priority: HIGH
 type: infra
 approval_status: proposed 2026-10-05 by owner request; owner delegated settings on 2026-10-05
@@ -37,7 +37,7 @@ When the whole system runs on a test recording, we want one report that says how
 
 Add `experiments/evaluation/`, a small shared package that:
 
-1. **Defines one stage report format** (version 1, JSON plus a readable table, published under `experiments/evaluation/runs/`). One section per stage: camera path, detection, segmentation, depth support, 3D object position, surface, identity, count. Each section records:
+1. **Defines one stage report format** (version 2, JSON plus a readable table, published under `experiments/evaluation/runs/`). One section per stage: camera path, detection, segmentation, depth support, 3D object position, surface, identity, count. Each section records:
    - the evaluated run's ID and completion-manifest SHA-256, plus the dataset and sequence it ran on;
    - the reference used: ID, version, file hash and kind (`independent`, `provisional`, `analytic` or `none`);
    - each measure as method key, name, value, unit, sample count and **coverage** (`complete` or `subset`, per measure, because one detection section can hold a complete cup measure and a subset monitor measure), or `null` with a stated reason;
@@ -145,13 +145,16 @@ Out of scope: new measures for detection placement (Task45), segmentation (Task3
 
 | field | value |
 |---|---|
-| closing commit | (fill in) |
-| files changed | (fill in) |
-| test | (fill in) |
-| before / after | (fill in) |
-| result | (fill in) |
+| closing commit | `c3bd9ef` |
+| files changed | New `experiments/evaluation/` (schema.py, compare.py, render.py, run.py, README.md, stages/{common,camera,detection,surface,identity}.py, tests/{fixtures,test_stage_report,test_accepted_runs}.py); `experiments/README.md`; `pytest.ini`; `tools/check.py`; `task_list/README.md` |
+| test | 32 contract tests plus 5 pinned-run reproduction tests: 37/37 pass with EVAL_RUNS_ROOT set (reproduction tests skip with a stated reason without it); 97% line coverage; ruff, black, mypy clean. Red-first: initial suite failed on import; the 13 review-fix tests failed before their fixes; three deliberate code breaks (inverted verdict, wrong detection inputs, zeroed camera score) each failed tests. Full default suite in the worktree: 528 passed, 4 skipped, 4 failed before the review fixes; all 4 need gitignored data present only in the main checkout (desk_smoke_v1 publication, pilot run), unrelated to this change |
+| before / after | 0 of 8 stages in a common log → 8 of 8 in one composite report (format version 2): camera, detection, surface and identity scored and equal to their stored values bit for bit (camera RMSE 0.006925680114771647 m; cup 4/5 matched, 0 false; surface mean 0.00784716023735381 m, coverage 0.2229; identity 5 conditions), 4 stages unavailable with reasons. Report run `experiments/evaluation/runs/20261005T084939.267589Z_eb6fdf05c67b4cf19da710104a771448`, manifest 0b9d468cceba7cde09b2fedef9bc21dd584e528e90f53be1a71aafeb40958e81 |
+| result | Implemented and reviewed. The composite report covers all eight stages, with four scored and four explicitly unavailable. Contract and accepted-run reproduction checks passed; the branch is merged locally and remains pending review for the validation workflow |
 
 Notes / caveats / follow-ups:
+
+- still open because later tasks must add the remaining segmentation, depth, position and count measures.
+- Deviation from plan: the reproduction tests use one variable, EVAL_RUNS_ROOT, instead of four per-run variables; skip behaviour is the same.
 
 - Tasks 32, 34, 35, 45 add their measures to this format. Task09 (inventory umbrella) should use this report as its end-to-end evidence.
 - Plan review 2026-10-05 FAIL (wrong surface owner function; tests depended on gitignored runs and were not collected by default). Both fixed above, together with the seven advisory findings: exact stored float for Task05, alignment frame in the camera RMSE, named method keys and conditions, per-measure coverage, composite labelling, pinned runs, importlib loading.
