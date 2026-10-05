@@ -19,7 +19,7 @@ baseline_metric:
   baseline_value: "0 independent sequential-error comparisons; cup RMS 72.8 mm on correlated selected views"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-04
+last_updated: 2026-10-05
 superseded_by: null
 ---
 
@@ -71,6 +71,10 @@ Primary sources are linked in research/README.md under the corresponding A-I wor
 | Proposed runner | New publication/readers | Versioned derived records; unavailable outcomes explicit | Complete verified runs only |
 
 Immutable source pixels/depth and pose revisions → derived observations → association → object/surface generation. Source-of-truth observations never change. Corrected poses invalidate/rebuild every affected estimate before one atomic generation activation; process death before activation leaves old generation, after activation exposes complete new records. Original identities/history survive recomputation. Fresh-deploy path verifies inputs/configuration then publishes a new run; old generations remain readable.
+
+## Per-stage log, 5 October 2026
+
+The shared per-stage report from Task44 carries this task's results. Each stage section records whether its inputs came from the reference (`isolated`) or from earlier predictions (`chained`), so the inherited error at each stage is the chained minus isolated difference on the same frames. This task fills the 3D-position and fusion rows and uses Task45's detection bias and wobble as the measured detection-stage error, instead of a synthetic guess. Task44's `compare` gives the before/after per stage when a fusion rule changes.
 
 ## Hyperparameters
 

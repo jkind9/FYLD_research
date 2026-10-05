@@ -22,7 +22,7 @@ baseline_metric:
   baseline_value: "0 of 13 candidate datasets downloaded or trialled; 3 local datasets in use"
   target: "Each shortlisted dataset has a recorded capability check and, where approved, one trial run per applicable layer with inspected outputs"
 created: 2026-10-04
-last_updated: 2026-10-04
+last_updated: 2026-10-05
 superseded_by: null
 ---
 
@@ -47,7 +47,7 @@ Investigation only. No thresholds, tuning or method changes.
 4. **Trial runs with existing code and recorded settings, unchanged:**
    - Layer 3 tracker on ADVIO, Hilti or ConSLAM, and ScanNet++ iPhone sequences.
    - Layer 4 point surface on ScanNet++ iPhone depth, scored against the laser scan.
-   - Layer 5 detection and replay on ScanNet++ and ROADWork samples.
+   - Layer 5 detection and replay on ScanNet++ and ROADWork samples. Score detection with Task18's hit/miss counts and Task45's box placement measures (centre offset, edge error, frame-to-frame wobble, share of the box that is background), not hit/miss alone.
    - Layer 2 has no method yet; record which datasets suit it.
 5. **Inspect and write up** what each trial produced: numbers where a reference exists, review pages, and every failure (format, scale, depth beyond 4 m, outdoor lighting, rolling shutter, missing calibration, classes the detector does not know).
 
@@ -71,6 +71,8 @@ Every result so far is indoor and close range. The current object adapter drops 
 | TartanGround and KITTI already assessed in the dataset guide | dataset guide | — | experiments/datasets/README.md:67, :75 |
 
 The layer 3 and layer 4 runners are tied to TUM and ICL paths. Running them on new data needs either a small dataset-selection change in those runners or a trial runner in `experiments/datasets/`. If a runner must change, add its file to `files:` first and keep the frozen settings for tracking (task 13) untouched.
+
+Task45 measures detection position error in clutter on COCO val2017 and the local TUM desk recording, because ScanNet++ needs a signed access agreement that only the owner can request. ScanNet++ remains useful later for phone-video outlines and laser-scan surfaces. Write any scored trial output in Task44's per-stage report format where it exists.
 
 Out of scope: KITTI and nuScenes subsets (task 38), phone captures (task 08), planning new reference measurements (task 40), any method tuning.
 

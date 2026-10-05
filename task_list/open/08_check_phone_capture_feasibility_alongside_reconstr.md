@@ -1,7 +1,7 @@
 ---
 id: "08"
 title: Check phone capture feasibility alongside reconstruction
-status: in_progress
+status: open
 priority: MED
 type: infra
 blocked_by: []

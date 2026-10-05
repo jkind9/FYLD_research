@@ -24,7 +24,7 @@ baseline_metric:
   baseline_value: "0 labelled revisit/counting evaluations"
   target: "Independent identity controls and held-out inventory evaluation"
 created: 2026-10-02
-last_updated: 2026-10-04
+last_updated: 2026-10-05
 superseded_by: null
 ---
 
@@ -37,6 +37,10 @@ Recognise objects in a walkthrough and remember which ones have already been see
 ## Follow-up ownership reconciled, 4 October 2026
 
 This task remains the stage06 umbrella and preserves the completed checked-store receipts below. The new plan is in the experiment README. Tasks 16/17 own research and labelled agreements; 18/19/20 own detection, segmentation and appearance; 21 owns automatic identity association; 22 owns matched-frame replay. Tasks17-20 have completed bounded provisional-reference trials; Tasks21/22 engineering has bounded results pending review. Their existence does not establish independent inventory accuracy. Task09 cannot close until those named evidence obligations land or are explicitly revised by the owner. The existing review stamp applies to persistence only; new stateful work requires its own plan/diff reviews.
+
+## Per-stage accuracy log, 5 October 2026
+
+The owner asked for end-to-end tests to produce a detailed per-stage accuracy log against reference data, so improvements and regressions can be seen stage by stage. Task44 owns that shared report and the comparison between two reports. Task45 owns detection box placement error and wobble in cluttered scenes, which Tasks 32, 34 and 35 build on. This umbrella's eventual inventory evidence should be a Task44 report covering camera path, detection, segmentation, depth support, 3D position, surface, identity and count.
 
 ## Reconciled follow-ups, 4 October 2026
 

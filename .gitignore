@@ -83,6 +83,8 @@ data/object_revisits/desk_smoke_v1/
 *.png
 *.npy
 *.html
+*.json
+!demo_outputs/*.html
 !experiments/shared/*.html
 experiments/**/output/
 experiments/**/debug/

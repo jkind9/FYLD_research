@@ -77,6 +77,8 @@ The smallest useful next device check is a separately exported single-rear-camer
 
 Measurements: Reference coverage matrix, identity certainty/disagreement, masks usable for formal scoring, instrument uncertainty, survey-to-method frame transform and its uncertainty, registration versus scored-anchor separation, coordinate/time consistency, independent session/view coverage, acquisition costs and exact unavailable cases. No experiment accuracy result is claimed by the plan.
 
+Public labelled data first, 5 October 2026: for detection and mask references in clutter, check what public labelled data already supplies (Task45 uses COCO val2017 outlines; ScanNet++ per-frame labels need an owner access request) before asking for human-drawn masks of new captures. They cannot replace surveyed physical anchors, the owner's own scenes, or held-out phone sessions. Record every reference in Task44's report with its kind (`independent`, `provisional`, `analytic`) so provisional and independent scores are never compared as if equal.
+
 Dependencies: None for research/design; acquisition/execution still require authorisation. Completed controls remain historical evidence, not reopened work. Task16 broad-protocol approval and new settings/model/data permissions remain separate prerequisites where relevant.
 
 Cost questions: Survey instrument/hardware access, human annotation and repeated independent review, capture labour/storage/permissions and missing depth/visibility. Prefer minimum acquisition that isolates a cause.
