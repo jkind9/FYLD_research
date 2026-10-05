@@ -115,7 +115,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 
 | Field | Value |
 |---|---|
-| Closing commit | `3820a3c` |
+| Closing commit | `3594825` |
 | Files changed | `mask_pipeline.py`, focused tests, segmentation README, task plan |
 | Test status | `22 passed` in focused segmentation suite; Ruff passed; code review found no defects |
 | Before measurement | 45 masks compared; 0 independently established position/size improvements |
