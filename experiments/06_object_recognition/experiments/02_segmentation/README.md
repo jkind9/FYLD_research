@@ -30,6 +30,8 @@ The largest observed coordinate changes involve monitor surfaces and background 
 
 ## Verification
 
+Task34's reusable component is `mask_pipeline.py`. It runs the existing rectangle, GrabCut and Canny methods in a declared order, keeps masks on the original image grid, records prompt and world lineage, preserves explicit empty/failed states and records per-method elapsed time. It is an execution contract only; the parallel validation session decides whether any mask improves 3D position or observed dimensions.
+
 Focused controls cover malformed boxes/grids, clipping, minimum support, empty contours, GrabCut failure, exact synthetic overlap and boundaries, touching instances, split/merge detection, missing/out-of-range depth, rectangle agreement with existing localization, source-copy failure, inventory tampering and nested/aliased output rejection. An offline Edge check expands prompt details and verifies every image loads without network requests or page errors. Final review and accepted publication receipts are recorded in Task19.
 
 Final verification: 28 focused tests pass with 92% production statement coverage. Ruff, package-based mypy and direct Black formatting checks pass. Independent Python/code review and fresh finished diff review both pass. The actual six-frame offline Edge report loads all 57 images without page errors or network requests.
