@@ -512,13 +512,33 @@ def main() -> None:
                     "supervisor did not release worker before startup deadline"
                 )
             time.sleep(0.02)
+        try:
+            release = json.loads(args._release_file.read_text(encoding="utf-8"))
+            worker_pid = release["worker_pid"]
+            process_memory_limit_bytes = release["process_memory_limit_bytes"]
+            if worker_pid != os.getpid():
+                parser.error("supervisor release does not name this worker process")
+            if process_memory_limit_bytes != MEMORY_LIMIT_BYTES:
+                parser.error("supervisor release has an unexpected process limit")
+            if (
+                WindowsProcessMemoryLimit.current_process_memory_limit()
+                != MEMORY_LIMIT_BYTES
+            ):
+                parser.error(
+                    "worker is not under the configured Windows process memory limit"
+                )
+            os.environ["FYLD_TRACKING_JOB_LIMIT_BYTES"] = str(
+                process_memory_limit_bytes
+            )
+        except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+            parser.error(f"invalid supervisor release: {error}")
         sequence_identity = json.loads(args._provenance_json)
         if not isinstance(sequence_identity, dict):
             parser.error("supervisor provenance must be a JSON object")
         try:
             if (
-                WindowsProcessMemoryLimit.current_process_memory_limit()
-                != MEMORY_LIMIT_BYTES
+                os.environ.get("FYLD_TRACKING_JOB_LIMIT_BYTES")
+                != str(MEMORY_LIMIT_BYTES)
             ):
                 parser.error("worker is not under the approved process memory limit")
             verified_identity = _archive_provenance(args.dataset, repo)

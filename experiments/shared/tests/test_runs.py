@@ -11,6 +11,87 @@ from experiments.shared.exporting import export_frame
 from experiments.shared.runs import Run, verify_run, write_json
 
 
+def test_snapshot_includes_dirty_untracked_walkthrough_and_hash_changes(tmp_path):
+    from experiments.shared.runs import _snapshot
+
+    source = tmp_path / "src/walkthrough/pipeline.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("value = 1\n")
+    experiment = tmp_path / "experiments/method.py"
+    experiment.parent.mkdir()
+    experiment.write_text("value = 2\n")
+    unrelated = tmp_path / "src/other.py"
+    unrelated.write_text("value = 3\n")
+    first = _snapshot(tmp_path, tmp_path / "snapshot-1", tmp_path / "runs")
+    assert set(first) == {"experiments/method.py", "src/walkthrough/pipeline.py"}
+    assert (
+        tmp_path / "snapshot-1/src/walkthrough/pipeline.py"
+    ).read_text() == "value = 1\n"
+    source.write_text("value = 4\n")
+    second = _snapshot(tmp_path, tmp_path / "snapshot-2", tmp_path / "runs")
+    assert first["src/walkthrough/pipeline.py"] != second["src/walkthrough/pipeline.py"]
+
+
+@pytest.mark.parametrize(
+    "linked",
+    [
+        ".",
+        "experiments",
+        "src",
+        "src/walkthrough",
+        "src/walkthrough/steps",
+        "src/walkthrough/pipeline.py",
+    ],
+)
+def test_source_snapshot_rejects_linked_roots_directories_and_files(
+    tmp_path, monkeypatch, linked
+):
+    from experiments.shared.runs import _snapshot
+
+    source = tmp_path / "src/walkthrough/pipeline.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("value = 1\n")
+    (source.parent / "steps").mkdir()
+    (tmp_path / "experiments").mkdir()
+    original = Path.is_symlink
+    link = tmp_path / linked
+    monkeypatch.setattr(Path, "is_symlink", lambda path: path == link or original(path))
+    with pytest.raises(ValueError, match="symbolic link"):
+        _snapshot(tmp_path, tmp_path / "snapshot", tmp_path / "runs")
+
+
+def test_run_refuses_repo_symlink_before_resolving_it(tmp_path, monkeypatch):
+    original = Path.is_symlink
+    monkeypatch.setattr(
+        Path, "is_symlink", lambda path: path == tmp_path or original(path)
+    )
+    with pytest.raises(ValueError, match="symbolic link"):
+        Run(tmp_path / "runs", tmp_path, {})
+
+
+def test_walkthrough_custom_run_root_excludes_prior_source_copies(
+    tmp_path, monkeypatch
+):
+    from experiments.shared import runs
+
+    source = tmp_path / "src/walkthrough/pipeline.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("value = 1\n")
+    monkeypatch.setattr(runs, "_git", lambda *_: "fake-test-repository")
+    for _ in range(2):
+        with Run(source.parent / "custom-output", tmp_path, {}) as run:
+            pass
+        snapshot = json.loads((run.path / "metadata/source_snapshot.json").read_text())
+        assert list(snapshot["files"]) == ["src/walkthrough/pipeline.py"]
+
+
+def test_public_artifact_inventory_reuses_manifest_contract(tmp_path):
+    from experiments.shared import runs
+
+    (tmp_path / "prediction.bin").write_bytes(b"prediction")
+    assert runs.artifact_inventory(tmp_path) == runs._inventory(tmp_path)
+
+
 def test_custom_run_root_excluded_from_source_snapshot(tmp_path, monkeypatch):
     from experiments.shared import runs
 
@@ -131,9 +212,10 @@ def test_failure_and_failed_publication_are_not_complete(tmp_path, monkeypatch):
     )
     with pytest.raises(ValueError, match="complete"):
         verify_run(run.path)
-    with pytest.raises(OSError, match="publication"), Run(
-        tmp_path, repo, {}
-    ) as publication:
+    with (
+        pytest.raises(OSError, match="publication"),
+        Run(tmp_path, repo, {}) as publication,
+    ):
         monkeypatch.setattr(
             publication,
             "finish",

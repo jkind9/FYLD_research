@@ -1,19 +1,20 @@
-# Experiments: the five layers
+# Experiments: six execution steps
 
-The project is built as five layers, each tested on its own with known inputs before being connected. The [root README](../README.md) explains the problem, the layers, the hosted-versus-phone options and the results in plain terms. This guide covers how the experiment folders are organised, the rules every experiment follows, and how the layers connect.
+The project is built as six execution steps, each tested on its own with known inputs before being connected. The [root README](../README.md) explains the problem, the layers, the hosted-versus-phone options and the results in plain terms. This guide covers how the experiment folders are organised, the rules every experiment follows, and how the layers connect.
 
 | Layer | Folder | What it answers | Status |
 |---|---|---|---|
 | 🟦 1. Camera capture | [01_camera_capture_delivery](01_camera_capture_delivery/README.md) | Can a phone record what the other layers need and deliver it? | Redmi capability export verified; image capture still missing |
 | 🟪 2. Depth estimation | [02_stereo_depth](02_stereo_depth/README.md) | How far away is each pixel, in metres? | Test data ready; no method run |
-| 🟩 3. Camera position estimation | [03_camera_pose_estimation](03_camera_pose_estimation/README.md) | Where was the camera for each frame? | 30-frame trial: 6.9 mm error |
-| 🟧 4. Environment visualisation | [04_surface_reconstruction](04_surface_reconstruction/README.md) and [05_birds_eye_mapping](05_birds_eye_mapping/README.md) | What does the site look like in 3D, and how big is it? | Point surface: 7.8 mm error; top-down map planned |
-| 🟥 5. Object isolation | [06_object_recognition](06_object_recognition/README.md) | Which objects are there, where, and how many distinct ones? | Early trials and a 60-frame replay |
+| 🟩 3. Camera position estimation | [03_camera_pose_estimation](03_camera_pose_estimation/README.md) | Where was the camera for each frame? | Frozen full runs: xyz 53.6 mm and desk 280.4 mm position RMSE |
+| 4. Surface reconstruction | [04_surface_reconstruction](04_surface_reconstruction/README.md) | What observed geometry can be placed in metres? | Historical supplied-input surface control; metric method boundary available |
+| 5. Mapping, dimensions and area | [05_birds_eye_mapping](05_birds_eye_mapping/README.md) | How big is the observed site, and what remains unknown? | Real method unavailable under Task55 |
+| 🟥 6. Object recognition and counting | [06_object_recognition](06_object_recognition/README.md) | Which objects are there, where, and how many distinct ones? | Early trials and a 60-frame replay |
 | Support | [geometry_validation](geometry_validation/README.md), [shared](shared/README.md), [datasets](datasets/README.md) | Coordinate checks, shared records and run export, test data guidance | In use |
 
 Each layer README starts with a guide: how the layer works from first principles, hosted and on-phone method options with licences, its top 5 sources and what can be improved. The detailed experiment record follows.
 
-Folder numbers are experiment numbers, not layer numbers: layer 4 has two folders, so the object layer is folder 06. Work-task numbers in the records below are a third, separate numbering used by the project's task tracker.
+Folder numbers now match the six execution steps. Earlier five-layer descriptions grouped reconstruction and mapping. Work-task numbers identify separate pieces of engineering work.
 
 ## Implementation and inspectable runs
 
@@ -23,7 +24,7 @@ Keep mathematics, dataset handling, estimator/backend adapters and exports separ
 
 The objective is to find out whether a phone capture can produce a repeatable, measurable representation of the visible work area and identify distinct objects across repeated views. We will build and evaluate six pieces independently, then connect them. The first prototype is preserved in [the Task 00 archive](../archive/task00_prototype/README.md).
 
-The six pieces are camera capture and delivery, stereo depth, camera tracking, 3D reconstruction, bird's-eye mapping and object recognition with persistent counting. 3D reconstruction and bird's-eye mapping together make up layer 4, environment visualisation, so six experiment folders cover five layers. Capture and delivery share one experiment because the first practical question is whether useful camera observations can reach an experiment. Its camera tests and network tests still have separate measurements.
+The six pieces are camera capture and delivery, stereo depth, camera tracking, 3D reconstruction, bird's-eye mapping and object recognition with persistent counting. 3D reconstruction and mapping are separate steps in the canonical runner; earlier diagrams grouped them as environment visualisation. Capture and delivery share one experiment because the first practical question is whether useful camera observations can reach an experiment. Its camera tests and network tests still have separate measurements.
 
 ## The pieces
 
@@ -77,12 +78,16 @@ flowchart TD
         p1["Visual tracking<br/><b>6.9 mm error</b>"] ~~~ p2["Reference camera path<br/><b>control</b>"] ~~~ p3["Drift correction<br/><i>planned</i>"]
     end
 
-    subgraph L4["4 · ENVIRONMENT VISUALISATION"]
+    subgraph L4["4. SURFACE RECONSTRUCTION"]
         direction LR
-        e1["Point surfaces<br/><b>7.8 mm error</b>"] ~~~ e2["Meshes · splats<br/><i>planned</i>"] ~~~ e3["Bird's-eye map and area<br/><i>planned</i>"]
+        e1["Point surfaces<br/><b>7.8 mm error</b>"] ~~~ e2["Meshes · splats<br/><i>planned</i>"]
     end
 
-    subgraph L5["5 · OBJECT ISOLATION"]
+    subgraph L5["5. MAPPING, DIMENSIONS AND AREA"]
+        e3["Bird's-eye map and area<br/><i>planned</i>"]
+    end
+
+    subgraph L6["6. OBJECT RECOGNITION AND COUNTING"]
         direction LR
         o1["Detection<br/><b>early trial</b>"] --> o2["Segmentation<br/><b>early trial</b>"] --> o3["Similarity<br/><b>early trial</b>"] --> o4["Tracking and counting<br/><b>early trial</b>"]
     end
@@ -92,20 +97,19 @@ flowchart TD
         q1(["How big is the site?"]) ~~~ q2(["How many of each object?"])
     end
 
-    L1 --> L2 --> L3 --> L4 --> L5 --> OUT
+    L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> OUT
 
     classDef default fill:#ffffff,stroke:#444,stroke-width:1.5px,color:#1a1a1a
     classDef planned fill:#ffffff,stroke:#999,stroke-width:1.5px,stroke-dasharray:6 4,color:#666
     classDef answer fill:#263238,stroke:#263238,color:#ffffff
     class c1,c3,d1,d2,p3,e2,e3 planned
     class q1,q2 answer
-    linkStyle 8,9,10 stroke:#444,stroke-width:2px
 
     style L1 fill:#DCEBFB,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
     style L2 fill:#E9E3F6,stroke:#5E35B1,stroke-width:2px,color:#311B92
     style L3 fill:#DBF0EE,stroke:#00897B,stroke-width:2px,color:#004D40
     style L4 fill:#FDEEDB,stroke:#FB8C00,stroke-width:2px,color:#BF360C
-    style L5 fill:#FADDE8,stroke:#D81B60,stroke-width:2px,color:#880E4F
+    style L6 fill:#FADDE8,stroke:#D81B60,stroke-width:2px,color:#880E4F
     style OUT fill:#ECEFF1,stroke:#546E7A,stroke-width:2px,color:#263238
 ```
 
@@ -129,7 +133,7 @@ Each experiment README names its initial inputs and independent reference. Curre
 | --- | --- | --- | --- |
 | Camera capture and delivery | Redmi capability export; S23 availability unconfirmed; acquired Middlebury images for file delivery replay | Actual device capability/timing records; original file hashes and frame identifiers for delivery | Warm-built Camera2 app ran on Redmi; valid report exposes rear/front IDs with no concurrent sets. Original image capture and delivery replay tests remain outstanding |
 | Stereo depth | Acquired Middlebury quarter-resolution training pairs | Published disparity, masks and scene calibration | Data ready; choose development/held-out scenes before tuning |
-| Camera tracking | Acquired TUM Freiburg1 xyz colour/depth | Motion-capture poses kept outside tracker inputs | 30-frame CPU trial completed: 6.93 mm position error and 2.14 image pairs/s; full xyz and selected desk evaluation remain |
+| Camera tracking | Acquired TUM Freiburg1 xyz colour/depth and held-out desk | Motion-capture poses kept outside tracker inputs | Frozen full runs completed: xyz 792 observations, 53.56 mm position RMSE, 480.06 s and 1.88 GiB peak commit; desk 573 observations, 280.36 mm RMSE, 341.58 s and 1.87 GiB peak commit |
 | Reconstruction | Acquired ICL living-room trajectory 2 depth/poses, matched IDs 1..880 | Separate acquired living-room reference point cloud | Nine-frame CPU baseline: 7.85 mm mean error, 22.29% whole-reference coverage within 5 cm |
 | Bird's-eye mapping | Independently specified known shapes; acquired ICL point cloud as a later complex input | Expected dimensions, heights, areas and observation masks from fixture definitions | Known-shape fixtures must be created with the first tests |
 | Object recognition and counting | Acquired TUM xyz/desk RGB-D, existing YOLO26x, six provisional desk reference frames | Agent-reviewed selected cup coverage and monitor positive subset; human mask/identity and independent physical anchors remain gaps | Bounded detection, classical masks, appearance, identity and 60-frame/457-proposal replay completed; no blind inventory accuracy |
@@ -167,7 +171,7 @@ These are proposed combinations. None has been validated on the available phones
 
 Multiple rear lenses do not establish simultaneous access to a useful stereo pair. Android's [multi-camera documentation](https://developer.android.com/media/camera/camera2/multi-camera) makes support dependent on the device implementation and camera grouping. The first experiment records actual support on both devices. Strong internet is helpful but does not establish capture timing, sustained upload performance or camera calibration.
 
-Task08 uses [python-for-android](https://github.com/kivy/python-for-android) for its WSL build route and a custom Java Activity that calls Camera2 directly. Its arm64 APK checks capabilities, captures a single-camera control, attempts advertised concurrent sets and exports a report ZIP. The supplied Redmi session passes export validation but contains no images. ARCore depth and pose are skipped because the SDK is absent, not because the handset is proven incompatible. [Experiment 01](01_camera_capture_delivery/README.md#redmi-device-result-5-october-2026) records the actual result and next export step.
+Task08 uses [python-for-android](https://github.com/kivy/python-for-android) for its WSL build route and a custom Java Activity that calls Camera2 directly. Its arm64 APK checks capabilities, captures a single-camera control, attempts advertised concurrent sets and exports a report ZIP. The supplied Redmi session passes export validation but contains no images. ARCore depth and pose are skipped because the SDK is absent, not because the handset is proven incompatible. Task08 is pending the owner's rear-camera control export and confirmation of Samsung S23 availability. [Experiment 01](01_camera_capture_delivery/README.md#redmi-device-result-5-october-2026) records the result and exact next step.
 
 ## The information pieces must exchange
 
@@ -215,10 +219,10 @@ The main implementation starts with a verified observation/pose contract and a r
 | [03: known-geometry contracts](../task_list/closed/03_define_observation_and_pose_contracts_with_known_g.md) | Complete: units, transforms and segments checked; CPU geometry controls exported | 02 |
 | [04: supplied-pose reconstruction](../task_list/closed/04_evaluate_reconstruction_with_supplied_depth_and_po.md) | Complete: point-surface error and coverage measured without a tracker | 03 |
 | [05: supplied-depth tracking](../task_list/closed/05_evaluate_tracking_with_supplied_benchmark_depth.md) | Measure camera movement error without stereo estimation | 03 |
-| [08: phone feasibility](../task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Inspect both phones and retain capture/calibration evidence | None; run alongside geometry work |
+| [08: phone feasibility](../task_list/pending_review/08_check_phone_capture_feasibility_alongside_reconstr.md) | Inspect both phones and retain capture/calibration evidence | None; run alongside geometry work |
 | [09: recognition and persistent counting](../task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Test labels, identities and revisit counts independently | 03 for 3D association; 04 for reconstructed-map integration |
 
-Geometry validation and Task 04's supplied-input point-surface baseline are complete. Nine CPU views have measured reference error and whole-reference coverage, with saved inputs and a surface preview. Task 05 has completed a 30-frame CPU tracking trial with independent scoring and shared timing metadata. Task 13 now has the selected desk archive and verified 573 timestamp pairs; full development and held-out tracking evaluations remain outstanding. Task 08 has a verified APK handoff and actual Redmi capability evidence; its separate image-control export is still missing. Task09 remains the inventory umbrella. Tasks17-22 have delivered provisional reference controls and bounded recognition/replay evidence; independent inventory accuracy and wider conditions remain untested. Record settings and numerical acceptance limits before experiment runs.
+Geometry validation and Task 04's supplied-input point-surface baseline are complete. Nine CPU views have measured reference error and whole-reference coverage, with saved inputs and a surface preview. Task 05's 30-frame CPU tracking trial remains a short historical check. Task 13 has now completed both frozen full tracking runs with independent scoring and verified manifests. xyz measured 53.56 mm position RMSE in 480.06 seconds; desk measured 280.36 mm in 341.58 seconds. The Job Object memory cap held on this Windows host; peak commit was 1.88 GiB for xyz and 1.87 GiB for desk. Product accuracy and wait limits remain undecided. Task 08 has a verified APK handoff and actual Redmi capability evidence; its separate image-control export is still missing. Task09 remains the inventory umbrella. Tasks17-22 have delivered provisional reference controls and bounded recognition/replay evidence; independent inventory accuracy and wider conditions remain untested. Record owner-agreed numerical acceptance limits before judging these results.
 
 The tracking trial is a short development result; later phone and site assemblies remain plans. Task 00 supplied literature and preliminary desktop results. Its integrated implementation is archived; final code review, package validation, coverage measurement and post-fix reruns were unfinished when the objective changed. Any reused code must be validated in its new owning experiment.
 
@@ -229,14 +233,22 @@ Every implemented stage should show the mapping from its inputs to its outputs. 
 
 Use four explicit labels in both the views and saved metadata: observed input, ground truth, predicted output and evaluated output. Measured TUM Kinect depth is observed input even though the benchmark supplies it. TUM reference camera poses and clean synthetic ICL depth and poses are ground truth. Display conversion and preview sampling must be stated, with links to full numerical artifacts. Point clouds without triangle faces are point surfaces. They are not completed meshes.
 
-Task 05 closes the 30-observation CPU tracking baseline. Task 13 retains the full development and held-out evaluation. Task 14 adds labelled inspection. Task 08 has verified the WSL p4a packaging route and the Redmi capability export; original image capture, timing measurements and Samsung checks remain outstanding.
+Task 05 closes the 30-observation CPU tracking baseline. Task 13 has completed the full frozen development and held-out camera evaluations. Task 14 adds labelled inspection. Task 08 has verified the WSL p4a packaging route and the Redmi capability export; original image capture, timing measurements and Samsung checks remain outstanding.
 
 Verified interactive inspections: [camera motion](03_camera_pose_estimation/runs/20261002T195923.778722Z_8bcaf965d8dc496192563205df59d85c/viewer.html) and [reconstructed point surface](04_surface_reconstruction/runs/20261002T195928.219822Z_55d2d0bfa455453eb2289a5e717490c1/viewer.html). These are local run artifacts; datasets and generated runs are excluded from repository publication.
 
-## Bounded replay and next investigations, 4 October 2026
+## Bounded replay and next investigations, 4 October 2026 (historical)
 
-The [object experiment](06_object_recognition/README.md) now has the accepted recorded replay: sixty desk frames, 457 baseline proposals and a six-frame automatic comparison, all using supplied poses. Task27's single-view xyz cup is a separate recording, not a verified physical identity shared with desk. Task21 and Task22 remain pending review; Task16 broader-protocol approval is outstanding. Task13 estimated tracking remains unfinished and frozen.
+The [object experiment](06_object_recognition/README.md) now has the accepted recorded replay: sixty desk frames, 457 baseline proposals and a six-frame automatic comparison, all using supplied poses. Task27's single-view xyz cup is a separate recording, not a verified physical identity shared with desk. Task21 and Task22 remain pending review; Task16 broader-protocol approval is outstanding. Task13's frozen camera-tracking runs are complete; full product validation still needs phone recordings, independent site references, owner-agreed accuracy limits and a measured edge workload.
 
-The next comparisons are Task31 provisional identity policy, Task34 mask geometry, Task32 spatial uncertainty, Task33 appearance/context association and Task35 sequential error/fusion, with independent references planned by Task40. Task36 separates surface geometry from realism; Tasks37/38 separately investigate room-mapping platforms and longer-range/driving data. Task39 records future review requirements without implementing an app. The [task board](../task_list/README.md#next-experiment-order-and-gaps) records priorities, blockers and acquisition decisions.
+The proposed comparisons on 4 October were Task31 provisional identity policy, Task34 mask geometry, Task32 spatial uncertainty, Task33 appearance/context association and Task35 sequential error/fusion, with independent references planned by Task40. Task36 separates surface geometry from realism; Tasks37/38 separately investigate room-mapping platforms and longer-range/driving data. Task39 records future review requirements without implementing an app. The [task board](../task_list/README.md#next-experiment-order-and-gaps) records priorities, blockers and acquisition decisions.
 
-Mobile capture/build remains Tasks08/24; Task23 retains its unfinished review controls. No phone capture or new experiment is started by documentation reconciliation. Model load, acquisition/annotation, component latency, memory/storage, correction/rebuild and unavailable conditions must be recorded alongside measurements. Software tests remain engineering receipts, not the main measure of experimental progress.
+On 4 October, mobile capture/build ownership was Tasks08/24, and Task23 retained its unfinished review controls. The current delivery owners are listed below. No phone capture or new experiment is started by documentation reconciliation. Model load, acquisition/annotation, component latency, memory/storage, correction/rebuild and unavailable conditions must be recorded alongside measurements. Software tests remain engineering receipts, not the main measure of experimental progress.
+
+## Current execution order, 6 October 2026
+
+The [task board](../task_list/README.md#next-experiment-order-and-gaps) now puts all three goals first: accuracy, latency and edge deployment. Task51 agrees success criteria. Task13's full camera baseline is complete; Tasks52/53 provide real phone recordings and independent answers; Task54 implements real depth and Task55 implements dimensions/area. Task56 integrates these owners into one complete same-recording test with total time and memory. Task57 checks device feasibility early and then measures the useful sustained workload. Existing object/mask/appearance/surface refinements follow measured failures; they do not block the first complete test. The earlier evidence and proposed methods above remain bounded historical records.
+
+## Canonical six-step execution
+
+The [root runner](../src/walkthrough/README.md) now calls capture/input validation, depth, camera tracking, surface reconstruction, mapping/dimensions/area, then object recognition/distinct counting. Segmentation and appearance are optional parts of step 6, disabled by default. Experiment methods remain independently callable. Error analysis imports each owner's dedicated validation area after predictions are saved and hashed. Real depth and mapping remain unavailable; software control success proves this organisation only. Existing supplied-input replays, frozen commands and saved runs remain historical controls.

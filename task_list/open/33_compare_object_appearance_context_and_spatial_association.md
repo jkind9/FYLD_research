@@ -5,7 +5,7 @@ status: open
 priority: MED
 type: experiment
 approval_status: proposed; no execution authorised by Task30
-blocked_by: ["31","32","40","16"]
+blocked_by: [31, 32, 40, 16, 56]
 blocks: []
 verification_test: ""
 plan_reviewed: null
@@ -28,6 +28,10 @@ superseded_by: null
 ## In plain English
 
 Compare object appearance with nearby context and measured position on the same views. Include similar neighbours and identical objects that never appear together. Record wrong matches and unresolved cases as well as correct returns.
+
+## Current priority, 6 October 2026
+
+Run this refinement after Task56 identifies mistakes that appearance/context could address. Reuse Task53 independent references. Compare added feature cost with the complete accuracy and latency baseline. Earlier model options remain proposals, not required steps before that baseline.
 
 ## What
 

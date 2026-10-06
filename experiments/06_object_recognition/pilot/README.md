@@ -14,6 +14,8 @@ The existing calibrated projection creates camera-coordinate points. The supplie
 
 The red cross marks a visible surface sample, not the full object's centre. Both methods can include background inside the box. Missing depth produces no invented position. The depth range and valid fraction describe support; they are not statistical uncertainty. Missing supplied poses prevent publication of world coordinates.
 
+Task32 adds an opt-in `localise_box_samples` helper for the parallel evaluator. It returns every valid box sample in camera and, when a supplied pose and non-empty pose revision are provided, world coordinates. It also retains source pixels, camera depths and world/segment/pose-revision lineage. The existing `localise_detection` output and median-point association are unchanged. These samples describe visible support and do not provide calibrated object-centre uncertainty.
+
 ## Initial evidence
 
 Open the [interactive cloud with the cup marked](runs/20261003T175727.913404Z_352c685ab5d24f16b31b50aa2cf50fb4/review.html), or the [static preview](runs/20261003T175727.913404Z_352c685ab5d24f16b31b50aa2cf50fb4/review.png). Drag to rotate and scroll to zoom. The red cross is the cup surface measurement. The [original detection image](runs/20261003T173943.511670Z_54a40c632f704b8685e9ed4568355c28/debug/detections.png) was inspected before mapping.
@@ -81,3 +83,7 @@ The earlier xyz selection was rejected: the cup remains visible in the alleged g
 ### Task17 RGB review correction
 
 A fresh RGB-only review on3October2026 found the cup partly visible at1305031460.891774 during the27-sample YOLO miss interval. The original1305031463.059810 frame is visually verified with no cup pixels, followed by the same cup at1305031466.095840. Thus the replay contains a physical look-away/return, but the detector miss interval is longer than the proven visibility gap. The object-0005 return and30.8mm coordinate difference are unchanged. [Task17's reference set](../datasets/README.md) supplies separately named provisional labels and the corrected gap. No published run artifact was edited.
+
+## Importable Task46 counting
+
+Use `importlib.import_module("experiments.06_object_recognition.pilot.association").associate_frame` for the unchanged counting method. `replay.associate_frame` remains the same compatibility import, including its numerical behavior. The replay remains a standalone supplied-depth/supplied-pose control, with unchanged settings and commands. New complete sequencing belongs to [the root runner](../../../src/walkthrough/README.md), whose counts are isolated by estimated origin.

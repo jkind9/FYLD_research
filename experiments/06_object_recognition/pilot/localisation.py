@@ -46,6 +46,46 @@ def box_support(frame: Any, detection: Detection) -> np.ndarray:
     return (u + 0.5 >= x1) & (u + 0.5 < x2) & (v + 0.5 >= y1) & (v + 0.5 < y2)
 
 
+def localise_box_samples(
+    frame: Any,
+    detection: Detection,
+    pose: Pose | None,
+    *,
+    pose_revision_id: str | None = None,
+) -> dict:
+    """Return every valid box sample without changing the median baseline."""
+    support = box_support(frame, detection)
+    points, pixels = backproject(frame.depth, frame.valid & support, frame.calibration)
+    if pose is not None and (
+        not isinstance(pose_revision_id, str) or not pose_revision_id.strip()
+    ):
+        raise ValueError("A non-empty pose revision is required for world samples")
+    world = transform_points(points, pose.matrix) if pose is not None else None
+    return {
+        "status": (
+            "located"
+            if pose is not None and len(points)
+            else "camera_only" if len(points) else "no_valid_depth"
+        ),
+        "box_pixel_count": int(support.sum()),
+        "valid_pixel_count": len(points),
+        "coordinate_frame": "world" if pose is not None else "camera",
+        "world_id": pose.world_id if pose else None,
+        "segment_id": pose.segment_id if pose else None,
+        "pose_source": pose.source if pose else None,
+        "pose_revision_id": pose_revision_id if pose else None,
+        "units": "metres",
+        "camera_samples_m": points.tolist(),
+        "world_samples_m": world.tolist() if world is not None else None,
+        "pixel_vu": pixels.tolist(),
+        "depth_m": points[:, 2].tolist(),
+        "claim": (
+            "Exact valid observed box samples; visible surface support, not a "
+            "foreground mask or calibrated location uncertainty."
+        ),
+    }
+
+
 def localise_detection(frame: Any, detection: Detection, pose: Pose | None) -> dict:
     support = box_support(frame, detection)
     points, pixels = backproject(frame.depth, frame.valid & support, frame.calibration)

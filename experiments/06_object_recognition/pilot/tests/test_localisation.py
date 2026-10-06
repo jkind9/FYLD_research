@@ -130,3 +130,33 @@ def test_invalid_detection_score_rejected(score):
 def test_invalid_transform_rejected():
     with pytest.raises(ValueError):
         pose(np.zeros((4, 4)))
+
+
+def test_opt_in_box_sample_export_preserves_exact_world_samples_and_lineage():
+    result = localisation.localise_box_samples(
+        frame(), box(), pose(), pose_revision_id="pose-v1"
+    )
+
+    assert result["status"] == "located"
+    assert len(result["world_samples_m"]) == 2
+    np.testing.assert_allclose(
+        result["world_samples_m"], [[-0.25, 0.0, 1.0], [0.25, 0.0, 1.0]]
+    )
+    assert result["pixel_vu"] == [[1, 1], [1, 2]]
+    assert result["pose_revision_id"] == "pose-v1"
+    assert result["coordinate_frame"] == "world"
+
+
+def test_opt_in_box_sample_export_requires_pose_revision_for_world_samples():
+    with pytest.raises(ValueError, match="pose revision"):
+        localisation.localise_box_samples(frame(), box(), pose())
+
+
+def test_opt_in_box_sample_export_keeps_missing_pose_explicit():
+    result = localisation.localise_box_samples(
+        frame(), box(), None, pose_revision_id=None
+    )
+
+    assert result["status"] == "camera_only"
+    assert result["world_samples_m"] is None
+    assert result["camera_samples_m"]

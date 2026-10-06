@@ -5,7 +5,7 @@ status: open
 priority: HIGH
 type: experiment
 approval_status: proposed; no execution authorised by Task30
-blocked_by: ["32","34","40"]
+blocked_by: [32, 34, 40, 56]
 blocks: []
 verification_test: ""
 plan_reviewed: null
@@ -28,6 +28,10 @@ superseded_by: null
 ## In plain English
 
 Find out when more views improve an estimate and when they repeat a mistake. Change one source of error at a time before combining them. Check how earlier object and surface estimates change when camera positions are corrected.
+
+## Current priority, 6 October 2026
+
+Task13 no longer waits for this investigation. Publish Task56's complete baseline first; use its failures to choose the error/fusion comparison. Task53 owns independent acquisition and Task56 owns complete-report integration. Analytic controls remain useful, but this task does not block the first complete benchmark.
 
 ## What
 

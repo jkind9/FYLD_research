@@ -226,3 +226,7 @@ flowchart TD
 ```
 
 Geometry proximity, observed coverage, missing/false surfaces and cost are separate from visual realism. Full-object dimensions need independent references and adequate surface coverage. Densifying display changes presentation, not captured information. No representation or correction experiment was started in documentation Task30.
+
+## Metric walkthrough geometry and recovery
+
+Step 4 calls `importlib.import_module("experiments.04_surface_reconstruction.src.metric_surface").reconstruct_metric(depth, valid, calibration, pose)`. It returns all valid points in metres and requires an estimated pose. It does not convert benchmark units or align to a reference model. Independent scoring imports `src.validation`; the existing evaluation implementation stays in place. Deliberate faults live in `src.validation.controls`, with `backend.fault_points` retained for compatibility. Recovery checks and copies that source too; historical snapshots missing it are explicitly refused and retained. Standalone control commands remain unchanged. See [the runner](../../src/walkthrough/README.md).

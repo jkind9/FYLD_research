@@ -15,11 +15,11 @@
     },
     {
       "path": "native/camera/java/org/fyld/capture/CameraCapture.java",
-      "sha256": "e9353021235f02eb27839c113bef3cacb96d041030b8613a6ec7080be96bae25"
+      "sha256": "9620d60196a478a4e046aee4b7e39faa5260702c0e2091268683360d707bc28f"
     },
     {
       "path": "native/camera/java/org/fyld/capture/CameraReport.java",
-      "sha256": "70102ba176da19975beb3f98ceea0b9f19bd4eda53b554b14fe2d96db919fc03"
+      "sha256": "a0de1254ff6edfd1f0e808fc41709501677c14c6c5dfed0a810cbe36adfe3bac"
     }
   ]
 }

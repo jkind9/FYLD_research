@@ -20,7 +20,7 @@ Phones change images in ways that matter for measurement. Autofocus changes the 
 
 **Using two lenses at once.** Android groups physical lenses behind a "logical" camera. Whether an app may stream two rear lenses at the same moment is decided by the manufacturer for each phone. Android's [multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) reports it. Having three rear lenses does not mean stereo is available, so this must be checked on both phones before stereo depth is planned around them.
 
-**ARCore.** Google's augmented-reality toolkit runs its own tracker and depth on the phone. Its [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback) saves the camera images, motion sensors and ARCore data into one MP4 that can be replayed later on a desktop. The default image it records for tracking is 640×480; higher resolution needs extra configuration. Both test phones are on Google's [ARCore supported devices list](https://developers.google.com/ar/devices) with depth support (checked 4 October 2026). The list is Google's claim, not a measurement on our handsets.
+**ARCore.** Google's augmented-reality toolkit can track the phone and provide depth on supported devices. Its [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback) records camera video and motion-sensor data in an MP4. It does not guarantee that every API output, such as depth maps or camera poses, is stored automatically. The default CPU image used for tracking is 640×480; the high-resolution GPU display texture is not recorded. A recorder must explicitly save any additional fields needed for later replay and check that they survive playback. Google's current [supported-device table](https://developers.google.com/ar/devices) lists Redmi Note 11 Pro with Depth API support. Xiaomi's [official device guide](https://alsgp0.fds.api.xiaomi.com/xiaomi-b2c-i18n-upload/user-guides/1c100fb724c5e54a94ff40e423c5d7ef.pdf) identifies the supplied Redmi code `2201116TG` as Redmi Note 11 Pro. This makes ARCore a supported-device candidate, not a runtime or measurement result. The Samsung handset is not confirmed available, and the received Redmi APK did not include ARCore. See the [24-row API inventory](../../research/arcore/README.md). No project phone has produced an ARCore measurement.
 
 **Delivery.** The safest pattern is save first, upload later: record to the phone, check the file, then upload over Wi-Fi with file hashes so losses are detected. Live streaming is a separate, harder condition. It adds dropped frames and delay, and needs capture time kept apart from arrival time.
 
@@ -32,10 +32,10 @@ In the **hosted** route the phone only records and uploads; everything else runs
 
 | Method | Route | What it gives | Notes |
 |---|---|---|---|
-| ARCore recorder app (Kotlin) using [Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) | Both | Images, IMU, ARCore camera position and depth in one replayable file | Recommended first recorder. Gives layers 2 and 3 a phone-made stand-in straight away. |
+| ARCore recorder app (Kotlin) using [Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) | Both | Camera video, IMU and explicitly saved ARCore fields | Possible future recorder. It needs the SDK, owner approval and a separate scoped task. The default recording does not guarantee saved depth or pose; replay and field persistence must be verified. |
 | [Camera2](https://developer.android.com/media/camera/camera2) or [CameraX](https://developer.android.com/media/camera/camerax) native app | Both | Full-resolution frames, manual focus and exposure, choice of physical lens, two-lens attempts | Needed for stereo and for high-resolution captures. |
 | [OpenCamera Sensors](https://github.com/MobileRoboticsSkoltech/OpenCamera-Sensors) | Both | Research recorder that saves video with synchronised IMU readings | Existing open-source option to compare against; check its licence and current Android support. |
-| [python-for-android](https://github.com/kivy/python-for-android) app with a native Java Camera2 Activity (current build route) | On the phone | Camera capability checks, single-camera control, advertised concurrent-set attempts and ZIP export | Warm-built arm64 APK handed off; phone run and the clean/container builds remain outstanding. [Chaquopy](https://chaquo.com/chaquopy/doc/current/android.html) is the main alternative for Python inside a normal Android app. |
+| [python-for-android](https://github.com/kivy/python-for-android) app with a native Java Camera2 Activity (current build route) | On the phone | Camera capability checks, single-camera control, advertised concurrent-set attempts and ZIP export | Warm-built arm64 APK verified and staged. A Redmi capability report exists, but the staged APK's on-device single-image export and the clean/container builds remain unverified. [Chaquopy](https://chaquo.com/chaquopy/doc/current/android.html) is the main alternative for Python inside a normal Android app. |
 | Upload to a server, for example behind FYLD's existing [BentoML](https://docs.bentoml.com/) serving | Hosted | Resumable upload of recordings with hashes | Keep capture time and upload time separate. |
 | Live streaming ([WebRTC](https://webrtc.org/), RTSP) | Hosted | Frames arrive while filming | Later condition; measure loss and delay separately from algorithm time. |
 | Calibration with [Kalibr](https://github.com/ethz-asl/kalibr) or OpenCV ChArUco boards | Setup step | Measured lens and lens-to-IMU calibration for each phone | Checks the calibration the phone reports. |
@@ -63,7 +63,7 @@ The sections below are the detailed experiment record: the test plan, the Androi
 
 ## Experiment record
 
-[Task 08](../../task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
+[Task 08](../../task_list/pending_review/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
 
 ## The piece we are testing
 
@@ -83,13 +83,24 @@ The output is a saved observation bundle, with an optional live delivery path pr
 
 Calibration describes focal lengths and principal point in pixels, distortion, and the relative camera transform with translation in metres. Declare which camera frame the transform maps from and to. Missing calibration is explicit. Preserve original images and any crop, resize or rotation description so later geometry can reproduce processing.
 
+The existing `validate_export` remains able to read capability-only reports with
+no images. `validate_phone_session_export` is stricter: it requires a real image
+and a passing single-camera check whose frame details match the exported files.
+The shared phone-session reader checks the image bytes and reported size, then
+keeps the camera intrinsics with the sensor grid, crop, rotation and capture
+time. Android's distortion-correction mode changes which active array defines
+crop coordinates. When that mode is ON or unavailable, the reader preserves the
+raw calibration but marks it not ready for metric geometry. Missing depth and
+pose stay explicit. The tests use generated images; they do not prove that the
+Redmi has produced a valid recording.
+
 ## Proposed steps and comparisons
 
 ### Python test app on the phones
 
 The user selected [python-for-android](https://github.com/kivy/python-for-android) as the planned packaging route. It can bundle Python and its dependencies into an installable Android package (APK). The first deliverable is a small foreground test app that runs Python experiments and saves results, rather than the full mapping pipeline.
 
-Use Python for workstation build checks, test sequencing and result review. The current camera prototype uses a custom Java Activity at `native/camera/java/org/fyld/capture/CameraActivity.java` and calls Camera2 directly. Its pinned profile is `build/camera-profile.json`; it adds only camera permission and does not include PyJNIus or ARCore. It now has a verified arm64 APK, but it has not yet been installed or run on a phone. Packaging Python does not bypass the handset's camera restrictions.
+Use Python for workstation build checks, test sequencing and result review. The current camera prototype uses a custom Java Activity at `native/camera/java/org/fyld/capture/CameraActivity.java` and calls Camera2 directly. Its pinned profile is `build/camera-profile.json`; it adds only camera permission and does not include PyJNIus or ARCore. A Redmi capability report has been returned, but the current staged APK's rear-camera still export has not been verified on a phone. The report contains no captured images. On 6 October 2026, the Windows check found no ADB command, no `ANDROID_HOME` or `ANDROID_SDK_ROOT`, and no ADB executable in the usual per-user SDK location. The pinned WSL SDK does include ADB at `/home/jkind/Android/Sdk/platform-tools/adb`, but `adb devices -l` returned no devices and `usbipd list` showed no Android handset. The SDK has no emulator binary or configured virtual device. The phone is not attached to this test path now; its ability to connect and capture remains unknown. Packaging Python does not bypass the handset's camera restrictions.
 
 The first app should enumerate camera identities and capabilities, save that report, obtain camera permission, record a single-camera control and then attempt a supported pair. Save original images and capture metadata locally before adding stream delivery. If using a small Kivy interface, keep it limited to starting tests, showing status and exporting results. Native libraries such as OpenCV require a supported cross-compilation recipe; verify dependency support before adding them. The backend receiver can use desktop OpenCV independently.
 
@@ -191,7 +202,11 @@ The separate fresh dependency build, limited to already-cached downloads, stoppe
 
 Task08's native Camera2 APK was built from the pinned Java source with that cached WSL toolchain. The offline bundle is `mobile deployment/camera_20261004_camera_redmi_run6/`. Its APK is `unnamed_dist_1-debug.apk`, SHA-256 `35e2c420e38d3b857747ac255a1fd7f81791959c3e44d0a99911913af149c29a`; the receipt verifies package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, the CAMERA permission and launcher `org.fyld.capture.CameraActivity`. This is a warm cached build, not a clean dependency or container build. The Redmi was not connected during packaging. Its later on-device capability export is recorded below; the report does not attest the installed APK's version or binary hash.
 
-All 110 Task24 tests passed in WSL. Branch coverage across the five build modules was 82%, and Ruff passed. Run project tests through `python -B tools/check.py ...`; it sends pytest scratch, coverage data and tool caches to a unique system temporary directory. `pytest.ini` disables pytest's repository cache and excludes known scratch folder names from test discovery. `.gitignore` also catches accidental pytest scratch folders. The separate Task13 scratch directory is retained as historical evidence.
+### Task52 camera-source build, 6 October 2026
+
+The first warm build stopped at Java compilation because `CameraReport.java` declared `rect(Rect)` twice. The duplicate was removed and that source's profile hash was updated. The second warm build passed in WSL in 29.00 seconds. Its bundle is `mobile deployment/camera_task52_camera_java_review_20261006_02/`. The APK SHA-256 is `d7b2242e5e601ce73d82205f99c5884a75addbc167fdf2a2ed4135bdbe308545`. `verification.json` reports a verified build, package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, and the CAMERA permission. It confirms the Java source hashes match `build/camera-profile.json`. This verifies packaging only; installation, capture, report recovery and physical image export remain unverified.
+
+All 110 Task24 tests passed in WSL. Branch coverage across the five build modules was 82%, and Ruff passed. Run project tests through `python -B tools/check.py ...`; it checks that `task_list/` contains only task records before starting pytest, then removes its temporary test directory on exit. All test paths in `pytest.ini` are included. `.gitignore` also catches accidental pytest scratch folders. The separate Task13 scratch directory is retained as historical evidence.
 
 ## Redmi device result, 5 October 2026
 
@@ -215,3 +230,13 @@ The supplied folder `session-1791186245035_f881c553` was moved unchanged into [t
 The capabilities file matches its report-declared hash and size. The report hash above was computed at workstation intake; the report has no separate signature. A completed session means the selected operation finished and saved, including a skipped pair attempt. It does not mean the full capture task passed. This result establishes no advertised concurrent route through this app's Camera2 inventory; it does not prove every vendor camera route or ARCore depth is unavailable.
 
 For the next check, press **Capture one rear-camera control**, then immediately **Export latest session**. The app starts a new session for each capture action and exports only the latest one, so export each result separately. Return that bundle with its JPEG and sensor metadata for integrity validation. Keep this capability/pair-attempt report. Measured frame timing, original image quality, independent calibration, sustained recording and Samsung checks remain outstanding. ARCore runtime depth, confidence and pose need a separately approved SDK-enabled test.
+
+## Current delivery ownership, 6 October 2026
+
+[Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) owns early device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) records the hardware, workload and acceptance limits before execution.
+
+Xiaomi's official guide identifies model `2201116TG` as Redmi Note 11 Pro, and Google's current ARCore supported-device list marks Redmi Note 11 Pro as supporting the Depth API. Together these sources make ARCore depth worth testing on the reported phone, but they do not prove that ARCore installs, starts or returns usable depth on its current software. The existing Camera2 APK does not include ARCore. A read-only WSL check found no cached `com.google.ar` dependency, attached ADB device, emulator or AVD; USB passthrough also showed no Android phone. The absence of a Camera2 `DEPTH16` stream does not test ARCore's motion-based depth path.
+
+## Walkthrough input boundary
+
+Step 1 of the canonical runner uses `experiments.shared.phone_session.read_phone_session` with `app.capture_report.validate_phone_session_export`. It validates recorded images, hashes, calibration and clocks while preserving absent depth and pose. Capture/readiness remains Task52 work. See [the six-step runner](../../src/walkthrough/README.md) for saved-input lifetimes and failure behavior.

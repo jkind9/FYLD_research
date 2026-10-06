@@ -59,3 +59,11 @@ The first report combines four earlier runs on three datasets. It is a composite
 Every number equals the value its own run stored, bit for bit. Report run: `experiments/evaluation/runs/20261005T084939.267589Z_eb6fdf05c67b4cf19da710104a771448` (manifest SHA-256 `0b9d468c…8e81`, report format version 2), generated in the Task 44 worktree. It replaces two earlier reports from the same day in older formats; `compare` refuses reports from another format version.
 
 No stage has yet been scored both with correct inputs and with predicted inputs on the same frames, so the split between a stage's own error and inherited error is so far tested only on synthetic data.
+
+## Complete walkthrough successor, 6 October 2026
+
+[Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns one complete same-recording test, including phone-compatible inputs, independently scored counts/dimensions/area, full processing time and peak memory. It extends this existing report schema and its comparison/readers for missing stage measures and site area, with an explicit format version. It reuses existing method owners and keeps reference answers outside method inputs. The composite report above remains historical component evidence; no complete walkthrough run is claimed.
+
+## Complete walkthrough ownership
+
+The sole current six-step sequencing lives in [src/walkthrough](../../src/walkthrough/README.md). This package still joins/scorers existing compatible results; Task56 consumes the root runner and owns complete physical-survey adapters and measured time/memory reports. Identity reporting now imports the public experiment validation scorer, with identical historical interpretation. No software fixture here establishes worksite accuracy, total latency or sustained edge acceptance.

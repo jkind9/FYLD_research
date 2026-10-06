@@ -1,0 +1,18 @@
+{
+  "archives": {
+    "val2017.zip": {
+      "bytes": 815585330,
+      "sha256": "4f7e2ccb2866ec5041993c9cf2a952bbed69647b115d0f74da7ce8f4bef82f05",
+      "url": "http://images.cocodataset.org/zips/val2017.zip"
+    },
+    "annotations_trainval2017.zip": {
+      "bytes": 252907541,
+      "sha256": "113a836d90195ee1f884e704da6304dfaaecff1f023f49b6ca93c4aaae470268",
+      "url": "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
+    }
+  },
+  "members": 5001,
+  "annotations_sha256": "e8c7f7908f1d7278341fae127d0da654f102f11bd7b21d8aeefa635b8c810b6f",
+  "extracted_utc": "2026-10-05T08:56:00.033727+00:00",
+  "licence": "annotations CC BY 4.0; images under their Flickr terms"
+}

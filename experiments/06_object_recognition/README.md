@@ -8,7 +8,7 @@ This is the brief's object-counting problem. Counting detections in 2D video ove
 
 ## How object isolation works
 
-The intended layer is a chain. Each step can be swapped independently. The corrected replay uses a box-depth median and permits provisional births at any frame. Full 3D support matching and duplicate-review relationships below remain planned behaviour.
+The intended layer is a chain. Each step can be swapped independently. The corrected replay uses a box-depth median and permits provisional births at any frame. Task32 now provides an isolated full-support association handoff; it is not wired into the published replay or demo.
 
 1. **Detection.** A neural network draws a box round each object it recognises, with a class name and a confidence score. A *closed-set* detector, such as YOLO or RF-DETR, knows a fixed list of classes; the common COCO list has 80 everyday classes and no traffic cones or barriers, so site objects need fine-tuning. An *open-vocabulary* detector, such as Grounding DINO or SAM 3, finds objects named in plain text instead.
 2. **Segmentation.** Pick out the object's own pixels inside the box. This matters because depth read from the whole box includes the wall behind the object, which pulls its 3D position backwards. Classical methods (GrabCut, filled outlines) need no model. Learned methods are the SAM family: SAM and SAM 2 outline whatever a box or point points at, SAM 2 follows it through video, and SAM 3 finds every instance of a named concept. Small versions (MobileSAM, EdgeSAM, EfficientSAM) trade some quality for speed.
@@ -19,7 +19,7 @@ The intended layer is a chain. Each step can be swapped independently. The corre
    - *Persistent identity* keeps a record for every object: 3D position, size, appearance and every sighting. A new sighting is matched to records by position and appearance, one-to-one within a frame (the Hungarian algorithm), with "new object" always an allowed answer. ConceptGraphs is a research system built this way.
 6. **Counting.** Count object records, not detections. An unmatched sighting first becomes a *provisional* object until more evidence confirms it. Duplicates, missed objects and wrong merges are reported separately, because a correct total can hide one duplicate and one miss.
 
-**Current priority, 5 October 2026.** Task46 fixes late same-class births and rebuilds the demo. Next build box-and-depth 3D matching before comparing segmentation. The replay already converts valid depth pixels inside each box to 3D, but association retains only their median. Task32's spatial-summary component is built and tested; replay does not call it yet. Task32 owns connecting the full samples to world-space regions. Task31 retains broader duplicate-review and confirmation work. Validation belongs to the parallel session. Establish the hosted accuracy and latency baseline before edge comparisons.
+**Current priority, 5 October 2026.** Task46 fixes late same-class births and rebuilds the demo. Task32 now adds an opt-in localisation export and an isolated support-aware association handoff before comparing segmentation. The published replay still uses the world-space box median. Task31 retains broader duplicate-review and confirmation work. Validation belongs to the parallel session. Establish the hosted accuracy and latency baseline before edge comparisons.
 
 The first representation should describe the object's observed surface: its position, spread and competing depth groups. Uncertainty-weighted matching (Mahalanobis distance) is a candidate score. Raw surface spread describes extent and background mixing; it is not a calibrated probability of the object's true centre. A box containing a book and desk can need several regions rather than one broad region. Flat book surfaces also need an explicit treatment because the existing component refuses distance scoring when samples do not span three dimensions. Do not merge neighbouring books merely because broad regions overlap.
 
@@ -162,7 +162,7 @@ flowchart TD
     Q["Task25 pose correction: planned"] -.-> W
     Q -.-> F
     Q -.-> S
-    U["Task32 support component: built; validation pending"] -.-> ID
+    U["Task32 support component and association handoff: built; validation pending"] -.-> ID
     U -.-> F
     R["Independent identity/mask/anchor/extent/surface references: Task40 gaps"] -.-> E["Independent scoring: planned broader evaluation"]
     ID -.-> E
@@ -170,7 +170,7 @@ flowchart TD
     S -.-> E
 ```
 
-Uncertainty about an anchor, geometry of its visible surface and hypotheses about complete dimensions are different records. Detector confidence, cosine scores and raw point spread are not calibrated probabilities. Task32 now has a reusable descriptive support component at `experiments/06_object_recognition/experiments/04_geometry_identity/spatial_support.py`: it summarises finite 3D samples with a regularised covariance and exposes Mahalanobis distance only when its minimum sample guard is met. It does not change current association, claim calibrated uncertainty or select a matching threshold. Validation of whether this representation helps belongs to the parallel evaluation work.
+Uncertainty about an anchor, geometry of its visible surface and hypotheses about complete dimensions are different records. Detector confidence, cosine scores and raw point spread are not calibrated probabilities. Task32 has a reusable descriptive support component at `experiments/06_object_recognition/experiments/04_geometry_identity/spatial_support.py` and an isolated handoff at `experiments/06_object_recognition/experiments/07_spatial_uncertainty/association.py`. The handoff keeps depth layers as separate candidates, reports visible extent separately from unavailable calibrated location uncertainty, preserves pose revision lineage, and returns per-decision diagnostics and processing time. It does not change current association, claim calibrated uncertainty or select a matching threshold. Task49 compared the frozen association source with exact within-frame index reuse on 60 frames and 457 proposals. The paired run's median full-call times were 120.481 s for the frozen source and 114.268 s with cached indexes. Task48's earlier single pass was 80.049 s; the cause of the difference across runs is unknown, so only the paired timing is used for the comparison. The paired-repeat reduction was 1.83%, and one repeat was marginally slower. Every association output matched. There is no independent physical reference, so this supports no accuracy or count claim. See the [latency experiment](experiments/08_spatial_uncertainty_latency/README.md) for run hashes and limits.
 
 ## Scoped next investigations
 
@@ -191,6 +191,22 @@ The [task board](../../task_list/README.md#next-experiment-order-and-gaps) owns 
 
 No follow-up runs in Task30. Completed Tasks17-20/27-29 remain historical evidence. Task09 remains the inventory umbrella; Task16/21/22 remain pending review. Tasks23/24 retain their unfinished review/build scopes, and Task25 remains behind Task13.
 
+## Proposed review and measurement requirements
+
+These requirements define what a later review tool should expose. They are a proposal for owner review. Task39 does not authorize a new application, capture, annotation, or accuracy claim.
+
+| Review action | The screen must show | Boundary and evidence owner |
+|---|---|---|
+| Select an object | Its current review state, every source frame and crop, the original detection, depth and validity evidence, and each accepted, rejected, or unresolved decision with its reason. | A sighting is not a physical object count. Missing source files or measurements stay visible as unavailable. Task22 supplies the existing frame and ID history. |
+| Review identity | Provisional, confirmed, rejected, and unresolved states separately; possible-duplicate links; aliases and prior IDs after a human-approved union; and the decision history. | Proximity, class, or appearance alone must not silently merge IDs. Task31 owns identity-state and duplicate decisions. |
+| Inspect location | Each measured visible-surface point beside the current estimate, its contributing observations, units, coordinate frame, scene segment, and camera-pose revision. | Visible-surface position is not the object centre. Show uncertainty only when its model is calibrated against independent references; otherwise say it is unavailable. Task32 owns support and location uncertainty. |
+| Inspect shape and size | The observed surface and its coverage, separate depth layers, hidden or unseen regions, and whether each dimension describes visible extent or complete object size. | A box or partial surface does not establish full dimensions. Do not fill unseen regions with a plausible-looking surface without marking the inference. Task34 owns pixel selection; Task36 owns surface representation. |
+| Measure | The selected endpoints, their source observations and coordinate frames, the resulting units, and any pose or alignment revision used. | Do not calculate a metric distance across incompatible or stale coordinate revisions. Show endpoint uncertainty only when independently calibrated. |
+| Check a returned object | Earlier and later sightings together, gaps in visibility, competing candidates, and the evidence behind a retained or changed identity. | A successful replay across one selected recording does not establish return-recovery accuracy. Task40 owns independent identities and held-out cases. |
+| Share or audit a result | Source paths or portable source links, capture/session identity, artifact hashes, and missing or unreadable evidence. | The original run remains unchanged. A corrected pose or identity decision creates a new revision and must not mix with stale geometry. |
+
+The later acceptance review should answer whether a reviewer can trace a selected ID to its source evidence, find rejected and unresolved cases, distinguish an observed surface from a complete object, and reproduce a measurement from its endpoints and coordinate revision. A later usability study needs owner-selected participants and review questions. Accuracy, count correctness, operating thresholds, and phone performance remain separate measured results.
+
 ## Proposed comparison protocol
 
 Task16's [broader shortlist/protocol](../../task_list/pending_review/16_research_segmentation_recognition_and_camera_corre.md) remains pending review. Its RF-DETR/YOLO nano, compact learned masks, DINO and camera-loop comparisons were not all executed. The [research shortlist](../../research/README.md#ranked-shortlist) is a dated source review, not a new model acquisition instruction. ResNet50 is an additional proposed appearance control, not a Task20 result.
@@ -210,3 +226,11 @@ Record model loading/warmup separately from feature/inference calls, depth selec
 Retain original observations/pose revisions. Corrected poses must recompute or invalidate affected world observations, object estimates and surfaces in a new committed generation. Interrupted corrections cannot mix revisions; original runs and ID histories remain readable. These are proposed downstream guarantees, not a completed correction experiment.
 
 Phone capture/energy/thermal behaviour, construction-site accuracy and longer-range operation remain untested. No packages, weights, inference, training, full Task13 sequence or experiment-code changes are part of Task30.
+
+## Current goal and ownership, 6 October 2026
+
+[Task09](../../task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md) retains distinct-object counting and the existing identity store. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) collects independent physical identities and measurements. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns the first complete benchmark, using a simple existing counting baseline before optional Tasks31-35 refinements. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) defines accuracy/time/device limits; [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) measures the useful deployed workload. Earlier next-method proposals are superseded by this evidence-first order; historical trials and their limitations stay unchanged.
+
+## Walkthrough counting boundary
+
+Step 6 of [the canonical runner](../../src/walkthrough/README.md) imports the existing detector, box-depth localisation and Task46 counting method. It keeps track state and provisional counts separate for each world/segment and reports no whole-site count. Segmentation and classical appearance are optional diagnostic evidence, disabled by default; they do not change this counting baseline. Learned appearance remains independently usable in its owning experiment. Task56 owns complete physical-survey scoring adapters; Task09 retains inventory policy.

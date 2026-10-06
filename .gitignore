@@ -10,7 +10,17 @@ pytest-cache-files-*/
 .task13_pytest_tmp_*/
 .task18_test_first/
 python_review_tmp/
+# Task records are the only tracked files under task_list; never keep pytest
+# code or generated test/probe output there. No Python file belongs on the task board.
+task_list/**/*.py
+task_list/**/*.pyc
+task_list/**/__pycache__/
+task_list/**/.pytest_cache/
+task_list/**/.pytest*/
+task_list/**/pytest*/
+task_list/**/job_alloc_probe_*
 task_list/.pytest-temp/
+tools/**/.pytest-temp/
 experiments/**/.pytest-tmp/
 experiments/**/tests/.pytest-temp/
 experiments/**/tests/.test-*.sqlite3*
@@ -70,10 +80,8 @@ research/session_recovery/claude_trace_2026-10-02.txt
 !data/**/
 data/**/*
 !data/**/
-!data/**/*.json
 !data/README.md
 data/**/review_temp/
-
 # Derived object-reference publication stays local; its frozen source manifest
 # lives under experiments/06_object_recognition/datasets/.
 data/object_revisits/desk_smoke_v1/
@@ -84,6 +92,9 @@ data/object_revisits/desk_smoke_v1/
 *.npy
 *.html
 *.json
+# Data acquisition and geometry records may be versioned, except raw controlled-scene bundles.
+!data/**/*.json
+data/controlled_scene/input/
 !demo_outputs/*.html
 !experiments/shared/*.html
 experiments/**/output/

@@ -5,7 +5,7 @@ status: open
 priority: MED
 type: experiment
 approval_status: proposed; no execution authorised by Task30
-blocked_by: []
+blocked_by: [56]
 blocks: []
 verification_test: ""
 plan_reviewed: null
@@ -28,6 +28,10 @@ superseded_by: null
 ## In plain English
 
 Compare ways to show and reconstruct the captured surfaces. Measure geometric quality separately from how realistic a scene looks. Uncaptured surfaces must remain identifiable as unknown.
+
+## Current priority, 6 October 2026
+
+Task55 owns dimensions and area; Task56 measures complete-system quality and cost. Pursue a representation change after that baseline identifies a geometry, coverage or review limitation. A more realistic display is not an accuracy result.
 
 ## What
 

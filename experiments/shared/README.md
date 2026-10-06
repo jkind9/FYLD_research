@@ -3,6 +3,7 @@
 | File | Responsibility |
 |---|---|
 | `contracts.py` | Frozen observation/calibration/pose records, metre units and origin identity |
+| `phone_session.py` | Verified Camera2 images with original sensor-grid calibration and explicit missing streams |
 | `geometry.py` | Axial depth, projection, proper poses, reference basis conversion and time association |
 | `runs.py` | Unique run lifecycle, source/environment/configuration snapshot and artifact validation |
 | `timing.py` | Monotonic stage timing, explicit frame counts and weighted throughput |
@@ -10,6 +11,16 @@
 | `requirements.txt` | Direct dependency versions used for CPU validation |
 
 Install with `python -m pip install -r experiments/shared/requirements.txt` from the repository root. Run `python -B tools/check.py -q` for CPU tests with caches outside the repository. The working environment is Python 3.12.10; dependency versions reflect that environment. A clean isolated installation and edge-device packaging remain separate checks.
+
+`read_phone_session` takes a Camera2 report, the exported bundle folder and the
+phone-session export validator. It rechecks image hashes, decodes every JPEG,
+and checks decoded dimensions against the report. It keeps camera intrinsics in
+their named sensor grid, with the active-array rectangles, crop and rotation.
+It marks the calibration grid ready for metric work only when the recorded
+distortion-correction mode is OFF. Corrected or unreported modes keep their raw
+metadata and a reason that geometry is not ready. Missing depth, pose and world
+identifiers remain missing with an explanation. Fixture tests do not prove that
+a physical phone produces matching records.
 
 `Run(root, repo, configuration)` creates a unique run containing `input/`,
 `output/`, `debug/` and `metadata/`. Use it as a context manager. Put every selected
@@ -87,3 +98,7 @@ Send the resulting HTML file. Recipients save it and open it in a JavaScript-ena
 Images are RGB PNG previews with a maximum edge of 320 pixels and no upscaling. Nearest-neighbour resizing preserves missing-depth colours. Use `--max-edge <pixels>` to change display resolution. Captions preserve input/reference/result labels and include per-frame distance bounds and colour encoding. Preview links open the reduced picture; original depth, arrays, source code and workstation metadata are omitted. The source run identifier and manifest hash remain for traceability. This file is for inspection, not numerical measurement.
 
 The exporter verifies the source inventory before and after conversion. It rejects incomplete or changed sources, non-contained images and output paths inside the source. Publication replaces the destination atomically after validation. Existing completed runs remain unchanged. Generated share files are local artifacts under ignored `runs/shareable/` folders; a fresh clone needs a complete inspection run before it can regenerate them.
+
+## Root runner provenance
+
+The six-step runner reuses `Run`, `verify_run`, the timing ledger, shared calibration/pose records and geometry primitives. `artifact_inventory(path)` exposes the existing publication hash/link checks. Source snapshots now also include dirty and untracked Python sources under `src/walkthrough` when present, with the same exclusions for generated runs. Repositories without that folder retain their experiment inventory. Prediction hashes are recorded while the run is running, checked after scoring, then included in final publication. [Runner lifecycle](../../src/walkthrough/README.md).

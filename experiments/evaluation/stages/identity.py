@@ -12,7 +12,7 @@ from experiments.evaluation.stages.common import (
     verified_run,
 )
 
-RUNNER = "experiments.06_object_recognition.experiments.04_geometry_identity.run"
+VALIDATION = "experiments.06_object_recognition.experiments.04_geometry_identity.validation"
 SCORES = (
     # Any assignment counts as matched, right or wrong, so neither count has a
     # better direction; correctness lives in the other three measures.
@@ -44,7 +44,7 @@ def identity_section(
 ) -> dict:
     run_path = Path(run_path)
     run = verified_run(run_path, pinned_sha256)
-    runner = owner(RUNNER)
+    validation = owner(VALIDATION)
     truth = read_json(run_path / "input/evaluator_truth.json")
     observations = read_json(run_path / "input/method_observations.json")
     stored = read_json(run_path / "output/summary.json")["conditions"]
@@ -53,7 +53,7 @@ def identity_section(
         decisions = read_json(
             run_path / "output/conditions" / condition / "decisions.json"
         )["observations"]
-        score = runner._score(decisions, truth, observations)
+        score = validation.score_identity(decisions, truth, observations)
         require_same(stored[condition]["score"], score, f"identity {condition}")
         values = _values(score)
         samples = len(decisions)

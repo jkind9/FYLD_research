@@ -239,6 +239,45 @@ def test_recovered_summary_weighting():
     assert result["max_m"] == 4
 
 
+@pytest.mark.parametrize("damage", ["missing", "changed"])
+def test_recovery_requires_extracted_fault_control_source(dataset, tmp_path, damage):
+    recovery = importlib.import_module(
+        "experiments.04_surface_reconstruction.src.recovery"
+    )
+    repo = Path(__file__).resolve().parents[3]
+    prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
+    (prior / "metadata/status.json").write_text('{"status":"running"}')
+    dependency = "experiments/04_surface_reconstruction/src/validation/controls.py"
+    source = prior / "metadata/source" / dependency
+    source.parent.mkdir(parents=True, exist_ok=True)
+    if damage == "missing":
+        source.unlink(missing_ok=True)
+        expected = "Recovery source dependency missing: .*validation/controls.py"
+    else:
+        source.write_text("# changed control implementation\n")
+        expected = "Recovery source differs: .*validation/controls.py"
+    before = (prior / "metadata/status.json").read_bytes()
+    with pytest.raises(ValueError, match=expected):
+        recovery.validate_prior(
+            prior, dataset, [1, 2], 0.05, repo, tmp_path / "evidence"
+        )
+    assert (prior / "metadata/status.json").read_bytes() == before
+
+
+def test_recovery_retains_fault_control_dependency_in_evidence(dataset, tmp_path):
+    recovery = importlib.import_module(
+        "experiments.04_surface_reconstruction.src.recovery"
+    )
+    repo = Path(__file__).resolve().parents[3]
+    prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
+    evidence = tmp_path / "evidence"
+    recovery.validate_prior(prior, dataset, [1, 2], 0.05, repo, evidence)
+    dependency = "experiments/04_surface_reconstruction/src/validation/controls.py"
+    assert (evidence / "source" / dependency).read_bytes() == (
+        repo / dependency
+    ).read_bytes()
+
+
 def test_recovery_empty_frame_and_bad_fault_summary(dataset, tmp_path):
     inspection = importlib.import_module(
         "experiments.04_surface_reconstruction.src.inspection"

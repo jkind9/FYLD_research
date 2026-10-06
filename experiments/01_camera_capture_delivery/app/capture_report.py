@@ -127,3 +127,36 @@ def validate_export(report: Any, bundle_root: Path) -> dict[str, Any]:
         _require(digest == expected["sha256"],
                  f"Bundle hash mismatch: {name}")
     return validated
+
+
+def validate_phone_session_export(report: Any, bundle_root: Path) -> dict[str, Any]:
+    """Require an actual passing single-camera recording for phone-session use."""
+    validated = validate_export(report, bundle_root)
+    _require(bool(validated["captures"]), "Phone session must contain at least one image")
+    passed_single_camera = any(
+        check["id"] == "single_camera_control" and check["status"] == "PASS"
+        for check in validated["checks"]
+    )
+    _require(passed_single_camera, "single-camera capture did not pass")
+    single_camera_check = next(
+        check for check in validated["checks"]
+        if check["id"] == "single_camera_control" and check["status"] == "PASS"
+    )
+    details = single_camera_check.get("details")
+    _require(isinstance(details, list), "Single-camera capture details are missing")
+    fields = (
+        "camera_id", "file", "sha256", "width", "height", "crop_region",
+        "rotation_degrees", "distortion_correction_mode", "distortion_correction_mode_name",
+        "sensor_timestamp_ns", "timestamp_source", "frame_number",
+    )
+    for capture in validated["captures"]:
+        _require("distortion_correction_mode" in capture
+                 and isinstance(capture.get("distortion_correction_mode_name"), str),
+                 "Capture distortion-correction mode is missing")
+        matched = any(
+            isinstance(frame, dict)
+            and all(frame.get(field) == capture.get(field) for field in fields)
+            for frame in details
+        )
+        _require(matched, "single-camera check does not identify the exported frames")
+    return validated

@@ -5,7 +5,7 @@ status: open
 approval_status: approved
 priority: MED
 type: experiment
-blocked_by: ["13", "16"]
+blocked_by: ["16"]
 blocks: []
 verification_test: experiments/03_camera_pose_estimation/experiments/tests/test_camera_comparisons.py
 plan_reviewed: null

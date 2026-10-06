@@ -1,13 +1,13 @@
 ---
 id: "13"
 title: Validate frozen tracking settings on full development and held-out data
-status: open
-priority: MED
+status: closed
+priority: HIGH
 type: experiment
 blocked_by: []
 blocks: []
-verification_test: experiments/03_camera_pose_estimation/tests/test_tracking.py
-plan_reviewed: 2026-10-02 PASS
+verification_test: experiments/03_camera_pose_estimation/tests/test_supervisor.py
+plan_reviewed: 2026-10-06 PASS
 shrinks:
   - experiments/03_camera_pose_estimation/src/supervisor.py
   - experiments/03_camera_pose_estimation/tests/test_tracking.py
@@ -17,17 +17,23 @@ files:
   - experiments/datasets/**
   - data/tum/rgbd_dataset_freiburg1_desk/**
   - data/archives/rgbd_dataset_freiburg1_desk.tgz*
+  - README.md
+  - task_list/README.md
+  - experiments/README.md
 docs:
   - experiments/03_camera_pose_estimation/README.md
   - experiments/datasets/README.md
   - data/README.md
+  - README.md
+  - task_list/README.md
+  - experiments/README.md
 baseline_metric:
   source: experiments/03_camera_pose_estimation/README.md
   field: complete full-sequence and held-out evaluations
   baseline_value: "0 complete full-sequence or held-out tracking evaluations"
   target: "2 complete frozen-setting evaluations: development xyz and held-out desk"
 created: 2026-10-02
-last_updated: 2026-10-03
+last_updated: 2026-10-06
 superseded_by: null
 ---
 
@@ -39,9 +45,19 @@ Check whether the camera tracker stays accurate beyond the short trial already c
 
 ## Planning update, 3 October 2026
 
-The owner now prioritises recorded-video object recognition as the next new stream, with full tracking/drift evaluation retained as future work. This task remains in_progress because unfinished authorised changes already occupy its slot; no other task is started or silently takes it. Move it through an intentional handoff before starting another task in this checkout. Approved selections/resource caps remain unchanged.
+Historical direction on 3 October put recorded-video recognition first. The 6 October board restored this full camera baseline near the start of the queue; it no longer waits for Task35. At the time of this planning note the task was open, with approved selections/resource caps and unfinished authorized code. The full runs and guard fix recorded below have since completed.
 
 Before inference, fix the independently reproduced acceptance defect: a final Job Object memory-limit event can be recorded without a rejection reason when the worker exits zero, allowing a complete artifact to be accepted. Add the combined memory-event/exit-zero/complete-run regression. Split supervisor.py and test_tracking.py below 800 lines, keep imports/behaviour equivalent and verify both shrink relative to the launch baseline. The shrinks declarations make this obligation measurable. Task25 owns later feature-seeded and verified-revisit comparisons; it must not alter this frozen baseline.
+
+## Planning update, 6 October 2026
+
+A fresh plan review found that the root README and task board also need result updates. Both are now declared in `files:` and `docs:`. The review confirmed that the planned data path still keeps reference poses outside tracking and preserves frozen CPU settings. It also confirmed the final memory-limit event defect remains reproducible. Re-review the amended plan before code changes.
+
+A second fresh plan review found that `experiments/README.md` also describes the Task13 full evaluation as unfinished. This status will be updated with the measured outcome and is now in scope. Historical dated notes will remain identified as historical.
+
+## Planning update, 6 October 2026, process-limit verification
+
+The focused Windows checks showed that querying the current process Job Object without a handle can return an enclosing job in this environment. The worker therefore cannot use that query to confirm the exact child limit. The supervisor will verify the configured limit through its exact Job Object handle after assigning the worker, then release only after writing a PID-bound confirmation. The worker checks that confirmation and its Job Object membership before inference. The hard process limit still uses the approved 2 GiB Windows Job Object setting. Re-review this amended handoff before continuing.
 
 ## What
 
@@ -64,7 +80,7 @@ The verified baseline covers only 30 observations and 1.136 seconds. It does not
 | Bounded safe extraction exists; downloader remains ICL-specific | `publish_archive` in the existing acquisition module | TUM-specific download and receipt handling in that module; its tests | experiments/datasets/acquisition.py:111 |
 
 1. Run the hyperparameter audit and record the confirmed full-sequence selections and caps before execution. On 3 October 2026, the user approved all 792 xyz pairs, all 573 desk pairs, a 30-minute per-sequence wall-clock limit and a 2 GiB per-process memory limit. Preserve all numerical backend settings from Task05. The acquired xyz data has 798 RGB rows and 798 depth rows, with 792 one-to-one pairs at the inherited 0.02-second tolerance. The acquired desk data has 613 RGB rows and 595 depth rows, with 573 one-to-one pairs at that tolerance.
-2. Extend the existing CLI and tests rather than introducing a second estimator. The CLI accepts either configured local Freiburg1 data path and a positive frame count. It checks official source URLs, archive size and SHA-256, then compares association tables and selected image files with archive-derived member hashes. It validates the reference file against its archive hash only after all estimates are saved. Preflight the selected association rows before backend loading; require the input snapshot to reproduce them. Hash the selected input copies in the run manifest. Record the actual sequence, row count and resource limits in run configuration and hyperparameters. A separate supervisor enforces the wall-clock deadline and a Windows per-process memory limit. The worker verifies its Job Object limit and source receipts before inference. The supervisor writes failed status before detail receipts after termination; it preserves completed artifacts and writes a separate rejection receipt if a completion is observed beyond the wall-clock cap. It never accepts an incomplete or over-time run. Preserve frozen backend settings and bounded image-pair processing.
+2. Extend the existing CLI and tests rather than introducing a second estimator. The CLI accepts either configured local Freiburg1 data path and a positive frame count. It checks official source URLs, archive size and SHA-256, then compares association tables and selected image files with archive-derived member hashes. It validates the reference file against its archive hash only after all estimates are saved. Preflight the selected association rows before backend loading; require the input snapshot to reproduce them. Hash the selected input copies in the run manifest. Record the actual sequence, row count and resource limits in run configuration and hyperparameters. A separate supervisor enforces the wall-clock deadline and a Windows per-process memory limit. The supervisor queries that exact Job Object after assigning the worker, confirms its limit, then writes a release record with the worker PID and confirmed limit. Before inference, the worker checks that the record names its own PID, that the recorded limit matches the approved value, that it belongs to a Windows Job Object, and that source receipts match. The supervisor writes failed status before detail receipts after termination; it preserves completed artifacts and writes a separate rejection receipt if a completion is observed beyond the wall-clock cap. It never accepts an incomplete or over-time run. Preserve frozen backend settings and bounded image-pair processing.
 3. Desk acquisition is complete. The archive was obtained from the official HTTPS publisher; its GET byte count matched the HTTPS HEAD length, its local SHA-256 is recorded because no publisher checksum is listed, and bounded extraction produced a verified fresh destination. Keep the archive and extraction receipts with the held-out data. Never overwrite development observations.
 4. Freeze settings on xyz before desk. Score desk only after estimation, without retuning against its reference poses. A desk-driven settings change needs a new independent held-out sequence.
 5. Publish both complete runs with statuses, segment-aware scores, stage timing/FPS, memory and inspectable reports. Keep no-loop-closure and no-map-recovery limitations explicit. Do not infer phone performance from desktop benchmarks.
@@ -115,7 +131,7 @@ After recording approval, the audit reports the wall-clock cap, process-memory c
 
 ## Verification
 
-Contract tests extend experiments/03_camera_pose_estimation/tests/test_tracking.py: selected_frames and recorded hyperparameters match actual inputs; changed selected bytes and changed reference bytes fail archive-hash checks; 30-minute and 2-GiB caps terminate the worker and leave a failed receipt; late complete artifacts remain intact but receive a rejection receipt; no incomplete run is scored; long streaming input retains only the image pair; failed/reset edges never join origins; missing or changed required artifacts cannot publish complete. Existing scaled/reversed trajectory controls must remain worse than the exact fixture under scale1 alignment.
+Contract tests cover experiments/03_camera_pose_estimation/tests/test_tracking.py and test_supervisor.py: selected frames and recorded hyperparameters match actual inputs; changed selected bytes or reference bytes fail archive-hash checks; the 30-minute limit leaves a failed receipt; late complete artifacts are rejected; incomplete runs are not scored; failed/reset edges do not join origins; and changed required artifacts cannot publish complete. The Windows memory-cap test starts a child waiting on stdin, verifies the configured 64 MiB test cap, then releases allocation. It requires a nonzero allocation below its 256 MiB ceiling, peak commit below 64 MiB, and a Job Object limit event. The test passes. The two full runs must publish valid manifests and reports using all 792 xyz and 573 desk observations without changing Task05 backend settings.
 
 Before: 0 complete full-sequence or held-out evaluations. Target: 2 complete reports using frozen backend settings, with every selected observation accounted for and all report/manifest links validated. Numeric product acceptance limits and phone performance remain separate questions.
 
@@ -123,12 +139,16 @@ Before: 0 complete full-sequence or held-out evaluations. Target: 2 complete rep
 
 | Field | Value |
 |---|---|
-| Closing commit | None; task remains in progress |
-| Files changed | `experiments/datasets/acquisition.py`, `experiments/datasets/tests/test_acquisition.py`, `data/README.md`, `experiments/datasets/README.md`, `experiments/03_camera_pose_estimation/README.md`, `experiments/03_camera_pose_estimation/src/run.py`, `experiments/03_camera_pose_estimation/tests/test_tracking.py`, `experiments/README.md`, `README.md`, `task_list/README.md`, this task record; ignored TUM desk archive and extracted input tree |
-| Test status | Earlier full repository suite: 162 passed; current tracking suite: 33 passed; Ruff lint and formatting passed; task plan lint passed; full tracking evaluation not run |
+| Closing commit | None; preserve the existing uncommitted work. Fresh post-fix diff review found no reproducible defect. `task.js verify 13` passed after Task51 was moved to open while its owner decisions remain pending. |
+| Files changed | Earlier Task13 work remains listed. This session changed `experiments/03_camera_pose_estimation/tests/test_supervisor.py`, the camera tracking README, project README, `experiments/README.md`, `data/README.md`, and this task record. It produced verified xyz run `20261006T092306.264759Z_859f644f1fd94231bf45feeddfaf4965` and desk run `20261006T093210.950449Z_cb1755babecc4d62afe543d46445eac2`. The older probe and pytest scratch folders under `task_list/` were removed. |
+| Test status | The revised Windows memory-cap integration test passed (1 passed), and Ruff passed in the earlier verification. This turn re-ran `verify_run` on both manifests; both returned `status: complete` (5,736 xyz files; 4,203 desk files). The fresh independent diff review found no reproducible defect and did not rerun tests. The full repository check collected 572 tests but emitted errors and ended with `PermissionError` while pytest enumerated its system-temp base; the Task13 directory check also could not finish cleanly for that temp-base error. No full-suite pass is claimed. |
 | Before measurement | 0 full-sequence or held-out evaluations |
-| After measurement | Still 0 full-sequence or held-out evaluations; desk archive verified, 573 paired images decode at 640x480, and 25.44% missing depth measurements remain invalid. The CLI now checks the configured local data path and archive provenance; each run hashes its actual selected input copies and records the sequence and count. |
-| Delta | 0 evaluations; held-out inputs acquired and checked; CLI, metadata, reference separation and streaming-memory contracts extended |
-| Outcome | Selections and caps approved 2026-10-03. Implement and verify supervisor enforcement before inference. |
+| After measurement | Two complete, manifest-verified runs. xyz: 792 observations, 53.56 mm position RMSE, 48.50 mm median, 88.20 mm p95, 5.37 mm relative translation RMSE, 480.06 s end-to-end, 1.88 GiB peak committed memory, 440 MiB peak working set. Desk: 573 observations, 280.36 mm position RMSE, 207.31 mm median, 474.10 mm p95, 10.57 mm relative translation RMSE, 341.58 s end-to-end, 1.87 GiB peak committed memory, 435 MiB peak working set. Both had zero failed observations and no supervisor memory-limit event. |
+| Delta | 0 to 2 full frozen-setting evaluations; manifests and reports verified; memory cap enforced on both runs |
+| Outcome | The two frozen tracking runs are complete and their manifests still verify. The worker now checks the operating system's actual per-process memory cap before inference. Product accuracy and wait limits remain pending, so these scores are not a product acceptance pass. Desk is a held-out sequence from the same indoor sensor/site as xyz. Fresh independent post-fix diff review found no reproducible defect. |
 
-still open because cap enforcement and full-sequence inference remain unfinished.
+The first focused Windows stress check used a temporary-file gate. It reported that a worker touched and retained 256 MiB under a queried 64 MiB Job Object limit, exited successfully and produced no limit event. That result remains here as historical evidence. Replacing the file handoff with an stdin pipe removed the access failure. A direct pipe-gated worker stopped after 48 MiB, reached a 56.5 MiB peak commit, received the limit event and exited successfully after catching `MemoryError`. The revised repository test uses the pipe gate, bounds the allocation loop, requires a nonzero allocation below that bound, checks peak commit stays under 64 MiB, and checks the limit event; it passes on this host. Microsoft documents this setting as a limit on process committed memory and says an allocation beyond it fails ([Windows Job Object process-memory limit](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_basic_limit_information)). Both approved full runs are now complete; see their receipts in the table above.
+
+docs n/a: the root README and `data/README.md` do not describe Task13 supervisor execution, and this session added no claims to those files. Generated test and probe files were removed from `task_list/`; its README now directs future scratch output to system temp.
+
+The bounded frozen-setting tracking baseline is complete. Product accuracy and wait limits remain unjudged until Task51 records the required limits.

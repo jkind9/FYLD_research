@@ -5,12 +5,12 @@ This repository is a research project. It asks whether a person walking through 
 1. **A measured 3D model of the visible site**, so its size, areas and dimensions can be read off in metres.
 2. **A count of distinct objects**, where an object that leaves the camera view and comes back is counted once, not twice.
 
-The work is split into five layers. Each layer is built and tested on its own with known inputs, then connected to the others. This README explains the problem, the layers, what has been measured so far and what is still unknown. It is meant to be read on its own. The experiment folders hold the detail.
+The work is split into six execution steps. Each layer is built and tested on its own with known inputs, then connected to the others. This README explains the problem, the layers, what has been measured so far and what is still unknown. It is meant to be read on its own. The experiment folders hold the detail.
 
 ## Contents
 
 - [The problem this solves](#the-problem-this-solves)
-- [The five layers](#the-five-layers)
+- [The six execution steps](#the-six-execution-steps)
 - [Why build the layers separately](#why-build-the-layers-separately)
 - [Hosted or on the phone](#hosted-or-on-the-phone)
 - [Layer by layer](#layer-by-layer)
@@ -28,11 +28,11 @@ FYLD suggested three research areas:
 
 | Suggested area | How this project relates to it |
 |---|---|
-| Deployment pipelines for cloud and edge devices. MLflow and BentoML are used for cloud today; there is no plan for edge devices yet. | **Supporting, not the main focus.** Every layer reads and writes saved records in a shared format, so the same layer can run on the phone, a nearby edge computer or a cloud server. Each experiment records model load time, processing time and memory separately, which is the evidence an edge-versus-cloud decision needs. The Android capability app has run on the Redmi; image capture and sustained phone performance remain unverified. |
+| Deployment pipelines for cloud and edge devices. MLflow and BentoML are used for cloud today; there is no plan for edge devices yet. | **One of three project goals, alongside accuracy and latency.** Shared records support replacing components, but do not establish phone compatibility or speed. The Android capability app has run on the Redmi; usable image capture and sustained workload performance remain unverified. Tasks52 and 57 own actual capture and deployment. |
 | Identify a worksite from a first-person video walkthrough, then estimate its size. | **Main focus, layers 1 to 4.** A normal video is flat. To measure a site you need to know how far away each pixel is (depth, layer 2) and where the camera was for each frame (camera position, layer 3). Together these place every pixel in one shared 3D space in metres (layer 4). Size, area and a top-down map then come from that 3D model. Recognising a site on a return visit is part of layer 3: the camera tracker must notice it is somewhere it has been before. |
-| Count objects in first-person video where an object can leave and re-enter the frame many times, efficiently. SAM works but is very heavy. | **Main focus, layer 5.** Counting in 2D fails because the same cone or barrier looks like a new object each time it comes back into view. Once objects have a position in the shared 3D space, a returning object comes back at the same place, so position and appearance together can decide "same object" or "new object". On efficiency, the experiments test whether cheap boxes or simple masks are good enough before reaching for a heavy segmentation model, and record the cost of every step. |
+| Count objects in first-person video where an object can leave and re-enter the frame many times, efficiently. SAM works but is very heavy. | **Main focus, step 6.** Counting in 2D fails because the same cone or barrier looks like a new object each time it comes back into view. Once objects have a position in the shared 3D space, a returning object comes back at the same place, so position and appearance together can decide "same object" or "new object". On efficiency, the experiments test whether cheap boxes or simple masks are good enough before reaching for a heavy segmentation model, and record the cost of every step. |
 
-## The five layers
+## The six execution steps
 
 Each coloured block is one layer. Boxes with a solid border work today; dashed boxes are planned. The word under each box gives its status:
 
@@ -58,12 +58,16 @@ flowchart TD
         p1["Visual tracking<br/><b>6.9 mm error</b>"] ~~~ p2["Reference camera path<br/><b>control</b>"] ~~~ p3["Drift correction<br/><i>planned</i>"]
     end
 
-    subgraph L4["4 · ENVIRONMENT VISUALISATION"]
+    subgraph L4["4. SURFACE RECONSTRUCTION"]
         direction LR
-        e1["Point surfaces<br/><b>7.8 mm error</b>"] ~~~ e2["Meshes · splats<br/><i>planned</i>"] ~~~ e3["Bird's-eye map and area<br/><i>planned</i>"]
+        e1["Point surfaces<br/><b>7.8 mm error</b>"] ~~~ e2["Meshes · splats<br/><i>planned</i>"]
     end
 
-    subgraph L5["5 · OBJECT ISOLATION"]
+    subgraph L5["5. MAPPING, DIMENSIONS AND AREA"]
+        e3["Bird's-eye map and area<br/><i>planned</i>"]
+    end
+
+    subgraph L6["6. OBJECT RECOGNITION AND COUNTING"]
         direction LR
         o1["Detection<br/><b>early trial</b>"] --> o2["Segmentation<br/><b>early trial</b>"] --> o3["Similarity<br/><b>early trial</b>"] --> o4["Tracking and counting<br/><b>early trial</b>"]
     end
@@ -73,24 +77,23 @@ flowchart TD
         q1(["How big is the site?"]) ~~~ q2(["How many of each object?"])
     end
 
-    L1 --> L2 --> L3 --> L4 --> L5 --> OUT
+    L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> OUT
 
     classDef default fill:#ffffff,stroke:#444,stroke-width:1.5px,color:#1a1a1a
     classDef planned fill:#ffffff,stroke:#999,stroke-width:1.5px,stroke-dasharray:6 4,color:#666
     classDef answer fill:#263238,stroke:#263238,color:#ffffff
     class c1,c3,d1,d2,p3,e2,e3 planned
     class q1,q2 answer
-    linkStyle 8,9,10 stroke:#444,stroke-width:2px
 
     style L1 fill:#DCEBFB,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
     style L2 fill:#E9E3F6,stroke:#5E35B1,stroke-width:2px,color:#311B92
     style L3 fill:#DBF0EE,stroke:#00897B,stroke-width:2px,color:#004D40
     style L4 fill:#FDEEDB,stroke:#FB8C00,stroke-width:2px,color:#BF360C
-    style L5 fill:#FADDE8,stroke:#D81B60,stroke-width:2px,color:#880E4F
+    style L6 fill:#FADDE8,stroke:#D81B60,stroke-width:2px,color:#880E4F
     style OUT fill:#ECEFF1,stroke:#546E7A,stroke-width:2px,color:#263238
 ```
 
-Read it top to bottom. Each layer can use the output of any layer above it, not only the one directly above. For example, object isolation uses the original images (layer 1), depth (layer 2) and camera positions (layer 3) to place each object, and its objects sit in the same 3D space as the environment model (layer 4). The site-size answer comes mainly from layer 4; the object count comes from layer 5.
+Read it top to bottom. Each layer can use the output of any layer above it, not only the one directly above. For example, object isolation uses the original images (layer 1), depth (layer 2) and camera positions (layer 3) to place each object, and its objects sit in the same 3D space as the environment model (layer 4). The site-size answer comes from step 5, using step 4 geometry; the object count comes from step 6.
 
 ## Why build the layers separately
 
@@ -104,22 +107,23 @@ This also makes each layer replaceable. A different depth model or camera tracke
 
 ## Hosted or on the phone
 
-There are two ways to deploy the same five layers.
+There are two ways to deploy the same six execution steps.
 
-- **Hosted.** The phone only records. It saves the video, the phone's motion sensors (accelerometer and gyroscope, together called the IMU) and the phone's own position and depth estimates, then uploads them. A server with a large GPU runs every other layer. Compute is not a constraint, so the most accurate methods can be used. This fits the cloud serving FYLD already runs with MLflow and BentoML. This is the planned main route.
+- **Hosted.** The phone only records. It saves the video, the phone's motion sensors (accelerometer and gyroscope, together called the IMU) and the phone's own position and depth estimates, then uploads them. A server can run the heavier processing stages. Its full processing time and memory still need measuring. This fits the cloud serving FYLD already runs with MLflow and BentoML. Task51 decides the first phone/edge/hosted workload split; Task56 tests the complete result.
 - **On the phone, offline.** Some layers can run on the phone with no internet connection. The point is not the final answer. It is quick checks on site, so a worker does not leave with a capture that turns out to be unusable: "you missed the far corner", "tracking was lost here", "about 40 m² so far, 6 cones counted so far".
 
 Google listed both candidate models as supporting ARCore depth when checked on 4 October 2026 ([ARCore supported devices](https://developers.google.com/ar/devices)). Only the Redmi is confirmed available for this test. A listing does not establish runtime support or measurement quality on the handset; those still need to be checked.
 
-ARCore offers more than camera position and depth. Outdoors it can label every pixel as road, pavement, building, vehicle, person and so on (Scene Semantics). It can supply building and terrain shapes from Street View data within about 100 m (Streetscape Geometry), and can give a location fix with heading (Geospatial). A dedicated examination of the whole toolkit, plus the phone's other sensors, is planned. It will decide what the capture app records.
+ARCore offers more than camera position and depth. Outdoors it can label every pixel as road, pavement, building, vehicle, person and so on (Scene Semantics). It can supply building and terrain shapes from Street View data within about 100 m (Streetscape Geometry), and can give a location fix with heading (Geospatial). The toolkit and phone-sensor inventory is recorded in [research/arcore](research/arcore/README.md). Task52 turns the selected inputs into a tested recording; the inventory itself establishes no runtime result.
 
 | Layer | Hosted: phone records, server does the rest | On the phone, offline | Offline check worth doing on site |
 |---|---|---|---|
 | 🟦 1. Camera capture | Record video, IMU and ARCore pose and depth into one file with ARCore's [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback). Upload on Wi-Fi to the server. | Same recording, kept on the phone. Android's [Camera2 multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) shows whether two rear lenses can record at once. | Blur, exposure and dropped-frame warnings. A coverage hint showing parts of the site not yet filmed. |
 | 🟪 2. Depth estimation | Large learned models on every frame: [FoundationStereo](https://arxiv.org/abs/2501.09898) if two lenses can record together, otherwise multi-view depth from [Depth Anything 3](https://arxiv.org/abs/2511.10647) or [MapAnything](https://arxiv.org/abs/2509.13414). ARCore depth sets the real-world scale. | ARCore's [Depth API](https://developers.google.com/ar/develop/java/depth/raw-depth). Optionally a small learned model such as [Depth Anything V2](https://arxiv.org/abs/2406.09414) Small, run through [LiteRT](https://ai.google.dev/edge/litert) or [ONNX Runtime](https://onnxruntime.ai/docs/tutorials/mobile/) on the phone's AI chip. | Warn where depth is missing or the subject is too far away for reliable depth. |
 | 🟩 3. Camera position | Full tracking with drift correction on the whole recording: [ORB-SLAM3](https://arxiv.org/abs/2007.11898) with the IMU, or the learned [MASt3R-SLAM](https://arxiv.org/abs/2412.12392) and [VGGT-SLAM 2.0](https://arxiv.org/abs/2601.19887). A final clean-up pass over all frames at once with [COLMAP](https://colmap.github.io/) or [GLOMAP](https://arxiv.org/abs/2407.20219). | ARCore motion tracking, which is built in and runs live. [RTAB-Map for Android](https://github.com/introlab/rtabmap) adds drift correction on top of ARCore's position. | "Tracking lost" alerts. A drift check: return to the starting spot and see how far the path has wandered. |
-| 🟧 4. Environment visualisation | Dense meshes from depth with [Open3D](https://www.open3d.org/docs/0.19.0/tutorial/pipelines/rgbd_integration.html) or [nvblox](https://arxiv.org/abs/2311.00626). Realistic views with [Gaussian splatting](https://arxiv.org/abs/2308.04079) or its surface-accurate variant [2DGS](https://arxiv.org/abs/2403.17888). Bird's-eye map and areas from the mesh. | ARCore's detected floor and wall planes plus its depth points, or RTAB-Map's on-phone mesh. A rough top-down preview. | Rough footprint and area in m². A map of gaps that were never filmed. |
-| 🟥 5. Object isolation | Detect, outline and follow objects named in plain text with [SAM 3](https://arxiv.org/abs/2511.16719) ("traffic cone", "barrier"). Compare appearance between sightings with [DINOv2](https://arxiv.org/abs/2304.07193) or [DINOv3](https://arxiv.org/abs/2508.10104) features. Build a 3D map of individual objects in the style of [ConceptGraphs](https://arxiv.org/abs/2309.16650). | A small detector trained on site object types: [RF-DETR](https://arxiv.org/abs/2511.09554) Nano or [YOLO26](https://docs.ultralytics.com/models/yolo26) nano. Short-term following with [ByteTrack](https://arxiv.org/abs/2110.06864). ARCore position and depth place each object in 3D so a returning object is not counted twice. [MobileSAM](https://arxiv.org/abs/2306.14289) only on chosen frames when an outline is needed. | A running provisional count, with uncertain or seen-once objects flagged for a second look. |
+| 🟧 4. Surface reconstruction | Dense meshes from depth with [Open3D](https://www.open3d.org/docs/0.19.0/tutorial/pipelines/rgbd_integration.html) or [nvblox](https://arxiv.org/abs/2311.00626). Realistic views with [Gaussian splatting](https://arxiv.org/abs/2308.04079) or its surface-accurate variant [2DGS](https://arxiv.org/abs/2403.17888). Bird's-eye map and areas from the mesh. | ARCore's detected floor and wall planes plus its depth points, or RTAB-Map's on-phone mesh. A rough top-down preview. | Rough footprint and area in m². A map of gaps that were never filmed. |
+| 5. Mapping, dimensions and area | Read full observed geometry and a defined reference plane to measure the site. Task55 owns the real method. | The selected edge method still needs implementation and measured evidence. | Defined area and dimensions with unknown coverage visible. |
+| 🟥 6. Object recognition and counting | Detect, outline and follow objects named in plain text with [SAM 3](https://arxiv.org/abs/2511.16719) ("traffic cone", "barrier"). Compare appearance between sightings with [DINOv2](https://arxiv.org/abs/2304.07193) or [DINOv3](https://arxiv.org/abs/2508.10104) features. Build a 3D map of individual objects in the style of [ConceptGraphs](https://arxiv.org/abs/2309.16650). | A small detector trained on site object types: [RF-DETR](https://arxiv.org/abs/2511.09554) Nano or [YOLO26](https://docs.ultralytics.com/models/yolo26) nano. Short-term following with [ByteTrack](https://arxiv.org/abs/2110.06864). ARCore position and depth place each object in 3D so a returning object is not counted twice. [MobileSAM](https://arxiv.org/abs/2306.14289) only on chosen frames when an outline is needed. | A running provisional count, with uncertain or seen-once objects flagged for a second look. |
 
 None of these methods has been measured on the two test phones yet. Published speeds come from the authors' own hardware and do not predict phone speed. Licences differ, and some forbid commercial use:
 - ORB-SLAM3 is GPLv3.
@@ -138,7 +142,7 @@ Check each licence before anything ships. Each layer README lists more options, 
 - **In:** a chosen phone, camera settings and a recording request.
 - **Out:** a saved bundle of images, each with camera identity, capture time and calibration (focal length, image centre, lens distortion and the offset between lenses).
 - **Phone available:** Redmi Note 11 Pro 4G, model 2201116TG, Android 13; Samsung S23 availability is unconfirmed.
-- **Where it stands:** the native Camera2 app ran on the Redmi. Its exported report lists one rear camera and one front camera, with no advertised simultaneous-camera sets. The supplied session contains no image captures. A separate rear-camera control export is still needed; runtime depth and camera position remain untested. A local browser preview and video-stream test is possible over HTTPS, but it cannot report the native concurrent-camera support and sensor details needed to assess stereo.
+- **Where it stands:** a native Camera2 capability session from the Redmi lists one rear camera and one front camera, with no advertised simultaneous-camera sets. Its export contains no image captures. The staged camera APK still needs a verified rear-camera image export; runtime depth and camera position remain untested. The Android Debug Bridge (ADB) is available in WSL, but its latest device query found no attached handset. A local browser preview and video-stream test is possible over HTTPS, but it cannot report the native concurrent-camera support and sensor details needed to assess stereo.
 - **Stand-in today:** public benchmark recordings (see [Data used for testing](#data-used-for-testing)).
 - **Key sources:** [ARCore Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) · [Android multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) · [ARCore supported devices](https://developers.google.com/ar/devices) · [MobiDepth, phone stereo timing](research/sources/01_mobidepth.md) · [Construction photo capture guidance](research/sources/19_construction_capture_guidance.md)
 - **Details:** [experiments/01_camera_capture_delivery](experiments/01_camera_capture_delivery/README.md)
@@ -164,13 +168,13 @@ Check each licence before anything ships. Each layer README lists more options, 
 
 - **In:** images, calibration, capture times and optionally depth or phone motion-sensor readings.
 - **Out:** a position and orientation for every frame, plus a flag for when tracking was lost.
-- **Where it stands:** a tracker built on Open3D, using colour and depth, ran on 30 frames of a recorded desk scene on a normal CPU. Its camera positions were within **6.9 mm** of the motion-capture reference on average (root-mean-square error). It processed 2.14 image pairs per second. This is a short development run, not a full-length test.
-- **Planned:** run on full sequences and on a held-out recording; add drift correction, where the tracker recognises a revisited place and corrects the path. That same recognition is what lets a later visit be matched to an earlier one.
+- **Where it stands:** the frozen CPU tracker completed the full 792-observation Freiburg1 xyz run and the separately selected 573-observation desk run. Their position root-mean-square errors were **53.6 mm** and **280.4 mm**. They took 480 seconds and 342 seconds end to end, with peak committed memory of **1.88 GiB** and **1.87 GiB** under the 2 GiB process limit. The desk recording is from the same indoor sensor/site as xyz, so it is a held-out sequence, not a different site. Product accuracy and wait limits remain undecided, and phone performance is still unknown.
+- **Next:** compare drift correction only if the owner-agreed accuracy limits or later revisit tests require it. The existing 30-frame result remains a short historical trial.
 - **Control:** the benchmark's own motion-capture camera path, used where a later layer needs a known-correct path.
 - **Key sources:** [ORB-SLAM3](https://arxiv.org/abs/2007.11898) · [MASt3R-SLAM](https://arxiv.org/abs/2412.12392) · [VGGT-SLAM 2.0](https://arxiv.org/abs/2601.19887) · [RTAB-Map](https://github.com/introlab/rtabmap) · [TUM RGB-D benchmark](https://cvg.cit.tum.de/data/datasets/rgbd-dataset)
 - **Details:** [experiments/03_camera_pose_estimation](experiments/03_camera_pose_estimation/README.md)
 
-### 🟧 4. Environment visualisation
+### 🟧 4. Surface reconstruction
 
 **Question:** can depth and camera positions be combined into a 3D model of the visible site that is accurate in metres, and turned into views people can use?
 
@@ -185,7 +189,11 @@ This layer covers everything that shows or measures the environment: point surfa
 - **Key sources:** [KinectFusion](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/ismar2011.pdf) · [nvblox](https://arxiv.org/abs/2311.00626) · [3D Gaussian splatting](https://arxiv.org/abs/2308.04079) · [2D Gaussian splatting](https://arxiv.org/abs/2403.17888) · [COLMAP](https://colmap.github.io/)
 - **Details:** [experiments/04_surface_reconstruction](experiments/04_surface_reconstruction/README.md), [experiments/05_birds_eye_mapping](experiments/05_birds_eye_mapping/README.md) and the shared [geometry check](experiments/geometry_validation/README.md)
 
-### 🟥 5. Object isolation
+### 5. Mapping, dimensions and area
+
+This execution step reads full observed geometry and reports site dimensions, a defined area and unknown coverage. Its real method remains unavailable under Task55. It is separate from surface reconstruction and cannot use sampled viewer points as measurements.
+
+### 🟥 6. Object recognition and counting
 
 **Question:** which objects are in the scene, where are they in 3D, and how many distinct ones are there, even when one leaves the view and comes back?
 
@@ -213,7 +221,7 @@ All results below are on recorded public data on a desktop computer. None is fro
 
 | Layer | Data | Result | What it does not show |
 |---|---|---|---|
-| 3. Camera position | 30 frames of a desk recording (TUM RGB-D) | 6.9 mm camera-position error; 2.14 image pairs per second on CPU | Full-length or held-out performance; phone speed |
+| 3. Camera position | Full 792-frame Freiburg1 xyz and 573-frame desk sequences | Position RMSE: 53.6 mm xyz and 280.4 mm desk; 1.65 and 1.68 observations/s; peak commit 1.88 and 1.87 GiB on CPU | Owner-set accuracy and wait limits; another site; phone speed |
 | 4. Environment | 9 views of a synthetic room (ICL-NUIM), supplied depth and camera path | 7.8 mm mean distance to the reference room; 22.3% of the whole room covered within 5 cm | Real phone depth; tracked camera paths; meshes |
 | 5. Detection | 6 reviewed desk frames | 4 of 5 cups found | A broad, unseen test set |
 | 5. Segmentation | 15 boxes, 3 mask methods | 45 masks; depth pixels chosen differ by method | That masks improve position or size |
@@ -246,7 +254,7 @@ Packaging took 27.34 seconds using the installed Android tools and cached librar
 
 | Dataset | What it provides | Used for |
 |---|---|---|
-| [TUM RGB-D](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) (desk and xyz recordings) | Colour video, measured depth, calibration, timestamps and a motion-capture camera path | Camera tracking (layer 3) and object isolation (layer 5) |
+| [TUM RGB-D](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) (desk and xyz recordings) | Colour video, measured depth, calibration, timestamps and a motion-capture camera path | Camera tracking (layer 3) and object recognition (step 6) |
 | [ICL-NUIM](https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html) (living room) | Synthetic colour and depth, exact camera path and a separate 3D model of the room | Scoring the surface layer (layer 4) |
 | [Middlebury stereo](https://vision.middlebury.edu/stereo/submit3/) (version 3, quarter resolution) | Stereo image pairs, calibration and exact reference depth for 15 scenes | Depth estimation (layer 2) |
 
@@ -258,25 +266,17 @@ A reference used for scoring is never fed to the method being scored, unless a r
 
 ## What comes next
 
-By layer:
+The work now targets accuracy, latency and edge deployment together. The [task board](task_list/README.md#next-experiment-order-and-gaps) is the execution order.
 
-- **1. Camera capture:** export a separate rear-camera control from the Redmi, check its original image and timestamps, then plan a calibrated recording. Test the Samsung separately if it becomes available. The Redmi report advertises no simultaneous-camera sets.
-- **2. Depth:** find out whether the phones allow two-lens stereo. Run a conventional stereo baseline on fixed Middlebury scenes, and in parallel try single-camera video depth with real-world scale from ARCore, GPS or known objects.
-- **3. Camera position:** finish the full-length and held-out tracking runs; then compare drift correction on revisited places. Corrected camera paths must update every surface and object position built from them.
-- **4. Environment:** compare points, meshes and splats on the same input; build the bird's-eye map on known test shapes first.
-- **5. Object isolation:**
-  1. Keep the late-birth fix from Task46. New objects may receive provisional identities at any frame; broader duplicate links and confirmation remain later policy work.
-  2. Connect the 3D depth samples inside each box to spatial matching before segmentation. Separate visible extent, background depth and uncertainty in location; test whether repeated sightings retain identities without merging neighbours.
-  3. Then compare segmentation with the same association policy. Change only pixel selection and measure whether masks improve position and identity outcomes. Learned masks and SAM 3 counting remain later comparisons.
-  4. Compare appearance features, including ResNet50, with and without the surrounding background.
-  5. Measure how errors in each layer add up, and whether more views of an object reduce its position error or repeat the same bias.
-- **Shared, parallel validation:** collect hand-checked identities and masks, surveyed object positions and sizes, and recordings with hard cases. These are needed for accuracy scoring; component construction and software controls can proceed separately.
-- **Test data:** check the candidate public datasets listed in the research README and run the existing experiments on small samples of them, to see how each layer copes with phone video, outdoor scenes and worksite objects.
-- **ARCore:** examine everything ARCore and the phone's sensors can record, including outdoor labels, building geometry and location, and decide what the capture app should save.
+1. Agree useful measurement/count accuracy, maximum wait, the first hardware and workload, separate test recordings, and how source recordings and surveys can be restored offline (Task51).
+2. The frozen camera tests are closed (Task13). Use the canonical six-step runner under `src/walkthrough/` ([Task58](task_list/closed/58_organise_six_step_walkthrough_orchestration.md)). Its components stay in the independent experiments. Software controls verify organisation; real depth and mapping remain unavailable until Tasks54/55 land.
+3. Build a usable phone recording (Task52), collect independent measurements and identities (Task53), and check device feasibility early (Task57). Implement and score real depth (Task54) and dimensions/area (Task55).
+4. Run one complete walkthrough against independent answers; measure total processing time and memory (Task56).
+5. Complete the sustained useful edge workload and compare its answers, delay, memory, heat, battery and offline behaviour (Task57).
 
-Related research has also been reviewed: Android ARCore and Apple's RoomPlan room scanning, and longer-range methods from self-driving cars that combine cameras and laser scanners. RoomPlan needs an Apple device with a laser depth sensor, which neither test phone has. See [research/README.md](research/README.md) for sources and what each one does and does not show.
+Object matching, masks, appearance and surface refinements follow measured weaknesses in that baseline. The first complete test does not wait for every proposed method comparison.
 
-No numeric pass mark has been set for any layer yet. Each comparison must record its settings and its decision rule before it runs. A clear negative result, such as a phone that cannot provide two cameras at once, is a useful finding.
+Numerical acceptance limits and new experimental settings remain pending owner decisions in Task51. An experiment can finish with a negative result; a failed method must not be presented as product success.
 
 ## Possible later output: a phone VR viewer
 
@@ -294,6 +294,8 @@ The viewer would display the project's measurements. It would not prove they are
 
 ## Repository layout and checks
 
+The cached phone-camera app is ready for device checks. The Redmi capability export advertises no concurrent camera sets; a rear-camera image export and confirmation of Samsung S23 availability remain with the handset owner. See [Experiment 01](experiments/01_camera_capture_delivery/README.md#redmi-device-result-5-october-2026) and [Task08](task_list/pending_review/08_check_phone_capture_feasibility_alongside_reconstr.md).
+
 ```text
 experiments/
   01_camera_capture_delivery/   layer 1: phone capture and delivery
@@ -301,7 +303,7 @@ experiments/
   03_camera_pose_estimation/    layer 3: camera tracking
   04_surface_reconstruction/    layer 4: building 3D surfaces
   05_birds_eye_mapping/         layer 4: top-down map and areas
-  06_object_recognition/        layer 5: detection, masks, similarity, tracking and counting
+  06_object_recognition/        step 6: detection, masks, similarity, tracking and counting
   geometry_validation/          checks coordinate handling with known inputs
   shared/                       common geometry, record formats and run export
   datasets/                     which data suits which layer
@@ -349,3 +351,7 @@ Costs are recorded for each step separately: model loading, detection, depth rea
 | Hosted, edge, on-device | Hosted: runs on a cloud server. Edge: runs on a computer near the user, such as a small box on site. On-device: runs on the phone itself. |
 | Open-vocabulary detection | Finding objects named in plain text, such as "traffic cone", without training a model for that class |
 | Root-mean-square (RMS) error | A typical error size that weights large errors more heavily than an average does |
+
+## Canonical runner and current gaps
+
+The [six-step runner](src/walkthrough/README.md) is implemented with software controls. It imports the owning experiments and keeps independent references in scoring, after prediction files are saved and hashed. Real depth and mapping methods remain unavailable under Tasks54/55, so an ordinary recording cannot yet complete all six steps. Segmentation and appearance are optional and disabled by default. Counts remain provisional and separate for each estimated world/segment; no whole-site count is claimed. Frozen benchmark commands, historical runs and their source snapshots remain intact. Physical accuracy, complete latency, peak memory and sustained edge operation still need measured evidence in Tasks56/57.

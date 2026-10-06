@@ -4,7 +4,7 @@ title: Evaluate scene object recognition and persistent counting
 status: open
 priority: MED
 type: experiment
-blocked_by: ["22", "31", "32", "33", "34", "35", "40"]
+blocked_by: [56]
 blocks: []
 verification_test: experiments/06_object_recognition/tests/test_identity_store.py
 plan_reviewed: 2026-10-02 PASS
@@ -24,7 +24,7 @@ baseline_metric:
   baseline_value: "0 labelled revisit/counting evaluations"
   target: "Independent identity controls and held-out inventory evaluation"
 created: 2026-10-02
-last_updated: 2026-10-05
+last_updated: 2026-10-06
 superseded_by: null
 ---
 
@@ -34,7 +34,11 @@ superseded_by: null
 
 Recognise objects in a walkthrough and remember which ones have already been seen. Looking away and returning should not automatically count an object twice. Start with checked examples, then measure what changes when recognition and camera positions are estimated.
 
-## Follow-up ownership reconciled, 4 October 2026
+## Current ownership, 6 October 2026
+
+Task09 retains inventory requirements and the checked identity-store implementation. Task56 owns the complete held-out walkthrough benchmark, adapters and report; it reuses existing stage methods rather than creating another store. Task53 collects independent identities and physical measurements. The first complete baseline does not wait for all Tasks31-35 refinements. Close this umbrella only after Task56 supplies independently scored count evidence and the owner resolves or explicitly waives remaining inventory requirements. Earlier proposed methods are optional corrections driven by that result.
+
+## Follow-up ownership reconciled, 4 October 2026 (historical)
 
 This task remains the stage06 umbrella and preserves the completed checked-store receipts below. The new plan is in the experiment README. Tasks 16/17 own research and labelled agreements; 18/19/20 own detection, segmentation and appearance; 21 owns automatic identity association; 22 owns matched-frame replay. Tasks17-20 have completed bounded provisional-reference trials; Tasks21/22 engineering has bounded results pending review. Their existence does not establish independent inventory accuracy. Task09 cannot close until those named evidence obligations land or are explicitly revised by the owner. The existing review stamp applies to persistence only; new stateful work requires its own plan/diff reviews.
 
@@ -111,4 +115,4 @@ Before: 0 labelled revisit/counting evaluations. After this first slice: still 0
 
 The store does not inspect images or create visual reports. It retains canonical observation descriptors and identity decisions; an input-to-output viewer belongs with the later recognition and geometry stages.
 
-Still open because recognition evaluation requires agreed site classes, labelled revisits, model and held-out scoring settings. The checked identity-store slice is complete; Task 13 has a separate active scope.
+Still open because recognition evaluation requires agreed site classes, labelled revisits, model and held-out scoring settings. The checked identity-store slice is complete; Task13 is open with its own scope.

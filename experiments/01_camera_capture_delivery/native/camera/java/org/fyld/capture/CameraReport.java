@@ -1,13 +1,16 @@
 package org.fyld.capture;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.util.Size;
 import android.util.SizeF;
+import android.util.AtomicFile;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -95,8 +98,13 @@ final class CameraReport {
                 characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE)));
         camera.put("pixel_array_size", size(
                 characteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE)));
+        camera.put("active_array_rect", rect(
+                characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)));
+        camera.put("pre_correction_active_array_rect", rect(
+                characteristics.get(CameraCharacteristics.SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE)));
         camera.put("intrinsic_calibration", metadata(
                 characteristics.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION)));
+        camera.put("intrinsic_calibration_grid", "pre_correction_active_array");
         camera.put("lens_distortion", metadata(
                 characteristics.get(CameraCharacteristics.LENS_DISTORTION)));
         camera.put("pose_rotation", metadata(
@@ -214,6 +222,8 @@ final class CameraReport {
         Object crop = frame.opt("crop_region");
         Object rotation = frame.opt("rotation_degrees");
         Object source = frame.opt("timestamp_source");
+        Object distortionMode = frame.opt("distortion_correction_mode");
+        Object distortionModeName = frame.opt("distortion_correction_mode_name");
         JSONArray cropValues = crop instanceof JSONArray ? (JSONArray) crop : null;
         int rotationValue = rotation instanceof Number ? ((Number) rotation).intValue() : -1;
         return timestamp instanceof Number && ((Number) timestamp).longValue() >= 0
@@ -223,6 +233,9 @@ final class CameraReport {
                 && cropValues.optInt(3, 0) > cropValues.optInt(1, 0)
                 && (rotationValue == 0 || rotationValue == 90
                     || rotationValue == 180 || rotationValue == 270)
+                && (distortionMode == JSONObject.NULL || distortionMode instanceof Number)
+                && distortionModeName instanceof String
+                && !((String) distortionModeName).trim().isEmpty()
                 && source instanceof String && !((String) source).trim().isEmpty()
                 && frame.optInt("width") > 0 && frame.optInt("height") > 0;
     }
@@ -249,23 +262,47 @@ final class CameraReport {
             capabilities.put("concurrent_camera_sets", report.optJSONArray("concurrent_camera_sets"));
             byte[] capabilityBytes = (capabilities.toString(2) + "\n")
                     .getBytes(java.nio.charset.StandardCharsets.UTF_8);
-            try (FileOutputStream capabilityOutput = new FileOutputStream(
-                    new File(session, "capabilities.json"), false)) {
-                capabilityOutput.write(capabilityBytes);
-                capabilityOutput.getFD().sync();
-            }
+            writeAtomically(new File(session, "capabilities.json"), capabilityBytes);
             JSONObject capabilityRecord = new JSONObject();
             capabilityRecord.put("sha256", sha256(capabilityBytes));
             capabilityRecord.put("bytes", capabilityBytes.length);
             report.getJSONObject("files").put("capabilities.json", capabilityRecord);
             File destination = new File(session, "report.json");
-            try (FileOutputStream output = new FileOutputStream(destination, false)) {
-                output.write((report.toString(2) + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                output.getFD().sync();
-            }
+            writeAtomically(destination,
+                    (report.toString(2) + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
         } catch (JSONException error) {
             throw new IOException("Could not serialize camera report", error);
         }
+    }
+
+    static void writeAtomically(File destination, byte[] bytes) throws IOException {
+        AtomicFile atomic = new AtomicFile(destination);
+        FileOutputStream output = null;
+        try {
+            output = atomic.startWrite();
+            output.write(bytes);
+            output.getFD().sync();
+            atomic.finishWrite(output);
+        } catch (IOException error) {
+            if (output != null) atomic.failWrite(output);
+            throw error;
+        } catch (RuntimeException error) {
+            if (output != null) atomic.failWrite(output);
+            throw error;
+        }
+    }
+
+    private static Object rect(Rect value) throws JSONException {
+        if (value == null) return JSONObject.NULL;
+        return new JSONArray().put(value.left).put(value.top).put(value.right).put(value.bottom);
+    }
+
+    static String distortionCorrectionModeName(Integer mode) {
+        if (mode == null) return "UNAVAILABLE";
+        if (mode == CaptureRequest.DISTORTION_CORRECTION_MODE_OFF) return "OFF";
+        if (mode == CaptureRequest.DISTORTION_CORRECTION_MODE_FAST) return "FAST";
+        if (mode == CaptureRequest.DISTORTION_CORRECTION_MODE_HIGH_QUALITY) return "HIGH_QUALITY";
+        return "UNKNOWN_" + mode;
     }
 
     private static Object number(Integer value) {

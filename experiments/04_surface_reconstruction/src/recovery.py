@@ -15,6 +15,7 @@ from .dataset import copy_checked
 from .run import HYPERPARAMETERS
 
 SAME_SOURCE = (
+    "experiments/04_surface_reconstruction/src/validation/controls.py",
     "experiments/04_surface_reconstruction/src/backend.py",
     "experiments/04_surface_reconstruction/src/run.py",
     "experiments/geometry_validation/src/control.py",
@@ -94,6 +95,8 @@ def validate_prior(
         raise ValueError("Recovery reference differs")
     source = prior / "metadata/source"
     for name in SAME_SOURCE:
+        if not (source / name).is_file():
+            raise ValueError(f"Recovery source dependency missing: {name}")
         if sha256(source / name) != sha256(repo / name):
             raise ValueError(f"Recovery source differs: {name}")
     if _query_signature(source / EVALUATION) != _query_signature(repo / EVALUATION):

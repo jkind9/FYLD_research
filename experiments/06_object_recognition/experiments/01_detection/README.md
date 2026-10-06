@@ -97,3 +97,7 @@ Commands (detector environment, GPU only when free):
 ```
 
 Both refuse to run unless OpenCV 5.0.0 is the version loaded, and Part A refuses unless the COCO extraction matches its recorded archive hashes (see `data/README.md`).
+
+## Independent validation import
+
+The public analysis boundary is `importlib.import_module("experiments.06_object_recognition.experiments.01_detection.validation").evaluate`. It forwards the existing scorer and its compatible frame/proposal schemas without copying scoring mathematics. The six-step runner saves and hashes predictions before scoring. Complete phone-survey adaptation remains Task56 work. [Runner contract](../../../../src/walkthrough/README.md).

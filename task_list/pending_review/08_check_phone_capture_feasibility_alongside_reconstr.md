@@ -1,7 +1,7 @@
 ---
 id: "08"
 title: Check phone capture feasibility alongside reconstruction
-status: open
+status: pending_review
 priority: MED
 type: infra
 blocked_by: []
@@ -101,14 +101,17 @@ Before: 0 verified target-phone camera pairs. Target: capability and capture evi
 |---|---|
 | Closing commit | Not closed; implementation committed in `63b48a7`, handoff docs in `e634ece`; this intake records partial device evidence |
 | Files changed | Capture/root/experiment/task READMEs, this receipt and Task40/reference README hardware constraints; supplied JSON moved unchanged into stage01's ignored local runs |
-| Test status | Prior camera build/export tests: 124 passed on Windows, with the Linux-only atomic rename race test deselected. Current received session passes `capture_report.validate_export`; capabilities bytes/hash and repeated device/camera/concurrent fields match. Focused report tests: 15 passed, 1 skipped (Windows symlink unavailable); first restricted run hit system-temp access denial, then rerun with approved temp access passed |
+| Test status | Prior camera build/export tests: 124 passed on Windows, with the Linux-only atomic rename race test deselected. Current received session passes `capture_report.validate_export`; capabilities bytes/hash and repeated device/camera/concurrent fields match. Focused declared report test: 15 passed, 1 skipped because Windows symlink creation is unavailable. Initial sandboxed attempts could not access pytest temporary folders; the completed approved run exited 0. No code changed. |
+| Task receipt check | `task.js verify 08` confirms pending-review status, filled receipts and clean board lint. It cannot verify this task against a clean Git tree: several existing project files are dirty and the Task32 spatial-uncertainty source/tests are untracked. No unrelated changes were committed or reverted. |
+| Latest export recheck | `capture_report.validate_export` returns PASS on the retained Redmi bundle: status `complete`, 0 captures and 1 declared file (`capabilities.json`). |
 | Before measurement | 0 verified target-phone camera pairs |
 | After measurement | 1 target-phone capability export verified; 2 exposed camera IDs; 0 advertised concurrent sets; 0 image captures in the supplied session; 0 verified camera pairs |
 | Delta | +1 actual Redmi capability report; negative advertised-pair finding; no new image/timing/depth/accuracy measurement |
 | Outcome | Redmi app launch, permission, camera inventory and capability export have device evidence. Original image capture, measured timing/calibration and Samsung obligations remain open. ARCore is skipped because SDK absent |
 | Review | Fresh read-only documentation review on 2026-10-05: APPROVE, 0 substantive defects; raw evidence, source behavior, hashes, links and task states checked |
+| Follow-up validation | Cached APK and verification receipt hashes match the recorded `35e2c420…af149c29a` APK. No ADB command is available in the workstation shell. Existing device export contains no JPEG or single-camera-control check. |
 
-still open because the supplied Redmi session has no original image or single-camera-control result, measured timing and independent calibration are absent, and Samsung S23 availability is unconfirmed. Runtime ARCore depth/pose needs a separately approved SDK-enabled test.
+To close: the owner runs **Capture one rear-camera control**, exports that session's ZIP, and returns it with the JPEG so its sensor metadata and hashes can be checked; the owner also confirms whether a Samsung S23 is available for this check, or records that it is unavailable. Engineering and the cached APK handoff are complete. Measured timing and independent calibration remain uncollected. Runtime ARCore depth/pose needs a separately approved SDK-enabled test.
 
 ### Actual Redmi session intake, 2026-10-05
 

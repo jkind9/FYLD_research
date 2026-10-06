@@ -13,6 +13,7 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Size;
 import android.view.Surface;
@@ -22,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -186,6 +186,12 @@ final class CameraCapture {
             value.put("frame_number", result.getFrameNumber());
             JSONArray crop = rect(result.get(CaptureResult.SCALER_CROP_REGION));
             value.put("crop_region", crop == null ? JSONObject.NULL : crop);
+            Integer distortionMode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? result.get(CaptureResult.DISTORTION_CORRECTION_MODE) : null;
+            value.put("distortion_correction_mode",
+                    distortionMode == null ? JSONObject.NULL : distortionMode);
+            value.put("distortion_correction_mode_name",
+                    CameraReport.distortionCorrectionModeName(distortionMode));
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(id);
             value.put("timestamp_source", CameraReport.timestampSource(
                     characteristics.get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE)));
@@ -210,10 +216,7 @@ final class CameraCapture {
             buffer.get(bytes);
             String fileName = captureName + "_camera_" + safeName(id) + ".jpg";
             File output = new File(sessionDirectory, fileName);
-            try (FileOutputStream stream = new FileOutputStream(output, false)) {
-                stream.write(bytes);
-                stream.getFD().sync();
-            }
+            CameraReport.writeAtomically(output, bytes);
             long arrival = System.currentTimeMillis();
             capturedImages.put(id, CameraReport.frame(id, fileName, bytes,
                     current.getWidth(), current.getHeight(),
@@ -241,6 +244,9 @@ final class CameraCapture {
                 frame.put("rotation_degrees", result.get("rotation_degrees"));
                 frame.put("rotation_source", result.get("rotation_source"));
                 frame.put("display_rotation_degrees", result.get("display_rotation_degrees"));
+                frame.put("distortion_correction_mode", result.get("distortion_correction_mode"));
+                frame.put("distortion_correction_mode_name",
+                        result.get("distortion_correction_mode_name"));
                 frames.put(frame);
             }
             for (int index = 0; index < frames.length(); index++) {
@@ -332,6 +338,8 @@ final class CameraCapture {
         Object frameNumber = frame.opt("frame_number");
         Object crop = frame.opt("crop_region");
         Object rotation = frame.opt("rotation_degrees");
+        Object distortionMode = frame.opt("distortion_correction_mode");
+        Object distortionModeName = frame.opt("distortion_correction_mode_name");
         JSONArray cropValues = crop instanceof JSONArray ? (JSONArray) crop : null;
         int rotationValue = rotation instanceof Number ? ((Number) rotation).intValue() : -1;
         return timestamp instanceof Number && ((Number) timestamp).longValue() >= 0
@@ -340,7 +348,10 @@ final class CameraCapture {
                 && cropValues.optInt(2, 0) > cropValues.optInt(0, 0)
                 && cropValues.optInt(3, 0) > cropValues.optInt(1, 0)
                 && (rotationValue == 0 || rotationValue == 90
-                    || rotationValue == 180 || rotationValue == 270);
+                    || rotationValue == 180 || rotationValue == 270)
+                && (distortionMode == JSONObject.NULL || distortionMode instanceof Number)
+                && distortionModeName instanceof String
+                && !((String) distortionModeName).trim().isEmpty();
     }
 
     private static String safeName(String value) {

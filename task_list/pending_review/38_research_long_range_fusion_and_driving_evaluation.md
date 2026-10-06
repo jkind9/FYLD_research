@@ -1,7 +1,7 @@
 ---
 id: "38"
 title: Research longer-range fusion and driving evaluation
-status: open
+status: pending_review
 priority: MED
 type: decision
 approval_status: proposed; no execution authorised by Task30
@@ -11,15 +11,17 @@ verification_test: ""
 plan_reviewed: null
 files:
   - research/README.md
+  - task_list/README.md
 docs:
   - research/README.md
+  - task_list/README.md
 baseline_metric:
   source: experiments/03_camera_pose_estimation/src/dataset.py:124
   field: evidence and comparison gap
   baseline_value: "0 acquired driving evaluation datasets; adapter maximum retained depth below 4 m"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-04
+last_updated: 2026-10-05
 superseded_by: null
 ---
 
@@ -47,6 +49,7 @@ Existing evidence: Current depth adapter excludes >=4 m and no driving dataset i
 |---|---|---|---|
 | Existing range limit is explicit | TUM adapter | range suitability | experiments/03_camera_pose_estimation/src/dataset.py:124 |
 | Dataset selection already has an owner | dataset README | acquisition planning | experiments/datasets/README.md:5 |
+| Current official source checks are already recorded in the research agenda | Task30 research section | this decision | research/README.md:171 |
 
 Proposed comparison: Research probabilistic 3D boxes/extents, camera/stereo/LiDAR fusion, occupancy with unknown space, uncertainty-aware association and ego-motion/timestamp compensation. Assess KITTI raw/tracking versus nuScenes annotations/poses/visibility and coordinate conventions without downloading. Design stationary-object modality ablations first, separate calibration/timing/ego-pose perturbations then combined tests; add moving-object velocity/identity only after ego-motion control.
 
@@ -60,7 +63,7 @@ Cost questions: Large dataset storage, registration/licences, sensor/capture ava
 
 Decision informed: Select a candidate dataset/subset and sensor comparison for authorised evaluation, or identify why required range/references are unavailable.
 
-Primary sources are linked in research/README.md under the corresponding A-I workstream. The full experimental question and requirements are stated here.
+Official sources checked on 5 October 2026: KITTI raw-data and 3D object benchmark pages, the nuScenes schema, and official detection/tracking evaluation pages. The research agenda records what they provide, range/metric limitations, and how the two candidates inform later Task41 trial selection. No dataset, model, threshold, sample size or acquisition choice was approved.
 
 ## Invariants and recovery
 
@@ -82,12 +85,12 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 
 | Field | Value |
 |---|---|
-| Closing commit | Not started; plan created during Task30 |
-| Files changed | Task file only; future scope proposed |
-| Test status | No implementation tests or experiment executed |
+| Closing commit | None; no commit created |
+| Files changed | `research/README.md`; `task_list/README.md`; this task record |
+| Test status | Documentation/source check only; no implementation or experiment run |
 | Before measurement | 0 acquired driving evaluation datasets; adapter maximum retained depth below 4 m |
-| After measurement | No new experimental result |
-| Delta | 0 executed comparisons |
-| Decision-gate outcome | Proposed; review/settings/references/acquisition authorisation outstanding |
+| After measurement | 2 dataset candidates checked against official documentation; 0 downloads or local runs |
+| Delta | nuScenes selected as the stronger multi-sensor moving-track control candidate; KITTI retained as a stereo/LiDAR/vehicle-pose control; neither validates static worksite inventory or full surface-position accuracy |
+| Decision-gate outcome | Research decision recorded. Owner review is pending to accept or revise the Task41 trial-selection recommendation. Any subset, access terms, storage, capture, local settings and execution remain separate owner decisions. |
 
-still open because the investigation and its reference/decision requirements are not complete.
+Independent source review and decision recording are complete. To close: the owner should accept or revise the recommendation for Task41; only then can a separately scoped task request data access, select a subset, and propose an experiment.

@@ -5,7 +5,7 @@ status: open
 priority: HIGH
 type: experiment
 approval_status: proposed; no execution authorised by Task30
-blocked_by: ["21","22","40"]
+blocked_by: [21, 22, 40, 56]
 blocks: []
 verification_test: experiments/06_object_recognition/experiments/06_identity_policy/tests/test_identity_policy.py
 plan_reviewed: 2026-10-04 PASS
@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "90 book proposals unresolved outside gate; 0 evaluated provisional-birth comparisons"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-05
+last_updated: 2026-10-06
 superseded_by: null
 ---
 
@@ -33,7 +33,7 @@ Give every detection its own record and let uncertain new objects remain provisi
 
 ## What
 
-Owner update, 5 October 2026: Task46 implements the explicitly requested late-birth bug fix and regenerated demo using the full 60-frame cached baseline. It is a bounded first slice of the policy work, with provisional IDs and no new numerical gates. The broader six-frame comparison, duplicate relationships, confirmation and schema migration below remain separate. Historical Task22 results remain intact. After Task46, Task32 box-depth spatial association is the next component; segmentation comparison follows it.
+Owner update, 5 October 2026: Task46 implements the explicitly requested late-birth bug fix and regenerated demo using the full 60-frame cached baseline. It is a bounded first slice of the policy work, with provisional IDs and no new numerical gates. The broader six-frame comparison, duplicate relationships, confirmation and schema migration below remain separate. Historical Task22 results remain intact. The earlier 5 October order put Task32 next. The 6 October board supersedes that queue: Task56 first establishes the complete baseline, then a measured identity/duplicate failure can justify this refinement.
 
 Question: Can provisional births and explicit duplicate relationships retain new/returning objects without inflating confirmed inventory or hiding uncertainty?
 

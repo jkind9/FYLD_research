@@ -114,3 +114,11 @@ No numeric pass mark is set yet. Agree quality and coverage limits before accept
 - **Find a sequence with stereo and a reference camera path.** TUM has no stereo pair and Middlebury has no camera path, so neither can test how stereo depth affects tracking. A synchronised stereo dataset or a measured phone recording is needed for that swap.
 
 Once tracking or reconstruction can read this layer's output without knowing where it was computed, promote the depth record format into [experiments/shared](../shared/README.md). See the [experiment guide](../README.md) for how the layers connect.
+
+## Current delivery ownership, 6 October 2026
+
+[Task54](../../task_list/open/54_implement_and_validate_real_metric_depth.md) owns the first implemented and independently scored real depth baseline. It chooses the usable phone or hosted route from the capture evidence; it does not wait indefinitely for stereo. [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) supplies phone observations and [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) supplies independent physical references. Code and runs remain absent until that work is executed.
+
+## Walkthrough depth boundary
+
+Step 2 is explicitly unavailable: no real metric-depth method or accuracy scorer has been implemented here. Task54 owns both. The root adapter accepts deterministic test providers only in labelled software controls. They do not constitute a depth method or measurement. See [the six-step runner](../../src/walkthrough/README.md).

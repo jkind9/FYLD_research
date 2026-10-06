@@ -1,7 +1,7 @@
 ---
 id: "37"
 title: Research ARCore, ARKit and RoomPlan mapping
-status: open
+status: pending_review
 priority: MED
 type: decision
 approval_status: proposed; no execution authorised by Task30
@@ -11,15 +11,17 @@ verification_test: ""
 plan_reviewed: null
 files:
   - research/README.md
+  - task_list/README.md
 docs:
   - research/README.md
+  - task_list/README.md
 baseline_metric:
   source: experiments/01_camera_capture_delivery/README.md:7
   field: evidence and comparison gap
   baseline_value: "0 verified project phone AR-depth/room scans"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-04
+last_updated: 2026-10-05
 superseded_by: null
 ---
 
@@ -84,10 +86,12 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 |---|---|
 | Closing commit | Not started; plan created during Task30 |
 | Files changed | Task file only; future scope proposed |
-| Test status | No implementation tests or experiment executed |
+| Test status | Rechecked six current first-party platform/API sources and the current ARCore device list on 2026-10-05; the updated capability and limitation matrix is in `research/README.md`. No implementation test, phone capture, timing run or accuracy experiment was authorised or executed. Claude's source validation is pending. |
 | Before measurement | 0 verified project phone AR-depth/room scans |
-| After measurement | No new experimental result |
-| Delta | 0 executed comparisons |
-| Decision-gate outcome | Proposed; review/settings/references/acquisition authorisation outstanding |
+| After measurement | API capability and capture-lineage requirements recorded for ARCore, ARKit and RoomPlan; Google lists the Galaxy S23, Redmi Note 11 Pro and Redmi Note 11 Pro 5G product families for Depth API; the exact Redmi code `2201116TG` is not listed and runtime support remains untested; 0 project phone AR-depth/room scans |
+| Delta | Research-only; no project measurement |
+| Decision-gate outcome | Platform comparison is documented from current primary sources. Samsung access, Redmi runtime support, a phone capture route, independent survey link and any implementation/acquisition approval remain outstanding. A research matrix does not establish accuracy or phone performance. |
 
-still open because the investigation and its reference/decision requirements are not complete.
+Source correction, 5 October 2026: Google's live supported-device list includes the Redmi Note 11 Pro and Redmi Note 11 Pro 5G names, both with Depth API support. It does not identify the exact `2201116TG` handset code. The inventory now records the listed product family separately from the project's untested handset and runtime support. This correction changes the pending Claude review snapshot; validate the corrected README from a new fixed snapshot.
+
+still open because Claude's independent source validation and owner decisions on any later device capture remain outstanding.

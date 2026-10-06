@@ -2,7 +2,7 @@
 
 This folder holds downloaded inputs and their acquisition records. The [dataset experiment plan](../experiments/datasets/README.md) explains which reference data can replace each unfinished piece of the phone-to-map system.
 
-Git retains this guide and JSON acquisition, inspection and geometry records. Images, depth files, point clouds and compressed archives are excluded. A receipt in a fresh clone is evidence of the original acquisition, not proof that its payload is present locally; verify or acquire the data before running an experiment.
+Git retains this guide and JSON acquisition, inspection and geometry records. Images, depth files, point clouds and compressed archives are excluded. Raw controlled-scene phone and survey bundles are excluded from Git in full, including JSON manifests and sidecars under `controlled_scene/input/`. Keep those bundles in the owner-approved offline store recorded in Task51. Their tracked release receipts belong under `experiments/06_object_recognition/datasets/releases/`. A receipt in a fresh clone is evidence of the original acquisition, not proof that its payload is present locally; retrieve and verify the data before running an experiment.
 
 ## Available and proposed inputs
 
@@ -14,6 +14,7 @@ Git retains this guide and JSON acquisition, inspection and geometry records. Im
 | ICL-NUIM living-room trajectory 2 and reference surface | Acquired; Task03 coordinate controls and Task04 nine-view surface scoring completed | Bounded reconstruction control without estimated depth or poses |
 | Analytic planes, steps and rectangular depressions | Planned; generated fixtures do not exist yet | Test bird's-eye heights, dimensions and unknown areas with exact answers |
 | Phone recordings | Not collected | Test actual dual-camera access and outdoor transfer of the methods |
+| Controlled-scene phone and survey bundles | Not collected; once acquired, kept outside Git and restored from the Task51-approved offline store | Supply original phone inputs and separate independent truth for the complete walkthrough |
 | COCO 2017 validation images and instance outlines | Acquired 5 October 2026; archives under `archives/coco2017/`, extracted under `coco2017/` | Task45: detection box placement against hand-drawn outlines, in clutter |
 
 The COCO archives come from the official URLs `http://images.cocodataset.org/zips/val2017.zip` (815,585,330 bytes, SHA-256 `4f7e2ccb2866ec5041993c9cf2a952bbed69647b115d0f74da7ce8f4bef82f05`) and `http://images.cocodataset.org/annotations/annotations_trainval2017.zip` (252,907,541 bytes, SHA-256 `113a836d90195ee1f884e704da6304dfaaecff1f023f49b6ca93c4aaae470268`; its MD5 matches the server's ETag). The SHA-256 values were computed locally at download; COCO publishes no checksum. Only the 5,000 val2017 images and `annotations/instances_val2017.json` are extracted, by `experiments/06_object_recognition/experiments/01_detection/coco.py`, which checks both archives, writes into a staging folder and renames it only when complete. `coco2017/EXTRACTION.json` records the archive hashes and the annotation file's SHA-256 (`e8c7f7908f1d7278341fae127d0da654f102f11bd7b21d8aeefa635b8c810b6f`). COCO annotations are CC BY 4.0; the images remain under their Flickr terms. The detector's makers use val2017 to choose checkpoints, so it is not unseen data for YOLO26x.
@@ -93,7 +94,7 @@ On 3 October 2026, the user approved evaluation of all 792 associated Freiburg1 
 
 [Six-frame reference inputs](../experiments/06_object_recognition/datasets/README.md) preserve original desk RGB/depth hashes and calibration, with separate method inputs and evaluator labels. The corrected verified camera look-away frame is1305031463.059810 (source frame268); the cup returns at1305031466.095840. The earlier claimed long visibility interval was a detector miss interval: the cup remains partly visible at1305031460.891774. Do not equate missing detections with absence from the image or scene.
 
-These agent-authored and independently agent-reviewed labels identify one cup and two distinct monitors. They are not human ground truth; polygon boundaries are provisional and excluded from formal segmentation scoring. Enrollment has2frames and evaluation4, all already inspected within one session. No tuning, blind accuracy or new-session generalisation is claimed. Required missing footage remains in the13-case registry. Task13's held-out tracking settings and unfinished work are preserved.
+These agent-authored, independently reviewed labels identify one cup and two distinct monitors. They are not human ground truth. Their mask outlines are provisional and are not used for formal scoring. The enrollment set has two frames and the evaluation set has four. Both sets come from the same inspected session, so they do not show performance on a new visit. Required missing footage remains in the 13-case registry. Task13's held-out camera-tracking run is complete under frozen settings; this does not make the object labels ground truth or count as a phone walkthrough.
 
 ## Reference and publication follow-up
 

@@ -1,10 +1,90 @@
-﻿# Task list
+# Task board
 
-## Current records, 5 October 2026
+## Objectives and current position, 6 October 2026
 
-This board separates measured controls and bounded proofs of concept from untested investigations. Task30 completed documentation/research only. Preserve Task13 frozen settings and unfinished code; leave Task16/21/22 pending review. Closed receipts are historical evidence and are not rewritten by the new backlog.
+A phone walkthrough should give useful site measurements and count each physical object once, including after a revisit. Three goals govern the work.
 
-| Task | State | Evidence or outstanding question |
+| Goal | What we must prove | Current evidence |
+|---|---|---|
+| Accuracy | Dimensions, defined area and object counts agree with independent measurements on separate test recordings. Missing coverage and uncertain answers stay visible. | Short camera/surface controls and object demonstrations exist. No complete phone/worksite test, independent final count or implemented site-area calculation. |
+| Latency | A representative walkthrough produces usable outputs within an agreed wait; live checks update at an agreed rate. | Desktop component timings exist. No measured complete-process budget or accepted maximum wait. |
+| Edge deployment | The useful workload runs on the chosen phone or nearby computer, with acceptable sustained resource use and offline behaviour. | Redmi camera inventory was exported, with 0 captured images. No useful measurement/counting workload has been measured on the target device. |
+
+[Task51](open/51_agree_success_criteria_and_the_first_deployment_ta.md) records the first use case, hardware, workload, error limits, maximum wait, device limits, and how source recordings and surveys can be retained and restored offline. Numerical choices remain pending. This board update authorizes planning and prioritization; it does not invent settings or claim a method works.
+
+Hosted and edge processing are both in scope. Every hosted stage need not run on the phone. Task51 states what runs where and what the user can do without a network.
+
+## Next experiment order and gaps
+
+This is the current order. It replaces the earlier object-first queue and blanket deferral of edge work. One task may be active. Task58's organisation work is complete and verified with deterministic software controls. Task51 choices remain open. Task52's reader and export-validator engineering can use synthetic fixtures and the unchanged camera profile. Physical capture, survey and acceptance runs still need the selected device and owner decisions. Implementation needs a current plan review before it starts.
+
+Keep `task_list/` for task records, its README, constitution and journal only. Root pytest discovery skips this folder. `.gitignore` ignores every Python file, pytest cache, pytest folder and job-allocation probe there, so accidental scratch stays out of Git. `tools/check.py` stops before pytest when it finds any unexpected file or folder in the task board. It places pytest files under a temporary system folder and removes that folder on exit. Put one-off diagnostic files there too. Before handing off, check `git status --short --untracked-files=all` and scan `task_list/` for unexpected files.
+
+The Task52 reader/export checks use fixture images and pass on this host. Its
+current Camera2 sources also passed the cached WSL warm build, with the pinned
+package and source hashes verified. No image from the Redmi has been validated.
+ADB access, handset confirmation, installation and capture remain outstanding.
+Scored capture also needs Task51 site and survey choices.
+
+| Order | Task | Direct output | Start condition / completion boundary |
+|---|---|---|---|
+| 1 | **51** — [Agree success criteria and deployment target](open/51_agree_success_criteria_and_the_first_deployment_ta.md) | One owner-recorded decision covering all three goals, scene, objects, hardware, test protocol and offline source-data recovery. | Next task. No invented limits or model choices. |
+| 2 | **13** — [Frozen camera tracking baseline](closed/13_validate_frozen_tracking_settings_on_full_developm.md) | The full xyz and desk runs are verified, and the fresh post-fix diff review found no reproducible defect. Desk is held out by sequence but comes from the same indoor sensor/site. | Two verified run manifests. This does not prove phone performance or product acceptance. |
+| 3a | **58** - [Organise the six-step walkthrough runner](closed/58_organise_six_step_walkthrough_orchestration.md) | One root runner, small importable experiment components and independent validation imports. | Software implementation and reviews complete. Real depth/mapping and measured product acceptance remain separate work. |
+| 3b | **52** — [Build a usable phone recording](open/52_build_and_verify_a_usable_phone_recording.md) | Original images, calibration, clocks, hashes and explicit available/missing depth and motion data. | Reader/export engineering can proceed on fixtures using the unchanged camera profile. Physical capture needs handset access and the applicable Task51 decisions; scored capture uses Task53's surveyed scene. |
+| 3c | **53** — [Collect independent measurements and identities](open/53_collect_independent_scene_measurements_and_object_.md) | Surveyed dimensions/area, human inventory, uncertainty and separate test-session roles. | After Task51. Survey before predictions; capture with Task52's verified recorder. Reuse Tasks40/41 design. |
+| 3d | **57** — [Check the edge workload early](open/57_deploy_and_measure_the_useful_edge_workload.md) | Actual-device compatibility, offline startup and memory evidence. | After Task51; does not wait for the desktop benchmark. This checkpoint alone does not finish Task57. |
+| 4a | **54** — [Implement real metric depth](open/54_implement_and_validate_real_metric_depth.md) | Method-produced distances, independent error/coverage, time and memory. | After Task51 for public-data controls; Tasks52/53 supply the phone comparison. Choose a usable route from evidence. |
+| 4b | **55** — [Implement dimensions and area](open/55_implement_site_dimensions_and_area_measurement.md) | Known-shape tests, real units and observed/unknown coverage. | After Task51. Analytic controls can precede capture; Task56 owns measured-scene integration. |
+| 5 | **56** — [Benchmark the complete walkthrough](open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) | Same-recording measurement/count errors, complete time, peak memory and a verdict against each goal. | Task58 runner is implemented; needs Task13 and Tasks52-55 results. Start with the simple existing counting method. References enter scoring only. |
+| 6 | **57** — [Complete sustained edge deployment](open/57_deploy_and_measure_the_useful_edge_workload.md) | Deployed workload, comparable answers, sustained delay, memory, heat, battery use, offline operation and restart behaviour. | Uses Task56's frozen baseline and Task52's capture contract. Does not require every desktop target to pass. |
+
+A completed baseline may fail a product target. Publish that result and the failing condition. Missing required input/reference evidence is a blocker, not a zero error.
+
+Task58 completed the canonical six-step runner in src/walkthrough, small component extractions and dedicated experiment validation imports. Its CRITICAL priority makes code clarity and maintainability explicit completion requirements. Its software controls and independent reviews passed. It preserves independent experiment commands and the simple Task46 counting method. Missing depth and mapping methods remain explicit gaps for Tasks54/55.
+
+Task56 consumes that runner with actual phone calibration/image grids and estimated inputs downstream. It extends the existing report for dimensions/area and missing count/depth measures. It cannot combine unrelated successful stage trials or create another orchestrator. Benchmark-only runners and historical reports remain intact.
+
+## Improvements after the first complete baseline
+
+Choose improvements from measured failures in Task56. They do not all have to finish before the first complete test.
+
+| Existing owner | Purpose and current boundary |
+|---|---|
+| [09: inventory goal](open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Keeps distinct-count requirements and checked persistence. Task56 supplies complete-test evidence; no second orchestrator or identity store. |
+| [25: camera correction](open/25_compare_feature_seeded_odometry_and_verified_camer.md) | Follows Task13 and existing protocol review if drift/revisits justify correction. Corrected positions must update dependent geometry. |
+| [31: IDs and duplicates](open/31_compare_provisional_object_ids_and_duplicate_relationships.md) | Task46 fixed late births. Broader confirmation/schema work follows Task56 and existing review prerequisites. |
+| [33: appearance](open/33_compare_object_appearance_context_and_spatial_association.md) | Add appearance if baseline mistakes justify its cost; retain a geometry-only comparison. |
+| [34: masks](open/34_evaluate_segmentation_for_position_and_observed_dimensions.md) | Open, unrun. Existing mask helpers are not a completed Task34 trial. Follows Tasks31 and Task56 and recorded validation gates. |
+| [35: error accumulation](open/35_measure_error_propagation_and_sequential_fusion.md) | Explain measured failures or test whether additional independent views help. Task13 no longer waits for Task35. |
+| [23: review controls](open/23_embed_interactive_surface_review_and_explain_depth.md), [36: surface representations](open/36_compare_surface_representations_and_visual_realism.md), [39: later app](pending_review/39_record_future_3d_review_and_measurement_requirements.md) | Diagnostic/review work follows a demonstrated measurement or user need; visual output cannot substitute for accuracy. |
+
+[49: support matching speed](pending_review/49_reduce_spatial_support_association_latency.md) is a finished experiment. Its timing record now explains the difference between Task48's earlier 80.049-second pass and Task49's 120.481-second paired-control median; the cause of that separate-run difference is unknown. The closing commit receipt is still missing, and physical accuracy is unknown. No further optimization is scheduled without evidence that the method's accuracy justifies its cost.
+
+## Existing evidence and review work
+
+Reviews retain their original scopes. Check specific component/source claims needed by the selected baseline; unrelated research approvals are not one blanket gate on every goal. Changed files require a fresh source snapshot.
+
+| Task(s) | State and responsibility |
+|---|---|
+| [08: phone feasibility](pending_review/08_check_phone_capture_feasibility_alongside_reconstr.md) | Pending owner image export and Samsung availability. Inventory received, usable capture unproved. Task52 owns new recording work. |
+| [16: recognition protocol](pending_review/16_research_segmentation_recognition_and_camera_corre.md) | Pending decisions/review. Previous trials do not approve unchosen comparisons; Task51 chooses the first workload. |
+| [21: association](pending_review/21_associate_object_identities_with_geometry_and_appe.md), [22: replay](pending_review/22_build_recorded_video_camera_surface_and_inventory_.md) | Bounded supplied-pose trials pending review; no verified physical count. |
+| [24: APK build](pending_review/24_recover_and_reproduce_android_apk_build_inside_cap.md) | Cached packaging verified; clean dependency/container follow-up pending. Smoke code does not deploy the workload. |
+| [32: spatial support](pending_review/32_investigate_spatial_support_and_position_uncertainty.md), [47: fixes](pending_review/47_fix_task32_association_lint_findings.md), [48: comparison](pending_review/48_paired_validation_of_median_point_and_task32_suppo.md) | Pending review. Task48 is descriptive and far slower than median-point matching; no independent count/position truth. Optional candidate, not a first-baseline requirement. |
+| [37: mobile platforms](pending_review/37_research_arcore_arkit_and_roomplan_mapping.md), [38: longer-range sources](pending_review/38_research_long_range_fusion_and_driving_evaluation.md), [42: phone APIs](pending_review/42_examine_the_arcore_toolkit_for_capture_depth_and_t.md) | Research awaiting validation/decisions. Tasks52/54/57 own actual capture, depth and deployment. |
+| [40: reference plan](pending_review/40_plan_independent_references_and_hard_case_acquisition.md), [41: source inventory](pending_review/41_investigate_candidate_test_datasets_and_trial_exis.md) | Planning/research pending review. Task53 owns collection; completed research implies no acquired physical references. |
+| [44: stage report](pending_review/44_build_a_per_stage_accuracy_log_for_end_to_end_runs.md), [45: detector placement](pending_review/45_measure_detection_position_error_in_cluttered_scen.md) | Infrastructure/detector evidence pending review. Task56 owns complete-run integration and missing report measures. |
+| [49: component speed](pending_review/49_reduce_spatial_support_association_latency.md) | Experiment finished, pending review; 457 decisions preserved, no physical accuracy result. |
+| [50: board alignment](closed/50_align_task_board_with_accuracy_latency_and_edge_de.md) | Closed documentation-only restructuring. Earlier dated review/snapshot handoff is preserved in its receipt; no experiment executed. |
+
+Earlier immutable snapshots predate these plans and changed paths. Do not relaunch external review sessions automatically. Prepare a current snapshot if independent review is resumed. Device/scene access and numerical decisions are explicit inputs to Tasks51-53.
+
+## Historical completed work
+
+Closed tasks prove their bounded work, not completion of the three goals. Preserve their settings and receipts. The tracking baseline used 30 Freiburg1 xyz frames spanning 1.136 seconds; object demonstrations used supplied benchmark camera positions.
+
+| Task | Historical state | Evidence and limits |
 |---|---|---|
 | [00: first prototype](archive/00_finish_and_validate_the_phase_1_scene_mapping_prot.md) | Superseded | Preliminary research/runs preserved; integrated validation unfinished |
 | [01: experiment organisation](closed/01_organise_independent_scene_mapping_experiments.md) | Closed | Six independent boundaries and preserved prototype evidence |
@@ -14,189 +94,37 @@ This board separates measured controls and bounded proofs of concept from untest
 | [05: tracking baseline](closed/05_evaluate_tracking_with_supplied_benchmark_depth.md) | Closed baseline | Thirty TUM observations; 6.93 mm camera-position error and 2.14 image pairs/s |
 | [06: recovered research](closed/06_recover_interrupted_research_and_review_current_or.md) | Closed | Original research and source corrections preserved |
 | [07: mobile mapping products](closed/07_review_mobile_stereo_mapping_products_against_the_.md) | Closed | Product evidence and map-rate/depth-rate limits separated |
-| [08: phone feasibility](open/08_check_phone_capture_feasibility_alongside_reconstr.md) | Open, awaiting image-control export | Redmi capability report passes integrity validation; rear/front IDs and no advertised concurrent sets. Supplied session has no images; ARCore skipped because SDK absent; Samsung availability unconfirmed |
-| [09: inventory umbrella](open/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Open | Checked persistence plus bounded child trials; independent inventory and wider cases remain |
 | [10: repository publication](closed/10_prepare_research_repository_and_publish_initial_main.md) | Closed | Initial main snapshot and publication exclusions recorded |
 | [11: geometry review](closed/11_explain_geometry_control_outputs_and_show_supplied.md) | Closed | Explained supplied-input/source-coordinate views |
 | [12: folder separation](closed/12_separate_geometry_validation_from_camera_pose_esti.md) | Closed | Supplied-pose control separated from camera estimation |
-| [13: frozen full tracking](open/13_validate_frozen_tracking_settings_on_full_developm.md) | Open, unfinished | Preserve frozen settings and partial code; full xyz/held-out desk tracking not run; 573 desk pairs acquired |
 | [14: labelled 3D inspection](closed/14_add_labelled_3d_stage_inspection_and_camera_motion.md) | Closed | Camera/surface viewers with explicit observed/reference/result labels |
 | [15: owner plan review](closed/15_prepare_recorded_video_recognition_plan_for_owner_.md) | Closed | Outline approved 3 October; later task-specific authorisations remain distinct |
-| [16: broader research protocol](pending_review/16_research_segmentation_recognition_and_camera_corre.md) | Pending review | Exploratory work does not approve the broad model/protocol comparisons |
 | [17: provisional reference](closed/17_prepare_labelled_revisit_inputs_and_object_observa.md) | Closed | Six agent-reviewed desk frames; complete selected cup coverage, monitor positive subset; no human gold |
 | [18: cached detection check](closed/18_evaluate_object_detection_on_frozen_labelled_obser.md) | Closed | Four of five cup references matched; monitor accuracy unscorable as full inventory |
 | [19: classical mask control](closed/19_evaluate_classical_and_edge_device_object_segmenta.md) | Closed | 45 masks across 15 prompts; coordinate changes/costs, no demonstrated accuracy improvement |
 | [20: appearance control](closed/20_compare_object_appearance_matching_across_viewpoin.md) | Closed | ZNCC and existing YOLO features tested; one wrong monitor ranking; ResNet50 untested |
-| [21: identity association](pending_review/21_associate_object_identities_with_geometry_and_appe.md) | Pending review | Geometry-only and combined rules each resolve eleven provisional observations; broader necessity unproved |
-| [22: recorded replay](pending_review/22_build_recorded_video_camera_surface_and_inventory_.md) | Pending review | Accepted sixty-frame/457-proposal viewer and six-frame automatic comparison; final browser-launch limit retained |
-| [23: surface review controls](open/23_embed_interactive_surface_review_and_explain_depth.md) | Approved, open, unfinished | Preserve partial edits; acquired publication/source-hash checks and finished reviews remain |
-| [24: APK build recovery](pending_review/24_recover_and_reproduce_android_apk_build_inside_cap.md) | Pending review | Repository-owned cached WSL build verified; clean dependency and compatible container builds remain blocked. Task08 owns handset checks |
-| [25: camera revisits/correction](open/25_compare_feature_seeded_odometry_and_verified_camer.md) | Approved outline, later | After Task13 and Task16 review; sidecar contract exists, correction production/comparison unperformed |
 | [26: standalone camera/surface](closed/26_export_self_contained_shareable_offline_viewers.md) | Closed | Portable offline viewers preserve supplied-input evidence |
 | [27: xyz cup localisation](closed/27_localise_yolo_cup_detections_in_recorded_rgbd.md) | Closed | One YOLO26x detection projected with measured depth and supplied poses; separate from desk cup |
 | [28: desk cup replay](closed/28_replay_cup_revisits_with_persistent_object_ids.md) | Closed | Sixty sampled desk frames; persistent cup ID across detector gap/return, not continuous physical absence |
 | [29: portable replay and spread](closed/29_export_replay_and_review_reconstruction_and_identi.md) | Closed | All nineteen cup proposals exported; sixteen assigned box RMS 72.8 mm / centre RMS 82.3 mm; surface repeatability only |
 | [30: documentation reconciliation](closed/30_reconcile_experimental_evidence_and_research_backl.md) | Closed | Evidence/source review complete; 226 local links/anchors checked and ten proposed follow-ups; no experiment started |
+| [43: Shareable demo visualisations](closed/43_build_shareable_demo_visualisations_from_exported_.md) | Closed | Existing run assets; Seven offline pages; Task46 owns the corrected identity publication and rebuild. |
+| [46: Fix late object births and regenerate the object demo](closed/46_fix_late_object_births_and_regenerate_the_object_d.md) | Closed | Same frozen 60-frame baseline; no independent accuracy claim; New same-class objects can start provisional IDs at any frame. Books: 90 to 5 unresolved, 1 to 6 IDs. All classes: 226 to 56 unresolved, 18 to 55 provisional IDs; seven pages rebuilt. Commit f16e8eb. |
 
-Implementation tests, coverage and hash checks remain in owning receipts. They support software correctness; experimental progress is explained through data, measurements, references and limitations.
+## Task workflow
 
-## Proposed follow-ups and ownership
+- Task frontmatter and folder define state; at most one task is in progress.
+- `open/` holds planned, blocked and active work. `pending_review/` holds completed scoped work or a named external handoff; an unrun experiment is not complete.
+- `closed/` requires filled receipts and resolved or explicitly waived follow-ups. Do not rewrite old results when priorities change.
+- Before HIGH/stateful code work: tighten scope, lint the plan, freeze settings, obtain fresh plan review and record its verdict.
+- Before closing HIGH/stateful code: obtain the required independent finished-diff review. Tests check behaviour, boundaries and failures.
+- Documentation belongs in README files; task files hold engineering traceability. The constitution remains an unratified draft.
 
-Tasks32 and 34 have built components in `pending_review`; their usefulness has not been established. Task31 and the other investigations remain open. Before starting a new implementation slice, scope its files/tests and complete the required plan review. Task40 supplies independent references for accuracy claims, rather than blocking component construction. Owner direction on 5 October puts box-and-depth 3D association ahead of segmentation comparisons; validation remains with the parallel session.
-
-| Task | Priority | Dependencies | Question / boundary |
-|---|---|---|---|
-| [31: Compare provisional object IDs and duplicate relationships](open/31_compare_provisional_object_ids_and_duplicate_relationships.md) | HIGH, next with Task32 | Task21/22 review; Task40 for accuracy scoring | Separate the restrictive birth policy from geometric matching. Allow multiple same-class provisional identities while retaining one-to-one assignment and ambiguity. |
-| [32: Investigate spatial support and position uncertainty](pending_review/32_investigate_spatial_support_and_position_uncertainty.md) | HIGH, next integration | Task40 for accuracy scoring | Component built; next connect full box-depth samples to world-space supports and distribution-aware association. Reopen and review the expanded integration plan before code. |
-| [33: Compare object appearance, context and spatial association](open/33_compare_object_appearance_context_and_spatial_association.md) | MED | Task31, Task32, Task40, Task16 | Which appearance/context evidence and spatial trade-off reduce false merges/splits at acceptable full processing cost? |
-| [34: Evaluate segmentation for position and observed dimensions](pending_review/34_evaluate_segmentation_for_position_and_observed_dimensions.md) | HIGH, comparison deferred | Box-depth baseline first; Task40 for accuracy scoring | Segmentation component built and tested. Compare masks only after geometry and birth-policy effects can be measured separately. |
-| [35: Measure error propagation and sequential fusion](open/35_measure_error_propagation_and_sequential_fusion.md) | HIGH | Task32, Task34, Task40 | Which errors dominate the pixel-to-fusion chain, and under what conditions do additional independent views reduce or reinforce error? |
-| [36: Compare surface representations and visual realism](open/36_compare_surface_representations_and_visual_realism.md) | MED | Research/design independent | Which representation improves review/navigation at suitable cost without obscuring geometry error or missing coverage? |
-| [37: Research ARCore, ARKit and RoomPlan mapping](open/37_research_arcore_arkit_and_roomplan_mapping.md) | MED | Research/design independent | Which accessible APIs and capture/correction/revisit techniques can supply the project's measurement records, and which require new hardware or algorithms? |
-| [38: Research longer-range fusion and driving evaluation](open/38_research_long_range_fusion_and_driving_evaluation.md) | MED | Research/design independent | Which sensor/data/uncertainty representation can test the intended range, and what can KITTI/nuScenes references actually establish? |
-| [39: Record future 3D review and measurement requirements](open/39_record_future_3d_review_and_measurement_requirements.md) | LOW | Research/design independent | What evidence and measurement interactions are needed for later 3D review without hiding rejected/uncertain observations or overstating accuracy? |
-| [40: Plan independent references and hard-case acquisition](open/40_plan_independent_references_and_hard_case_acquisition.md) | HIGH | Research/design independent | Which independent identity/mask/anchor/extent/surface references and hard cases are necessary and practical for the proposed comparisons? |
-| [41: Investigate candidate test datasets and trial existing experiments on them](open/41_investigate_candidate_test_datasets_and_trial_exis.md) | HIGH | Research independent; acquisitions/runs separately scoped | Select references suitable for the existing stages and identify adapter gaps; proposal remains open. |
-| [42: Examine the ARCore toolkit for capture, depth and telemetry](open/42_examine_the_arcore_toolkit_for_capture_depth_and_t.md) | HIGH, later capture work | Research independent; phone runs with Tasks08/24 | Investigate available capture inputs without making phone capture a prerequisite for recorded-video geometry. |
-| [43: Shareable demo visualisations](closed/43_build_shareable_demo_visualisations_from_exported_.md) | Closed | Existing run assets | Seven offline pages; Task46 owns the corrected identity publication and rebuild. |
-| [44: Build a per-stage accuracy log for end-to-end runs](pending_review/44_build_a_per_stage_accuracy_log_for_end_to_end_runs.md) | HIGH | Implemented and reviewed 5 October; first composite report published | One report per run scores all eight stages against reference data, marking unscorable stages unavailable and separating a stage's own error from error passed down from earlier stages. Later tasks add the remaining measures. |
-| [45: Measure detection position error in cluttered scenes](pending_review/45_measure_detection_position_error_in_cluttered_scen.md) | HIGH | Implemented and reviewed 5 October; Part A and Part B reruns complete | COCO placement and TUM desk jitter are measured. The corrected desk run reports 449 gone, 60 claimed by another track, 53 without depth and 26 one-to-one jumps. |
-| [46: Fix late object births and regenerate the object demo](closed/46_fix_late_object_births_and_regenerate_the_object_d.md) | Closed | Same frozen 60-frame baseline; no independent accuracy claim | New same-class objects can start provisional IDs at any frame. Books: 90 to 5 unresolved, 1 to 6 IDs. All classes: 226 to 56 unresolved, 18 to 55 provisional IDs; seven pages rebuilt. Commit f16e8eb. |
-
-Task09 retains the inventory objective and checked-store history. Tasks31-35 own new isolated comparisons rather than silently enlarging Tasks19-22. Task40 owns shared independent-reference/capture design; it does not turn Task17 provisional labels into human gold. Task37 owns room-platform research; Task38 owns driving/range suitability; their research can proceed before optional acquisitions. Task39 is a later application requirement, not a build task. Task23/24 keep their existing scopes. Task25 stays behind frozen Task13 and broader protocol review; Task35 can start with analytic/supplied-pose controls without triggering either camera run.
-
-## Next-experiment order and gaps
-
-Added 5 October 2026 at the owner's request: end-to-end tests should produce a per-stage accuracy log against reference data. **Task44** builds that log from existing runs first (no new inference). **Task45** adds detection box placement error and wobble, the first measure aimed at the cluttered-scene position variation; it uses COCO val2017 (downloaded 5 October) and the local TUM desk recording, because ScanNet++ needs an owner access request. Tasks 32, 34 and 35 report into the Task44 format.
-
-**Task46 fixes the core birth restriction first.** It replays the exact cached 60-frame baseline with unchanged boxes/depth/poses and numerical gates, and rebuilds the demo. It does not implement Task31's schema migration or duplicate-review ledger. The corrected provisional-birth output is the baseline for the next spatial-matching comparison below.
-
-1. **Task32 box-and-depth 3D association, with Task31 birth policy.** Keep YOLO boxes, measured depth and supplied poses fixed. Retain the box's valid 3D samples instead of reducing them immediately to a median; separate competing depth groups, transform them into the same world and compare their spatial support. Test uncertainty-weighted distance (Mahalanobis distance) alongside support overlap, keeping visible extent separate from uncertainty in location. Planar surfaces, missing depth and competing hypotheses must have explicit outcomes. Task32 owns geometry; Task31 owns provisional IDs, possible duplicates and one-to-one assignment. New thresholds remain unselected. The existing component review does not cover this expanded integration.
-2. **Parallel validation through Tasks40/44/45.** Pin the exact 60-frame/95-book input before reproducing demo 06; the existing six-frame Task31 fixture is different. Compare point matching with restrictive births, point matching with provisional births, then spatial-support matching with the same provisional births. This separates policy effects from geometry effects. Report position spread, false merges/splits and return recovery where independently labelled, unresolved cases and runtime. A smaller unassigned count alone is not an accuracy improvement. Task44 still needs the spatial-position/association measures wired into its report.
-3. **Task34 segmentation comparison, deferred.** Preserve the built component. Once the box-depth baseline is available, change only pixel selection and compare rectangles/classical/checked masks with the same association policy. Independent masks and object references are needed to claim improvement.
-4. **Task33 appearance/context plus spatial association.** Add appearance only after the geometry baseline, using existing ZNCC/YOLO caches before new models. Independent hard negatives and separate validation are needed. Keep a geometry-only comparison.
-5. **Task35 sequential error/fusion.** Perturb one stage at a time, then combine; compare individual and growing estimates. Independent measurement lineage matters more than frame count. Real pose-correction comparisons wait for Task13/25 separately.
-6. **Edge comparisons, deferred.** Establish the hosted processing baseline and measure its accuracy and latency before trying to reproduce its quality on a phone. Recorded single-camera video remains the development input; capture streaming is not the next priority.
-7. **Task36 representation controls.** Denser display then fixed-depth/pose patches/mesh; texture/photogrammetry/splat/NeRF later with separate geometry/visual references and resource approval. Task23 remains the current review-controls owner.
-
-Tasks37 and 38 are independent research/selection streams, followed by separately authorised Android/Apple or KITTI/nuScenes acquisitions if justified. Task08 now has actual Redmi capability evidence and needs a separate rear-camera control export with images; Samsung availability is unconfirmed. No concurrent sets are advertised in the supplied report. A browser preview can check basic streaming but cannot measure native concurrent-camera support. Task24's clean dependency and container build follow-up remains in pending review. Task39 requires later review of user journeys/data contracts before a separate implementation task. No task is started merely because it appears first here.
-
-The adapter excludes depth at/beyond 4 m. Indoor controls do not justify outdoor gates or accuracy. Acceptance thresholds, sample sizes, instrument tolerances and model settings remain owner decisions before execution, not numbers invented during documentation.
-
-## Key evidence
-
-Open [the accepted Task22 viewer](../experiments/06_object_recognition/experiments/05_replay/runs/20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66/review.html), [portable ZIP](../experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_replay_20261004.zip), [cup CSV](../experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_desk_observations.csv), [spread definitions/results](../experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_repeatability.json) and [primary-source research coverage](../research/README.md#research-agenda-4-october-2026). Local generated evidence is excluded from Git and needs a verified offline handoff.
-
-The sixteen assigned desk-cup observations have RMS spread 72.8/82.3 mm and maximum pair separation 291.7/317.0 mm for box median/centre sample. These are surface-repeatability statistics, not absolute physical-centre errors. The 30.8 mm return result uses two views. The 95-book result includes a restrictive birth policy, not failed book appearance matching.
-
-## Reconciliation checks and remaining board findings
-
-Task30 source checks verified the accepted publications and portable artifacts; the numeric spread was recomputed from the exported CSV without inference. Missing mobile-deployment documentation declarations were redirected to the existing stage01 README. Task24/25 verification paths are planned tests, not completed files. Some HIGH plans have review stamps; a completed component review does not approve later integration, and materially revised plans need a fresh review before start. The read-only audit also reports inherited oversized reference/vendor/saved-source files; these are preserved rather than refactored or deleted in documentation work.
-
-## Workflow and supporting engineering records
-
-Work in this project is tracked as tasks. One file per task. The folder a task sits
-in is its state:
-
-| folder | meaning |
-|---|---|
-| `open/` | being worked on now (status `in_progress` = the active one), or waiting to be picked up (`open`) |
-| `pending_review/` | finished, waiting for a human to check it |
-| `closed/` | done and signed off |
-| `archive/` | dropped, or rolled into another task |
-
-There's no app and no database â€” the folder is the board, and `git` is the history.
-
-Manage tasks with the tool (don't move files by hand):
-
-```
-node ~/.claude/task-system/task.js list             # open tasks + what's active (* = in_progress)
-node ~/.claude/task-system/task.js new "title" --files src/x.py --docs src/README.md
-node ~/.claude/task-system/task.js start <id>       # make an open task the active (in_progress) one
-node ~/.claude/task-system/task.js move <id> pending_review
-node ~/.claude/task-system/task.js move <id> closed   # refused until receipts are filled
+```powershell
+node C:/Users/jkind/.claude/task-system/task.js ready --next
+node C:/Users/jkind/.claude/task-system/task.js list
+node C:/Users/jkind/.claude/task-system/task.js lint
+node C:/Users/jkind/.claude/task-system/task.js audit
 ```
 
-**Two frontmatter fields the hooks enforce â€” `files:` and `docs:`** (YAML lists of
-repo-relative paths). They link a task to the code it owns *and* the documentation that
-code lives under, so neither is forgotten:
-
-- **`files:`** â€” the code/test files this task touches. The PreToolUse task-gate
-  (`~/.claude/scripts/hooks/task-gate.js`) blocks a 2nd+ code write that isn't matched by
-  the single in_progress task's `files:` globs. If the work grows, add the new file here.
-- **`docs:`** â€” the README(s)/docs that document this task's code. The Stop completion-gate
-  (`~/.claude/scripts/hooks/task-complete-gate.js`) **blocks session end** when a
-  code-changing in_progress task either declares no `docs:`, or declares docs that weren't
-  updated **this session** (a SessionStart hook, `docs-snapshot.js`, baselines the working
-  tree so a doc merely dirty from earlier work doesn't count). Satisfy it by editing the
-  listed docs this session, or write a one-line `docs n/a: <reason>`.
-
-The same completion-gate also enforces a **tests floor**: when code changed, a test must have
-been added/updated this session (any `tests/` path, or `test_*` / `_test` / `*.spec` / `*.test`
-naming), or you write a one-line `tests n/a: <reason>` (rename/comment/pure-doc). The gate only
-proves a test was *touched* â€” the **rigour** is on you (see "Testing standard" below).
-
-A non-blocking Stop reminder (`deps-surface.js`) also lists, for each changed `.py`, the
-modules that import it â€” the dependents you may need to update too.
-
-## Testing standard
-
-The gate checks that a test exists; this section is how you make it a test that would actually
-catch a bug. Two failure modes to avoid: **incomplete** (you forgot the empty-input case) and
-**tautological** (the test passes no matter what the code does). Different fixes:
-
-**Completeness â€” walk two checklists.** Don't enumerate hundreds of inputs; test one representative
-per *class of behaviour* (equivalence partitioning) plus the *boundaries* between classes.
-
-- **Right-BICEP** â€” *what* to test: **R**ight (correct result on a known input), **B**oundary
-  conditions, **I**nverse (round-trip: `decode(encode(x)) == x`), **C**ross-check (agree with a
-  simpler/reference implementation), **E**rror conditions (bad input â†’ the right raise),
-  **P**erformance (only when it matters).
-- **CORRECT** â€” *which boundaries*: **C**onformance (shape/format), **O**rdering, **R**ange (values
-  in bounds â€” an invariant), **R**eference (external state; **does it mutate its input?**),
-  **E**xistence (null / empty / zero), **C**ardinality (the 0-1-many rule), **T**ime
-  (ordering/timeouts/concurrency).
-
-Walk the rows, keep the ones that apply, say why. A pure numeric transform usually earns 4â€“8 tests
-(a couple of happy representatives + empty/one/constant/zero boundaries + one per error path), not
-one per row and not one per input.
-
-**Rigour â€” prove the test is load-bearing.** One of:
-
-1. **Red-first** â€” write the test (or confirm it) *failing* before the code exists / the fix lands.
-   A test you've watched fail for the right reason is proven to bite.
-2. **Independent review** â€” a second pass (person or agent) asks: *"would this test still pass if the
-   function returned its input unchanged / returned zeros / was a no-op?"* If yes, it's tautological.
-3. **Mutation check** (for load-bearing logic) â€” flip a `>` to `>=`, a `+` to `-`; the tests must go
-   red. The objective measure that a test catches bugs.
-
-**Type/return correctness is not a test's job** â€” assert it with static typing (mypy/pyright), which
-checks every path for free. Reserve tests for *behaviour*: values, shapes, invariants, and raises.
-
-**Golden master** (freeze a whole output and compare) is the far end of "Right" â€” reach for it only
-when the output is too rich to assert any other way (arrays, images, rendered docs), and keep a
-tolerance so float noise doesn't false-fail. Prefer a narrow property/threshold when one exists.
-
-Each task file opens with an **In plain English** section â€” 2â€“5 sentences a reader with no
-project context can follow (what is the objective, and how will it be done? â€” no acronyms, no
-file paths). The completion gate blocks a code-changing session while it is missing or unfilled;
-`task.js start` scaffolds it into older files. The rest of the file is the engineering record:
-**What** we're doing, **Why**, **How** (lead with a **Reuse evidence** table â€” one row per
-"this already exists" claim, each with a `file:line` in the Evidence column), an
-**Invariants and recovery** section for stateful/HIGH work (or `invariants n/a: <reason>`),
-how we'll **Verify** it, and a **Receipts** table filled in when it closes.
-
-Before starting a HIGH task, run the plan checks while the plan is still cheap to change:
-`node ~/.claude/scripts/task-plan-lint.js <task-file>` (deterministic checks: scope gaps,
-invariants + reuse-evidence coverage, numeric baseline, vague criteria), `/clarify-task` if
-anything material is vague (â‰¤5 questions, recorded in the file under `## Clarifications`),
-then the **plan-reviewer** agent (fresh context, reads the actual code and the project
-`CONSTITUTION.md` if present, hunts for a plan claim the code contradicts) â€” and record its
-verdict: `task.js review <id> PASS|FAIL`.
-
-Two board-level companions: `task.js audit` is a read-only drift report (declared docs/tests
-that don't exist, HIGH tasks missing invariants or a review stamp, stale README task links,
-and an inventory of every `docs n/a:`/`tests n/a:`/`still open because` waiver);
-`CONSTITUTION.md` is currently an unratified template; it does not yet supply owner-ratified project principles
-(versioned, owner-ratified â€” plans conflicting with it fail review).
-Full guide: `~/.claude/task-system/HOWTO.md`.
+Next-task selection follows the bold numbers in the execution table. Start only when inputs and review requirements are met. Passing software tests alone do not prove research success.

@@ -56,6 +56,11 @@ def _validate_inventory(path: Path, manifest: dict) -> None:
         raise ValueError("Run artifact inventory does not match manifest")
 
 
+def artifact_inventory(path: Path) -> dict:
+    """Hash artifacts with the publication manifest's exclusions and link checks."""
+    return _inventory(path)
+
+
 def verify_run(path: Path) -> dict:
     """Reject incomplete runs and any changed, missing or additional artifact."""
     status = json.loads((path / "metadata/status.json").read_text(encoding="utf-8"))
@@ -78,20 +83,29 @@ def _git(repo: Path, *arguments: str) -> str:
 
 def _snapshot(repo: Path, destination: Path, run_root: Path) -> dict:
     files = {}
-    experiments = repo / "experiments"
     sources: list[Path] = []
-    for directory, children, names in os.walk(experiments):
-        # os.walk requires modifying this list to prune traversal of generated trees.
-        children[:] = [
-            name
-            for name in children
-            if name not in {"runs", "__pycache__", ".venv", "node_modules"}
-            and not (
-                (Path(directory) / name).resolve().is_relative_to(run_root.resolve())
-                and (Path(directory) / name / "metadata/status.json").is_file()
-            )
-        ]
-        sources.extend(Path(directory) / name for name in names)
+    for root in (repo, repo / "experiments", repo / "src", repo / "src/walkthrough"):
+        if root.is_symlink():
+            raise ValueError(f"Source snapshot refuses symbolic link: {root}")
+    for root in (repo / "experiments", repo / "src/walkthrough"):
+        for directory, children, names in os.walk(root):
+            for name in children:
+                child = Path(directory) / name
+                if child.is_symlink():
+                    raise ValueError(f"Source snapshot refuses symbolic link: {child}")
+            # os.walk requires modifying this list to prune generated trees.
+            children[:] = [
+                name
+                for name in children
+                if name not in {"runs", "__pycache__", ".venv", "node_modules"}
+                and not (
+                    (Path(directory) / name)
+                    .resolve()
+                    .is_relative_to(run_root.resolve())
+                    and (Path(directory) / name / "metadata/status.json").is_file()
+                )
+            ]
+            sources.extend(Path(directory) / name for name in names)
     for source in sorted(sources):
         relative = source.relative_to(repo)
         if any(
@@ -99,12 +113,12 @@ def _snapshot(repo: Path, destination: Path, run_root: Path) -> dict:
             for part in relative.parts
         ):
             continue
+        if source.is_symlink():
+            raise ValueError(f"Source snapshot refuses symbolic link: {relative}")
         if not source.is_file() or not (
             source.suffix == ".py" or source.name == "requirements.txt"
         ):
             continue
-        if source.is_symlink():
-            raise ValueError(f"Source snapshot refuses symbolic link: {relative}")
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)
@@ -139,6 +153,8 @@ class Run:
 
     def __init__(self, root: Path, repo: Path, configuration: dict) -> None:
         self.root = Path(root)
+        if Path(repo).is_symlink():
+            raise ValueError(f"Source snapshot refuses symbolic link: {repo}")
         self.repo = Path(repo).resolve()
         self.configuration = json.loads(json.dumps(configuration, allow_nan=False))
         self.path = self.root / (

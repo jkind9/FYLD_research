@@ -81,3 +81,11 @@ Recognising whether work is finished is a separate task. It needs its own defini
 - **Combine repeated visits.** Align maps from different days only after their coordinate frames are linked by a checked transform.
 
 Projection code will move to [experiments/shared](../shared/README.md) once its tests pass, so any geometry source can use it. See the [experiment guide](../README.md) for how the layers connect.
+
+## Current delivery ownership, 6 October 2026
+
+[Task55](../../task_list/open/55_implement_site_dimensions_and_area_measurement.md) owns the first dimensions/area component and independent known-shape tests. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) integrates its outputs into the complete walkthrough benchmark. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) supplies physical reference measurements. This remains planned work; a surface viewer is not a measured area result.
+
+## Walkthrough measurement boundary
+
+Step 5 is explicitly unavailable. Task55 must supply real mapping, dimensions, a defined area method and independent error analysis. The canonical runner records this absence; it does not infer area from sampled viewer points or fill unseen space. Deterministic mapping controls stay in root tests. See [the six-step runner](../../src/walkthrough/README.md).
