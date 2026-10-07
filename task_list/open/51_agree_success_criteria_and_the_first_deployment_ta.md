@@ -1,13 +1,13 @@
 ---
 id: "51"
-title: Agree success criteria and the first deployment target
-status: in_progress
+title: Define and build the first prerecorded walkthrough pipeline
+status: open
 priority: HIGH
-type: decision
-approval_status: planning authorised 2026-10-06; execution requires task-specific review and frozen settings
+type: infra
+approval_status: first prerecorded-pipeline scope confirmed by owner 2026-10-06; field acceptance limits remain pending
 blocked_by: []
 blocks: [53, 54, 55, 57]
-verification_test: ""
+verification_test: "src/walkthrough/tests/test_pipeline.py"
 plan_reviewed: 2026-10-06 PASS
 files:
   - .gitignore
@@ -17,36 +17,56 @@ files:
   - task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md
   - task_list/open/52_build_and_verify_a_usable_phone_recording.md
   - task_list/open/53_collect_independent_scene_measurements_and_object_.md
+  - src/walkthrough/**
+  - src/README.md
   - task_list/README.md
   - README.md
-  - experiments/01_camera_capture_delivery/README.md
 docs:
   - data/README.md
   - task_list/README.md
   - README.md
   - experiments/01_camera_capture_delivery/README.md
+  - src/walkthrough/README.md
+  - src/README.md
 baseline_metric:
   source: task_list/README.md and reuse evidence below
-  field: agree success criteria and the first deployment target
-  baseline_value: "0 owner-agreed complete-system acceptance records"
-  target: "1 recorded decision covering accuracy, latency, deployment, workload and held-out protocol"
+  field: run the first prerecorded input through the existing pipeline layers
+  baseline_value: "0 prerecorded-video input adapters in src/walkthrough"
+  target: "1 prerecorded input adapter with preserved frame identity and explicit missing metadata"
 created: 2026-10-06
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
-# Task51: Agree success criteria and the first deployment target
+# Task51: Define and build the first prerecorded walkthrough pipeline
 
 ## Clarifications
 
 ### Session 2026-10-06
 
-- The owner selected the available Redmi for capture and live checks, with final processing on a named host.
-- The owner asked to leave every numeric accuracy, wait-time and device-use limit pending.
-- The site/use case, target objects and revisit conditions, final host choice, and independent survey/inventory method remain pending. The supplied Redmi capability report identifies model 2201116TG; its ARCore runtime support still needs an on-device check. Do not start acceptance runs that need the other choices.
+- The owner selected the available Redmi for later capture and live checks. That device choice is separate from this prerecorded-file pipeline. Its runtime support and physical capture remain unverified.
+- The owner selected existing prerecorded training data as the first pipeline input where it has references suitable for the layer being scored. A construction video may be sourced later if needed.
+- The owner selected MasterPC with GPU available as the current local processing host. This is not a deployment or a claim that all stages use the GPU.
+- The owner confirmed the current model's supported classes and existing components. No new model or framework is being selected for this integration work.
+- The owner deferred camera streaming and FastAPI hosting. Frame skipping and lower resolution are future evaluation dimensions; their values and effects are not yet measured.
+- The owner asked to leave numeric product acceptance limits pending. Scene-specific objects, revisit conditions, independent survey method and original-data recovery details are not needed to glue existing referenced training data, but remain open for later field work.
 - All numeric accuracy, coverage, waiting-time, live-update, sustained-use, memory, battery and heat targets remain pending, as requested.
 
-### Recommendations submitted 2026-10-06; owner confirmation pending
+### Owner correction 2026-10-06: first integration run
+
+| Choice | Owner decision | Boundary |
+|---|---|---|
+| First input | Use prerecorded footage. Prefer suitable footage already in the project with usable references; a construction video may be sourced later if existing data does not exercise the needed flow. | No physical site visit or camera capture is part of the first pipeline run. TUM `freiburg1_xyz` is a practical existing-data recommendation, not a separately confirmed dataset choice. Do not treat TUM desk labels as independent ground truth or feed supplied depth/pose references into method predictions. |
+| Object classes and model | Use the classes supported by the existing model and connect the established components. | Do not select a new detector, framework, or class list as part of the glue work. |
+| Processing host | Use MasterPC with its GPU available for now. | This is the current local processing host, not a deployment or proof that every component uses the GPU. |
+| Input delivery | Read local prerecorded files for the first run. A temporary MasterPC upload location is not needed for this training-data integration. | Prepare a clear input boundary so a FastAPI upload adapter or camera-stream client can be added later; do not build either now. |
+| Sampling and image size | Support frame skipping and lower-resolution inputs as later evaluation dimensions. | No frame interval, resolution, or performance effect is chosen or claimed here. Preserve source frame IDs, timestamps, and geometry when any conversion is later evaluated. |
+| References | Use references already supplied with the selected training data when their scope and provenance match the layer being scored. | Keep references out of runtime methods. Where video has no ground truth, a later task must measure uncertainty against independently labelled examples; model confidence alone is not an error estimate. |
+| Depth method | Depth Anything V2 is a candidate to assess against the existing depth contract. | It is not selected, installed, run, or accepted by this decision. Its relative-depth default and metric variants must be distinguished before any metric claim. |
+| Earlier phone choice | The Redmi remains the confirmed device for later capture and live checks. | It is outside this prerecorded pipeline run. ARCore support and physical capture remain unverified. |
+| Product limits | All numerical accuracy, coverage, timing, live-update, and resource limits remain pending. | The integration run demonstrates code flow only and cannot pass field or deployment acceptance. |
+
+### Earlier field recommendations, still pending for later field acceptance
 
 | Item | Evidence | Recommendation | Owner state |
 |---|---|---|---|
@@ -60,15 +80,15 @@ superseded_by: null
 
 ## In plain English
 
-Agree what a useful first result must do. Decide how accurate the measurements and counts must be, how long the user can wait, and which device must run which parts. Record the choices before selecting or tuning methods.
+Define the first software run through the existing layers using recorded video and its available references. Keep the code easy to follow and leave camera streaming and field acceptance for later. Record unresolved accuracy and performance limits without guessing values.
 
 ## What
 
-Own the first acceptance record, including target object classes, scene/range and motion conditions, measured outputs, measurement/count error limits, minimum coverage, maximum complete-result wait, offline feedback requirements, target hardware, sustained-use duration, memory/battery/heat limits, reference uncertainty, session-disjoint test selection and raw-data retention/recovery. Distinguish the phone, a nearby edge computer and a hosted server. The available Redmi is the candidate, not proof of capability; Samsung access is unconfirmed. Decide the baseline methods and licensed checkpoints from existing evidence without assuming a new model is better.
+Build the first prerecorded pipeline run using suitable existing footage and matching references, the current model's supported classes, and MasterPC with GPU available. Connect existing stages; do not select or trial a new model. Keep the main flow, run context, per-layer settings, outputs and validation purpose clear in plain English, with flat calls and no nested orchestration. Export visual previews for each stage and record the producing method with every preview. Accept local recorded input now and leave a narrow boundary for future upload or stream adapters. Frame skipping and lower resolution need later per-stage evaluation; no values are assumed. Future field work still needs owner-agreed accuracy, coverage, latency, offline-use, sustained-use, memory, battery, heat, survey and storage limits. The Redmi remains the confirmed phone for later capture/live checks, not the input device for this run.
 
 ## Why
 
-Current tasks have numerical settings but no shared definition of acceptable product behaviour. Deployment was treated as secondary. The owner now requires accuracy, latency and edge deployment together.
+The existing runner is organized around a phone export and its layer calls hide the meaning of shared context, broad configuration, and step state. The owner clarified that the immediate need is a readable pipeline run over prerecorded data. A later FastAPI or camera-stream adapter should feed the same layer contracts. That work does not settle field accuracy or deployment limits.
 
 ## How
 
@@ -76,22 +96,38 @@ Current tasks have numerical settings but no shared definition of acceptable pro
 
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
-| Acceptance choices remain pending | Current task board | all acceptance trials | task_list/README.md:13 |
+| The first pipeline scope is now owner-confirmed; field limits remain pending | Current task board | pipeline integration and later field tasks | task_list/README.md:13 |
 | Device/runtime evidence is limited | Capture experiment | capture and edge plans | experiments/01_camera_capture_delivery/README.md:196 |
 | Reference design exists | Task40 | measured-scene plan | task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md:65-73 |
 | Test and diagnostic scratch belongs outside task records | Task board guidance | future project checks | task_list/README.md:21; tools/check.py:11-27 |
 | Controlled-scene source files need full Git exclusion and a retrieval record | Task53 input plan | future checkout and preparation | .gitignore:78-101; data/README.md:5 |
+| The canonical runner already has six ordered direct stage calls; it currently accepts phone-session input | Task58 runner | prerecorded pipeline implementation | src/walkthrough/pipeline.py:51; src/walkthrough/steps/capture.py:26 |
+| The TUM camera reader owns safe source-path and timestamp parsing plus shared calibration | Camera tracking experiment | local prerecorded RGB input adapter and separate reference loader | experiments/03_camera_pose_estimation/src/dataset.py:14-16,57-76,14-16 |
+| Local TUM xyz RGB files are available for a repeatable recorded input | Existing project data | capture/input adapter | data/tum/rgbd_dataset_freiburg1_xyz/rgb.txt |
+| TUM xyz ground-truth poses have a dedicated parser and tracking evaluator | Camera tracking experiment | scorer-only tracking reference request | experiments/03_camera_pose_estimation/src/evaluation.py:13-33; data/tum/rgbd_dataset_freiburg1_xyz/groundtruth.txt |
+| Score requests separate reference loading from methods but save no reference identity today | Walkthrough scorer | reproducible score record | src/walkthrough/validation.py:20-24,144-194 |
 
-1. Present the owner with one short decision table covering the items in What; show measured baselines and explicitly unknown values.
-2. Record actual answers and their dates. Do not manufacture numeric limits, scene sizes, sample counts, workloads or settings from this board authorization.
-3. Assign whole sessions to enrollment, validation and held-out evaluation roles before model selection. If no settings or calibration are selected from the collected data, record that fact and leave validation unused. Agree how a baseline can fail a product target yet still produce a useful completed report.
-4. Update the two declared READMEs with the accepted first-use case and limits. Keep later aspirational use cases separate.
-5. Keep generated test artifacts out of the task board: root pytest discovery excludes `task_list/`, and ignore rules cover accidental test scripts, caches and job-allocation probe folders there.
-6. Keep phone and survey bundle payloads outside Git, including source-manifest JSON. Record the approved offline retrieval method before acquisition and verify it can restore matching bundles from a fresh checkout.
+1. Add a local TUM prerecorded input option to the CLI and input adapter. Use the existing safe RGB timestamp reader and shared calibration owner; retain each RGB relative path as frame identity and save its source table index alongside it. This input adapter reads no depth/pose frames. Normalize only shared fields: stable source frame ID, RGB path, source ID, timestamp in seconds with timestamp-source label, and shared `Calibration` when provided. Keep phone crop/grid details in the phone input record; do not make them required fields for every source. Preserve supplied TUM depth and pose on the scorer side. Do not require phone-only CLI arguments for the TUM input path. Missing timestamp or calibration stays absent; a dependent layer must return unavailable before runtime if it requires the missing field. Update the shared image record and the depth/tracking/object consumers to handle absent fields without raising a missing-key error.
+2. Keep each layer's runtime, relevant configuration, output, and validation purpose visible in `src/walkthrough/pipeline.py`. Plain-English comments should explain the shared run context, layer-specific settings and what each validation checks. Keep the six calls explicit and avoid nested orchestration or generic dispatch machinery. Current depth and mapping methods are not ready, so the first integration may stop at an unavailable layer; the report must say this plainly and must not imply all six outputs completed.
+3. Keep `Configuration` as the validated CLI/run snapshot. Pass its `CaptureConfiguration` view only to input, and its `ObjectConfiguration` view only to object recognition. Keep `StepResult` and `Result` because they record each layer's status and whole-run completion. Keep `ScoreRequest` because it separates reference loading from methods. Keep the `TypedDict` records because each experiment adapter exchanges named data fields. Do not add forwarding classes or duplicate experiment methods.
+4. Add an explicit TUM tracking-reference request in the CLI, pass it to `run`, and store its source path and file hash with the score result, including an unavailable result when tracking predictions are not ready. Keep the reference loader and answers out of method calls. Extend `ScoreRequest` to carry that source identity.
+5. Leave frame skipping and resolution values unset until their effect is measured per stage. Keep original frame identity, time and calibration lineage.
+6. Keep model references out of method inputs. A video without ground truth needs a later uncertainty evaluation against independently labelled examples; confidence scores alone are not validated uncertainty.
+7. Treat Depth Anything V2 as a candidate only. Do not claim metric depth unless a selected metric checkpoint and its scale are validated under Task54.
+8. Update the declared READMEs to distinguish this local prerecorded pipeline from future phone capture, FastAPI hosting, camera streaming and field acceptance.
+9. Keep generated test artifacts out of the task board: root pytest discovery excludes `task_list/`, and ignore rules cover accidental test scripts, caches and job-allocation probe folders there.
+10. Export visuals from saved stage outputs: recorded RGB input, predicted depth, its binary validity mask and a colour coverage overlay on the RGB source, the estimated camera path, a full-point coloured PLY with a labelled PNG preview, a mapping measurement card or an explicit no-geometry status, and object boxes with provisional IDs or an explicit zero-proposal count. Write an offline `output/visualizations/index.html` and `manifest.json`; every stage and visual artifact names its producing method and source. Show valid-pixel counts on mask and coverage views. Label software-control object boxes as synthetic. PNG previews include the method in the footer and PNG metadata. PLY headers include the method and source frame. Reuse the existing depth preview and point-cloud display helpers. Clearly label display-only conversions and sampling. Never draw TUM supplied depth or poses as method predictions.
 
 ## Invariants and recovery
 
-invariants n/a: an owner decision record only. Existing frozen Task13 settings and earlier receipts remain unchanged. The draft constitution is not automatically ratified.
+| Data or side effect | Producer / owner | Consumer | Representation and boundary | Survives restart? |
+|---|---|---|---|---|
+| Prerecorded video and optional reference files | Local input adapter | Capture/input validation and separate scorer | Preserve source path and hash, stable source frame identity, timestamp in seconds and calibration only with original values and provenance. TUM input reads `rgb.txt` directly; use each RGB relative path as frame identity and save the source table index. The adapter uses only source RGB, timestamp and shared calibration as method input; supplied depth/pose stay in the scorer-only reference path. | The original files remain unchanged. The adapter records source identity and source-provided metadata in the run output. |
+| Frame artifacts and visual previews | Input and stage adapters | Later methods, scorers and the offline visual index | Keep numeric predictions unchanged. Each preview names its producing method and source artifact in the visual manifest; display-only colour, projection or point sampling never feeds back into scoring. A point-cloud PLY retains all reconstructed points; any smaller PNG preview records its display sample count. Missing method output is shown as unavailable, not replaced with invented geometry. | The visual manifest, previews, method-labelled prediction records and original numeric artifacts are saved in the run folder and covered by its final hash manifest. |
+| Run folder and stage artifacts | `Run` from `experiments/shared/runs.py:151-245`, named `run_context` by the pipeline | Stage writers and final report | The run context owns the output folder, settings snapshot, timing and artifact inventory. See `src/walkthrough/pipeline.py:116-141`. | Interrupted runs remain incomplete. A retry uses a fresh run folder and never resumes by reusing partial outputs. Task58 records this existing behavior in `task_list/closed/58_organise_six_step_walkthrough_orchestration.md:178-182`. |
+| Predictions and references | Stage outputs and independent validation inputs | Scorer | Save/hash predictions before scoring; do not pass references into runtime methods. Each score request names its reference source and source-file hash. The TUM scorer hashes one byte payload and parses that same payload. See `src/walkthrough/pipeline.py:116-133` and `src/walkthrough/validation.py:20-24,151-205`. | Saved predictions and the score request's declared reference source are identified in the run record, even when a score is unavailable because predictions are incomplete. A failed validation cannot mark the run complete. |
+
+This task runs locally over prerecorded files. The CLI must allow a reader to select the existing phone-export path or a local prerecorded dataset path without requiring phone-only flags for dataset input. TUM `freiburg1_xyz` is the practical first-input recommendation because it already exists with timestamps and calibration; the owner approved existing data generally but did not name this sequence. The adapter copies only method inputs; supplied depth and pose remain separate references. The TUM walkthrough input reads the RGB timestamp table directly, retains each relative image path as frame identity, and saves the source-table index. It does not pair or load the dataset's depth frames. A shared frame record carries source identity, image path, optional timestamp and optional shared calibration. It does not require phone-only crop-grid fields. Generic video may be ingested only when its reader can preserve available source data; a layer missing a required timestamp or calibration returns unavailable before method execution. No timestamp, calibration or geometry is invented. This task does not add a deployed service or a second process boundary. Existing Task13 inputs and settings remain unchanged. A fresh local run starts from the original selected file and creates a new run folder; if a stage is unavailable or fails, the report keeps that status and does not claim a complete walkthrough. No field storage location, recovery interval, numeric threshold or missing measurement is invented. The draft constitution is not automatically ratified.
 
 ## Hyperparameters
 
@@ -99,22 +135,24 @@ hyperparameters n/a: no experiment. This task records owner choices; each execut
 
 ## Verification
 
-The decision table has an explicit owner answer, unit and date for each required acceptance field. There are 0 silently assumed limits. A missing answer is marked pending and blocks the affected acceptance run. The first hardware/workload and independent test partition are explicitly named. `pytest.ini` excludes `task_list/`; `git check-ignore` confirms that pytest test files, `conftest.py`, pytest caches and `job_alloc_probe_*/` are ignored. It also confirms that phone/reference JSON manifests and binary payloads under `data/controlled_scene/input/` stay out of Git.
+- Contract check: `src/walkthrough/tests/test_pipeline.py` must assert the exact ordered stage calls, the layer-specific inputs passed to each call, that each stage output is validated before the next stage runs, and that an unavailable or failed stage remains incomplete in the final report. Adapter coverage must assert that source frame identity and available metadata are preserved, absent metadata is not fabricated, surface/object frame IDs match their upstream inputs, empty mapping measurements are rejected, and dependent layers do not run without required fields. Visual export checks must assert that the index and manifest include all six stage statuses, every visual records its producer and source, depth masks preserve invalid pixels and report valid-pixel counts, software-control boxes are labelled synthetic, and the PLY retains the full cloud while any preview sampling is labelled. Do not add model, camera or field trials as part of this check.
+- Baseline and target: the current source has 0 prerecorded-dataset input adapters in `src/walkthrough`; the target is 1 local TUM adapter that preserves source frame identity and metadata and routes supplied depth/pose only to validation. Record the actual result in Receipts. No metric result is claimed.
+- Scoring contract: the TUM CLI builds and passes a tracking `ScoreRequest` naming `groundtruth.txt`; saved scores retain the source path and SHA-256, even when tracking predictions are unavailable. The reference loader stays outside stage inputs.
+- The code and `src/README.md` must make the local prerecorded-file flow clear and distinguish it from later upload, stream, field acceptance and uncertainty evaluation. Numeric product limits stay pending.
+- `pytest.ini` excludes `task_list/`; ignore rules continue to cover task-board scratch and controlled-scene payloads for later physical work.
 
-Before starting HIGH work, refine exact scope, audit settings, run task-plan lint and obtain a fresh plan review against current sources. No implementation or acquisition is performed while writing this plan.
+The pre-start lint and fresh plan review passed on 2026-10-06. Do not run model trials, phone capture or physical-device checks under this task. Keep Task51 open until its contract checks and software-run evidence are complete; field acceptance limits remain a separate pending decision.
 
 ## Receipts
 
 | Field | Value |
 |---|---|
-| Closing commit | Not started |
-| Files changed | `.gitignore`, `pytest.ini`, project/capture/task-board READMEs, and this task record; owner acceptance decisions remain open |
-| Test status | No software tests run for this decision record. The named `job_alloc_probe_8a3c20c6f86a49cfaeb1d62343ac0cfb` folder was absent. A recursive scan found no Python/pytest files, caches or probe directories under `task_list/`; only task Markdown, `README.md`, `CONSTITUTION.md` and the journal were present. `git check-ignore` covers arbitrary `.py` files, pytest cache/folder names and job-allocation probes; pytest discovery excludes `task_list/`. Xiaomi's official guide identifies model 2201116TG as Redmi Note 11 Pro, and Google's current ARCore list marks Redmi Note 11 Pro as supporting Depth API; these sources support an on-device trial, not a runtime result. The Task51 plan lint, board lint and documentation diff check pass. The Task52 APK verification record and actual file hashes match for package `org.fyld.capturecheck`; installation and capture remain unverified. The latest read-only WSL check reports no attached ADB devices, no cached ARCore Gradle dependency, and no emulator or AVD; USB passthrough also shows no Android phone. |
-| Before measurement | 0 owner-agreed complete-system acceptance records |
-| After measurement | Not measured |
-| Delta | Not measured |
-| Decision-gate outcome | Open; owner decisions pending |
+| Closing commit | Not committed; Task51 remains in progress |
+| Files changed | `src/walkthrough/cli.py`, `config.py`, `pipeline.py`, `records.py`, `provenance.py`, `validation.py`, `visualization.py`, `steps/artifacts.py`, `steps/capture.py`, `steps/depth.py`, `steps/tracking.py`, `steps/surface.py`, `steps/mapping.py`, `steps/objects.py`; `src/README.md`, `src/walkthrough/README.md`, `data/README.md`, `task_list/README.md`, root `README.md`, capture experiment README; this task file |
+| Test status | The test suite was not run and the contract test was not updated. The two-frame TUM clip completed all six layers in a labelled software-control run at `outputs/task51_visual_e2e_runs/20261007T073231.235212Z_3a03158a79104e3b9481e77c77d41b38`. Its visual manifest lists 6 stage statuses and 17 artifacts; every listed file exists and names a source and producer. The mask labels report 100% valid coverage because the fixture marks all 307,200 pixels valid; the RGB coverage overlay makes this visible. The object overlay labels its one full-frame box as synthetic software-control output, not a detector result. All local links resolve. The two full coloured PLY exports retain all 307,200 points per frame and include the method and source frame in their headers. Fixtures do not measure model accuracy. |
+| Before measurement | 0 prerecorded-dataset adapters in `src/walkthrough`; no visual index exported by the walkthrough |
+| After measurement | 1 TUM RGB input adapter completed a six-layer software-control run on 2 recorded frames; 6 stage views and 17 method-labelled visual artifacts were exported; no real depth, tracking, mapping or detection method was evaluated; field acceptance limits remain pending |
+| Delta | +1 local prerecorded input path; six-layer orchestration and clearer visual exports exercised with software controls |
+| Decision-gate outcome | Owner-approved glue scope implemented and exercised with deterministic software providers; no model, capture or field trial started; field/deployment acceptance remains open. Visual outputs do not change stage data contracts, so downstream dependency edges are unchanged. |
 
-still open because the owner has not yet recorded the acceptance choices.
-
-tests n/a: this hygiene change only updates ignore/discovery configuration and the task-board instructions; its checks inspect those settings directly.
+still open because the contract test remains outstanding, this run used software controls rather than real depth and mapping methods, and field acceptance limits are pending by owner direction.

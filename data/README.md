@@ -2,6 +2,8 @@
 
 This folder holds downloaded inputs and their acquisition records. The [dataset experiment plan](../experiments/datasets/README.md) explains which reference data can replace each unfinished piece of the phone-to-map system.
 
+The first integration run uses suitable prerecorded project data and the references that belong to it. The existing TUM `freiburg1_xyz` RGB sequence is the practical starting source because its timestamp table and calibration already have project readers. The walkthrough input copies RGB only; supplied depth and poses remain scorer references. It does not need a temporary upload store or new phone footage. Each run has an offline visual index and manifest that name the producing method and input source for saved stage views. Choose data by what its references can actually check; do not treat the TUM desk's provisional object labels as ground truth. Any later construction-video source needs a recorded license and a clear account of which layers have usable references.
+
 Git retains this guide and JSON acquisition, inspection and geometry records. Images, depth files, point clouds and compressed archives are excluded. Raw controlled-scene phone and survey bundles are excluded from Git in full, including JSON manifests and sidecars under `controlled_scene/input/`. Keep those bundles in the owner-approved offline store recorded in Task51. Their tracked release receipts belong under `experiments/06_object_recognition/datasets/releases/`. A receipt in a fresh clone is evidence of the original acquisition, not proof that its payload is present locally; retrieve and verify the data before running an experiment.
 
 ## Available and proposed inputs
