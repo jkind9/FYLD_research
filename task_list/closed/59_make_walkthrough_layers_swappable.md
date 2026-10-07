@@ -1,7 +1,7 @@
 ---
 id: "59"
 title: Make each walkthrough layer swappable and simplify the runner
-status: in_progress
+status: closed
 priority: HIGH
 type: refactor
 approval_status: plan requested by owner 2026-10-07; six decisions and contract scope answered 2026-10-07 (see Clarifications)
@@ -20,7 +20,7 @@ files:
   - src/README.md
   - README.md
   - task_list/README.md
-  - task_list/open/59_make_walkthrough_layers_swappable.md
+  - task_list/closed/59_make_walkthrough_layers_swappable.md
 docs:
   - experiments/shared/README.md
   - src/walkthrough/README.md
@@ -981,7 +981,7 @@ Before closing, run the diff-reviewer agent on the whole diff without telling it
 
 | Field | Value |
 |---|---|
-| Closing commit | Scoped implementation commit will be identified before the board transition; source baseline 14957e6f2b706afa33d2db1128175826ed6245f7 |
+| Closing commit | b487c9acda764a88910a4ebf5bf65c9568568fa7; source baseline 14957e6f2b706afa33d2db1128175826ed6245f7 |
 | Files changed | src/walkthrough/config.py, pipeline.py, records.py, validation.py, cli.py, steps/contracts.py, artifacts.py, capture.py, depth.py, tracking.py, surface.py, mapping.py, objects.py; walkthrough tests/providers.py, test_pipeline.py, test_adapters.py, test_imports_cli.py, test_layers.py, test_contracts.py; experiments/shared/runs.py, geometry.py, requirements.txt, tests/test_runs.py, tests/test_geometry.py; root/src/walkthrough/shared READMEs and task index. Task51's already-written visualization.py is retained unchanged as a required source dependency. The now-unused untracked provenance.py helper was removed. |
 | Test status | Full CPU suite: 749 passed, 7 skipped in 280.51 s. Final targeted suite after review fixes and calibration regression: 195 passed in 117.90 s; 93% production-code coverage (tests excluded). Walkthrough has 84 cases, up from 51. Ruff and git diff --check pass. Scoped mypy passes for 15 core files; unchanged visual typing and pipeline's status-dependent optional flow remain outside that scoped check. |
 | Before | 21 failed and 30 passed walkthrough cases; targeted walkthrough/shared baseline 21 failed and 135 passed. Pipeline 241 lines; total runner 1688 lines; 0/6 method slots; 0/4 frame-layer throughput counts; 17 function-level import_module calls. |
@@ -1024,4 +1024,3 @@ Before closing, run the diff-reviewer agent on the whole diff without telling it
 - Six agents were used, with the plan reviewer reused for test execution. Windows Black CLI processes hung; verified task-owned formatter processes were stopped and formatting was completed through Black's synchronous API.
 - Existing unrelated data/capture documentation changes and Task51's task record remain outside the scoped implementation commit. Historical experiment commands and runs are unchanged.
 - The eight items under Follow-up tasks are intentionally separate scope, not unfinished Task59 requirements. Real depth, mapping, complete physical scores, capture metadata, phone processing placement, sustained performance and peak memory remain with their named owners.
-
