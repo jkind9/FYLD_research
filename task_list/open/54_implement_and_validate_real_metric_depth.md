@@ -31,7 +31,7 @@ superseded_by: null
 
 ## In plain English
 
-Measure how well three different programs can estimate the distance from the camera to every point in a picture, using recordings where the true distances were also measured by a depth sensor. One program is small and gives real distances, one is large and slow but known for good shapes, and one is built to run fast on phones. Compare their errors, how much of each picture they cover, how long they take and how big they are. Then use the best phone-ready option in the full pipeline instead of borrowing the sensor's distances.
+Measure how well three different programs can estimate the distance from the camera to every point in a picture, using recordings where the true distances were also measured by a depth sensor. One program is small and gives real distances, one is very large and server-only but known for good shapes, and one is built to run fast on phones. Compare their errors, how much of each picture they cover, how long they take and how big they are. Then use the best phone-ready option in the full pipeline instead of borrowing the sensor's distances.
 
 ## Board update, 7 October 2026
 
@@ -44,10 +44,10 @@ Deployment must be on a phone (owner, 7 October 2026). The chosen depth route mu
 | Method | Why it is in the comparison | Output | Size and licence | Phone route |
 |---|---|---|---|---|
 | [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2) Small, metric indoor checkpoint (Hypersim, max 20 m) | Named candidate since Task51; the only one of the three that outputs metres directly | Depth in metres | 24.8M parameters. The relative Small model is Apache-2.0; confirm the metric indoor Small checkpoint's licence on its model card before the run | Small enough to try converting; not built for phone chips |
-| [Marigold Depth v1.1](https://github.com/prs-eth/marigold) (`prs-eth/marigold-depth-v1-1`) | Owner request. Strong shape quality; serves as the hosted accuracy reference | Relative depth (correct shape, unknown scale and offset) | Stable Diffusion 2 U-Net and image encoder, roughly 0.9B parameters (estimate; record the real count at load). Code Apache-2.0; weights under the RAIL++-M licence, which carries use restrictions | None; hosted only |
+| [Marigold v2](https://github.com/huawei-bayerlab/marigold-v2) (`huawei-bayerlab/marigold-v2-0`, depth checkpoint `Log-stage2`; [paper](https://arxiv.org/abs/2609.08084), released 8 September 2026) | Owner request. Strong shape quality; serves as the hosted accuracy reference | Affine-invariant log depth (correct shape; unknown scale and shift per image) | Qwen-Image-Edit-2509 diffusion transformer with LoRA adapters, quantised to 4-bit at first load; single-step prediction. Apache-2.0 for code and weights. README: about 17 GB GPU memory at 1024x1024 | None; hosted only. Linux only, so it runs under WSL Ubuntu on MasterPC |
 | [ZipDepth](https://github.com/fabiotosi92/ZipDepth) (ECCV 2026) | Most promising phone model found: about 6.1M parameters, a separate build for phone AI chips (NPUs), and export to ONNX, TFLite and CoreML | Relative depth | MIT licence on the repository (confirm it covers the weights); released July 2026 | Built for phones |
 
-The owner asked for "Marigold v2". The newest Marigold depth release found on 7 October 2026 is v1.1 (15 May 2025); no v2 exists in the official repository. Confirm v1.1 before running.
+Marigold v2 comes from Huawei Bayer Lab, EPFL and the University of Bologna, not the original prs-eth repository (whose newest depth release is v1.1). MasterPC's RTX 5070 Ti has 16 GB, below the README's 17 GB figure for 1024x1024. TUM frames are 640x480 (about 30% of those pixels), so it is expected to fit, but this is unverified. If it runs out of memory, record that as a result and ask the owner before changing resolution or hardware.
 
 ZoeDepth was considered and rejected. It outputs metres, but its repository was archived on 5 May 2025, it uses a large transformer backbone, and it makes no mobile claims. Other references already in the project (Depth Pro, Metric3D, UniDepth, MoGe, Prompt Depth Anything, Depth Anything 3) are listed with their licence notes in research/session_recovery/README.md:82-86 and experiments/02_stereo_depth/README.md:44-50. They are not part of this comparison.
 
@@ -70,12 +70,12 @@ Depth is the missing link from phone images to physical measurements. All downst
 | Licence notes for other depth models are already recorded | research recovery notes | method selection | research/session_recovery/README.md:82-86 |
 
 1. **Freeze settings.** Fill the Hyperparameters table with owner-confirmed values before any run. Download weights into ignored local storage and record their file hashes.
-2. **Tests first.** In `experiments/02_stereo_depth/tests/test_metric_depth.py`, assert unit conversion, the native output convention each adapter declares (Marigold: relative depth; ZipDepth: confirm from its code whether it outputs relative depth or relative inverse depth), invalid pixels staying invalid, image-grid mismatch rejected, alignment that recovers a known scale and shift on a synthetic frame, and reference depth never passed to an adapter.
+2. **Tests first.** In `experiments/02_stereo_depth/tests/test_metric_depth.py`, assert unit conversion, the native output convention each adapter declares (Marigold v2 `Log-stage2`: affine-invariant log depth; ZipDepth: confirm from its code whether it outputs relative depth or relative inverse depth), invalid pixels staying invalid, image-grid mismatch rejected, alignment that recovers a known scale and shift on a synthetic frame, and reference depth never passed to an adapter.
 3. **Score on TUM.** Same frames for all three methods. Reference is the Kinect depth, used for scoring only. Report two views and never mix them:
    - *Metric view* (Depth Anything V2 metric only): raw output against the reference.
    - *Shape view* (all three): per-frame least-squares scale and shift fitted in each method's native space against the reference, then scored. Label this as reference-aligned; it shows shape quality, not real-world distance.
    Metrics: AbsRel, RMSE in metres, share of pixels within 1.25x of the reference (δ1), valid coverage, and each of these by distance band (0-1, 1-2, 2-4 m).
-4. **Cost.** On MasterPC, GPU and CPU separately: model load time, warm per-frame time (after warm-up frames), peak memory, file size and parameter count. For ZipDepth also: ONNX and TFLite export, and the exported model's output difference from PyTorch on the same frames. On-phone timing belongs to Task57.
+4. **Cost.** On MasterPC, GPU and CPU separately: model load time, warm per-frame time (after warm-up frames), peak memory, file size and parameter count. Marigold v2 runs under WSL Ubuntu, so record its operating system separately and count the first-load 4-bit quantisation in load time, not per-frame time. For ZipDepth also: ONNX and TFLite export, and the exported model's output difference from PyTorch on the same frames. On-phone timing belongs to Task57.
 5. **Scale for relative methods.** In the walkthrough, a relative method needs a scale source. Allowed sources: the reference (labelled as a control, never counted as a result), or later ARCore's metric depth or tracked points on the phone (Task52/57). Do not add any other hidden scaling.
 6. **Wire the metric method.** Add the Depth Anything V2 metric adapter as a `DepthMethod` in `src/walkthrough/steps/depth.py`, returning axial depth in metres and a validity mask. Its output must pass the layer's existing validation.
 7. **Publish** one run with per-method results, settings, weight hashes and environment. A method that performs badly or fails to convert is a valid result.
@@ -92,20 +92,20 @@ Original frames, frozen settings and weight hashes are the source of truth. The 
 
 ## Hyperparameters
 
-Proposed on 2026-10-07. Values marked "pending" need the owner's confirmation before the run.
+Proposed and confirmed by the owner on 2026-10-07.
 
 | name | value | source |
 |---|---|---|
-| methods | Depth Anything V2 metric indoor Small; Marigold Depth v1.1; ZipDepth | confirmed 2026-10-07 (owner named the first two and delegated the phone choice; ZipDepth chosen) |
-| Marigold version | v1.1 (`prs-eth/marigold-depth-v1-1`) | n/a pending owner confirmation; owner asked for "v2", which does not exist |
-| Depth Anything V2 input size and max depth | 518 px short side (repository default); 20 m (indoor checkpoint) | n/a pending owner confirmation |
-| Marigold denoising steps, ensemble size, processing resolution | 1 step, ensemble 1, 768 px (repository's practical setting) | n/a pending owner confirmation |
-| ZipDepth build and input size | NPU build for the export check; GPU build for desktop scoring; repository default input size | n/a pending owner confirmation |
-| recordings and frames | TUM freiburg1_xyz and freiburg1_desk, every 10th colour frame | n/a pending owner confirmation |
+| methods | Depth Anything V2 metric indoor Small; Marigold v2; ZipDepth | confirmed 2026-10-07 (owner named the first two and delegated the phone choice; ZipDepth chosen) |
+| Marigold version and checkpoint | Marigold v2, `huawei-bayerlab/marigold-v2-0`, depth `Log-stage2` (repository default) | confirmed 2026-10-07 (owner supplied the repository link) |
+| Depth Anything V2 input size and max depth | 518 px short side (repository default); 20 m (indoor checkpoint) | confirmed 2026-10-07 (owner agreed the proposed settings) |
+| Marigold v2 resolution, steps, seed and quantisation | native 640x480 (already a multiple of 16); single step; seed 0; 4-bit quantisation as loaded by the repository | confirmed 2026-10-07 |
+| ZipDepth build and input size | NPU build for the export check; GPU build for desktop scoring; repository default input size | confirmed 2026-10-07 (owner agreed the proposed settings) |
+| recordings and frames | TUM freiburg1_xyz and freiburg1_desk, every 10th colour frame | confirmed 2026-10-07 (owner agreed the proposed settings) |
 | reference decoding | 5000 units per metre; valid when 0 < depth < 4 m; pairing tolerance 0.02 s | inherited src/walkthrough/steps/depth.py:43-45 |
-| shape-view alignment | per-frame least-squares scale and shift in each method's native space, over valid reference pixels | n/a pending owner confirmation |
-| distance bands | 0-1, 1-2, 2-4 m | n/a pending owner confirmation |
-| timing | 5 warm-up frames discarded; GPU and CPU timed separately; 3 repeats, median reported | n/a pending owner confirmation |
+| shape-view alignment | per-frame least-squares scale and shift in each method's native space, over valid reference pixels | confirmed 2026-10-07 (owner agreed the proposed settings) |
+| distance bands | 0-1, 1-2, 2-4 m | confirmed 2026-10-07 (owner agreed the proposed settings) |
+| timing | 5 warm-up frames discarded; GPU and CPU timed separately; 3 repeats, median reported | confirmed 2026-10-07 (owner agreed the proposed settings) |
 | output units for the walkthrough | axial Z in metres with validity mask | inherited src/walkthrough/steps/depth.py:113 |
 
 ## Verification
@@ -114,7 +114,7 @@ Proposed on 2026-10-07. Values marked "pending" need the owner's confirmation be
 - Walkthrough test under `src/walkthrough/tests/`: the Depth Anything V2 metric method passes the depth layer's validation on a fixture frame and returns the source frame ID.
 - Before: 0 depth methods run. After: 3 methods scored on the same frames with both views, cost on GPU and CPU, and the ZipDepth export check. Failing an accuracy limit is a valid reported outcome. Numeric limits come from Task61.
 
-Before starting this HIGH task: confirm the pending settings, run task-plan lint, and obtain a fresh plan review.
+Before starting this HIGH task: check the two open licence points (Depth Anything V2 metric Small checkpoint; whether ZipDepth's MIT licence covers its weights), run task-plan lint, and obtain a fresh plan review.
 
 ## Receipts
 
@@ -126,6 +126,6 @@ Before starting this HIGH task: confirm the pending settings, run task-plan lint
 | Before measurement | 0 depth methods run in experiment02; downstream trials use supplied sensor depth |
 | After measurement | Not measured |
 | Delta | Not measured |
-| Decision-gate outcome | Open; settings confirmation, plan review and execution pending |
+| Decision-gate outcome | Open; settings confirmed 2026-10-07; licence checks, plan review and execution pending |
 
 still open because this plan has not been implemented or measured.
