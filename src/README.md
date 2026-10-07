@@ -1,6 +1,6 @@
 # Shared implementation
 
-The canonical [walkthrough runner](walkthrough/README.md) calls six ordered layers: capture, depth, camera position, surface, site measurements and object counting. Each has a swappable method choice with a contract in `walkthrough/steps/contracts.py`. Recorded depth and poses can be supplied as labelled reference controls to test later layers. [Task59](../task_list/open/59_make_walkthrough_layers_swappable.md) records this refactor; [Task58](../task_list/closed/58_organise_six_step_walkthrough_orchestration.md) records the original organisation.
+The canonical [walkthrough runner](walkthrough/README.md) calls six ordered layers: capture, depth, camera position, surface, site measurements and object counting. Each has a swappable method choice with a contract in `walkthrough/steps/contracts.py`. Recorded depth and poses can be supplied as labelled reference controls to test later layers. [Task59](../task_list/closed/59_make_walkthrough_layers_swappable.md) records this refactor; [Task58](../task_list/closed/58_organise_six_step_walkthrough_orchestration.md) records the original organisation.
 
 Reference inputs match each frame to its nearest recording within the selected tolerance, allowing nearby frames to reuse a reference. They consume decoded images one at a time. Missing methods report why they are unavailable before loading timing starts.
 

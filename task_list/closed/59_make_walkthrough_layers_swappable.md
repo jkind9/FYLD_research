@@ -1,7 +1,7 @@
 ---
 id: "59"
 title: Make each walkthrough layer swappable and simplify the runner
-status: in_progress
+status: closed
 priority: HIGH
 type: refactor
 approval_status: plan requested by owner 2026-10-07; six decisions and contract scope answered 2026-10-07 (see Clarifications)
@@ -20,7 +20,7 @@ files:
   - src/README.md
   - README.md
   - task_list/README.md
-  - task_list/open/59_make_walkthrough_layers_swappable.md
+  - task_list/closed/59_make_walkthrough_layers_swappable.md
 docs:
   - src/walkthrough/README.md
   - src/README.md
@@ -1074,7 +1074,7 @@ Before/after targets: XYZ missing depth 6/798 -> 0/798; first 20 frames missing 
 
 | Receipt | Result |
 |---|---|
-| Closing implementation commit | Filled from the scoped correction commit before closing |
+| Closing implementation commit | fd427084e38164561f100b3a1e1b24eda56de37f |
 | Files changed | pipeline.py; steps/contracts.py, depth.py, tracking.py, mapping.py, objects.py, capture.py, surface.py; tests/test_layers.py, test_reference_inputs.py, test_reference_inputs_real.py; walkthrough README, src README, task index and this record |
 | Before | XYZ 6/798 unmatched depth frames, first 20 3/20 unmatched; both reference adapters buffer all decoded frames; three absent-method load stages recorded as failed; tracking/mapping/objects output validation invoked twice, object proposal fields checked three times; missing pose status supplied |
 | After | XYZ 0/798 unmatched, first 20 0/20 unmatched; real 20-frame depth/pose/surface run succeeds; first decoded frame and its arrays collectible before frame 3 arrives in both adapters; absent methods/settings create zero load samples; selected loader failures still timed; one output validation per tracking/mapping/objects layer, one object proposal-field traversal; missing pose status lost |
@@ -1085,7 +1085,7 @@ Before/after targets: XYZ missing depth 6/798 -> 0/798; first 20 frames missing 
 | Plan review | correction_plan PASS; corrected its two advisory evidence citations before implementation |
 | Code review | correction_code_review APPROVE, no actionable defects |
 | Python review | python_review PASS after fixing NumPy float timestamp compatibility and formatting |
-| Diff review | correction_diff PASS after fixing decimal tolerance boundary; final tracking consolidation recheck recorded before closure |
+| Diff review | correction_diff PASS after fixing decimal tolerance boundary; final tracking consolidation recheck PASS, with independent missing/extra/swapped record reproductions |
 | Documentation | Declared walkthrough README, src README and task index updated this session; original shared/root README updates remain documented in the historical implementation receipts |
 | Decision outcome | All requested corrections implemented and verified; genuine unmatched depth still fails, unmatched poses remain lost, and the shared one-to-one scorer/experiment matcher is unchanged |
 
