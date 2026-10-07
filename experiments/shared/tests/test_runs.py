@@ -11,6 +11,23 @@ from experiments.shared.exporting import export_frame
 from experiments.shared.runs import Run, verify_run, write_json
 
 
+def test_stop_incomplete_keeps_files_and_refuses_verify(tmp_path):
+    with Run(tmp_path / "runs", Path.cwd(), {}) as run:
+        write_json(run.path / "output/partial.json", {"saved": True})
+        run.stop_incomplete("Depth unavailable")
+        with pytest.raises(ValueError, match="Only running runs"):
+            run.finish()
+    status = json.loads((run.path / "metadata/status.json").read_text())
+    assert status["status"] == "failed"
+    assert status["error_type"] == "IncompleteRun"
+    assert status["error"] == "Depth unavailable"
+    assert (run.path / "output/partial.json").is_file()
+    assert (run.path / "metadata/timing.json").is_file()
+    assert not (run.path / "metadata/manifest.json").exists()
+    with pytest.raises(ValueError, match="not complete"):
+        verify_run(run.path)
+
+
 def test_snapshot_includes_dirty_untracked_walkthrough_and_hash_changes(tmp_path):
     from experiments.shared.runs import _snapshot
 

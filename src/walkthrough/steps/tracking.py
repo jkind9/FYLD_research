@@ -1,89 +1,126 @@
-"""Call the unchanged tracking kernel on one calibrated RGB-D frame at a time."""
+"""Tracking methods consume a calibrated RGB-D sequence and preserve pose origins."""
 
 import importlib
 from collections.abc import Iterator
-from typing import Any
+from dataclasses import dataclass, field
+from functools import partial
+from pathlib import Path
+from typing import Protocol
 
-import numpy as np
-from PIL import Image
+from numpy.typing import NDArray
 
-from experiments.shared.contracts import Calibration
+from experiments.shared.contracts import Pose
+from experiments.shared.geometry import associate_times
 from experiments.shared.runs import Run, write_json
 
-from ..config import Configuration
-from ..records import StepResult, failed_step
-from .artifacts import CaptureOutput, DepthOutput, TrackingOutput
+from ..records import StepResult, Unavailable, failed_step
+from .contracts import (
+    CaptureOutput,
+    DepthOutput,
+    MethodChoice,
+    PoseRecord,
+    RGBDFrame,
+    TrackingEstimator,
+    TrackingOutput,
+    check_capture_clock,
+    load_rgbd_frames,
+    method_label,
+    read_pose,
+)
+
+pose_tracking = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
+pose_backends = importlib.import_module("experiments.03_camera_pose_estimation.src.backend")
+pose_evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
 
 
-def frames(run: Run, capture: CaptureOutput, depth: DepthOutput) -> Iterator[Any]:
-    owner = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
-    if len(capture["frames"]) != len(depth["frames"]):
-        raise ValueError("Capture/depth frame counts differ")
-    camera_id, clock = None, None
-    for row, measured in zip(capture["frames"], depth["frames"], strict=True):
-        if row["frame_id"] != measured["frame_id"]:
-            raise ValueError("Capture/depth frame identities differ")
-        current = (row["camera_id"], row["timestamp_source"])
-        if camera_id is not None and current != (camera_id, clock):
-            raise ValueError(
-                "Tracking requires one camera and one declared capture clock"
+class TrackingMethod(MethodChoice, Protocol):
+    def load(self) -> TrackingEstimator: ...
+
+
+@dataclass(frozen=True)
+class CpuOdometry:
+    name: str = field(default="cpu_odometry", init=False)
+    control: str | None = field(default=None, init=False)
+
+    def load(self) -> TrackingEstimator:
+        return partial(pose_tracking.track, backend=pose_backends.CPUOdometry())
+
+
+@dataclass(frozen=True)
+class ReferencePoses:
+    groundtruth: Path
+    tolerance_s: float = 0.02
+    name: str = field(default="reference_poses", init=False)
+    control: str = field(default="reference", init=False)
+
+    def load(self) -> TrackingEstimator:
+        references = pose_evaluation.read_references(self.groundtruth)
+        return partial(self._estimate, references=references)
+
+    def _estimate(
+        self,
+        frames: Iterator[RGBDFrame],
+        *,
+        run: Run,
+        references: list[tuple[float, NDArray]],
+    ) -> list[PoseRecord]:
+        observations = list(frames)
+        matches = dict(
+            associate_times(
+                [frame.timestamp_s for frame in observations],
+                [row[0] for row in references],
+                self.tolerance_s,
             )
-        camera_id, clock = current
-        with Image.open(run.path / row["image"]) as image:
-            colour = np.asarray(image.convert("RGB"))
-        with np.load(run.path / measured["arrays"], allow_pickle=False) as arrays:
-            timestamp = row["timestamp_ns"] / 1_000_000_000
-            yield owner.RGBDFrame(
-                row["frame_id"],
-                timestamp,
-                timestamp,
-                Calibration(**measured["calibration"]),
-                colour,
-                arrays["depth"],
-                arrays["valid"],
-            )
+        )
+        records = []
+        for index, frame in enumerate(observations):
+            if index in matches:
+                pose = Pose(references[matches[index]][1], "tum_groundtruth", "0", "supplied")
+                reason = "reference control"
+            else:
+                pose = None
+                reason = f"No ground-truth pose within {self.tolerance_s:g} s"
+            records.append(PoseRecord(frame.frame_id, frame.timestamp_s, "supplied", pose, reason))
+        return records
 
 
 def run(
-    publication: Run,
-    capture: CaptureOutput | None,
-    depth: DepthOutput | None,
-    config: Configuration,
-    *,
-    state: StepResult,
-    test_backend: Any = None,
+    run_context: Run, capture: CaptureOutput, depth: DepthOutput, method: TrackingMethod
 ) -> tuple[StepResult, TrackingOutput | None]:
-    if state.status != "pending":
-        return state, None
     artifact = "output/predictions/tracking.json"
     try:
-        with publication.measure("prediction_tracking"):
-            if capture is None or depth is None:
-                raise ValueError("Required upstream predictions are missing")
-            owner = importlib.import_module(
-                "experiments.03_camera_pose_estimation.src.tracking"
-            )
-            backend = importlib.import_module(
-                "experiments.03_camera_pose_estimation.src.backend"
-            )
-            if test_backend is not None and not config.software_control:
-                raise ValueError("Test backend requires software_control=True")
-            selected = backend.CPUOdometry() if test_backend is None else test_backend
-            records = owner.track(
-                frames(publication, capture, depth),
-                selected,
-                publication,
-                publication.path.name,
-            )
-            if not records or any(record.pose is None for record in records):
+        check_capture_clock(capture)
+        with run_context.measure("load_tracking"):
+            estimate = method.load()
+        with run_context.measure("prediction_tracking", frames=len(capture["frames"])):
+            records = estimate(load_rgbd_frames(run_context.path, capture, depth), run=run_context)
+            source_ids = [frame["frame_id"] for frame in capture["frames"]]
+            if len(records) != len(source_ids):
+                raise ValueError(f"Tracking returned {len(records)} records for {len(source_ids)} frames")
+            if [record.frame_id for record in records] != source_ids:
+                raise ValueError("Tracking record order must match capture")
+            lost = [record for record in records if record.pose is None]
+            if lost:
                 raise ValueError(
-                    "Tracking failed for one or more observations; no complete geometry"
+                    f"Tracking could not place {len(lost)} of {len(records)} frames; first {lost[0].frame_id}: {lost[0].reason}"
                 )
             output: TrackingOutput = {
-                "records": [record.to_dict() for record in records]
+                "methods": {"tracking": method_label(method)},
+                "records": [record.to_dict() for record in records],
+                "control": method.control,
             }
-            # Export this layer's predictions before returning downstream data.
-            write_json(publication.path / artifact, output)
-    except (ValueError, OSError, ImportError, RuntimeError) as error:
-        return failed_step(state.name, error), None
-    return StepResult(state.name, "complete", "Method outputs saved", artifact), output
+            validate(capture, output)
+            write_json(run_context.path / artifact, output)
+    except (Unavailable, ValueError, OSError) as error:
+        return failed_step("tracking", error, method.name), None
+    step = StepResult("tracking", "complete", "Method outputs saved", method.name, len(records), artifact)
+    return step, output
+
+
+def validate(capture: CaptureOutput, output: TrackingOutput) -> None:
+    if [row["frame_id"] for row in capture["frames"]] != [row["frame_id"] for row in output["records"]]:
+        raise ValueError("Tracking frame identities must match capture")
+    for source, record in zip(capture["frames"], output["records"], strict=True):
+        if record["timestamp_s"] != source["timestamp_s"]:
+            raise ValueError(f"Frame {source['frame_id']}: tracking timestamp must match capture")
+        read_pose(record["pose"])

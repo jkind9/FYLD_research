@@ -109,7 +109,7 @@ This also makes each layer replaceable. A different depth model or camera tracke
 
 There are two ways to deploy the same six execution steps.
 
-- **Hosted.** The phone only records. It saves the video, the phone's motion sensors (accelerometer and gyroscope, together called the IMU) and the phone's own position and depth estimates, then uploads them. A server can run the heavier processing stages. Its full processing time and memory still need measuring. This fits the cloud serving FYLD already runs with MLflow and BentoML. Task51 decides the first phone/edge/hosted workload split; Task56 tests the complete result.
+- **Hosted.** The phone only records. It saves the video, the phone's motion sensors (accelerometer and gyroscope, together called the IMU) and the phone's own position and depth estimates, then uploads them. A server can run the heavier processing stages. Its full processing time and memory still need measuring. This fits the cloud serving FYLD already runs with MLflow and BentoML. The first software integration run is local prerecorded footage on MasterPC; it is not a deployment. Later work can add FastAPI input and camera streaming behind the same layer boundaries. Task56 tests the complete result.
 - **On the phone, offline.** Some layers can run on the phone with no internet connection. The point is not the final answer. It is quick checks on site, so a worker does not leave with a capture that turns out to be unusable: "you missed the far corner", "tracking was lost here", "about 40 m² so far, 6 cones counted so far".
 
 Google listed both candidate models as supporting ARCore depth when checked on 4 October 2026 ([ARCore supported devices](https://developers.google.com/ar/devices)). Only the Redmi is confirmed available for this test. A listing does not establish runtime support or measurement quality on the handset; those still need to be checked.
@@ -268,15 +268,15 @@ A reference used for scoring is never fed to the method being scored, unless a r
 
 The work now targets accuracy, latency and edge deployment together. The [task board](task_list/README.md#next-experiment-order-and-gaps) is the execution order.
 
-1. Agree useful measurement/count accuracy, maximum wait, the first hardware and workload, separate test recordings, and how source recordings and surveys can be restored offline (Task51).
-2. The frozen camera tests are closed (Task13). Use the canonical six-step runner under `src/walkthrough/` ([Task58](task_list/closed/58_organise_six_step_walkthrough_orchestration.md)). Its components stay in the independent experiments. Software controls verify organisation; real depth and mapping remain unavailable until Tasks54/55 land.
-3. Build a usable phone recording (Task52), collect independent measurements and identities (Task53), and check device feasibility early (Task57). Implement and score real depth (Task54) and dimensions/area (Task55).
+1. Task51 records the first integration target: prerecorded footage and its available references, current model classes, and MasterPC with GPU available. It does not set field acceptance limits. Those numerical limits remain pending.
+2. Task51 simplifies and connects the canonical six-step runner under `src/walkthrough/`. Keep each layer's settings, runtime and validation clear. Use local files now; leave FastAPI upload and camera streaming for later.
+3. The frozen camera tests are closed (Task13), and Task58 established the six-step runner. Build a usable phone recording (Task52), collect independent measurements and identities (Task53), and check device feasibility later (Task57). Implement and score real depth (Task54) and dimensions/area (Task55).
 4. Run one complete walkthrough against independent answers; measure total processing time and memory (Task56).
 5. Complete the sustained useful edge workload and compare its answers, delay, memory, heat, battery and offline behaviour (Task57).
 
 Object matching, masks, appearance and surface refinements follow measured weaknesses in that baseline. The first complete test does not wait for every proposed method comparison.
 
-Numerical acceptance limits and new experimental settings remain pending owner decisions in Task51. An experiment can finish with a negative result; a failed method must not be presented as product success.
+Numerical field acceptance limits and sampling/resolution settings remain pending owner decisions in Task51. Depth Anything V2 is a candidate, not an accepted or measured method. For footage without ground truth, a later task must evaluate uncertainty against independently labelled examples; confidence values alone do not establish error. An experiment can finish with a negative result; a failed method must not be presented as product success.
 
 ## Possible later output: a phone VR viewer
 
@@ -354,4 +354,6 @@ Costs are recorded for each step separately: model loading, detection, depth rea
 
 ## Canonical runner and current gaps
 
-The [six-step runner](src/walkthrough/README.md) is implemented with software controls. It imports the owning experiments and keeps independent references in scoring, after prediction files are saved and hashed. Real depth and mapping methods remain unavailable under Tasks54/55, so an ordinary recording cannot yet complete all six steps. Segmentation and appearance are optional and disabled by default. Counts remain provisional and separate for each estimated world/segment; no whole-site count is claimed. Frozen benchmark commands, historical runs and their source snapshots remain intact. Physical accuracy, complete latency, peak memory and sustained edge operation still need measured evidence in Tasks56/57.
+Each of the six layers has one method choice with a written contract. Recorded TUM sensor depth and camera poses can be supplied as labelled reference controls to test later layers. Runs with controls never count as measurements. Development and accuracy work use training, test and pre-existing recordings. Deployment must use a phone capture app to record calibration per frame; whether processing is hosted or also runs on the phone remains undecided.
+
+The [six-step runner](src/walkthrough/README.md) is implemented with software controls. Each run saves an offline stage visual index and manifest that name the method and source for every view, including depth maps, object overlays and point clouds. It imports the owning experiments and keeps independent references in scoring, after prediction files are saved and hashed. Real depth and mapping methods remain unavailable under Tasks54/55, so an ordinary recording cannot yet complete all six steps. Segmentation and appearance are optional and disabled by default. Counts remain provisional and separate for each estimated world/segment; no whole-site count is claimed. Frozen benchmark commands, historical runs and their source snapshots remain intact. Physical accuracy, complete latency, peak memory and sustained edge operation still need measured evidence in Tasks56/57.

@@ -23,14 +23,13 @@ def invoke(args, cwd=ROOT):
     )
 
 
-def test_importing_root_has_no_models_optional_modules_or_output(tmp_path):
+def test_importing_root_has_no_models_or_output(tmp_path):
     result = invoke(
         [
             "-c",
             (
                 "import sys; from src.walkthrough import pipeline,cli; "
-                "assert not any(n in sys.modules for n in ('torch','ultralytics','open3d','cv2')); "
-                "assert not any('02_segmentation' in n or '03_appearance' in n for n in sys.modules)"
+                "assert not any(n in sys.modules for n in ('torch','ultralytics','open3d'))"
             ),
         ],
         tmp_path,
@@ -92,3 +91,19 @@ def test_cli_reports_real_depth_unavailable_and_returns_failure(tmp_path):
     assert '"name": "depth"' in result.stdout
     assert "Task54" in result.stdout
     assert '"complete": false' in result.stdout
+
+
+@pytest.mark.parametrize(
+    "flags",
+    [
+        ["--report", "report.json"],
+        ["--dataset", "dataset", "--bundle", "bundle"],
+    ],
+)
+def test_cli_refuses_incomplete_or_mixed_source_before_creating_run(tmp_path, flags):
+    run_root = tmp_path / "runs"
+    result = invoke(["-m", "src.walkthrough.cli", *flags, "--run-root", str(run_root)])
+    assert result.returncode == 2
+    assert "error:" in result.stderr
+    assert "--report and --bundle" in result.stderr
+    assert not run_root.exists()

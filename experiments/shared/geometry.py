@@ -17,16 +17,16 @@ def depth_metres(encoded: ArrayLike, units_per_metre: float) -> tuple[NDArray, N
     return np.where(valid, depth, np.nan), valid
 
 
-def backproject(
-    depth: NDArray, valid: NDArray, calibration: Calibration
-) -> tuple[NDArray, NDArray]:
-    if (
-        depth.shape != (calibration.height, calibration.width)
-        or valid.shape != depth.shape
-    ):
+def check_depth_grid(depth: NDArray, valid: NDArray, calibration: Calibration) -> None:
+    """Check metric depth and its trusted-pixel mask on the calibrated image grid."""
+    if depth.shape != (calibration.height, calibration.width) or valid.shape != depth.shape:
         raise ValueError("Depth/mask resolution must match calibration")
     if valid.dtype != np.bool_ or np.any(valid & (~np.isfinite(depth) | (depth <= 0))):
         raise ValueError("Valid mask admits invalid depth")
+
+
+def backproject(depth: NDArray, valid: NDArray, calibration: Calibration) -> tuple[NDArray, NDArray]:
+    check_depth_grid(depth, valid, calibration)
     v, u = np.nonzero(valid)
     z = depth[v, u]
     points = np.column_stack(
@@ -41,12 +41,7 @@ def backproject(
 
 def project(points: ArrayLike, calibration: Calibration) -> NDArray:
     points = np.asarray(points, dtype=np.float64)
-    if (
-        points.ndim != 2
-        or points.shape[1] != 3
-        or not np.isfinite(points).all()
-        or np.any(points[:, 2] <= 0)
-    ):
+    if points.ndim != 2 or points.shape[1] != 3 or not np.isfinite(points).all() or np.any(points[:, 2] <= 0):
         raise ValueError("Projection requires finite Nx3 points with positive Z")
     x, y, z = points.T
     return np.column_stack(
@@ -66,31 +61,21 @@ def validate_transform(transform: ArrayLike, *, basis: bool = False) -> None:
     if (
         not np.allclose(transform[3], [0, 0, 0, 1], atol=1e-10, rtol=0)
         or not np.allclose(r.T @ r, np.eye(3), atol=1e-5, rtol=0)
-        or not np.isclose(
-            abs(determinant) if basis else determinant, 1, atol=1e-5, rtol=0
-        )
+        or not np.isclose(abs(determinant) if basis else determinant, 1, atol=1e-5, rtol=0)
     ):
-        raise ValueError(
-            "Expected orthogonal basis" if basis else "Expected proper rigid pose"
-        )
+        raise ValueError("Expected orthogonal basis" if basis else "Expected proper rigid pose")
 
 
-def transform_points(
-    points: ArrayLike, transform: ArrayLike, *, basis: bool = False
-) -> NDArray:
+def transform_points(points: ArrayLike, transform: ArrayLike, *, basis: bool = False) -> NDArray:
     validate_transform(transform, basis=basis)
-    points, transform = np.asarray(points, dtype=float), np.asarray(
-        transform, dtype=float
-    )
+    points, transform = np.asarray(points, dtype=float), np.asarray(transform, dtype=float)
     if points.ndim != 2 or points.shape[1] != 3 or not np.isfinite(points).all():
         raise ValueError("Expected finite Nx3 points")
     return points @ transform[:3, :3].T + transform[:3, 3]
 
 
 def pose_matrix(translation: ArrayLike, quaternion_xyzw: ArrayLike) -> NDArray:
-    translation, quaternion = np.asarray(translation, dtype=float), np.asarray(
-        quaternion_xyzw, dtype=float
-    )
+    translation, quaternion = np.asarray(translation, dtype=float), np.asarray(quaternion_xyzw, dtype=float)
     if (
         translation.shape != (3,)
         or quaternion.shape != (4,)
@@ -100,14 +85,10 @@ def pose_matrix(translation: ArrayLike, quaternion_xyzw: ArrayLike) -> NDArray:
     ):
         raise ValueError("Expected metric translation and unit xyzw quaternion")
     rotation = Rotation.from_quat(quaternion).as_matrix()
-    return np.block(
-        [[rotation, translation[:, None]], [np.zeros((1, 3)), np.ones((1, 1))]]
-    )
+    return np.block([[rotation, translation[:, None]], [np.zeros((1, 3)), np.ones((1, 1))]])
 
 
-def associate_times(
-    first: ArrayLike, second: ArrayLike, tolerance_s: float
-) -> list[tuple[int, int]]:
+def associate_times(first: ArrayLike, second: ArrayLike, tolerance_s: float) -> list[tuple[int, int]]:
     """One-to-one nearest match, inclusive tolerance; independent of pose estimation."""
     first, second = np.asarray(first, dtype=float), np.asarray(second, dtype=float)
     if (
@@ -120,9 +101,7 @@ def associate_times(
         or np.any(np.diff(first) <= 0)
         or np.any(np.diff(second) <= 0)
     ):
-        raise ValueError(
-            "Expected finite ordered unique timestamps and nonnegative tolerance"
-        )
+        raise ValueError("Expected finite ordered unique timestamps and nonnegative tolerance")
     candidates: list[tuple[float, int, int]] = []
     for i, timestamp in enumerate(first):
         lo = np.searchsorted(second, timestamp - tolerance_s, side="left")

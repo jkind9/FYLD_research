@@ -4,11 +4,13 @@
 |---|---|
 | `contracts.py` | Frozen observation/calibration/pose records, metre units and origin identity |
 | `phone_session.py` | Verified Camera2 images with original sensor-grid calibration and explicit missing streams |
-| `geometry.py` | Axial depth, projection, proper poses, reference basis conversion and time association |
+| `geometry.py` | Axial depth, calibrated depth/mask checks, projection, proper poses, reference basis conversion and time association |
 | `runs.py` | Unique run lifecycle, source/environment/configuration snapshot and artifact validation |
 | `timing.py` | Monotonic stage timing, explicit frame counts and weighted throughput |
 | `exporting.py` | Lossless stage arrays, coloured point clouds, visual rasters and 3D previews |
 | `requirements.txt` | Direct dependency versions used for CPU validation |
+
+OpenCV is a shared CPU dependency because the walkthrough imports segmentation and classical appearance modules at startup. Models still load only when selected.
 
 Install with `python -m pip install -r experiments/shared/requirements.txt` from the repository root. Run `python -B tools/check.py -q` for CPU tests with caches outside the repository. The working environment is Python 3.12.10; dependency versions reflect that environment. A clean isolated installation and edge-device packaging remain separate checks.
 
@@ -26,7 +28,7 @@ a physical phone produces matching records.
 `output/`, `debug/` and `metadata/`. Use it as a context manager. Put every selected
 input and its matching stage artifacts inside that directory before leaving the
 context. Successful exit creates a hash inventory, validates it and writes the
-completion receipt last. An exception marks the run failed. A killed process
+completion receipt last. `stop_incomplete(reason)` retains partial outputs and timing, records failed status with `IncompleteRun`, and writes no completion manifest. An exception marks the run failed. A killed process
 leaves the run marked running. `verify_run(path)` rejects incomplete runs and
 changed, missing or extra artifacts.
 

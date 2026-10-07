@@ -1,146 +1,107 @@
-"""The sole complete walkthrough sequence, with explicit dependency failures."""
-
-from typing import Any
+"""Run the six README layers, validate saved outputs, then score and publish."""
 
 from experiments.shared.runs import Run, artifact_inventory, write_json
 
-from . import validation
-from .config import Configuration
-from .records import IncompleteRun, Result, StepResult
+from . import validation, visualization
+from .config import STEP_NAMES, PipelineSpec
+from .records import Result, StepResult
 from .steps import capture, depth, mapping, objects, surface, tracking
-from .steps.artifacts import TestProviders
+
+READS = {
+    "capture": (),
+    "depth": ("capture",),
+    "tracking": ("capture", "depth"),
+    "surface": ("depth", "tracking"),
+    "mapping": ("surface",),
+    "objects": ("capture", "depth", "tracking"),
+}
 
 
-def _check_dependencies(
-    config: Configuration,
-    states: tuple[StepResult, ...],
-    name: str,
-    dependencies: tuple[str, ...],
-) -> StepResult:
-    """Decide whether a step can run; never execute methods or write files."""
-    if name not in config.requested:
-        return StepResult(name, "skipped", "Not requested")
-    completed = {state.name for state in states if state.status == "complete"}
-    if not set(dependencies) <= completed:
-        return StepResult(name, "skipped", "Required upstream step is incomplete")
-    if not config.partial and any(state.status != "complete" for state in states):
-        return StepResult(
-            name, "skipped", "Required run stopped after an incomplete step"
-        )
-    return StepResult(name, "pending", "Ready to run")
+def skip_reason(spec: PipelineSpec, status: dict[str, StepResult], name: str) -> str | None:
+    """Partial runs wait for inputs; other runs wait for every preceding layer."""
+    if name not in spec.requested:
+        return "Not requested"
+    needs = READS[name] if spec.partial else STEP_NAMES[: STEP_NAMES.index(name)]
+    blocking = [f"{need} is {status[need].status}" for need in needs if status[need].status != "complete"]
+    return f"Waiting on earlier layers: {', '.join(blocking)}" if blocking else None
 
 
-def run(
-    config: Configuration,
-    *,
-    scores: tuple[validation.ScoreRequest, ...] = (),
-    test_providers: TestProviders | None = None,
-) -> Result:
-    controls: dict[str, Any] = {} if test_providers is None else dict(test_providers)
-    if controls and (
-        not config.software_control
-        or not set(controls) <= {"depth", "mapping", "backend", "detector"}
-    ):
-        raise ValueError("Explicit test providers require a labelled software control")
-    publication = Run(config.run_root, config.repo, config.to_dict())
-    result = None
-    try:
-        with publication:
-            states: tuple[StepResult, ...] = ()
+def run(spec: PipelineSpec, *, scores: tuple[validation.ScoreRequest, ...] = ()) -> Result:
+    """The shared run context owns saved inputs, settings, artifacts and timing."""
+    status: dict[str, StepResult] = {}
+    captured = measured = tracked = reconstructed = mapped = recognised = None
+    with Run(spec.run_root, spec.repo, spec.to_dict()) as run_context:
+        # 1. Camera capture: source identity, calibration and original image bytes.
+        if reason := skip_reason(spec, status, "capture"):
+            status["capture"] = StepResult("capture", "skipped", reason)
+        else:
+            status["capture"], captured = capture.run(run_context, spec.source)
+        if captured is not None:
+            capture.validate(captured)
+        with run_context.measure("visual_capture"):
+            visualization.capture(run_context.path, status["capture"], captured)
 
-            # 1. Validate capture inputs and export originals.
-            state = _check_dependencies(config, states, "capture", ())
-            state, captured = capture.run(publication, config, state=state)
-            states = (*states, state)
+        # 2. Depth: metric arrays for exactly the captured frames.
+        if reason := skip_reason(spec, status, "depth"):
+            status["depth"] = StepResult("depth", "skipped", reason)
+        else:
+            status["depth"], measured = depth.run(run_context, captured, spec.depth)
+        if measured is not None:
+            depth.validate(captured, measured)
+        with run_context.measure("visual_depth"):
+            visualization.depth(run_context.path, status["depth"], captured, measured)
 
-            # 2. Estimate depth and export depth arrays.
-            state = _check_dependencies(config, states, "depth", ("capture",))
-            state, measured = depth.run(
-                publication,
-                captured,
-                config,
-                test_provider=controls.get("depth"),
-                state=state,
-            )
-            states = (*states, state)
+        # 3. Camera position: one valid camera-to-world pose per captured frame.
+        if reason := skip_reason(spec, status, "tracking"):
+            status["tracking"] = StepResult("tracking", "skipped", reason)
+        else:
+            status["tracking"], tracked = tracking.run(run_context, captured, measured, spec.tracking)
+        if tracked is not None:
+            tracking.validate(captured, tracked)
+        with run_context.measure("visual_tracking"):
+            visualization.tracking(run_context.path, status["tracking"], tracked)
 
-            # 3. Track the camera and export estimated poses.
-            state = _check_dependencies(
-                config, states, "tracking", ("capture", "depth")
-            )
-            state, tracked = tracking.run(
-                publication,
-                captured,
-                measured,
-                config,
-                test_backend=controls.get("backend"),
-                state=state,
-            )
-            states = (*states, state)
+        # 4. Surface: saved world points retain depth frame IDs and metre units.
+        if reason := skip_reason(spec, status, "surface"):
+            status["surface"] = StepResult("surface", "skipped", reason)
+        else:
+            status["surface"], reconstructed = surface.run(run_context, measured, tracked, spec.surface)
+        if reconstructed is not None:
+            surface.validate(measured, reconstructed)
+        with run_context.measure("visual_surface"):
+            visualization.surface(run_context.path, status["surface"], captured, measured, reconstructed)
 
-            # 4. Reconstruct and export observed surfaces.
-            state = _check_dependencies(
-                config, states, "surface", ("depth", "tracking")
-            )
-            state, reconstructed = surface.run(
-                publication, measured, tracked, config, state=state
-            )
-            states = (*states, state)
+        # 5. Mapping: named measurements must exist before the layer completes.
+        if reason := skip_reason(spec, status, "mapping"):
+            status["mapping"] = StepResult("mapping", "skipped", reason)
+        else:
+            status["mapping"], mapped = mapping.run(run_context, reconstructed, spec.mapping)
+        if mapped is not None:
+            mapping.validate(mapped)
+        with run_context.measure("visual_mapping"):
+            visualization.mapping(run_context.path, status["mapping"], mapped)
 
-            # 5. Calculate and export mapping, dimensions and area.
-            state = _check_dependencies(config, states, "mapping", ("surface",))
-            state, _ = mapping.run(
-                publication,
-                reconstructed,
-                config,
-                test_provider=controls.get("mapping"),
-                state=state,
-            )
-            states = (*states, state)
+        # 6. Objects: proposals match capture frames and keep counts per origin.
+        if reason := skip_reason(spec, status, "objects"):
+            status["objects"] = StepResult("objects", "skipped", reason)
+        else:
+            status["objects"], recognised = objects.run(run_context, captured, measured, tracked, spec.objects)
+        if recognised is not None:
+            objects.validate(captured, recognised)
+        with run_context.measure("visual_objects"):
+            visualization.objects(run_context.path, status["objects"], captured, recognised)
 
-            # 6. Recognise objects and export distinct counts.
-            state = _check_dependencies(
-                config, states, "objects", ("capture", "depth", "tracking")
-            )
-            state, _ = objects.run(
-                publication,
-                captured,
-                measured,
-                tracked,
-                config,
-                test_detector=controls.get("detector"),
-                state=state,
-            )
-            states = (*states, state)
-
-            # Export whole-run results and record prediction hashes before references.
-            result = Result(
-                publication.path,
-                states,
-                all(s.status == "complete" for s in states),
-                config.software_control,
-            )
-            write_json(publication.path / "output/result.json", result.to_dict())
-            predictions = publication.path / "output/predictions"
-            hashes = artifact_inventory(predictions)
-            write_json(
-                publication.path / "metadata/prediction_hashes.json", {"files": hashes}
-            )
-            # Load references and validate saved predictions through their owners.
-            with publication.measure("scoring"):
-                scored = validation.score(publication, config, states, scores)
-            if artifact_inventory(predictions) != hashes:
-                raise ValueError("Prediction artifacts changed during scoring")
-            # Export scoring results only after checking prediction integrity.
-            write_json(publication.path / "output/scores.json", scored)
-            if not result.complete:
-                raise IncompleteRun(
-                    "Six-step predictions are incomplete; inspect output/result.json"
-                )
-            # Publish a complete manifest only when all six steps succeeded.
-            publication.finish()
-    except IncompleteRun:
-        if result is None or result.complete:
-            raise
-    assert result is not None
+        result = Result(run_context.path, tuple(status[name] for name in STEP_NAMES), spec.controls)
+        write_json(run_context.path / "output/result.json", result.to_dict())
+        # References are opened only after predictions are saved and hashed.
+        predictions = run_context.path / "output/predictions"
+        prediction_hashes = artifact_inventory(predictions)
+        write_json(run_context.path / "metadata/prediction_hashes.json", {"files": prediction_hashes})
+        with run_context.measure("scoring"):
+            score_results = validation.score(run_context.path, result.steps, scores)
+        if artifact_inventory(predictions) != prediction_hashes:
+            raise ValueError("Prediction artifacts changed during scoring")
+        write_json(run_context.path / "output/scores.json", score_results)
+        if not result.complete:
+            run_context.stop_incomplete("Six-step predictions are incomplete; inspect output/result.json")
     return result

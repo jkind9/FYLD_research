@@ -1,75 +1,59 @@
-"""Method inputs only: references belong to validation requests."""
+"""One method choice per layer; scoring references stay outside this record."""
 
-import math
-from dataclasses import dataclass
+import json
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-STEP_NAMES: tuple[str, ...] = (
-    "capture",
-    "depth",
-    "tracking",
-    "surface",
-    "mapping",
-    "objects",
-)
+from .steps.capture import CaptureSource
+from .steps.depth import DepthMethod
+from .steps.mapping import MappingMethod
+from .steps.objects import ObjectSettings
+from .steps.surface import MetricPoints, SurfaceMethod
+from .steps.tracking import CpuOdometry, TrackingMethod
+
+STEP_NAMES = ("capture", "depth", "tracking", "surface", "mapping", "objects")
 
 
 @dataclass(frozen=True)
-class Configuration:
+class PipelineSpec:
     run_root: Path
     repo: Path
-    report: Path
-    bundle: Path
-    partial: bool = False
+    source: CaptureSource
+    depth: DepthMethod | None = None
+    tracking: TrackingMethod = field(default_factory=CpuOdometry)
+    surface: SurfaceMethod = field(default_factory=MetricPoints)
+    mapping: MappingMethod | None = None
+    objects: ObjectSettings = field(default_factory=ObjectSettings)
     requested: tuple[str, ...] = STEP_NAMES
-    checkpoint: Path | None = None
-    max_distance_m: float | None = None
-    ambiguity_margin_m: float | None = None
-    segmentation: str | None = None
-    appearance: bool = False
-    software_control: bool = False
+    partial: bool = False
 
     def __post_init__(self) -> None:
-        names = set(STEP_NAMES)
         if (
             not isinstance(self.requested, tuple)
             or not all(isinstance(name, str) for name in self.requested)
-            or not set(self.requested) <= names
+            or not set(self.requested) <= set(STEP_NAMES)
             or len(set(self.requested)) != len(self.requested)
         ):
             raise ValueError("Requested steps must be a tuple of unique known names")
-        if any(
-            type(getattr(self, name)) is not bool
-            for name in ("partial", "appearance", "software_control")
-        ):
-            raise ValueError("Run and optional-component switches must be booleans")
-        for name in ("run_root", "repo", "report", "bundle", "checkpoint"):
-            value = getattr(self, name)
-            if value is None and name != "checkpoint":
-                raise ValueError(
-                    "Run, repository, report and bundle paths are required"
-                )
-            if value is not None:
-                object.__setattr__(self, name, Path(value))
-        if self.segmentation not in {None, "rectangle", "grabcut", "canny"}:
-            raise ValueError("Choose an existing segmentation method explicitly")
-        for name in ("max_distance_m", "ambiguity_margin_m"):
-            value = getattr(self, name)
-            if value is not None and (
-                type(value) not in (int, float)
-                or not math.isfinite(value)
-                or value < 0
-                or (name == "max_distance_m" and value == 0)
-            ):
-                raise ValueError(
-                    "Explicit counting settings must be finite valid metres"
-                )
+
+    @property
+    def controls(self) -> dict[str, str]:
+        choices = {
+            "capture": self.source,
+            "depth": self.depth,
+            "tracking": self.tracking,
+            "surface": self.surface,
+            "mapping": self.mapping,
+            "objects": self.objects.detector,
+            "segmentation": self.objects.segmentation,
+            "appearance": self.objects.appearance,
+        }
+        return {
+            name: choice.control
+            for name, choice in choices.items()
+            if choice is not None and choice.control is not None
+        }
 
     def to_dict(self) -> dict[str, Any]:
-        from dataclasses import asdict
-
-        return {
-            key: str(value) if isinstance(value, Path) else value
-            for key, value in asdict(self).items()
-        }
+        return json.loads(json.dumps(asdict(self), default=str))

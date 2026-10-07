@@ -22,6 +22,10 @@ from experiments.shared.timing import TimingLedger
 EXCLUDED = {"metadata/status.json", "metadata/manifest.json"}
 
 
+class IncompleteRun(RuntimeError):
+    """Saved partial outputs cannot be published as a complete run."""
+
+
 def write_json(path: Path, data: object) -> None:
     """Serialize strictly before publishing via same-directory atomic replace."""
     payload = json.dumps(data, indent=2, sort_keys=True, allow_nan=False) + "\n"
@@ -75,9 +79,7 @@ def verify_run(path: Path) -> dict:
 
 
 def _git(repo: Path, *arguments: str) -> str:
-    result = subprocess.run(
-        ["git", "-C", str(repo), *arguments], check=True, capture_output=True
-    )
+    result = subprocess.run(["git", "-C", str(repo), *arguments], check=True, capture_output=True)
     return result.stdout.decode("utf-8", errors="replace")
 
 
@@ -99,25 +101,18 @@ def _snapshot(repo: Path, destination: Path, run_root: Path) -> dict:
                 for name in children
                 if name not in {"runs", "__pycache__", ".venv", "node_modules"}
                 and not (
-                    (Path(directory) / name)
-                    .resolve()
-                    .is_relative_to(run_root.resolve())
+                    (Path(directory) / name).resolve().is_relative_to(run_root.resolve())
                     and (Path(directory) / name / "metadata/status.json").is_file()
                 )
             ]
             sources.extend(Path(directory) / name for name in names)
     for source in sorted(sources):
         relative = source.relative_to(repo)
-        if any(
-            part in {"runs", "__pycache__", ".venv", "node_modules"}
-            for part in relative.parts
-        ):
+        if any(part in {"runs", "__pycache__", ".venv", "node_modules"} for part in relative.parts):
             continue
         if source.is_symlink():
             raise ValueError(f"Source snapshot refuses symbolic link: {relative}")
-        if not source.is_file() or not (
-            source.suffix == ".py" or source.name == "requirements.txt"
-        ):
+        if not source.is_file() or not (source.suffix == ".py" or source.name == "requirements.txt"):
             continue
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -130,9 +125,7 @@ def _snapshot(repo: Path, destination: Path, run_root: Path) -> dict:
 
 def _environment() -> dict:
     packages = sorted(
-        (d.metadata["Name"], d.version)
-        for d in importlib.metadata.distributions()
-        if d.metadata.get("Name")
+        (d.metadata["Name"], d.version) for d in importlib.metadata.distributions() if d.metadata.get("Name")
     )
     return {
         "python": sys.version,
@@ -157,9 +150,7 @@ class Run:
             raise ValueError(f"Source snapshot refuses symbolic link: {repo}")
         self.repo = Path(repo).resolve()
         self.configuration = json.loads(json.dumps(configuration, allow_nan=False))
-        self.path = self.root / (
-            datetime.now(UTC).strftime("%Y%m%dT%H%M%S.%fZ") + "_" + uuid4().hex
-        )
+        self.path = self.root / (datetime.now(UTC).strftime("%Y%m%dT%H%M%S.%fZ") + "_" + uuid4().hex)
         self.started = datetime.now(UTC).isoformat()
         self.clock = time.perf_counter()
         self.timing = TimingLedger()
@@ -212,9 +203,7 @@ class Run:
         metadata = self.path / "metadata"
         git = {
             "commit": _git(self.repo, "rev-parse", "HEAD").strip(),
-            "status": _git(
-                self.repo, "status", "--porcelain=v1", "--untracked-files=all"
-            ),
+            "status": _git(self.repo, "status", "--porcelain=v1", "--untracked-files=all"),
             "working_diff": _git(self.repo, "diff", "--binary"),
             "staged_diff": _git(self.repo, "diff", "--cached", "--binary"),
         }
@@ -241,6 +230,11 @@ class Run:
         except (OSError, ValueError) as timing_error:
             # Failure status must survive an independently unwritable timing file.
             raise error from timing_error
+
+    def stop_incomplete(self, reason: str) -> None:
+        """Keep saved outputs and timings, and record an explicitly incomplete run."""
+        self._require_running()
+        self._failed(IncompleteRun(reason))
 
     def finish(self) -> None:
         metadata = self.path / "metadata"
@@ -269,12 +263,10 @@ class Run:
             self._failed(error)
             return False
         try:
-            status = json.loads(
-                (self.path / "metadata/status.json").read_text(encoding="utf-8")
-            )
+            status = json.loads((self.path / "metadata/status.json").read_text(encoding="utf-8"))
             if status["status"] == "complete":
                 verify_run(self.path)
-            else:
+            elif status["status"] == "running":
                 self.finish()
         except BaseException as failure:
             self._failed(failure)

@@ -1,183 +1,114 @@
-"""Scorer-only references, imported through each experiment's validation area."""
+"""Independent scoring after prediction hashes are saved; no reference enters a method."""
 
 import importlib
 import json
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from types import MappingProxyType
 from typing import Any
 
 import numpy as np
 
+from experiments.datasets.acquisition import sha256
 from experiments.shared.contracts import Pose
-from experiments.shared.runs import Run
 
-from .config import Configuration
 from .records import StepResult
+from .steps.contracts import read_pose
+
+tracking_validation = importlib.import_module("experiments.03_camera_pose_estimation.src.validation")
+tracking_records = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
+surface_validation = importlib.import_module("experiments.04_surface_reconstruction.src.validation")
 
 
 @dataclass(frozen=True)
 class ScoreRequest:
     component: str
     load_references: Callable[[], Any]
-    options: Mapping[str, Any]
+    options: Mapping[str, Any] = field(default_factory=dict)
+    reference_file: Path | None = None
 
     def __post_init__(self) -> None:
         if self.component not in {
+            "depth",
             "tracking",
             "surface",
+            "mapping",
             "detection",
             "segmentation",
             "appearance",
             "identity",
         }:
             raise ValueError("Unknown experiment validation component")
-        object.__setattr__(self, "options", MappingProxyType(dict(self.options)))
 
 
-def _readonly(value: Any) -> Any:
-    if isinstance(value, dict):
-        return MappingProxyType({key: _readonly(item) for key, item in value.items()})
-    if isinstance(value, list):
-        return tuple(_readonly(item) for item in value)
-    return value
-
-
-def score_compatible(
-    component: str,
-    function: str,
-    prediction_args: tuple[Any, ...],
-    reference_args: tuple[Any, ...],
-    **kwargs: Any
-) -> Any:
-    """Call existing schemas only; Task56 owns complete physical survey adapters."""
-    owners = {
-        "tracking": (
-            "experiments.03_camera_pose_estimation.src.validation",
-            {"evaluate"},
-        ),
-        "surface": (
-            "experiments.04_surface_reconstruction.src.validation",
-            {"SurfaceScorer"},
-        ),
-        "detection": (
-            "experiments.06_object_recognition.experiments.01_detection.validation",
-            {"evaluate"},
-        ),
-        "segmentation": (
-            "experiments.06_object_recognition.experiments.02_segmentation.validation",
-            {"mask_scores", "instance_events"},
-        ),
-        "appearance": (
-            "experiments.06_object_recognition.experiments.03_appearance.validation",
-            {"label_pairs", "rank_queries"},
-        ),
-        "identity": (
-            "experiments.06_object_recognition.experiments.04_geometry_identity.validation",
-            {"score_identity"},
-        ),
-    }
-    if component not in owners or function not in owners[component][1]:
-        raise ValueError("Unknown public experiment scorer")
-    return getattr(importlib.import_module(owners[component][0]), function)(
-        *prediction_args, *reference_args, **kwargs
-    )
-
-
-def _tracking(
-    predictions: Mapping[str, Any], references: Any, options: Mapping[str, Any]
-) -> dict[str, Any]:
-    owner = importlib.import_module(
-        "experiments.03_camera_pose_estimation.src.validation"
-    )
-    records_api = importlib.import_module(
-        "experiments.03_camera_pose_estimation.src.tracking"
-    )
+def _tracking(predictions: dict[str, Any], references: Any, options: Mapping[str, Any]) -> dict[str, Any]:
     records = []
     for row in predictions["records"]:
-        p = row["pose"]
-        estimated = (
-            None
-            if p is None
-            else Pose(p["T_world_camera"], p["world_id"], p["segment_id"], p["source"])
-        )
+        pose = read_pose(row["pose"])
+        # The frozen scorer groups by segment only; include its world in that key.
+        scoring_pose = Pose(pose.matrix, pose.world_id, json.dumps([pose.world_id, pose.segment_id]), pose.source)
         records.append(
-            records_api.Record(
-                row["frame_id"],
-                row["timestamp_s"],
-                row["status"],
-                estimated,
-                row["reason"],
-            )
+            tracking_records.Record(row["frame_id"], row["timestamp_s"], row["status"], scoring_pose, row["reason"])
         )
-    truth = (
-        owner.read_references(references)
-        if isinstance(references, Path)
-        else references
-    )
-    return owner.evaluate(records, truth, **options)
+    return tracking_validation.evaluate(records, references, **options)
 
 
 def _surface(
-    run: Run,
-    predictions: Mapping[str, Any],
+    run_path: Path,
+    predictions: dict[str, Any],
     references: Mapping[str, Any],
     options: Mapping[str, Any],
 ) -> dict[str, Any]:
-    owner = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.validation"
-    )
     origin = references["world_id"], references["segment_id"]
-    shards = predictions["shards"]
-    if any((s["world_id"], s["segment_id"]) != origin for s in shards):
-        raise ValueError(
-            "Surface references must match every scored origin; no silent alignment"
-        )
-    scorer = owner.SurfaceScorer(references["points"], **options)
-    for shard in shards:
-        points = np.load(run.path / shard["points"], allow_pickle=False, mmap_mode="r")
+    if any((s["world_id"], s["segment_id"]) != origin for s in predictions["shards"]):
+        raise ValueError("Surface references must match every scored origin; no silent alignment")
+    scorer = surface_validation.SurfaceScorer(references["points"], **options)
+    for shard in predictions["shards"]:
+        points = np.load(run_path / shard["points"], allow_pickle=False, mmap_mode="r")
         scorer.observe(points)
     return scorer.summary()
 
 
-def score(
-    run: Run,
-    config: Configuration,
-    states: tuple[StepResult, ...],
-    requests: tuple[ScoreRequest, ...],
-) -> dict[str, Any]:
-    available = {state.name: state for state in states if state.status == "complete"}
-    results = {}
+def score(run_path: Path, steps: tuple[StepResult, ...], requests: tuple[ScoreRequest, ...]) -> dict[str, Any]:
+    available = {step.name: step for step in steps if step.status == "complete"}
+    results: dict[str, Any] = {}
     for request in requests:
         component = request.component
-        stage = component if component in {"tracking", "surface"} else "objects"
-        disabled = (component == "segmentation" and config.segmentation is None) or (
-            component == "appearance" and not config.appearance
-        )
-        if disabled or stage not in available:
-            results[component] = {
-                "status": "unavailable",
-                "reason": "Component disabled or predictions incomplete",
-            }
-            continue
+        provenance: dict[str, Any] = {
+            "reference_source": (str(request.reference_file) if request.reference_file is not None else None),
+            "reference_sha256": None,
+        }
+        if request.reference_file is not None and component in {"tracking", "surface"}:
+            try:
+                provenance["reference_sha256"] = sha256(request.reference_file)
+            except OSError as error:
+                if component in available:
+                    raise
+                provenance["reference_unavailable_reason"] = f"{type(error).__name__}: {error}"
         if component not in {"tracking", "surface"}:
             results[component] = {
+                **provenance,
                 "status": "unavailable",
                 "reason": "Task56 must adapt complete observations to this scorer's independent reference schema",
             }
             continue
-        artifact = available[stage].artifact
+        if component not in available:
+            blocked = next((step for step in steps if step.name == component), None)
+            reason = f"{component} is {blocked.status}: {blocked.reason}" if blocked else f"{component} was not run"
+            results[component] = {**provenance, "status": "unavailable", "reason": reason}
+            continue
+        artifact = available[component].artifact
         if artifact is None:
             raise ValueError("Completed step is missing its saved prediction artifact")
-        predictions = _readonly(
-            json.loads((run.path / artifact).read_text(encoding="utf-8"))
-        )
-        # No method or disabled component receives this loader or its answers.
+        predictions = json.loads((run_path / artifact).read_text(encoding="utf-8"))
         references = request.load_references()
-        results[component] = (
-            _tracking(predictions, references, request.options)
-            if component == "tracking"
-            else _surface(run, predictions, references, request.options)
-        )
+        results[component] = {
+            **provenance,
+            "status": "scored",
+            "result": (
+                _tracking(predictions, references, request.options)
+                if component == "tracking"
+                else _surface(run_path, predictions, references, request.options)
+            ),
+        }
     return results
