@@ -1,7 +1,7 @@
 ---
 id: "49"
 title: Reduce spatial-support association latency
-status: pending_review
+status: closed
 priority: MED
 type: experiment
 blocked_by: []
@@ -23,7 +23,7 @@ baseline_metric:
   baseline_value: "120.481 s per 60-frame call"
   target: "Report measured before/after latency, decision equality, and limitations without a preset speed threshold"
 created: 2026-10-05
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -120,7 +120,7 @@ The experiment is complete and was handed to pending review on 6 October. No fur
 
 | field | value |
 |---|---|
-| closing commit | Not created; keep Task49 pending review. Any later commit must exclude unrelated shared-worktree edits. |
+| closing commit | `14957e6` |
 | files changed | `association.py`, `test_association.py`, `run.py`, `test_latency.py`, the experiment README, object-recognition README, task-list README, this task file |
 | test | 33 focused tests passed; Task49 Python review found no remaining reproducible defect; Ruff passed |
 | before / after | 120.481 s to 114.268 s median full-call time; median paired-repeat reduction 1.83% |
@@ -133,3 +133,7 @@ Notes / caveats / follow-ups:
 - Prior run `20261005T213545.108406Z_123832963a6348f396feaf1d471d5a3c` preserved but superseded after review found a cache collision for duplicate embedded IDs. Initial import-failed run `20261005T213438.624959Z_6b85741f1c5642a88b16545c495353f3` also preserved.
 - Pending review of the completed experiment. The paired-repeat reduction is 1.83% and variable. Task56 owns complete-process timing and independently scored accuracy; unchanged decisions here do not prove accuracy.
 - The earlier `78.456 s` rationale had no matching measurement in the preserved Task48 artifact and is corrected to `80.049 s`. Task49's comparison uses its own frozen-source control and same-run paired repeats; do not compare its absolute timing directly with Task48's single earlier pass.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. Code is committed in `14957e6`. The recording has no independent object positions, so no accuracy claim is made. Independently scored accuracy and complete timing belong to Task56; no further work on this method is scheduled unless Task56 shows identity errors it could fix.

@@ -1,7 +1,7 @@
 ---
 id: "22"
 title: Build recorded video camera surface and inventory replay
-status: pending_review
+status: closed
 approval_status: approved
 priority: MED
 type: experiment
@@ -27,7 +27,7 @@ baseline_metric:
   baseline_value: "0 matched-input camera surface inventory replays"
   target: "1 verified integrated replay with 0 broken artifact links and complete selected-frame accounting"
 created: 2026-10-03
-last_updated: 2026-10-04
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -163,7 +163,7 @@ Before:0integrated automatic appearance/geometry comparisons, existing60-frame p
 
 | Field | Value |
 |---|---|
-| Closing commit | None; changes remain uncommitted |
+| Closing commit | `8140ba0` (code); task record `de324e5` |
 | Files changed | Task22 replay modules/tests/README, object-recognition README, task board and root README; unrelated existing dirty files preserved |
 | Test status | Focused Task22 suite 4 passed; Ruff passed. Current publication verifies all 258 artifacts. Prior publication passed offline Edge smoke checks. Final browser relaunch was blocked by Windows `WinError 5` creating the Playwright subprocess. Black reformatted `report.py` and `test_replay.py`, then stalled; no Black check result claimed. |
 | Before measurement | Existing 60-frame geometry replay; 0 integrated appearance-and-geometry association trials |
@@ -172,3 +172,7 @@ Before:0integrated automatic appearance/geometry comparisons, existing60-frame p
 | Decision-gate outcome | Exploratory POC result recorded. Task22 awaits owner review; Task16 remains pending review and unapproved. |
 
 still open because the owner needs to review the replay outcome and the final viewer could not be reopened in a browser after its unsampled-frame overlay fix. Code review found and confirmed that fix; Python review found and confirmed the custom-repository output-path fix. Task21 awaits owner review, which does not approve Task16.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. Owner review waived. Kept as historical exploratory replay evidence; no physical count is claimed. The browser reopen of the final viewer was not repeated.

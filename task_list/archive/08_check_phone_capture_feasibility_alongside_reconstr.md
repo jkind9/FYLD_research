@@ -1,7 +1,7 @@
 ---
 id: "08"
 title: Check phone capture feasibility alongside reconstruction
-status: pending_review
+status: archived
 priority: MED
 type: infra
 blocked_by: []
@@ -10,7 +10,7 @@ verification_test: experiments/01_camera_capture_delivery/tests/test_capture_rep
 plan_reviewed: null
 files:
   - experiments/01_camera_capture_delivery/**
-  - task_list/open/40_plan_independent_references_and_hard_case_acquisition.md
+  - task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md
   - experiments/06_object_recognition/datasets/README.md
 docs:
   - experiments/01_camera_capture_delivery/README.md
@@ -24,8 +24,8 @@ baseline_metric:
   baseline_value: "0 verified phone camera pairs"
   target: "Capability and capture evidence for both available phones"
 created: 2026-10-02
-last_updated: 2026-10-05
-superseded_by: null
+last_updated: 2026-10-07
+superseded_by: "52"
 ---
 
 # Task 08: Check phone capture feasibility alongside reconstruction
@@ -156,3 +156,7 @@ Before extraction or installation, the Google command-line tools archive matched
 Checks passed: NDK clang emitted an ELF64 AArch64 Android shared library for API 24; p4a built a minimal arm64 APK with Python 3.14.2; the APK signature verified and its manifest reports min API 24, target API 36 and native code `arm64-v8a`. The build ran in WSL scratch space. No emulator or GPU was used. The current command-line tools warn that `sdkmanager` is deprecated and recommend the new `android sdk` command for future SDK maintenance.
 
 The smoke APK does not include camera access. Neither phone is connected, and no camera IDs, stream pairs, timing, calibration or handset compatibility have been tested. Task 08 remains open for those device checks.
+
+## Board decision, 2026-10-07
+
+Archived under Task60: superseded by Task52, which owns the usable phone recording. The Redmi capability evidence recorded here remains valid; Samsung access was never confirmed and is no longer pursued.

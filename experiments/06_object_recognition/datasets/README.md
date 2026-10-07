@@ -32,7 +32,7 @@ The 13-case registry marks cup return, distinct monitors, viewpoint, uncontrolle
 
 ## Independent reference follow-up
 
-[Task40](../../../task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md) owns shared reference and missing-capture design. It preserves this provisional six-frame publication. Human-checked pixel masks, surveyed physical anchors/visible surfaces, 3D endpoint/corner coordinates with orientation and uncertainty, instrument uncertainty and new-session hard cases require separate acquisition/authorisation. Identical-looking objects seen only in separate views need independent identity evidence or an explicitly ambiguous reference, rather than guessed labels.
+[Task40](../../../task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md) owns shared reference and missing-capture design. It preserves this provisional six-frame publication. Human-checked pixel masks, surveyed physical anchors/visible surfaces, 3D endpoint/corner coordinates with orientation and uncertainty, instrument uncertainty and new-session hard cases require separate acquisition/authorisation. Identical-looking objects seen only in separate views need independent identity evidence or an explicitly ambiguous reference, rather than guessed labels.
 
 Retain camera/calibration/timestamp/world/revision and depth-measurement lineage. Session-disjoint validation/calibration and held-out evaluation must keep nearby frames/derivatives together. Task13's desk hold-out is already inspected by this object stream, so it cannot be called an independent end-to-end hold-out across these components. Frozen camera settings remain unchanged.
 

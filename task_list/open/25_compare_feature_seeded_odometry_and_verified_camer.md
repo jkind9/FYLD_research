@@ -3,9 +3,9 @@ id: "25"
 title: Compare feature seeded odometry and verified camera revisits
 status: open
 approval_status: approved
-priority: MED
+priority: LOW
 type: experiment
-blocked_by: ["16"]
+blocked_by: [56]
 blocks: []
 verification_test: experiments/03_camera_pose_estimation/experiments/tests/test_camera_comparisons.py
 plan_reviewed: null
@@ -20,7 +20,7 @@ baseline_metric:
   baseline_value: "0 feature-seeded or verified-revisit camera comparisons"
   target: "1 same-input comparison reporting drift/failures/runtime and false loop acceptances"
 created: 2026-10-03
-last_updated: 2026-10-04
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -31,6 +31,10 @@ superseded_by: null
 Measure whether feature matches help camera tracking and whether revisited views can correct drift. Compare each addition separately against the existing method and an established tracker. Reject look-alike scenes that cannot supply a verified camera relationship.
 
 The comparison-directory README and verification test are future implementation deliverables. The existing stage03 README is the current documentation owner; no empty comparison folder is created by Task30.
+
+## Current priority, 7 October 2026
+
+Lowered to LOW and blocked only on Task56 by Task60. Run this only if Task56 shows camera drift or failed revisits that hurt measurements or counts. Deployment must be on a phone (owner, 7 October 2026). If the phone route uses ARCore camera tracking, ARCore already corrects drift on revisits, so compare against ARCore's poses before building a separate correction. The earlier Task16 blocker is removed: that research note closed without becoming a gate.
 
 ## What
 

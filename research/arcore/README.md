@@ -47,8 +47,8 @@ Tasks08 and 24 do not provide an ARCore recorder. The current Task08 Camera2 APK
 
 - Google's product-name rows and Depth API flags were checked on 5 October 2026. Exact model code `2201116TG` is absent from the page text. Both physical phones still need runtime checks in an approved SDK-enabled app.
 - The ARCore sources document API output and limits. This review did not measure phone depth, pose accuracy, frame rate, thermal load, power, sensor synchronization or worksite performance.
-- [Task41's dataset inventory](../../task_list/pending_review/41_investigate_candidate_test_datasets_and_trial_exis.md) says ADVIO's reference trajectory is estimated from inertial data and fixation points. A comparison could score agreement with that dataset path, but cannot establish surveyed position accuracy.
-- [Task37's cross-platform mapping review](../../task_list/pending_review/37_research_arcore_arkit_and_roomplan_mapping.md) remains the source for the ARKit and RoomPlan comparison.
+- [Task41's dataset inventory](../../task_list/closed/41_investigate_candidate_test_datasets_and_trial_exis.md) says ADVIO's reference trajectory is estimated from inertial data and fixation points. A comparison could score agreement with that dataset path, but cannot establish surveyed position accuracy.
+- [Task37's cross-platform mapping review](../../task_list/closed/37_research_arcore_arkit_and_roomplan_mapping.md) remains the source for the ARKit and RoomPlan comparison.
 - Recheck Google's device table, Android permissions and API behavior before any later implementation or device test because platform support can change.
 
 ## Primary sources checked

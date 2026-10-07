@@ -5,7 +5,7 @@ status: open
 priority: HIGH
 type: infra
 approval_status: planning authorised 2026-10-06; execution requires task-specific review and frozen settings
-blocked_by: [51]
+blocked_by: []
 blocks: []
 verification_test: "experiments/02_stereo_depth/tests/test_metric_depth.py"
 plan_reviewed: null
@@ -20,7 +20,7 @@ baseline_metric:
   baseline_value: "0 depth methods run in experiment02; downstream trials use supplied sensor depth"
   target: "1 measured baseline producing depth in metres with validity, timing and independent scoring"
 created: 2026-10-06
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -29,6 +29,12 @@ superseded_by: null
 ## In plain English
 
 Test how the chosen capture can provide real distances from the camera to surfaces. Measure its errors, missing answers and processing time. Use those estimates in the complete test instead of borrowing correct depth from a benchmark.
+
+## Board update, 7 October 2026
+
+Task51 was rescoped on 6 October 2026 to the first prerecorded pipeline. Where this file refers to Task51 decisions for field work (site, objects, survey method, storage and retrieval, numeric limits, phone processing split), Task61 now owns them. Controls on existing recorded data can start now, so this task is no longer blocked. TUM recordings include a depth sensor, which can serve as an independent sensor reference for a camera-only method (it has its own errors and is not a survey). Task51 named Depth Anything V2 as a candidate; its relative-depth and metric variants must be told apart before any metric claim.
+
+Deployment must be on a phone (owner, 7 October 2026). The chosen depth route must therefore have a path that runs on the phone: ARCore's Depth API, or a model small enough to convert and run on the device. If Task61 decides the phone only captures and processing is hosted, record that decision and still measure the model's size and speed so the choice can be revisited. The physical phone trial needs Task52's recording and Task53's survey.
 
 ## What
 

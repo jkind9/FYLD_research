@@ -1,7 +1,7 @@
 ---
 id: "24"
 title: Recover and reproduce Android APK build inside capture experiment
-status: pending_review
+status: closed
 approval_status: approved
 priority: MED
 type: infra
@@ -22,7 +22,7 @@ baseline_metric:
   baseline_value: "0 repository-owned reproducible APK build recipes"
   target: "1 reproduced smoke build and 1 verified container build route or an explicit recorded container blocker"
 created: 2026-10-03
-last_updated: 2026-10-04
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -50,7 +50,7 @@ Stage01 currently contains only a README; smoke app/build files remain in WSL ho
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
 | Verified WSL route and smoke build are recorded | stage01 toolchain receipt | new build recipe | experiments/01_camera_capture_delivery/README.md:34 |
-| Offline APK handoff already belongs to Task08 | phone feasibility plan | mobile deployment | task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:60 |
+| Offline APK handoff already belongs to Task08 | phone feasibility plan | mobile deployment | task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:60 |
 | Existing first-party smoke source is nine bytes and has no camera feature | WSL smoke source | recovered `experiments/01_camera_capture_delivery/app/main.py` | /home/jkind/android-prep/app/main.py:1 (`print(42)`) |
 | Native compile control already exists | WSL first-party C source | recovered `experiments/01_camera_capture_delivery/native/smoke.c` | /home/jkind/android-prep/smoke.c:1 (`int add(int a, int b) { return a + b; }`) |
 | Saved distribution fixes bootstrap, ABI, minimum API and recipes | generated p4a dist metadata | build preflight and isolated packaging | /home/jkind/android-prep/p4a-storage/dists/unnamed_dist_1/dist_info.json:1 |
@@ -77,12 +77,12 @@ Read/copy only first-party app/build source and dependency provenance from the e
 | Setting | Value | Provenance |
 |---|---|---|
 | Ubuntu / host Python / JDK | 24.04.4 / 3.12.3 / 17.0.20.1 | inherited experiments/01_camera_capture_delivery/README.md:34-40 |
-| p4a release / release commit | 2026.05.09 / 58d21141f17c889bf8585f5665921d72028f8831 | inherited task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:95 |
-| p4a wheel SHA-256 | 79a58606a78ed3cec1aba110876a414d4aa988f082385d68393e208d009e1e94 | inherited task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:97 |
+| p4a release / release commit | 2026.05.09 / 58d21141f17c889bf8585f5665921d72028f8831 | inherited task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:95 |
+| p4a wheel SHA-256 | 79a58606a78ed3cec1aba110876a414d4aa988f082385d68393e208d009e1e94 | inherited task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:97 |
 | SDK API / build tools / platform tools | 36 / 35.0.0 / 37.0.1 | inherited experiments/01_camera_capture_delivery/README.md:43-45 |
 | NDK / compile minimum | 28.2.13676358 (r28c) / API24 | inherited experiments/01_camera_capture_delivery/README.md:46 |
 | Android Gradle Plugin / wrapper | 8.11.0 / 8.14.3 all | inherited saved build.gradle:8 and gradle-wrapper.properties:6 |
-| Wrapper all SHA-256 | ed1a8d686605fd7c23bdf62c7fc7add1c5b23b2bbc3721e661934ef4a4911d7c | inherited task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:97 |
+| Wrapper all SHA-256 | ed1a8d686605fd7c23bdf62c7fc7add1c5b23b2bbc3721e661934ef4a4911d7c | inherited task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:97 |
 | Android Python recipe | 3.14.2 | inherited experiments/01_camera_capture_delivery/README.md:48; saved dist metadata confirms major/minor3.14 only |
 | Bootstrap / ABI / setup mode | sdl2 / arm64-v8a / ignore setup.py | inherited saved dist_info.json:1 |
 | Package / app label / version | org.fyld.toolchainsmoke / FYLDToolchainSmoke / 0.1 (10241) | inherited saved build.gradle:24-31 and src/main/res/values/strings.xml:8 |
@@ -94,7 +94,7 @@ The owner authorised overnight reversible build recovery. These are inherited sm
 | Producer/owner | Consumer | Representation | Survives restart? | Evidence |
 |---|---|---|---|---|
 | Recorded WSL toolchain and smoke-app recipe | clean WSL/container build | pinned dependency versions/checksums, app source and build commands | repository recipe plus provenance | experiments/01_camera_capture_delivery/README.md:34 |
-| Recorded verified smoke build and required offline handoff | phone export | arm64 APK plus signature/manifest/SHA256 and installation instructions | exported files proposed | experiments/01_camera_capture_delivery/README.md:52; task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:60 |
+| Recorded verified smoke build and required offline handoff | phone export | arm64 APK plus signature/manifest/SHA256 and installation instructions | exported files proposed | experiments/01_camera_capture_delivery/README.md:52; task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:60 |
 
 Source of truth is the recovered first-party recipe and pinned toolchain provenance. Windows/WSL/container filesystem boundaries carry source/build inputs and verified APK outputs. Build in isolated scratch space; interrupted builds cannot replace an exported verified APK. Export a complete verified bundle before changing its handoff pointer; restart rebuilds in clean scratch space. Fresh deployment installs documented prerequisites, builds the smoke app, verifies the APK, then exports it. Preserve the existing WSL installation and receipts. A container blocker remains a named follow-up in pending_review until fixed or explicitly waived by the owner; it is not a verified build route. Camera app/device testing stays in Task08.
 
@@ -116,7 +116,7 @@ Before: 0 repository-owned reproducible APK build recipes. Target: 1 reproduced 
 
 | Field | Value |
 |---|---|
-| Closing commit | None; this goal remains in progress and no goal work has been committed |
+| Closing commit | `7e0d479`, `63b48a7` (build recipe and Camera2 sources) |
 | Files changed | `.gitignore`; `pytest.ini`; `experiments/01_camera_capture_delivery/app/main.py`; `native/smoke.c`; `build/recipe.py`, `verify.py`, `verify_bytecode.py`, `warm.py`, `export.py`, `build-apk.sh`, `export-apk.ps1`, `toolchain.json`, `container-readiness.json`; `tests/test_build_recipe.py`, `tests/test_warm_build.py`; `experiments/01_camera_capture_delivery/README.md`; root `README.md` |
 | Test status | 110 focused tests passed in WSL; branch coverage 82% across the five build Python modules; Ruff passed. `apksigner verify --verbose --print-certs` passed and `aapt dump badging` confirmed package `org.fyld.toolchainsmoke`, version `0.1` (10241), min API 24, target API 36, debug flag and only `arm64-v8a`. The Windows run collected 110 tests but could not create/read its temporary test files in the restricted user-temp folder; it did not pass or validate product behaviour. |
 | Before measurement | 0 repository-owned reproducible APK build recipes |
@@ -125,3 +125,7 @@ Before: 0 repository-owned reproducible APK build recipes. Target: 1 reproduced 
 | Decision-gate outcome | Warm build, APK provenance, signature, manifest, ABI and offline bundle passed. The compressed Python bundle contains 68 members and is now required by the verifier; the independent diff review passed with no remaining findings. The cache-only clean build stopped at the missing cached JPEG source archive (`sdl2_image` attempted to clone `https://github.com/libsdl-org/jpeg.git`; the local-only proxy blocked access). One repeat attempt used the wrong Gradle cache root and stopped before producing an artifact; the corrected run passed. Docker was available, but none of five inspected local image digests had the required Ubuntu 24.04.4, Python 3.12.3 and OpenJDK 17.0.20.1 combination. No image was downloaded and no container build was run. Twenty-four disposable pytest scratch folders were removed from the repository root; `.task13_pytest_tmp_20261003` was retained. `tools/check.py` already routes test scratch to the system temp folder; `.gitignore` and `pytest.ini` now cover stray pytest scratch names, and the default pytest search includes the replay tests. Root and capture READMEs now record the verified warm build, clean/container limitations and pytest scratch policy. Task08 may reuse the verified WSL APK route while the container follow-up remains open. |
 
 still open because the pinned container image/build follow-up remains outstanding; no compatible image was available locally, and no image was downloaded.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The cached warm build is verified and Task52 reuses it. The pinned container rebuild follow-up moves to Task57, which owns reproducible deployment builds.

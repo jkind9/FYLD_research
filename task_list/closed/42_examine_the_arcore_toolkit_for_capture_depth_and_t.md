@@ -1,7 +1,7 @@
 ---
 id: "42"
 title: Examine the ARCore toolkit for capture, depth and telemetry
-status: pending_review
+status: closed
 priority: HIGH
 type: decision
 approval_status: research only; no ARCore phone run or app change authorised; any recording needs a separate owner decision and scoped task
@@ -10,7 +10,7 @@ blocks: []
 verification_test: ""
 plan_reviewed: 2026-10-05 PASS
 files:
-  - task_list/pending_review/42_examine_the_arcore_toolkit_for_capture_depth_and_t.md
+  - task_list/closed/42_examine_the_arcore_toolkit_for_capture_depth_and_t.md
   - research/arcore/README.md
   - research/README.md
   - experiments/01_camera_capture_delivery/README.md
@@ -26,7 +26,7 @@ baseline_metric:
   baseline_value: "0 of 24 listed features have a current consolidated feature-by-feature inventory; the Galaxy S23 and Redmi Note 11 Pro product families are listed for Depth API; exact handset runtime checks are absent"
   target: "24 of 24 planned feature rows have primary-source links, layer, output/units, timing/accuracy limits, network/offline needs and dated device-list/runtime status; no phone run"
 created: 2026-10-04
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -106,13 +106,13 @@ The project is building its own depth and camera tracking. ARCore may supply alt
 
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
-| Room-mapping platform research covering ARCore, ARKit and RoomPlan exists | Task37 | research README section G | task_list/pending_review/37_research_arcore_arkit_and_roomplan_mapping.md:51 |
-| Phone product-family evidence exists, but does not confirm a hardware SKU or runtime ARCore support | Task08 | Task42 device-status rows | task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:48 |
+| Room-mapping platform research covering ARCore, ARKit and RoomPlan exists | Task37 | research README section G | task_list/closed/37_research_arcore_arkit_and_roomplan_mapping.md:51 |
+| Phone product-family evidence exists, but does not confirm a hardware SKU or runtime ARCore support | Task08 | Task42 device-status rows | task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:48 |
 | ARCore pose, Raw Depth and anchors already summarised from primary sources | research README section G | Task42 source inventory | research/README.md:153-155 |
 | ARCore Recording and Playback and native pose already reviewed for SLAM use | Android SLAM review | layer 3 | research/orb_slam/android/README.md:19 |
 | ARCore Raw Depth source note exists | research source notes | layer 2 | research/sources/06_arcore_raw_depth.md:3 |
-| Phone capability checks have an owner | task 08 | layer 1 | task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:51 |
-| A smoke-app build and export path exists; it does not provide an ARCore recorder | Task24 | build handoff only | task_list/pending_review/24_recover_and_reproduce_android_apk_build_inside_cap.md:40 |
+| Phone capability checks have an owner | task 08 | layer 1 | task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:51 |
+| A smoke-app build and export path exists; it does not provide an ARCore recorder | Task24 | build handoff only | task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md:40 |
 
 Split with Task37: this task owns the feature-by-feature ARCore and Android sensor inventory and a proposal for a possible ARCore recording. Task37 keeps the cross-platform comparison with ARKit and RoomPlan and the transferable mapping techniques. The existing research index and Task37 record now distinguish the listed Redmi product names from the exact `2201116TG` code and its untested runtime support.
 
@@ -142,7 +142,7 @@ tests n/a: research document only; no code.
 
 | field | value |
 |---|---|
-| closing commit | None; repository baseline is `684468d01c1f32b98b531c2922bd409583716150`; changes remain uncommitted |
+| closing commit | `14957e6` (research/arcore inventory) |
 | files changed | `research/arcore/README.md`, `research/README.md`, `experiments/01_camera_capture_delivery/README.md`, `task_list/README.md`, this task record |
 | test | Research-only contract check: 24 named feature rows link official sources and report output/units, network needs, limits, layer and support status. `git diff --check` and task-plan lint pass. No phone run or code test applies. |
 | before / after | Before: 0 of 24 rows in one feature-by-feature inventory; product-family Depth API flags existed but exact SKU and runtime status were not established. After: 24 rows, dated official source list, separate family/SKU/runtime labels and conditional recording proposal; no project phone measurement. |
@@ -159,3 +159,7 @@ still open because the completed source inventory needs fixed-snapshot Claude va
 ### Plan review history
 
 - 2026-10-05 FAIL: initial plan described ADVIO's estimated trajectory as independent reference truth, failed to state the limits of Google's feature table and omitted Task42 itself from file scope. Corrected those claims and paths; final fresh plan review returned PASS.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The fixed-snapshot external validation is waived: the board README says those review sessions are not relaunched automatically, and a source claim is rechecked by whichever task uses it. Task52 (recording), Task54 (depth) and Task57 (deployment) own actual phone checks.

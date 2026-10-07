@@ -1,7 +1,7 @@
 ---
 id: "09"
 title: Evaluate scene object recognition and persistent counting
-status: open
+status: archived
 priority: MED
 type: experiment
 blocked_by: [56]
@@ -24,8 +24,8 @@ baseline_metric:
   baseline_value: "0 labelled revisit/counting evaluations"
   target: "Independent identity controls and held-out inventory evaluation"
 created: 2026-10-02
-last_updated: 2026-10-06
-superseded_by: null
+last_updated: 2026-10-07
+superseded_by: "56"
 ---
 
 # Task 09: Evaluate scene object recognition and persistent counting
@@ -116,3 +116,7 @@ Before: 0 labelled revisit/counting evaluations. After this first slice: still 0
 The store does not inspect images or create visual reports. It retains canonical observation descriptors and identity decisions; an input-to-output viewer belongs with the later recognition and geometry stages.
 
 Still open because recognition evaluation requires agreed site classes, labelled revisits, model and held-out scoring settings. The checked identity-store slice is complete; Task13 is open with its own scope.
+
+## Board decision, 2026-10-07
+
+Archived under Task60: superseded by Task56, which owns the independently scored count in a complete walkthrough. The checked identity store and its receipts remain in place and are reused by Task56; the earlier refinement plans moved to `stale/`.

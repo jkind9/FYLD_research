@@ -1,7 +1,7 @@
 ---
 id: "44"
 title: Build a per-stage accuracy log for end-to-end runs
-status: pending_review
+status: closed
 priority: HIGH
 type: infra
 approval_status: proposed 2026-10-05 by owner request; owner delegated settings on 2026-10-05
@@ -23,7 +23,7 @@ baseline_metric:
   baseline_value: "0 of 8 stages in a common log; 4 stages scored only inside separate experiment folders"
   target: "8 of 8 stages present in one composite report from pinned runs; each either scored or marked unavailable with a reason"
 created: 2026-10-05
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -158,3 +158,7 @@ Notes / caveats / follow-ups:
 
 - Tasks 32, 34, 35, 45 add their measures to this format. Task09 (inventory umbrella) should use this report as its end-to-end evidence.
 - Plan review 2026-10-05 FAIL (wrong surface owner function; tests depended on gitignored runs and were not collected by default). Both fixed above, together with the seven advisory findings: exact stored float for Task05, alignment frame in the camera RMSE, named method keys and conditions, per-measure coverage, composite labelling, pinned runs, importlib loading.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The remaining segmentation, depth, position and count measures are owned by Task56's complete-run report.

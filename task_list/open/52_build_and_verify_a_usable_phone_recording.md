@@ -27,7 +27,7 @@ baseline_metric:
   baseline_value: "0 received phone image sessions with usable calibration and synchronized stream lineage"
   target: "1 verified recording bundle on the Task51 target with actual images and explicit stream availability"
 created: 2026-10-06
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -36,6 +36,10 @@ superseded_by: null
 ## In plain English
 
 Record real images from the selected phone, with the information needed to interpret them correctly. Save distance and camera-motion data when the phone supplies them. Make missing data and capture failures visible so later tests cannot mistake a capability report for a usable recording.
+
+## Board update, 7 October 2026
+
+Task51 was rescoped on 6 October 2026 to the first prerecorded pipeline. Where this file refers to Task51 decisions for field work (site, objects, survey method, storage and retrieval, numeric limits, phone processing split), Task61 now owns them. Task08's earlier phone-feasibility check is archived as superseded by this task; its Redmi capability evidence still applies. The owner directed on 7 October 2026 that development stays on recorded data for now, so physical capture waits until phone work resumes. Deployment must be on a phone, and calibration is only trustworthy when this project's app records it per frame.
 
 ## What
 

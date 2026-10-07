@@ -174,7 +174,7 @@ Uncertainty about an anchor, geometry of its visible surface and hypotheses abou
 
 ## Scoped next investigations
 
-The [task board](../../task_list/README.md#next-experiment-order-and-gaps) owns priorities and dependencies. [Research coverage](../../research/README.md#research-agenda-4-october-2026) provides sources and platform distinctions.
+The [task board](../../task_list/README.md#next-order) owns priorities and dependencies. On 7 October 2026 Task60 moved Tasks31, 33, 34 and 35 to `stale/` and archived the Task09 umbrella; Task56's complete walkthrough benchmark now owns proving distinct counts, and a parked comparison returns only when that benchmark shows a failure it would fix. The table below is the 4 October plan, kept for reference. [Research coverage](../../research/README.md#research-agenda-4-october-2026) provides sources and platform distinctions.
 
 | Workstream | Owner | Isolated comparison and decision |
 |---|---|---|
@@ -209,7 +209,7 @@ The later acceptance review should answer whether a reviewer can trace a selecte
 
 ## Proposed comparison protocol
 
-Task16's [broader shortlist/protocol](../../task_list/pending_review/16_research_segmentation_recognition_and_camera_corre.md) remains pending review. Its RF-DETR/YOLO nano, compact learned masks, DINO and camera-loop comparisons were not all executed. The [research shortlist](../../research/README.md#ranked-shortlist) is a dated source review, not a new model acquisition instruction. ResNet50 is an additional proposed appearance control, not a Task20 result.
+Task16's [broader shortlist/protocol](../../task_list/closed/16_research_segmentation_recognition_and_camera_corre.md) remains pending review. Its RF-DETR/YOLO nano, compact learned masks, DINO and camera-loop comparisons were not all executed. The [research shortlist](../../research/README.md#ranked-shortlist) is a dated source review, not a new model acquisition instruction. ResNet50 is an additional proposed appearance control, not a Task20 result.
 
 Freeze source-session splits before tuning. Keep nearby frames, derivatives and augmentations together. Independent human-checked labels/reference measurements score the methods after predictions; an independently checked foreground mask used as a method input is an explicitly labelled oracle control. Use separate validation and held-out sessions for threshold selection and calibration. A single inspected session supports only a narrow descriptive claim.
 
@@ -229,7 +229,7 @@ Phone capture/energy/thermal behaviour, construction-site accuracy and longer-ra
 
 ## Current goal and ownership, 6 October 2026
 
-[Task09](../../task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md) retains distinct-object counting and the existing identity store. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) collects independent physical identities and measurements. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns the first complete benchmark, using a simple existing counting baseline before optional Tasks31-35 refinements. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) defines accuracy/time/device limits; [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) measures the useful deployed workload. Earlier next-method proposals are superseded by this evidence-first order; historical trials and their limitations stay unchanged.
+[Task09](../../task_list/archive/09_evaluate_scene_object_recognition_and_persistent_counting.md) retains distinct-object counting and the existing identity store. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) collects independent physical identities and measurements. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns the first complete benchmark, using a simple existing counting baseline before optional Tasks31-35 refinements. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) defines accuracy/time/device limits; [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) measures the useful deployed workload. Earlier next-method proposals are superseded by this evidence-first order; historical trials and their limitations stay unchanged.
 
 ## Walkthrough counting boundary
 

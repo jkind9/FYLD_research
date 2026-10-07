@@ -1,7 +1,7 @@
 ---
 id: "23"
 title: Embed interactive surface review and explain depth validity masks
-status: open
+status: stale
 approval_status: approved
 priority: MED
 type: infra
@@ -28,7 +28,7 @@ baseline_metric:
   baseline_value: "0 embedded interactive surface reviews"
   target: "1 verified embedded review with rotation/pan/zoom and explicit mask counts"
 created: 2026-10-03
-last_updated: 2026-10-04
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -100,3 +100,7 @@ Before: 0 embedded interactive surface reviews. Target: 1 verified embedded revi
 | Decision-gate outcome | Outline approved 3 October 2026; task-specific protocol, numerical choices and run approvals remain pending |
 
 still open because acquired-run publication, source-hash comparison and finished reviews remain. The owner prioritized completing Tasks16 and 17 in order; preserve these partial changes and resume Task23 afterward.
+
+## Board decision, 2026-10-07
+
+Parked under Task60 with owner approval. This is an optional object-identity or review refinement that does not lead directly to the accuracy, latency or phone-deployment goals. It returns to `open/` only if Task56's complete walkthrough benchmark shows a measured failure it would fix; refresh its blockers and plan review then. Earlier receipts and authorisations remain as written. Partial viewer edits are already committed; Task51's offline visual index now covers per-stage visual review.

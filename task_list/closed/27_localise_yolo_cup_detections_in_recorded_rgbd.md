@@ -15,10 +15,10 @@ files:
   - task_list/closed/27_localise_yolo_cup_detections_in_recorded_rgbd.md
   - task_list/pending_review/27_localise_yolo_cup_detections_in_recorded_rgbd.md
   - task_list/closed/27_localise_yolo_cup_detections_in_recorded_rgbd.md
-  - task_list/pending_review/16_research_segmentation_recognition_and_camera_corre.md
+  - task_list/closed/16_research_segmentation_recognition_and_camera_corre.md
   - task_list/open/17_prepare_labelled_revisit_inputs_and_object_observa.md
   - task_list/open/18_evaluate_object_detection_on_frozen_labelled_obser.md
-  - task_list/open/21_associate_object_identities_with_geometry_and_appe.md
+  - task_list/closed/21_associate_object_identities_with_geometry_and_appe.md
 docs:
   - experiments/06_object_recognition/README.md
   - experiments/06_object_recognition/pilot/README.md

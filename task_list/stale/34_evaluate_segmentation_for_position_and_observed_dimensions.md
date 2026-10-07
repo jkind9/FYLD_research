@@ -1,7 +1,7 @@
 ---
 id: "34"
 title: Evaluate segmentation for position and observed dimensions
-status: open
+status: stale
 priority: HIGH
 type: experiment
 approval_status: authorised by owner instruction 2026-10-05; existing data and classical methods only
@@ -11,7 +11,7 @@ blocks: []
 verification_test: experiments/06_object_recognition/experiments/02_segmentation/tests/test_task34_metrics.py
 plan_reviewed: 2026-10-05 PASS
 files:
-  - task_list/open/34_evaluate_segmentation_for_position_and_observed_dimensions.md
+  - task_list/stale/34_evaluate_segmentation_for_position_and_observed_dimensions.md
   - task_list/README.md
   - experiments/06_object_recognition/experiments/02_segmentation/scoring.py
   - experiments/06_object_recognition/experiments/02_segmentation/support.py
@@ -31,7 +31,7 @@ baseline_metric:
   baseline_value: "45 historical masks; 0 scored against public instance polygons"
   target: "All non-crowd outlines in the inherited 5,000-image COCO val2017 selection plus all 457 Task22 proposals; no accuracy target for 3D position"
 created: 2026-10-04
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -62,11 +62,11 @@ Task19 compared 45 masks on inspected RGB-D frames and measured coordinate chang
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
 | Rectangle, GrabCut and Canny mask generation already exists | `masks.segment` and `mask_pipeline.run_methods` | this comparison | experiments/06_object_recognition/experiments/02_segmentation/masks.py:31; experiments/06_object_recognition/experiments/02_segmentation/mask_pipeline.py:41 |
-| COCO polygons use a pixel-centre rasterizer and Task45 fixed the full val2017 selection | `placement.polygon_mask` and `coco` | oracle-prompt mask scores against the paired COCO polygon; Task34 records the exact image bytes consumed | experiments/06_object_recognition/experiments/01_detection/placement.py:55; experiments/06_object_recognition/experiments/01_detection/coco.py:95-109,159; task_list/pending_review/45_measure_detection_position_error_in_cluttered_scen.md:39 |
+| COCO polygons use a pixel-centre rasterizer and Task45 fixed the full val2017 selection | `placement.polygon_mask` and `coco` | oracle-prompt mask scores against the paired COCO polygon; Task34 records the exact image bytes consumed | experiments/06_object_recognition/experiments/01_detection/placement.py:55; experiments/06_object_recognition/experiments/01_detection/coco.py:95-109,159; task_list/closed/45_measure_detection_position_error_in_cluttered_scen.md:39 |
 | Depth summaries return selected area, valid depth count and camera-frame surface medians | `support.summarise` | Task34 extends these to world-frame surface summaries and visible spans | experiments/06_object_recognition/experiments/02_segmentation/support.py:11-33 |
 | Shared run manager owns fresh-directory lifecycle, environment capture and completion-manifest verification | `Run` and `verify_run` | Task34 uses the shared publication contract for its new results | experiments/shared/runs.py:117-145,180-209,229-244 |
 | Task22 fixes the 60-frame RGB-D replay; Task46 fixes identities and birth policy | verified source runs and cached replay | all three mask conditions share the same proposal and identity rows | experiments/06_object_recognition/experiments/06_identity_policy/cached_replay.py:23; experiments/06_object_recognition/experiments/05_replay/README.md:19 |
-| No independent TUM object position or complete-size reference exists | Task40 reference plan | limits every 3D claim in this task | experiments/06_object_recognition/experiments/05_replay/README.md:40; task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md:68-69 |
+| No independent TUM object position or complete-size reference exists | Task40 reference plan | limits every 3D claim in this task | experiments/06_object_recognition/experiments/05_replay/README.md:40; task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md:68-69 |
 
 1. On COCO, process all 5,000 images and every one of the 36,335 non-crowd polygon annotations. Exclude the 446 crowd regions because they use a separate, non-instance reference representation. Use each annotation's reference box for all three methods, score IoU and one-pixel boundary F1 against that annotation's paired polygon, and retain every empty, unusable or failed output with its reason. Do not call the paired box/polygon an independent reference or the result a held-out test.
 2. On Task22, run all three methods on the same 457 boxes in 60 source frames. Use Task46 object IDs as fixed grouping only. Do not feed mask-derived positions back into association. For each proposal/method, report selected and valid-depth pixel counts, camera-frame median, world-frame median, the world-frame median's displacement from rectangle, and world-axis spans of the selected valid-depth point cloud (maximum minus minimum in x/y/z). Across views of each fixed ID, report coordinate-wise IQR and maximum pair separation of per-view world medians. Label these as observed-surface repeatability/spread and visible spans, not position accuracy, calibrated uncertainty or complete object size. Keep unavailable views with a reason.
@@ -94,7 +94,7 @@ Primary sources are linked in research/README.md under the corresponding A-I wor
 
 | Producer/owner | Consumer | Representation | Survives restart? |
 |---|---|---|---|
-| Task45 COCO acquisition (`task_list/pending_review/45_measure_detection_position_error_in_cluttered_scen.md:39`) | COCO loader/scorer | original RGB grid; paired annotation box and polygon; annotation IDs; 5,000-image selection; verified archive and JSON hashes at extraction; Task34 per-image hashes identify exact consumed local bytes | yes; the run stores filename, hash and byte count per scored image, but local image hashes have no independent pre-existing expected values |
+| Task45 COCO acquisition (`task_list/closed/45_measure_detection_position_error_in_cluttered_scen.md:39`) | COCO loader/scorer | original RGB grid; paired annotation box and polygon; annotation IDs; 5,000-image selection; verified archive and JSON hashes at extraction; Task34 per-image hashes identify exact consumed local bytes | yes; the run stores filename, hash and byte count per scored image, but local image hashes have no independent pre-existing expected values |
 | Task22 source run (`experiments/06_object_recognition/experiments/05_replay/README.md:19`) | Task34 TUM runner | uint16 depth at 5,000 units/metre; camera calibration; supplied pose per source frame; proposal/frame IDs | yes, read-only source manifest and copied-input hashes verified |
 | Task46 cached replay (`experiments/06_object_recognition/experiments/06_identity_policy/cached_replay.py:23`) | Task34 grouping | fixed proposal-to-object IDs and birth-policy output | yes, replay ledger/manifest hashes verified; association is not rerun |
 | `mask_pipeline.run_methods` (`experiments/06_object_recognition/experiments/02_segmentation/mask_pipeline.py:41`) | Task34 measurement caller | immutable uint8 masks on the original RGB pixel grid with frame/prompt/world/pose lineage | in memory only; completed rows are written to the run |
@@ -136,7 +136,7 @@ Task34 persists its own stage durations for input verification/loading, mask gen
 | COCO RGB decoding | Pillow `Image.open(...).convert("RGB")`; uint8 RGB on the source image grid; runtime Pillow `12.3.0` | inherited experiments/06_object_recognition/experiments/02_segmentation/run.py:13,176-178 and installed `.venv-yolo` runtime checked 2026-10-05; record exact runtime in each run |
 | COCO image selection | all 5,000 val2017 images and all valid non-crowd annotations | inherited Task45 plan; 36,335 non-crowd annotations in the pinned local annotations file |
 | COCO crowd annotations | 446 excluded from instance scores | inherited Task45 reference policy; crowd regions do not represent one object instance |
-| COCO box prompts | paired reference box from the same annotation as the scored polygon; explicitly oracle | inherited Task45 full selection (`task_list/pending_review/45_measure_detection_position_error_in_cluttered_scen.md:39`); same prompt sent to all methods; not independent of the polygon |
+| COCO box prompts | paired reference box from the same annotation as the scored polygon; explicitly oracle | inherited Task45 full selection (`task_list/closed/45_measure_detection_position_error_in_cluttered_scen.md:39`); same prompt sent to all methods; not independent of the polygon |
 | TUM depth decode and valid range | raw uint16 divided by 5,000 units/metre; retain only `0 < depth < 4 m` | inherited experiments/06_object_recognition/experiments/02_segmentation/support.py:15-17; use unchanged |
 | Boundary scoring tolerance | `1` pixel | inherited scoring.py:33-36; no sweep |
 | Surface quantiles | NumPy `method="linear"`; coordinate-wise Q75 minus Q25; null for no points | inherited experiments/06_object_recognition/experiments/02_segmentation/support.py:22-30; installed NumPy `2.4.2`, checked 2026-10-05; record exact runtime in each run |
@@ -180,3 +180,7 @@ The sixth fresh plan review returned PASS. It found no blocking issue and advise
 | Decision-gate outcome | Owner authorized this bounded existing-data comparison and confirmed the COCO aggregation rule on 2026-10-05. Plan review passed. Start remains blocked by Task31 and independent review of the Task21/22 inputs and Task32/48 baseline. Physical accuracy remains unavailable without Task40 references. |
 
 still open because Task31, the independent Tasks21/22/32/48 gates and Claude technical validation are incomplete. No Task34 run has been produced. The planned comparison cannot establish absolute 3D position, full object size or physical count.
+
+## Board decision, 2026-10-07
+
+Parked under Task60 with owner approval. This is an optional object-identity or review refinement that does not lead directly to the accuracy, latency or phone-deployment goals. It returns to `open/` only if Task56's complete walkthrough benchmark shows a measured failure it would fix; refresh its blockers and plan review then. Earlier receipts and authorisations remain as written. The planned methods (rectangle, GrabCut, Canny on COCO with answer-key boxes) cannot show site accuracy and are not phone candidates.

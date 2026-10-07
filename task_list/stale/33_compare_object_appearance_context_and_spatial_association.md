@@ -1,7 +1,7 @@
 ---
 id: "33"
 title: Compare object appearance, context and spatial association
-status: open
+status: stale
 priority: MED
 type: experiment
 approval_status: proposed; no execution authorised by Task30
@@ -19,7 +19,7 @@ baseline_metric:
   baseline_value: "1 incorrect YOLO monitor ranking; 0 ResNet50/context comparisons"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-04
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -96,3 +96,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 | Decision-gate outcome | Proposed; review/settings/references/acquisition authorisation outstanding |
 
 still open because the investigation and its reference/decision requirements are not complete.
+
+## Board decision, 2026-10-07
+
+Parked under Task60 with owner approval. This is an optional object-identity or review refinement that does not lead directly to the accuracy, latency or phone-deployment goals. It returns to `open/` only if Task56's complete walkthrough benchmark shows a measured failure it would fix; refresh its blockers and plan review then. Earlier receipts and authorisations remain as written.

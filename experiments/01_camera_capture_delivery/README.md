@@ -63,7 +63,7 @@ The sections below are the detailed experiment record: the test plan, the Androi
 
 ## Experiment record
 
-[Task 08](../../task_list/pending_review/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
+[Task 08](../../task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
 
 ## The piece we are testing
 
@@ -175,7 +175,7 @@ Promote the observation format and reader when another experiment consumes them 
 
 ## Android package build and offline handoff
 
-[Task24](../../task_list/pending_review/24_recover_and_reproduce_android_apk_build_inside_cap.md) owns the first-party p4a build and export helpers in `build/`, the package-only app in `app/main.py`, the native compile control in `native/smoke.c`, and build checks in `tests/`. Its cached WSL packaging route passed; clean dependency and container builds remain follow-ups. The app only prints `42`. It requests no camera permission and does not inspect camera or depth APIs. Task08 owns the separate capability and capture app.
+[Task24](../../task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md) owns the first-party p4a build and export helpers in `build/`, the package-only app in `app/main.py`, the native compile control in `native/smoke.c`, and build checks in `tests/`. Its cached WSL packaging route passed; clean dependency and container builds remain follow-ups. The app only prints `42`. It requests no camera permission and does not inspect camera or depth APIs. Task08 owns the separate capability and capture app.
 
 The reproduced route reused Android libraries already built on this workstation (a warm build). It uses Ubuntu 24.04.4, host Python 3.12.3, Java 17.0.20.1, python-for-android (p4a) `2026.05.09`, Android SDK API 36, build tools 35.0.0, NDK `28.2.13676358` and Gradle 8.14.3. The APK verifies as package `org.fyld.toolchainsmoke`, version `0.1` (10241), minimum Android API 24, target API 36, and 64-bit ARM (`arm64`) only. The final run took 27.34 seconds. Its SHA-256 is `2a1f1f821408d637cbb8416e465b273245c5813013a73684f7f70dab45fc26e5`; the packaged source matches `app/main.py` SHA-256 `58a44735ffdfa6b14977516ad6e6e642d477999cd361537028f2d6b99e07ad68`; the debug certificate SHA-256 is `45e634374292b269842a381e50dc1bb08d6b30db388ed4572a880d9b1670e1c3`. Signature, package metadata, arm64 native libraries and the 68-entry compressed Python bundle passed verification.
 

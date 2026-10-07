@@ -55,7 +55,7 @@ The root still says no recognition inference has run, while accepted desk replay
 | Accepted viewer and portable measurements already exist | replay publication and Task29 exports | root and research summaries | experiments/06_object_recognition/experiments/05_replay/README.md:5; experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_repeatability.json:1 |
 | Appearance result includes a wrong monitor ranking | Task20 | comparison backlog | experiments/06_object_recognition/experiments/03_appearance/README.md:56 |
 | Mask coordinate changes are not accuracy scores | Task19 | segmentation follow-up | experiments/06_object_recognition/experiments/02_segmentation/README.md:5 |
-| Task09 already owns the inventory umbrella | Task09 | new bounded follow-ups | task_list/open/09_evaluate_scene_object_recognition_and_persistent_counting.md:35 |
+| Task09 already owns the inventory umbrella | Task09 | new bounded follow-ups | task_list/archive/09_evaluate_scene_object_recognition_and_persistent_counting.md:35 |
 
 - Inspect board, READMEs, saved results and source artifacts without inference.
 - Browse primary documentation/papers and qualify the supplied display-conversion article.

@@ -1,7 +1,7 @@
 ---
 id: "39"
 title: Record future 3D review and measurement requirements
-status: pending_review
+status: closed
 priority: LOW
 type: decision
 approval_status: proposed requirements only; no application scope or product acceptance
@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "0 reviewed complete 3D-pick-to-source application requirements"
   target: "1 source-traceable proposed requirements matrix; app scope and product approval remain separate"
 created: 2026-10-04
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -49,11 +49,11 @@ Existing evidence: Task22 viewer already shows selected-ID history and baseline 
 |---|---|---|---|
 | Existing replay/history viewer is reusable | Task22 | source frames, boxes, IDs and unresolved candidates | experiments/06_object_recognition/experiments/05_replay/README.md:5 |
 | Portable replay exports preserve original evidence | Task29 | audit and offline review | experiments/06_object_recognition/experiments/05_replay/README.md:29 |
-| Provisional states, duplicate links and ID history have a separate owner | Task31 | identity review and count states | task_list/open/31_compare_provisional_object_ids_and_duplicate_relationships.md:62 |
-| Spatial support, visible extent and pose lineage have a separate owner | Task32 | position and shape displays | task_list/pending_review/32_investigate_spatial_support_and_position_uncertainty.md:74 |
-| Sequential fusion and pose-revision comparisons have a separate owner | Task35 | fused estimate and correction history | task_list/open/35_measure_error_propagation_and_sequential_fusion.md:52 |
-| Independent identity, anchor and size references are still planned | Task40 | accuracy labels and measurement comparisons | task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md:57 |
-| Surface-review interactions retain separate implementation ownership | Task23 | viewport controls and mask explanation | task_list/open/23_embed_interactive_surface_review_and_explain_depth.md:43 |
+| Provisional states, duplicate links and ID history have a separate owner | Task31 | identity review and count states | task_list/stale/31_compare_provisional_object_ids_and_duplicate_relationships.md:62 |
+| Spatial support, visible extent and pose lineage have a separate owner | Task32 | position and shape displays | task_list/closed/32_investigate_spatial_support_and_position_uncertainty.md:74 |
+| Sequential fusion and pose-revision comparisons have a separate owner | Task35 | fused estimate and correction history | task_list/stale/35_measure_error_propagation_and_sequential_fusion.md:52 |
+| Independent identity, anchor and size references are still planned | Task40 | accuracy labels and measurement comparisons | task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md:57 |
+| Surface-review interactions retain separate implementation ownership | Task23 | viewport controls and mask explanation | task_list/stale/23_embed_interactive_surface_review_and_explain_depth.md:43 |
 
 Requirements review only: pick an object or surface and trace it to source frames/crops and depth/mask evidence; inspect accepted, rejected and unresolved observations; inspect provisional, confirmed and duplicate/alias relationships; compare individual positions with the fused estimate; identify coordinate and pose revisions; and measure only between named endpoints. The README records seven review actions and their display boundaries. No app is implemented here.
 
@@ -89,7 +89,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 
 | Field | Value |
 |---|---|
-| Closing commit | None; no commit created |
+| Closing commit | `14957e6` (requirements record) |
 | Files changed | `experiments/06_object_recognition/README.md` and this task record |
 | Test status | docs n/a: requirements-only review; no implementation or experiment changed |
 | Before measurement | 0 source-traceable proposed requirements rows |
@@ -98,3 +98,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 | Decision-gate outcome | Awaiting source validation and owner review; any application implementation needs a separate task |
 
 still open because an owner must accept or revise the proposed product requirements before they can guide a separate application task. No thresholds, acquisition, app implementation or accuracy claims were selected.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The fixed-snapshot external validation is waived: the board README says those review sessions are not relaunched automatically, and a source claim is rechecked by whichever task uses it. The requirements stay as reference for the later 3D/VR review goal. Any application needs its own task.

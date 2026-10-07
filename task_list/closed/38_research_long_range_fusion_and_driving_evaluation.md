@@ -1,7 +1,7 @@
 ---
 id: "38"
 title: Research longer-range fusion and driving evaluation
-status: pending_review
+status: closed
 priority: MED
 type: decision
 approval_status: proposed; no execution authorised by Task30
@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "0 acquired driving evaluation datasets; adapter maximum retained depth below 4 m"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -85,7 +85,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 
 | Field | Value |
 |---|---|
-| Closing commit | None; no commit created |
+| Closing commit | `14957e6` (research record) |
 | Files changed | `research/README.md`; `task_list/README.md`; this task record |
 | Test status | Documentation/source check only; no implementation or experiment run |
 | Before measurement | 0 acquired driving evaluation datasets; adapter maximum retained depth below 4 m |
@@ -94,3 +94,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 | Decision-gate outcome | Research decision recorded. Owner review is pending to accept or revise the Task41 trial-selection recommendation. Any subset, access terms, storage, capture, local settings and execution remain separate owner decisions. |
 
 Independent source review and decision recording are complete. To close: the owner should accept or revise the recommendation for Task41; only then can a separately scoped task request data access, select a subset, and propose an experiment.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The fixed-snapshot external validation is waived: the board README says those review sessions are not relaunched automatically, and a source claim is rechecked by whichever task uses it. Street-range driving evaluation is outside the current phone walkthrough scope; no follow-up is scheduled.

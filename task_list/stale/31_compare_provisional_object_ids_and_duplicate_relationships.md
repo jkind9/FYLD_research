@@ -1,7 +1,7 @@
 ---
 id: "31"
 title: Compare provisional object IDs and duplicate relationships
-status: open
+status: stale
 priority: HIGH
 type: experiment
 approval_status: proposed; no execution authorised by Task30
@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "90 book proposals unresolved outside gate; 0 evaluated provisional-birth comparisons"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -90,11 +90,11 @@ Fresh-checkout setup and reproduction command after implementation: create an is
 | Name | Value | Source |
 |---|---|---|
 | Cached proposal input and six-frame groups | Accepted Task22 `automatic.json`; six frame groups and 17 automatic boxes; parent `selection.json` has 60 frames and is lineage only; manifest SHA-256 `fd7a7cce28fad27a0eb8af5b81a96f7aa613e825b2fbe8dfacf4191d5939254f` | inherited experiments/06_object_recognition/experiments/05_replay/README.md:19 |
-| Geometry gate | distance ≤0.35 m against anchor and current estimate | inherited task_list/pending_review/22_build_recorded_video_camera_surface_and_inventory_.md:139 |
-| Appearance gate and combined cost | cosine ≥0.80; geometry/appearance weights 0.5/0.5 | inherited task_list/pending_review/22_build_recorded_video_camera_surface_and_inventory_.md:139 |
-| Assignment and ambiguity | max-cardinality then min-cost; alternate mean-cost gap ≤0.05 abstains; float comparison tolerance 1e-12 | inherited task_list/pending_review/22_build_recorded_video_camera_surface_and_inventory_.md:140,154 |
-| Duplicate control and existing birth rule | same-class box IoU ≥0.90 and world distance ≤0.02 m; both unresolved and zero votes; initial-class seeds, later unmatched births pending | inherited task_list/pending_review/22_build_recorded_video_camera_surface_and_inventory_.md:141 |
-| View grouping and position summary | translation ≤0.05 m and rotation ≤10°; one vote per source frame; earliest representative; coordinate median versus last | inherited task_list/pending_review/22_build_recorded_video_camera_surface_and_inventory_.md:142 |
+| Geometry gate | distance ≤0.35 m against anchor and current estimate | inherited task_list/closed/22_build_recorded_video_camera_surface_and_inventory_.md:139 |
+| Appearance gate and combined cost | cosine ≥0.80; geometry/appearance weights 0.5/0.5 | inherited task_list/closed/22_build_recorded_video_camera_surface_and_inventory_.md:139 |
+| Assignment and ambiguity | max-cardinality then min-cost; alternate mean-cost gap ≤0.05 abstains; float comparison tolerance 1e-12 | inherited task_list/closed/22_build_recorded_video_camera_surface_and_inventory_.md:140,154 |
+| Duplicate control and existing birth rule | same-class box IoU ≥0.90 and world distance ≤0.02 m; both unresolved and zero votes; initial-class seeds, later unmatched births pending | inherited task_list/closed/22_build_recorded_video_camera_surface_and_inventory_.md:141 |
+| View grouping and position summary | translation ≤0.05 m and rotation ≤10°; one vote per source frame; earliest representative; coordinate median versus last | inherited task_list/closed/22_build_recorded_video_camera_surface_and_inventory_.md:142 |
 | Provisional birth and reviewable duplicate-link policy | one provisional ID per unmatched proposal; no automatic confirmation, rejection or union | n/a owner approval pending; do not run before decision |
 | Confirmation/rejection criteria and new score thresholds | not selected | n/a no new numerical setting is authorized |
 | Independent scoring cases and split | Task40 acquisition, separate sessions/views | n/a cases not yet acquired or authorized |
@@ -122,3 +122,7 @@ Task30 checks plan completeness and board consistency only. This HIGH/stateful p
 | Decision-gate outcome | Plan review passed; comparison not authorised. Tasks16, 21 and 22 remain pending review; Task40 has no approved independent reference acquisition or scoring cases. Owner approval for the bounded comparison and schema migration is still required. Confirm any new thresholds or settings before numerical scoring. |
 
 still open because the comparison has no owner authorisation or independent scoring cases, and Tasks16, 21 and 22 remain in pending review.
+
+## Board decision, 2026-10-07
+
+Parked under Task60 with owner approval. This is an optional object-identity or review refinement that does not lead directly to the accuracy, latency or phone-deployment goals. It returns to `open/` only if Task56's complete walkthrough benchmark shows a measured failure it would fix; refresh its blockers and plan review then. Earlier receipts and authorisations remain as written. Its motivating defect (90 unresolved books) was fixed by Task46 (5 unresolved).

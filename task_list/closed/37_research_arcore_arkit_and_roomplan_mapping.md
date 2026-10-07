@@ -1,7 +1,7 @@
 ---
 id: "37"
 title: Research ARCore, ARKit and RoomPlan mapping
-status: pending_review
+status: closed
 priority: MED
 type: decision
 approval_status: proposed; no execution authorised by Task30
@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "0 verified project phone AR-depth/room scans"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -47,8 +47,8 @@ Existing evidence: Primary ARCore/ARKit/RoomPlan sources reviewed in Task30. No 
 
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
-| Phone capability owner already exists | Task08 | hardware acquisition plan | task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:36 |
-| Capture/build owner already exists | stage01/Task24 | future API capture | experiments/01_camera_capture_delivery/README.md:7; task_list/open/08_check_phone_capture_feasibility_alongside_reconstr.md:36 |
+| Phone capability owner already exists | Task08 | hardware acquisition plan | task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:36 |
+| Capture/build owner already exists | stage01/Task24 | future API capture | experiments/01_camera_capture_delivery/README.md:7; task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:36 |
 
 Proposed comparison: Research visual-inertial tracking, raw/full depth and confidence, timestamps/reprojected observations, planes, meshes, room/object parameters, anchors/relocalisation, scan guidance, corrections and repeated observations. Map each required field to actual APIs and mark internal research algorithms separately. Design Android raw-depth export control first; propose Apple LiDAR/RoomPlan control only with hardware approval. Keep existing Task08/24 ownership for any app/device implementation.
 
@@ -84,7 +84,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 
 | Field | Value |
 |---|---|
-| Closing commit | Not started; plan created during Task30 |
+| Closing commit | `14957e6` (research/README.md matrix) |
 | Files changed | Task file only; future scope proposed |
 | Test status | Rechecked six current first-party platform/API sources and the current ARCore device list on 2026-10-05; the updated capability and limitation matrix is in `research/README.md`. No implementation test, phone capture, timing run or accuracy experiment was authorised or executed. Claude's source validation is pending. |
 | Before measurement | 0 verified project phone AR-depth/room scans |
@@ -95,3 +95,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 Source correction, 5 October 2026: Google's live supported-device list includes the Redmi Note 11 Pro and Redmi Note 11 Pro 5G names, both with Depth API support. It does not identify the exact `2201116TG` handset code. The inventory now records the listed product family separately from the project's untested handset and runtime support. This correction changes the pending Claude review snapshot; validate the corrected README from a new fixed snapshot.
 
 still open because Claude's independent source validation and owner decisions on any later device capture remain outstanding.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The fixed-snapshot external validation is waived: the board README says those review sessions are not relaunched automatically, and a source claim is rechecked by whichever task uses it. Task52 (recording), Task54 (depth) and Task57 (deployment) own actual phone checks.

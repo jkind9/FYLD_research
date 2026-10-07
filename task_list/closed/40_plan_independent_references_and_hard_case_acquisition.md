@@ -1,7 +1,7 @@
 ---
 id: "40"
 title: Plan independent references and hard-case acquisition
-status: pending_review
+status: closed
 priority: HIGH
 type: decision
 approval_status: proposed; no execution authorised by Task30
@@ -10,7 +10,7 @@ blocks: []
 verification_test: ""
 plan_reviewed: 2026-10-05 PASS
 files:
-  - task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md
+  - task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md
   - experiments/06_object_recognition/datasets/README.md
   - task_list/README.md
 docs:
@@ -22,7 +22,7 @@ baseline_metric:
   baseline_value: "6 provisional frames; 0 independent desk physical-centre references"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -168,7 +168,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 
 | Field | Value |
 |---|---|
-| Closing commit | No commit created; work remains local and unpublished |
+| Closing commit | `14957e6` (plan record) |
 | Files changed | Task40 plan and `experiments/06_object_recognition/datasets/README.md`; no data or code changed |
 | Test status | Task-plan lint passed. Fresh plan-reviewer review of the corrected plan returned PASS on 2026-10-05 and was recorded with `task.js review 40 PASS`. `git diff --check` passed. The earlier Claude snapshot review passed protocol structure and identified the findings listed below; a new fixed-snapshot Claude review is pending. No acquisition or comparison executed. |
 | Before measurement | 6 provisional frames; 0 independent desk physical-centre references |
@@ -181,3 +181,7 @@ still open because the investigation and its reference/decision requirements are
 Independent review history: Claude's read-only review passed the protocol structure on snapshot `fyld_goal_review_snapshot_20261005_b` (manifest SHA-256 `86e41ac18c3f0432d1c1ada0cc5c9b245d47845e1ad2f5a24b7a2b33cf55e5f4`). It found the desk-session exclusion list was incomplete, a stale Task48-state sentence, a depth-hash citation that ended before the depth check, a fifth table cell that hid evidence, and the lack of surveyed 3D-boundary coordinates/orientation. Four evidence claims were UNPROVEN because ignored run artifacts or the review journal were absent from that snapshot. This correction changes Task40's review target; a new fixed snapshot and independent review are still required.
 
 Fresh plan review: a plan-reviewer agent checked the corrected plan against the current code and the unratified constitution placeholder on 2026-10-05 and returned PASS with no findings. This is a plan review, not the required independent Claude validation. Claude's new fixed-snapshot review and the owner's reference, access and measurement decisions remain outstanding.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The fixed-snapshot external validation is waived: the board README says those review sessions are not relaunched automatically, and a source claim is rechecked by whichever task uses it. Task53 consumes this reference design; Task53's own plan review passed on 2026-10-06.

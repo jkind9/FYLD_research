@@ -1,7 +1,7 @@
 ---
 id: "32"
 title: Investigate spatial support and position uncertainty
-status: pending_review
+status: closed
 priority: HIGH
 type: experiment
 approval_status: isolated handoff implementation authorised; accuracy claims remain with parallel validation
@@ -29,7 +29,7 @@ baseline_metric:
   baseline_value: "0 independently calibrated spatial models; assigned cup RMS 72.8 mm"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -135,7 +135,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 
 | Field | Value |
 |---|---|
-| Closing commit | No new commit; local stack remains unpublished pending owner decision |
+| Closing commit | `5513498`, `14957e6` |
 | Files changed | `pilot/localisation.py`, its tests, new `07_spatial_uncertainty` association/tests package, the related READMEs, Task32 receipt, and Task47 follow-up receipt |
 | Test status | The original 66-test focused baseline passed before follow-ups. Seven added regressions bring the final suite to 73 passed; Black, Ruff, Python compilation, adapter mypy, task-plan lint, and diff whitespace checks passed. Mypy cannot address the new module because its folder name begins with digits. Final diff review found and cleared seven issues; the last review reported no findings. |
 | Before measurement | 0 independently calibrated spatial models; assigned cup RMS 72.8 mm |
@@ -144,3 +144,7 @@ Task30 checks plan completeness and board consistency only. HIGH/stateful implem
 | Decision-gate outcome | Handoff ready for the parallel evaluator. Calibration, usefulness, thresholds, and matching benefit remain undecided; the median baseline and Task46 birth policy remain unchanged |
 
 still open because independent references and validation remain outside this session. Task32 must not be treated as an accuracy result, and publication remains pending the owner's decision.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. Code is committed in `14957e6`. The recording has no independent object positions, so no accuracy claim is made. Independently scored accuracy and complete timing belong to Task56; no further work on this method is scheduled unless Task56 shows identity errors it could fix.

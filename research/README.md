@@ -40,7 +40,7 @@ Two sources remain outside the public inventory: a few street-works-like scenes 
 
 ## Task16 shortlist and experiment protocol
 
-[Task16](../task_list/pending_review/16_research_segmentation_recognition_and_camera_corre.md) records the source review and draft protocol for Tasks17–22 and 25. The owner later clarified that exploratory replay and association trials do not approve this broader protocol, so Task16 remains pending review. Each experiment records its own authorised settings and limits. The [stage06 plan](../experiments/06_object_recognition/README.md#proposed-comparison-protocol) holds the proposed protocol. Keep the existing YOLO26x checkpoint for the first detection comparison. Other learned models remain research candidates; no new models or weights are downloaded.
+[Task16](../task_list/closed/16_research_segmentation_recognition_and_camera_corre.md) records the source review and draft protocol for Tasks17–22 and 25. The owner later clarified that exploratory replay and association trials do not approve this broader protocol, so Task16 remains pending review. Each experiment records its own authorised settings and limits. The [stage06 plan](../experiments/06_object_recognition/README.md#proposed-comparison-protocol) holds the proposed protocol. Keep the existing YOLO26x checkpoint for the first detection comparison. Other learned models remain research candidates; no new models or weights are downloaded.
 
 The requested [Kuey survey](https://kuey.net/index.php/kuey/article/download/2260/1290/13992) separates boundary methods, such as edge detection, from region methods. It reviews algorithms; it is not a current device benchmark or a runnable object inventory. A Canny contour is a boundary control. GrabCut with a checked rectangle prompt is a classical mask-producing control. Neither supplies an object class or instance identity. OpenCV's [marker watershed guide](https://docs.opencv.org/4.12.0/d3/db4/tutorial_py_watershed.html) describes a seeded region method that can test touching objects.
 
@@ -87,7 +87,7 @@ This review uses primary documentation and papers. Proposed comparisons below ar
 
 ### A. Observation IDs, provisional identities and duplicates
 
-[Task31](../task_list/open/31_compare_provisional_object_ids_and_duplicate_relationships.md) follows the existing checked store and bounded association trials. Every detection needs its own observation ID. Unmatched candidates may acquire provisional object IDs; confirmed inventory and rejected detections remain distinct. Preserve source histories and aliases when identities are unified. A confident returning observation retains its ID; missing depth records unknown position.
+[Task31](../task_list/stale/31_compare_provisional_object_ids_and_duplicate_relationships.md) follows the existing checked store and bounded association trials. Every detection needs its own observation ID. Unmatched candidates may acquire provisional object IDs; confirmed inventory and rejected detections remain distinct. Preserve source histories and aliases when identities are unified. A confident returning observation retains its ID; missing depth records unknown position.
 
 [Linear assignment documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linear_sum_assignment.html) describes one-to-one minimum-cost assignment, including rectangular problems. It supplies a solver, not an object identity policy; eligibility, unmatched options, birth, duplicate and confirmation decisions still need definition. [Deep SORT](https://arxiv.org/abs/1703.07402) combines motion and learned pedestrian appearance for time-local tracking. Its results do not establish persistent identity for cups/books in disjoint views.
 
@@ -95,7 +95,7 @@ Compare the existing restrictive class-birth rule with provisional births and ex
 
 ### B. Spatial supports and calibrated uncertainty
 
-[Task32](../task_list/open/32_investigate_spatial_support_and_position_uncertainty.md) investigates matching spatial distributions or occupied supports rather than point centres. Keep three quantities separate: uncertainty about a defined object anchor, measured visible-surface geometry, and hypotheses about full dimensions. A visible-surface centroid can move with viewpoint even when the object is stationary.
+[Task32](../task_list/closed/32_investigate_spatial_support_and_position_uncertainty.md) investigates matching spatial distributions or occupied supports rather than point centres. Keep three quantities separate: uncertainty about a defined object anchor, measured visible-surface geometry, and hypotheses about full dimensions. A visible-surface centroid can move with viewpoint even when the object is stationary.
 
 [Extended-object tracking review](https://arxiv.org/abs/1604.00970) treats objects that generate multiple measurements and models extent separately from motion state. [Kendall and Gal](https://proceedings.neurips.cc/paper/2017/hash/2650d6089a6d640c5e85b2b88265dc2b-Abstract.html) distinguish observation noise from model uncertainty in depth/segmentation tasks. These motivate the design; neither provides a calibrated model for this project.
 
@@ -105,7 +105,7 @@ Compare the current point gate with simple uncertainty regions, empirical depth 
 
 ### C. Appearance and spatial association
 
-[Task33](../task_list/open/33_compare_object_appearance_context_and_spatial_association.md) retains Task20's tested ZNCC and existing YOLO26x pooled features as baselines. [ResNet research](https://arxiv.org/abs/1512.03385) establishes an image-recognition architecture; proposed ResNet50 embeddings do not yet establish instance re-identification here. [DINOv2 source](https://github.com/facebookresearch/dinov2) remains a separate contextual-feature candidate from Task16. No new weights were acquired.
+[Task33](../task_list/stale/33_compare_object_appearance_context_and_spatial_association.md) retains Task20's tested ZNCC and existing YOLO26x pooled features as baselines. [ResNet research](https://arxiv.org/abs/1512.03385) establishes an image-recognition architecture; proposed ResNet50 embeddings do not yet establish instance re-identification here. [DINOv2 source](https://github.com/facebookresearch/dinov2) remains a separate contextual-feature candidate from Task16. No new weights were acquired.
 
 Hold crop/support, gallery and split fixed while comparing ZNCC, current YOLO features and an authorised ResNet50/context candidate. Compare object-only pixels with fixed surrounding context and context-only controls; repeated backgrounds may help within-session matching yet leak scene identity. Then compare appearance-only, spatial-only and combined costs on the same observations. Include similar co-visible neighbours and identical objects seen only separately.
 
@@ -113,7 +113,7 @@ Report pair rankings, false accepts/rejects, mistaken merges, splits, unresolved
 
 ### D. Segmentation, position and dimensions
 
-[Task34](../task_list/open/34_evaluate_segmentation_for_position_and_observed_dimensions.md) extends Task19 through new independent references; it does not reopen or rewrite that completed control. [OpenCV GrabCut](https://docs.opencv.org/4.x/d8/d83/tutorial_py_grabcut.html) requires foreground/background initialization; a filled contour is only a boundary-derived control. Neither gives a semantic object identity or complete-object shape.
+[Task34](../task_list/stale/34_evaluate_segmentation_for_position_and_observed_dimensions.md) extends Task19 through new independent references; it does not reopen or rewrite that completed control. [OpenCV GrabCut](https://docs.opencv.org/4.x/d8/d83/tutorial_py_grabcut.html) requires foreground/background initialization; a filled contour is only a boundary-derived control. Neither gives a semantic object identity or complete-object shape.
 
 On identical boxes/depth/poses, compare rectangle supports, existing classical masks and independently checked foreground masks supplied as a named oracle control. Only then add an authorised learned method. Keep prompt quality separate. Score contamination against checked visible foreground, per-view position/surface repeatability against independent references, and absolute error against a declared physical anchor. Exact visible-mask scoring needs human-checked pixel masks, not Task17's coarse polygons.
 
@@ -121,7 +121,7 @@ Measure observed dimensions in a declared frame, coverage, boundary/mask error, 
 
 ### E. Error propagation and sequential improvement
 
-[Task35](../task_list/open/35_measure_error_propagation_and_sequential_fusion.md) traces pixels/masks -> depth -> camera coordinates -> camera poses -> world coordinates -> association -> object/surface fusion. First perturb one source at a time against analytic geometry or independent references, then combine perturbations on matching inputs.
+[Task35](../task_list/stale/35_measure_error_propagation_and_sequential_fusion.md) traces pixels/masks -> depth -> camera coordinates -> camera poses -> world coordinates -> association -> object/surface fusion. First perturb one source at a time against analytic geometry or independent references, then combine perturbations on matching inputs.
 
 Compare individual measurements with last-view, equal-weight and robust estimates as more independently acquired viewpoints arrive. Test adjacent correlated frames, reused/reprojected depth, bias, outliers, wrong associations and pose drift separately. More frames may average independent noise yet reinforce persistent bias or duplicate evidence. Report error/coverage and wrong-identity contamination as functions of independent views and elapsed time; do not assume a reduction proportional to the square root of frame count.
 
@@ -146,7 +146,7 @@ The supplied [Alpha3D article](https://www.alpha3d.io/kb/metaverse/convert-norma
 
 ### G. Dedicated AR/VR room mapping
 
-[Task37](../task_list/pending_review/37_research_arcore_arkit_and_roomplan_mapping.md) is a dedicated platform/data investigation. No Apple or Android capability is inferred from a brand name alone.
+[Task37](../task_list/closed/37_research_arcore_arkit_and_roomplan_mapping.md) is a dedicated platform/data investigation. No Apple or Android capability is inferred from a brand name alone.
 
 | Primary source | Accessible API capability | Limits and proposed transfer |
 |---|---|---|
@@ -170,7 +170,7 @@ ARCore's depth storage range is not an accuracy guarantee. Its current documenta
 
 ### H. Autonomous driving and longer range
 
-[Task38](../task_list/pending_review/38_research_long_range_fusion_and_driving_evaluation.md) checked official KITTI and nuScenes dataset/evaluator material on 5 October 2026. This comparison is research only. It downloads no data and changes no local depth range.
+[Task38](../task_list/closed/38_research_long_range_fusion_and_driving_evaluation.md) checked official KITTI and nuScenes dataset/evaluator material on 5 October 2026. This comparison is research only. It downloads no data and changes no local depth range.
 
 [The supplied probabilistic detection review](https://arxiv.org/abs/2011.10671) discusses observation/model uncertainty, calibration and proper scoring; its comparative experiments concern primarily 2D probabilistic detection. It does not establish a calibrated local 3D distribution. [LaserNet](https://openaccess.thecvf.com/content_CVPR_2019/papers/Meyer_LaserNet_An_Efficient_Probabilistic_3D_Object_Detector_for_Autonomous_Driving_CVPR_2019_paper.pdf) predicts distributions over LiDAR-based 3D boxes. [BEVFusion](https://arxiv.org/abs/2205.13542) combines camera/LiDAR features in an overhead representation. Neither has been run here.
 
@@ -187,13 +187,13 @@ For any later controlled comparison, first match coordinate and timestamp conven
 
 ### I. Future review and measurement requirements
 
-[Task39](../task_list/open/39_record_future_3d_review_and_measurement_requirements.md) records a future requirement, not an application implementation for this session. A picked 3D object should expose every source frame/crop, accepted/rejected observations, provisional IDs and duplicate links, individual positions and fused estimates, with pose revisions and depth lineage. A surface selection should show endpoint provenance, distances, observed dimensions and uncertainty.
+[Task39](../task_list/closed/39_record_future_3d_review_and_measurement_requirements.md) records a future requirement, not an application implementation for this session. A picked 3D object should expose every source frame/crop, accepted/rejected observations, provisional IDs and duplicate links, individual positions and fused estimates, with pose revisions and depth lineage. A surface selection should show endpoint provenance, distances, observed dimensions and uncertainty.
 
 Review usability must be measured separately from metric accuracy. Unknown surfaces, complete-size assumptions, rejected matches and incompatible coordinate frames need visible explanations. Existing Task22/23 review scopes remain bounded; this requirement does not silently expand them.
 
 ### Practical order and authorisation gaps
 
-[Task40](../task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md) owns the shared reference-acquisition protocol: independent human identity/mask review, surveyed anchor/extent/surface definitions, uncertainty of reference instruments, representative hard cases and session-disjoint splits. Begin with an inventory of usable existing evidence, then request only missing capture/reference access. Raw data acquisition, packages/weights, learned-model execution and phone/Apple hardware trials are not authorised by Task30.
+[Task40](../task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md) owns the shared reference-acquisition protocol: independent human identity/mask review, surveyed anchor/extent/surface definitions, uncertainty of reference instruments, representative hard cases and session-disjoint splits. Begin with an inventory of usable existing evidence, then request only missing capture/reference access. Raw data acquisition, packages/weights, learned-model execution and phone/Apple hardware trials are not authorised by Task30.
 
 After a reviewed reference plan: Task31 policy comparison can start on cached proposals; Task34 rectangle/classical/oracle mask comparison isolates contamination; Task32 support/distribution comparison isolates spatial uncertainty; Task33 appearance/context and combined association follows fixed supports; Task35 sequential/error tests follow defined anchors and support. Task36 points/patch/mesh display can be scoped independently, with geometric claims waiting for references. Task37 and Task38 platform/dataset research can proceed independently; their acquisitions need separate approval. Task13 and Task25 remain a separate frozen camera stream.
 

@@ -1,7 +1,7 @@
 ---
 id: "21"
 title: Associate object identities with geometry and appearance
-status: pending_review
+status: closed
 approval_status: approved
 priority: MED
 type: experiment
@@ -23,7 +23,7 @@ baseline_metric:
   baseline_value: "0 bounded five-condition geometry/appearance comparisons"
   target: "1 bounded within-session comparison, 0 origin merges, complete decisions and separate synthetic neighbour controls"
 created: 2026-10-03
-last_updated: 2026-10-04
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -161,7 +161,7 @@ Before: 0 bounded five-condition geometry/appearance comparisons. Target: 1 five
 
 | Field | Value |
 |---|---|
-| Closing commit | No implementation commit |
+| Closing commit | `8140ba0` (code); task record `de324e5` |
 | Files changed | Task21 experiment package, focused tests, scoped READMEs, pytest index and `tools/check.py`; existing IdentityStore schema/API and Task13 files unchanged |
 | Test status | 21 focused tests pass against the immutable accepted run, including the cross-session boundary regression; Ruff, mypy and scoped Black check pass. The regression failed before the session guard and passed after it. The actual bounded replay exercised the full runner and reported 94% package coverage before a test-only assertion key was corrected. The passing snapshot-validation suite reports 77% because it reuses that run and does not repeat input and report construction. |
 | Before measurement | 0 bounded five-condition geometry/appearance comparisons |
@@ -172,3 +172,7 @@ Before: 0 bounded five-condition geometry/appearance comparisons. Target: 1 five
 Run history: immutable snapshots `20261004T141743.357358Z_5788907929ad42e0be51854ff4642f74`, `20261004T142933.968017Z_baefbf4d59a04d5a86cff8a17ab0ce70`, `20261004T143414.120838Z_ac77f275fe084ebd87a0cf212c2b7510`, and `20261004T143434.634726Z_33f59456f7d34e50a64020ed6e0613bb` remain intact. The last run is the accepted box-versus-polygon and six-frame gap snapshot. Earlier runs are diagnostic snapshots superseded by the added support comparison and gap history. No production replay was created after the last run; corrected assertions reused the latest immutable run.
 
 Owner review remains outstanding. Task16's broader protocol remains pending review.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. Owner review waived. Kept as historical exploratory evidence on supplied camera poses; no physical count is claimed. Task46's fixed identities build on this work.

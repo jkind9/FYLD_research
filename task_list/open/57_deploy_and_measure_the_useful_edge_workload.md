@@ -5,13 +5,14 @@ status: open
 priority: HIGH
 type: infra
 approval_status: planning authorised 2026-10-06; execution requires task-specific review and frozen settings
-blocked_by: [51]
+blocked_by: [61]
 blocks: []
 verification_test: "experiments/01_camera_capture_delivery/tests/test_edge_workload.py"
 plan_reviewed: null
 files:
   - experiments/01_camera_capture_delivery/edge/**
   - experiments/01_camera_capture_delivery/native/**
+  - experiments/01_camera_capture_delivery/build/**
   - experiments/01_camera_capture_delivery/tests/**
 docs:
   - experiments/01_camera_capture_delivery/README.md
@@ -23,7 +24,7 @@ baseline_metric:
   baseline_value: "0 deployed useful measurement/counting workloads with sustained target-device evidence"
   target: "1 actual-device feasibility checkpoint and 1 sustained comparable deployment report"
 created: 2026-10-06
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -32,6 +33,10 @@ superseded_by: null
 ## In plain English
 
 Run the agreed useful workload on the chosen phone or nearby computer. Check early that it can load and work offline, then measure its behaviour during a real-length session. Compare its answers and resource use with the complete baseline.
+
+## Board update, 7 October 2026
+
+Task51 was rescoped on 6 October 2026 to the first prerecorded pipeline. Where this file refers to Task51 decisions for field work (site, objects, survey method, storage and retrieval, numeric limits, phone processing split), Task61 now owns them. The owner directed on 7 October 2026 that deployment must be on a phone; a nearby computer does not satisfy this task on its own. Task61 records whether the phone only captures (with hosted processing) or also processes. This task then deploys and measures that split. It also takes over Task24's open follow-up: rebuild the APK from a pinned container image so a fresh machine can reproduce the deployed package. The cached warm build that Task52 verified remains the working route until then.
 
 ## What
 
@@ -48,7 +53,7 @@ APK packaging and a camera report do not deploy the project's useful workload. E
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
 | Native camera app/build path already exists | capture experiment | device packaging | experiments/01_camera_capture_delivery/README.md:165; experiments/01_camera_capture_delivery/native/camera/java/org/fyld/capture/CameraActivity.java:1 |
-| Cached smoke build does not run measurement | Task24 | deployment baseline distinction | task_list/pending_review/24_recover_and_reproduce_android_apk_build_inside_cap.md:123 |
+| Cached smoke build does not run measurement | Task24 | deployment baseline distinction | task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md:123 |
 | Shared records and lineage exist | shared contracts | device adapter/export | experiments/shared/contracts.py:73; experiments/shared/runs.py:59 |
 | ARCore feature inventory is not device proof | ARCore research | runtime feasibility | research/arcore/README.md:3; research/arcore/README.md:7 |
 

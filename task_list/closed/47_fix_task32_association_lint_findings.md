@@ -1,7 +1,7 @@
 ---
 id: "47"
 title: Fix Task32 association defects found in final review
-status: pending_review
+status: closed
 priority: MED
 type: bug
 blocked_by: []
@@ -19,7 +19,7 @@ baseline_metric:
   baseline_value: "5 lint findings; 7 reproducible cases can confuse identities or exhaust resources"
   target: "0 lint findings; unique observation decisions and bounded assignment/distance memory"
 created: 2026-10-05
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -65,10 +65,14 @@ The tests assert duplicate observation IDs raise `ValueError` before decisions a
 
 | Field | Value |
 |---|---|
-| Closing commit | None; changes remain unpublished pending owner decision |
+| Closing commit | `14957e6` |
 | Files changed | `07_spatial_uncertainty/association.py`, `07_spatial_uncertainty/tests/test_association.py`, `task_list/README.md`, and this task receipt |
 | Test status | 73 focused tests passed; Ruff, Black, Python compilation, adapter mypy, both task-plan lint checks, and `git diff --check` passed. Mypy cannot map the new module because its package directory begins with digits. |
 | Before / after | 5 Ruff findings and 7 reproduced association/resource defects / 0 Ruff findings; all 7 regression tests pass |
 | Result | Final diff review passed with no findings; follow-up moved to pending review |
 
 still open because owner review and the publication decision remain outstanding.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. Code is committed in `14957e6`. The recording has no independent object positions, so no accuracy claim is made. Independently scored accuracy and complete timing belong to Task56; no further work on this method is scheduled unless Task56 shows identity errors it could fix.

@@ -1,7 +1,7 @@
 ---
 id: "48"
 title: Paired validation of median-point and Task32 support association
-status: pending_review
+status: closed
 priority: MED
 type: infra
 blocked_by: []
@@ -9,7 +9,7 @@ blocks: []
 verification_test: ""
 plan_reviewed: null
 files:
-  - task_list/pending_review/48_paired_validation_of_median_point_and_task32_suppo.md
+  - task_list/closed/48_paired_validation_of_median_point_and_task32_suppo.md
   - task_list/README.md
   - C:/Users/jkind/AppData/Local/Temp/claude/c--Users-jkind-Documents-02-Work-01-fyld-mobile-depth-estimation-tracking/b26acd3f-d0ce-46e0-832e-1538bd5e9231/scratchpad/compare_association.py
   - C:/Users/jkind/AppData/Local/Temp/claude/c--Users-jkind-Documents-02-Work-01-fyld-mobile-depth-estimation-tracking/b26acd3f-d0ce-46e0-832e-1538bd5e9231/scratchpad/run_timing.sh
@@ -23,7 +23,7 @@ baseline_metric:
   baseline_value: "55 IDs, 346 matched, 56 unresolved of 457 proposals"
   target: "Paired support-aware outcomes on the same inputs; no accuracy target"
 created: 2026-10-05
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -79,7 +79,7 @@ The concise status and run location are recorded in `task_list/README.md`; the r
 
 | field | value |
 |---|---|
-| closing commit | None; repository baseline is `684468d01c1f32b98b531c2922bd409583716150`; no commit created |
+| closing commit | `14957e6` |
 | files changed | This task record, `task_list/README.md`, and verified publication run `experiments/06_object_recognition/experiments/07_spatial_uncertainty/runs/20261005T190553.450639Z_99c53d40233e4d74839dc55d84284d68`; the existing Claude scratchpad remains unchanged |
 | test / verification | Comparison reproduced deterministically across 7 repeats per method; Task46 replay matched all 457 detections; 120 selected RGB/depth files rehashed with 0 mismatches; source and Task46 runs verified; copied 124 Task22 input files checked; publication manifest verified (327 files). No unit test changed because this is a read-only experiment. |
 | before / after | Earlier scratch report: median point 55 IDs, 346 matched, 56 unresolved; support-aware 30 IDs, 319 matched, 108 unresolved. Reproduced: same counts. The 60-frame replay has no independent object-position/count reference, so accuracy and physical count remain unavailable. |
@@ -121,3 +121,7 @@ Each box was turned into a 3D region: the box's pyramid between its nearest and 
 - Strict all-view intersection is too brittle for size: 13 of 55 tracks emptied, and the cup shrank from 429 to 5 voxels over 16 views. A size estimate needs tolerant fusion (vote or occupancy probability) and handling of the known colour/depth timing offset and box jitter.
 - Evidence: `experiments/06_object_recognition/experiments/07_spatial_uncertainty/runs/20261005T190553.450639Z_99c53d40233e4d74839dc55d84284d68/output/timing_result.json` and `regions_result.json`; source scripts and original failed execution metadata are copied into the run. The run manifest is verified.
 - still open because Claude's independent technical validation and owner review are pending. The validated package contains no independent object-position or physical-count reference, so it cannot establish identity accuracy or better counting.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. Code is committed in `14957e6`. The recording has no independent object positions, so no accuracy claim is made. Independently scored accuracy and complete timing belong to Task56; no further work on this method is scheduled unless Task56 shows identity errors it could fix.

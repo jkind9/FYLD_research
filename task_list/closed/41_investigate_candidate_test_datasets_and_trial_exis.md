@@ -1,7 +1,7 @@
 ---
 id: "41"
 title: Inventory public datasets for the hosted processing baseline
-status: pending_review
+status: closed
 priority: HIGH
 type: decision
 approval_status: research-only inventory authorised; no download, adapter, or experiment run authorised
@@ -10,7 +10,7 @@ blocks: []
 verification_test: experiments/datasets/README.md
 plan_reviewed: 2026-10-05 PASS
 files:
-  - task_list/pending_review/41_investigate_candidate_test_datasets_and_trial_exis.md
+  - task_list/closed/41_investigate_candidate_test_datasets_and_trial_exis.md
   - task_list/README.md
   - research/README.md
   - experiments/datasets/README.md
@@ -24,7 +24,7 @@ baseline_metric:
   baseline_value: "0 of 14 candidates fully inventoried; 3 local datasets already in use"
   target: "14 of 14 candidates inventoried with capability, reference, size, licence, and permission status; no downloads or runs"
 created: 2026-10-04
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -80,7 +80,7 @@ No acceptance threshold, performance result, adapter contract or experiment resu
 
 | field | value |
 |---|---|
-| closing commit | None; repository baseline is `684468d01c1f32b98b531c2922bd409583716150`; changes remain uncommitted |
+| closing commit | `14957e6` (research record) |
 | files changed | Task41 plan/receipt; `task_list/README.md`; `research/README.md`; `experiments/datasets/README.md` |
 | test | Documentation contract: 14 distinct candidate rows and six cells per row confirmed; no code/data test applies. `task-plan-lint.js` passed and `git diff --check` passed. `python -B tools/check.py -q` did not complete cleanly: tests emitted errors and the runner ended with `PermissionError [WinError 5]` while pytest cleaned its temp folder; exact suite outcomes are unavailable. |
 | before / after | Before: 0 of 14 additional candidates fully inventoried; 3 local datasets. After: 14 source-linked candidates record modalities, references, size, permissions/access, hosted-stage relevance and unknowns; no downloads or runs. |
@@ -96,3 +96,7 @@ still open because Claude's fixed-snapshot validation has not returned yet.
 ### Plan review history
 
 - 2026-10-05 FAIL: scope included downloads/adapters/runs despite the authorised research-only inventory; the grouped KITTI/nuScenes row made the 13-candidate count incomplete; settings and code paths were not fully scoped; the cited downloader is ICL-specific. Plan narrowed to 14 source checks only. Fresh review required before start.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The fixed-snapshot external validation is waived: the board README says those review sessions are not relaunched automatically, and a source claim is rechecked by whichever task uses it. Any dataset download or trial needs a separately scoped task.

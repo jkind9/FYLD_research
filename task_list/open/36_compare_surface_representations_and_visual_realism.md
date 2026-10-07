@@ -2,7 +2,7 @@
 id: "36"
 title: Compare surface representations and visual realism
 status: open
-priority: MED
+priority: LOW
 type: experiment
 approval_status: proposed; no execution authorised by Task30
 blocked_by: [56]
@@ -19,7 +19,7 @@ baseline_metric:
   baseline_value: "20000 desk display points; 0 local mesh/splat/NeRF comparisons"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-04
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -32,6 +32,10 @@ Compare ways to show and reconstruct the captured surfaces. Measure geometric qu
 ## Current priority, 6 October 2026
 
 Task55 owns dimensions and area; Task56 measures complete-system quality and cost. Pursue a representation change after that baseline identifies a geometry, coverage or review limitation. A more realistic display is not an accuracy result.
+
+## Board decision, 7 October 2026
+
+Lowered to LOW by Task60. It stays open because a 3D/VR review of the walkthrough is a stated later goal. It does not affect the first accuracy, latency or phone results.
 
 ## What
 

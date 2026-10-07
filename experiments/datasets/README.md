@@ -110,6 +110,6 @@ Record scene selection, resolution, reference units, calibration, pose direction
 
 ## Current object references and longer-range gaps, 4 October 2026
 
-[Task17 reference](../06_object_recognition/datasets/README.md) is a six-frame provisional agent-reviewed Freiburg1 desk control, with complete selected cup coverage and non-exhaustive monitor positives. It is neither human gold nor blind evaluation. [Task40](../../task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md) plans independent identity/mask/anchor/extent/surface references and missing captures; owner decisions remain outstanding.
+[Task17 reference](../06_object_recognition/datasets/README.md) is a six-frame provisional agent-reviewed Freiburg1 desk control, with complete selected cup coverage and non-exhaustive monitor positives. It is neither human gold nor blind evaluation. [Task40](../../task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md) plans independent identity/mask/anchor/extent/surface references and missing captures; owner decisions remain outstanding.
 
 KITTI and nuScenes are [research candidates](../../research/README.md#h-autonomous-driving-and-longer-range), not downloaded evaluation inputs. Task38 owns subset, sensor/time/pose/reference conventions, terms, storage and suitability. Indoor depth below the current 4 m cutoff does not establish longer-range accuracy. Dataset box centres, visible-surface anchors and surveyed physical centres must not be scored as interchangeable references.

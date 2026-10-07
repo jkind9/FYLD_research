@@ -5,7 +5,7 @@ status: open
 priority: HIGH
 type: infra
 approval_status: planning authorised 2026-10-06; execution requires task-specific review and frozen settings
-blocked_by: [51]
+blocked_by: []
 blocks: []
 verification_test: "experiments/05_birds_eye_mapping/tests/test_measurement.py"
 plan_reviewed: null
@@ -20,7 +20,7 @@ baseline_metric:
   baseline_value: "0 implemented site-area calculations or independent known-shape tests"
   target: "1 tested measurement component with dimensions, defined area and unknown coverage"
 created: 2026-10-06
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -29,6 +29,10 @@ superseded_by: null
 ## In plain English
 
 Turn the visible site model into dimensions and an area in real units. Start with shapes whose answers are known, then test a measured scene. Show what was never seen so missing ground cannot be counted as empty ground.
+
+## Board update, 7 October 2026
+
+Task51 was rescoped on 6 October 2026 to the first prerecorded pipeline. Where this file refers to Task51 decisions for field work (site, objects, survey method, storage and retrieval, numeric limits, phone processing split), Task61 now owns them. The known-shape tests and existing-surface controls need no field decision, so this task is no longer blocked. The site region and boundary definition for field use comes from Task61 and is only needed before Task56's physical comparison.
 
 ## What
 

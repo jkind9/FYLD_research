@@ -5,7 +5,7 @@ status: open
 priority: HIGH
 type: infra
 approval_status: planning authorised 2026-10-06; execution requires task-specific review and frozen settings
-blocked_by: [51]
+blocked_by: [61]
 blocks: []
 verification_test: "experiments/06_object_recognition/datasets/tests/test_reference_bank.py"
 plan_reviewed: 2026-10-06 PASS
@@ -25,7 +25,7 @@ baseline_metric:
   baseline_value: "0 independent physical object-position/count references and 0 surveyed phone test scenes"
   target: "1 versioned independently measured scene bank with separate development and held-out session roles"
 created: 2026-10-06
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -34,6 +34,10 @@ superseded_by: null
 ## In plain English
 
 Create a test scene whose correct measurements and object identities are known independently. Measure it and check the objects before looking at the program's answers. Film revisits and difficult cases so we can tell whether the program misses objects or counts the same one twice.
+
+## Board update, 7 October 2026
+
+Task51 was rescoped on 6 October 2026 to the first prerecorded pipeline. Where this file refers to Task51 decisions for field work (site, objects, survey method, storage and retrieval, numeric limits, phone processing split), Task61 now owns them. This task is now blocked by Task61 instead of Task51. Task40's reference design, which this task executes, closed on 7 October 2026 and stays the design source.
 
 ## What
 
@@ -49,9 +53,9 @@ Current identity labels are agent-reviewed and physical centres/counts are unkno
 
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
-| Detailed physical-reference design exists | Task40 | scene collection and scorers | task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md:65-73 |
+| Detailed physical-reference design exists | Task40 | scene collection and scorers | task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md:65-73 |
 | Existing desk publisher stages paired artifacts and exposes them with one directory rename, but its manifest does not represent surveyed site truth or enforce session-level roles | dataset publisher | current desk dataset consumers only | experiments/06_object_recognition/datasets/prepare.py:169-203; experiments/06_object_recognition/shared/manifest.py:205-278 |
-| Additional source inventory does not acquire data | Task41 | optional public-source selection | task_list/pending_review/41_investigate_candidate_test_datasets_and_trial_exis.md:35 |
+| Additional source inventory does not acquire data | Task41 | optional public-source selection | task_list/closed/41_investigate_candidate_test_datasets_and_trial_exis.md:35 |
 
 Task53 will define and validate a controlled-scene manifest under `experiments/06_object_recognition/datasets/`. It will keep method inputs and evaluator-only truth in one versioned publication directory, validate that each complete capture session has exactly one role, and keep survey units, frame links, uncertainty, object identity and ambiguity labels out of method inputs. The existing desk schema and pinned desk scorer remain unchanged. Task56 must consume the new pair through a declared adapter before scoring it.
 
@@ -66,7 +70,7 @@ Task53 will define and validate a controlled-scene manifest under `experiments/0
 
 | Producer/owner | Consumer | Representation | Survives restart? | Evidence |
 |---|---|---|---|---|
-| Independent survey/human reviewer | evaluator adapter only | metres, frame/session IDs, instrument uncertainty, physical IDs and explicit ambiguous/missing labels | versioned evaluator bundle survives | task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md:67 |
+| Independent survey/human reviewer | evaluator adapter only | metres, frame/session IDs, instrument uncertainty, physical IDs and explicit ambiguous/missing labels | versioned evaluator bundle survives | task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md:67 |
 | Task52 export and independent survey/reference bundle | controlled-scene preparation command | original phone payload under `input/phone/`, separate truth bundle under `input/reference/`; bundle IDs and source hashes recorded in the tracked release receipt | retained outside Git at the Task51-approved storage location and restored using the receipt's release ID | task_list/open/52_build_and_verify_a_usable_phone_recording.md:55-60; data/README.md:5 |
 | Recorded observations | method adapters | original image/depth/pose/calibration and one role per whole session; no truth IDs | sealed method bundle survives | experiments/06_object_recognition/shared/manifest.py:205-278 |
 | Controlled-scene publisher | dataset readers | paired manifests and shared version/hash links in one publication directory | both bundles appear together or neither does | experiments/06_object_recognition/datasets/prepare.py:169-203 |
@@ -78,7 +82,7 @@ Source of truth is independent survey and human review, never model outputs. Ref
 | name | value | source |
 |---|---|---|
 | scene, object classes, instruments, reviewed views, capture/session counts, splits and uncertainty limits | pending Task51 and scene-access decisions | n/a planning only; owner-confirmed values required before acquisition |
-| reference semantics and separation | anchors, dimensions, uncertainty and evaluator-only truth | inherited task_list/pending_review/40_plan_independent_references_and_hard_case_acquisition.md:67 |
+| reference semantics and separation | anchors, dimensions, uncertainty and evaluator-only truth | inherited task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md:67 |
 
 ## Verification
 

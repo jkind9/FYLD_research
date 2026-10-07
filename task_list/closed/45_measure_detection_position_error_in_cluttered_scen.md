@@ -1,7 +1,7 @@
 ---
 id: "45"
 title: Measure detection position error in cluttered scenes
-status: pending_review
+status: closed
 priority: HIGH
 type: experiment
 approval_status: owner delegated settings and GPU use on 2026-10-05 ("happy to defer to your judgement"; GPU allowed when no parallel session is using it)
@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "0 placement or jitter measures recorded; only hit/miss counts (cup 4 of 5 matched at IoU 0.3/0.5/0.7 on 6 coarse frames)"
   target: "placement error for every matched box in COCO val2017 (5000 images) against clutter; jitter for every desk track over the 571 posed TUM desk frames (573 associated colour/depth pairs, 2 refused for motion-capture gaps), next to a like-for-like feature noise floor; no pass/fail limit"
 created: 2026-10-05
-last_updated: 2026-10-05
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -208,3 +208,7 @@ Notes / caveats / follow-ups:
 - Plan review 2026-10-05 FAIL with 6 blocking findings: the 640×480 fixed size in `score_category`; the crowd rule hiding false detections; a frame-to-frame "bias" that could not see a steady offset and overstated jitter by √2; an inflated ORB floor (depth/colour timing, depth edges, keypoint level, outliers); depth-choice and edge effects counted as detector jitter; ORB settings diverging from the project's. All revised above, along with the nine advisory findings.
 - Task34 should reuse the placement, excess-background and outline-coverage measures to compare boxes with masks on the same COCO images and desk frames.
 - ScanNet++ phone-video outlines remain a later option; it needs the owner to request access.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. Clutter-stratified recall is owned by Task56. The downstream segmentation comparison (Task34) is parked in stale/.

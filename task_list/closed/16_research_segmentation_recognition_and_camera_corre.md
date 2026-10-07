@@ -1,7 +1,7 @@
 ---
 id: "16"
 title: Research segmentation recognition and camera correction comparisons
-status: pending_review
+status: closed
 approval_status: pending_review
 priority: MED
 type: decision
@@ -13,15 +13,15 @@ files:
   - research/README.md
   - experiments/06_object_recognition/README.md
   - experiments/03_camera_pose_estimation/README.md
-  - task_list/pending_review/16_research_segmentation_recognition_and_camera_corre.md
+  - task_list/closed/16_research_segmentation_recognition_and_camera_corre.md
   - task_list/open/17_prepare_labelled_revisit_inputs_and_object_observa.md
   - task_list/open/18_evaluate_object_detection_on_frozen_labelled_obser.md
   - task_list/open/19_evaluate_classical_and_edge_device_object_segmenta.md
   - task_list/open/20_compare_object_appearance_matching_across_viewpoin.md
-  - task_list/open/21_associate_object_identities_with_geometry_and_appe.md
-  - task_list/open/22_build_recorded_video_camera_surface_and_inventory_.md
-  - task_list/open/23_embed_interactive_surface_review_and_explain_depth.md
-  - task_list/open/24_recover_and_reproduce_android_apk_build_inside_cap.md
+  - task_list/closed/21_associate_object_identities_with_geometry_and_appe.md
+  - task_list/closed/22_build_recorded_video_camera_surface_and_inventory_.md
+  - task_list/stale/23_embed_interactive_surface_review_and_explain_depth.md
+  - task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md
   - task_list/open/25_compare_feature_seeded_odometry_and_verified_camer.md
 docs:
   - research/README.md
@@ -33,7 +33,7 @@ baseline_metric:
   baseline_value: "0 approved stage 06 comparison protocols"
   target: "1 approved protocol and availability-checked shortlist spanning the 5 stage 06 experiments"
 created: 2026-10-03
-last_updated: 2026-10-04
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -82,7 +82,7 @@ Before: 0 approved stage 06 comparison protocols. Target: 1 approved protocol an
 
 | Field | Value |
 |---|---|
-| Closing commit | Not applicable; no commit created |
+| Closing commit | `de324e5` (research record; no code) |
 | Files changed | research/README.md; experiments/03_camera_pose_estimation/README.md; experiments/06_object_recognition/README.md; Tasks 16 to 25 records |
 | Test status | No tests run; read-only source-to-documentation trace completed |
 | Before measurement | 0 approved stage 06 comparison protocols |
@@ -99,3 +99,7 @@ Earlier narrow YOLO approval did not approve this protocol. The subsequent instr
 ## Later owner direction, 4 October 2026
 
 Exploratory replay and association work do not approve this broader protocol. Keep Task16 in pending review until the owner accepts it. Task17 and the bounded exploratory trials remain separate evidence; they do not close this approval question.
+
+## Closure, 2026-10-07
+
+Closed under Task60 with owner approval. Earlier `still open because` lines above are superseded by this note. The fixed-snapshot external validation is waived: the board README says those review sessions are not relaunched automatically, and a source claim is rechecked by whichever task uses it. The broad protocol is not adopted as a gate on other work; Task56's measured failures choose any later comparison.

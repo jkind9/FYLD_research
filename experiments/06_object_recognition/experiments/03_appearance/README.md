@@ -65,7 +65,7 @@ Forty-one focused controls passed with 91% implementation coverage. Ruff, progra
 
 ## Next comparison, without reopening Task20
 
-[Task33](../../../../task_list/open/33_compare_object_appearance_context_and_spatial_association.md) will compare object-only/context appearance and spatial trade-offs on fixed inputs. ZNCC and existing YOLO26x pooled features are measured baselines. ResNet50 and contextual embeddings are proposed, untested and require their own acquisition/execution decisions. One incorrect monitor ranking is a recorded failure; it does not establish failure on all objects. Geometry-only and combined rules both resolve the current eleven observations, so wider tests must assess when additional appearance helps.
+[Task33](../../../../task_list/stale/33_compare_object_appearance_context_and_spatial_association.md) will compare object-only/context appearance and spatial trade-offs on fixed inputs. ZNCC and existing YOLO26x pooled features are measured baselines. ResNet50 and contextual embeddings are proposed, untested and require their own acquisition/execution decisions. One incorrect monitor ranking is a recorded failure; it does not establish failure on all objects. Geometry-only and combined rules both resolve the current eleven observations, so wider tests must assess when additional appearance helps.
 
 ## Optional walkthrough appearance and validation
 

@@ -22,7 +22,7 @@ baseline_metric:
   baseline_value: "0 same-recording complete tests with independently scored site measurements and counts"
   target: "1 held-out complete-process baseline report with accuracy, total time, memory and device context"
 created: 2026-10-06
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 superseded_by: null
 ---
 
@@ -31,6 +31,10 @@ superseded_by: null
 ## In plain English
 
 Run one recorded walkthrough through the whole process and compare its measurements and counts with independent answers. Measure the total wait and memory use on the chosen hardware. Show which stage failed instead of combining unrelated good results.
+
+## Board update, 7 October 2026
+
+Task51 was rescoped on 6 October 2026 to the first prerecorded pipeline. Where this file refers to Task51 decisions for field work (site, objects, survey method, storage and retrieval, numeric limits, phone processing split), Task61 now owns them. Task09's inventory umbrella is archived as superseded by this task: this report is now the place where distinct object counts after revisits are proven. The checked identity store from Task09 is still reused unchanged. Optional identity and error refinements (Tasks31, 33, 34, 35) are parked in `stale/`; reopen one only when this report shows a failure it would fix.
 
 ## What
 
