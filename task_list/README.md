@@ -16,7 +16,7 @@ The owner ruled on 7 October 2026 that deployment must be on a phone. Developmen
 
 ## Board pruning, 7 October 2026
 
-[Task60](open/60_prune_task_board_to_the_accuracy_latency_and_mobil.md) cut the board from 32 live tasks to 11 open ones. Finished pending-review work was closed with its commit receipts. The fixed-snapshot external validation those tasks were waiting for was waived, because those review sessions are not relaunched automatically; a source claim is rechecked by whichever task uses it. Optional object-identity and review refinements moved to `stale/` and return only when Task56 shows a measured failure they would fix.
+[Task60](closed/60_prune_task_board_to_the_accuracy_latency_and_mobil.md) cut the board from 32 live tasks to 11 open ones. Finished pending-review work was closed with its commit receipts. The fixed-snapshot external validation those tasks were waiting for was waived, because those review sessions are not relaunched automatically; a source claim is rechecked by whichever task uses it. Optional object-identity and review refinements moved to `stale/` and return only when Task56 shows a measured failure they would fix.
 
 ## Next order
 
