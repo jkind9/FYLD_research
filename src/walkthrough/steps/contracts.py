@@ -154,6 +154,28 @@ class ObjectsOutput(TypedDict):
 # ---- Shared readers ----
 
 
+def check_reference_tolerance(tolerance_s: float) -> None:
+    """Reference adapters accept only finite nonnegative seconds."""
+    if type(tolerance_s) not in (int, float) or not np.isfinite(tolerance_s) or tolerance_s < 0:
+        raise ValueError("Reference tolerance must be finite nonnegative seconds")
+
+
+def nearest_references(
+    frames: Iterator[Any], timestamps: list[float], tolerance_s: float
+) -> Iterator[tuple[Any, int | None]]:
+    """Match streamed frames independently; readers own ordered tables, choices own tolerance."""
+    reference_times = np.asarray(timestamps)
+    for frame in frames:
+        timestamp = frame.timestamp_s
+        if not isinstance(timestamp, (int, float)) or isinstance(timestamp, bool) or not np.isfinite(timestamp):
+            raise ValueError(f"{frame.frame_id}: Reference input requires a finite source timestamp")
+        insertion = int(np.searchsorted(reference_times, timestamp))
+        adjacent = range(max(0, insertion - 1), min(len(reference_times), insertion + 1))
+        nearest = min(adjacent, key=lambda index: abs(timestamp - reference_times[index]))
+        within_tolerance = timestamp - tolerance_s <= reference_times[nearest] <= timestamp + tolerance_s
+        yield frame, nearest if within_tolerance else None
+
+
 def method_label(choice: Any) -> str:
     """The chosen method's short name and class, saved with predictions and shown on visuals."""
     return f"{choice.name} ({type(choice).__module__}.{type(choice).__qualname__})"

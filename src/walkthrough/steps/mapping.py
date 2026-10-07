@@ -25,9 +25,9 @@ def run(
     artifact = "output/predictions/mapping.json"
     name = method.name if method is not None else None
     try:
+        if method is None:
+            raise Unavailable("Task55 mapping, dimensions and area implementation is unavailable")
         with run_context.measure("load_mapping"):
-            if method is None:
-                raise Unavailable("Task55 mapping, dimensions and area implementation is unavailable")
             measure_site = method.load()
         with run_context.measure("prediction_mapping"):
             output: MappingOutput = {

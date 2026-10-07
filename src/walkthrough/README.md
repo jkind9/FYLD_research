@@ -117,6 +117,10 @@ assert not result.is_measurement
 
 A reference control supplies recorded depth or camera poses so later layers can be tested without errors inherited from that estimator. It is the only route for reference data into a method. Ordinary capture withholds supplied depth and poses and records why. All other references remain in scoring requests. Supplied poses reach surface and objects only under a labelled tracking reference control. Their saved source remains `supplied`.
 
+Each reference adapter matches a frame independently to the nearest recorded timestamp within `tolerance_s` (default 0.02 seconds). Nearby frames may reuse a reference. Equal-distance matches choose the earlier timestamp, and the tolerance boundary is included. A genuine depth gap fails the layer with the frame named. A missing pose produces a `lost` record; tracking refuses to publish a complete layer with unplaced frames. Experiment and scoring association still uses its original one-to-one matching.
+
+Reference adapters keep the reference table in memory and consume decoded colour or RGB-D frames as they arrive. They retain no sequence-wide image list. Recorded depth exposes `units_per_metre=5000.0` and `max_depth_m=4.0`, inherited from experiment 03's TUM reader. The range is exclusive: trusted pixels have depth below the maximum. These fields appear in saved run settings. A wider reference range still meets tracking's documented 4-metre restriction only if its valid mask excludes longer depths.
+
 Controls use `software` for fixed fixtures and `reference` for recorded answers. `result.json` names every chosen control. Any control makes `is_measurement` false. This flag describes the source of predictions; it does not establish physical accuracy or phone fitness. Real-method results still report those as unmeasured until independently validated.
 
 ## Run recorded input
@@ -168,6 +172,8 @@ The ordinary TUM command returns exit code 2 with the Task54 depth reason today.
 
 Times are seconds. Frames per second is successful frames divided by successful elapsed time. Nested timings overlap; never add them. Depth times each next result. A method that processes all frames first puts that waiting time into the first frame sample. Depth, tracking, surface and objects have a whole-layer frame count. The current tracking method also records its pair samples. Peak memory and sustained phone speed remain Task57 work.
 
+A missing method or required counting setting returns its unavailable reason before loading starts, so it creates no `load_<layer>` sample. A selected method whose loader fails still creates a failed loading sample. Tracking, mapping and objects each validate their output once inside the layer, before saving it.
+
 ## Scoring and publication
 
 `ScoreRequest(component, load_references, options, reference_file)` keeps answers outside methods. Prediction hashes are saved before scoring, then checked again afterward. The optional reference file is hashed for provenance before its loader runs. Hashing and parsing are separate operations; this version does not promise a single immutable reference-byte snapshot.
@@ -195,3 +201,5 @@ python -B tools/check.py src/walkthrough/tests experiments/shared/tests -q
 ```
 
 The fixtures test execution order, saved contracts, timing, reference labels, scoring integrity, failures and visual exports. They are ordinary method choices labelled `software`, never physical accuracy evidence. Existing frozen experiment commands and historical runs remain unchanged.
+
+Reference regressions embed the first 20 XYZ recording timestamps to catch competing matches without a dataset download. They check genuine gaps, tie and tolerance boundaries, frame release and invalid settings. When the optional XYZ images are installed, two further checks cover all 798 timestamps and a real 20-frame depth, pose and surface run.

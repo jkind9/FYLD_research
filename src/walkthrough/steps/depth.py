@@ -5,12 +5,12 @@ from collections.abc import Iterator
 from dataclasses import asdict, dataclass, field
 from functools import partial
 from pathlib import Path
-from typing import Protocol, cast
+from typing import Protocol
 
 import numpy as np
 from PIL import Image
 
-from experiments.shared.geometry import associate_times, check_depth_grid, depth_metres
+from experiments.shared.geometry import check_depth_grid, depth_metres
 from experiments.shared.runs import Run, write_json
 
 from ..records import StepResult, Unavailable, failed_step
@@ -23,7 +23,9 @@ from .contracts import (
     DepthOutput,
     DepthPrediction,
     MethodChoice,
+    check_reference_tolerance,
     method_label,
+    nearest_references,
 )
 
 pose_dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
@@ -35,10 +37,21 @@ class DepthMethod(MethodChoice, Protocol):
 
 @dataclass(frozen=True)
 class RecordedSensorDepth:
+    """Supply experiment 03's recorded TUM depth as a reference control."""
+
     root: Path
-    tolerance_s: float = 0.02
+    tolerance_s: float = 0.02  # inherited from experiment 03 dataset.py:79
+    units_per_metre: float = 5000.0  # inherited from experiment 03 dataset.py:123
+    max_depth_m: float = 4.0  # inherited from experiment 03 dataset.py:124
     name: str = field(default="recorded_sensor_depth", init=False)
     control: str = field(default="reference", init=False)
+
+    def __post_init__(self) -> None:
+        check_reference_tolerance(self.tolerance_s)
+        for name in ("units_per_metre", "max_depth_m"):
+            value = getattr(self, name)
+            if type(value) not in (int, float) or not np.isfinite(value) or value <= 0:
+                raise ValueError(f"{name} must be positive and finite")
 
     def load(self) -> DepthEstimator:
         rows = pose_dataset.read_table(self.root / "depth.txt")
@@ -47,40 +60,29 @@ class RecordedSensorDepth:
     def _predict(
         self, frames: Iterator[ColourFrame], *, run: Run, rows: list[tuple[float, str]]
     ) -> Iterator[DepthPrediction]:
-        colour_frames = list(frames)
-        if any(frame.timestamp_s is None for frame in colour_frames):
-            raise ValueError("Recorded sensor depth requires source timestamps")
-        matches = dict(
-            associate_times(
-                cast(list[float], [frame.timestamp_s for frame in colour_frames]),
-                [row[0] for row in rows],
-                self.tolerance_s,
-            )
-        )
-        for index, frame in enumerate(colour_frames):
-            if index not in matches:
+        for frame, matched in nearest_references(frames, [row[0] for row in rows], self.tolerance_s):
+            if matched is None:
                 raise ValueError(f"{frame.frame_id}: No sensor depth within {self.tolerance_s:g} s")
-            path = self.root / rows[matches[index]][1]
+            path = self.root / rows[matched][1]
             if path.is_symlink() or not path.resolve().is_relative_to(self.root.resolve()):
                 raise ValueError("TUM depth path must stay inside the selected dataset")
             with Image.open(path) as image:
                 encoded = np.asarray(image)
                 if image.format != "PNG" or encoded.dtype != np.uint16:
                     raise ValueError(f"{frame.frame_id}: Expected uint16 depth PNG")
-            depth, valid = depth_metres(encoded, 5000)
-            yield DepthPrediction(frame.frame_id, depth, valid & (depth < 4))
+            depth, valid = depth_metres(encoded, self.units_per_metre)
+            yield DepthPrediction(frame.frame_id, depth, valid & (depth < self.max_depth_m))
 
 
 def run(run_context: Run, capture: CaptureOutput, method: DepthMethod | None) -> tuple[StepResult, DepthOutput | None]:
     artifact = "output/predictions/depth.json"
     name = None if method is None else method.name
     try:
-        if method is not None:
-            for frame in capture["frames"]:
-                calibration_for(frame)
+        if method is None:
+            raise Unavailable("Task54 real metric depth implementation is unavailable")
+        for frame in capture["frames"]:
+            calibration_for(frame)
         with run_context.measure("load_depth"):
-            if method is None:
-                raise Unavailable("Task54 real metric depth implementation is unavailable")
             estimate = method.load()
         with run_context.measure("prediction_depth", frames=len(capture["frames"])):
             predictions = iter(estimate(saved_colour_frames(run_context.path, capture), run=run_context))

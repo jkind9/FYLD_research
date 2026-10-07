@@ -33,7 +33,7 @@ class SurfaceMethod(MethodChoice, Protocol):
 
 @dataclass(frozen=True)
 class MetricPoints:
-    """Backproject the valid depth pixels and transform them into their world."""
+    """Build experiment 04's point representation using shared geometry and supplied origins."""
 
     name: str = field(default="metric_points", init=False)
     control: str | None = field(default=None, init=False)

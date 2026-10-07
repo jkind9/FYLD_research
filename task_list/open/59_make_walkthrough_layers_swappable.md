@@ -1,7 +1,7 @@
 ---
 id: "59"
 title: Make each walkthrough layer swappable and simplify the runner
-status: closed
+status: in_progress
 priority: HIGH
 type: refactor
 approval_status: plan requested by owner 2026-10-07; six decisions and contract scope answered 2026-10-07 (see Clarifications)
@@ -20,12 +20,10 @@ files:
   - src/README.md
   - README.md
   - task_list/README.md
-  - task_list/closed/59_make_walkthrough_layers_swappable.md
+  - task_list/open/59_make_walkthrough_layers_swappable.md
 docs:
-  - experiments/shared/README.md
   - src/walkthrough/README.md
   - src/README.md
-  - README.md
   - task_list/README.md
 baseline_metric:
   source: "this file, section Why, measured 2026-10-07 08:16 on the Task 51 working tree"
@@ -1024,3 +1022,77 @@ Before closing, run the diff-reviewer agent on the whole diff without telling it
 - Six agents were used, with the plan reviewer reused for test execution. Windows Black CLI processes hung; verified task-owned formatter processes were stopped and formatting was completed through Black's synchronous API.
 - Existing unrelated data/capture documentation changes and Task51's task record remain outside the scoped implementation commit. Historical experiment commands and runs are unchanged.
 - The eight items under Follow-up tasks are intentionally separate scope, not unfinished Task59 requirements. Real depth, mapping, complete physical scores, capture metadata, phone processing placement, sustained performance and peak memory remain with their named owners.
+
+## Reopened correction plan, 2026-10-07
+
+### In plain English
+
+Recorded depth incorrectly prevents two colour frames from using the same nearby depth image. Fix both reference inputs to match one frame at a time, keep decoded images out of sequence-wide lists, and report missing methods without pretending loading failed. Keep the existing safety checks and add tests using the real recording's timestamp pattern.
+
+### What and why
+
+Reopen Task 59 after owner review. The XYZ recording has 798 colour frames, six unmatched by the reference adapter's one-to-one association, but zero unmatched by nearest matching within 0.02 s (maximum gap 0.017199993 s). Both adapters retain decoded frames for the entire sequence. Repeated contract traversal and absent-method timing also diverge from the approved examples. Original implementation receipts remain historical; correction receipts will be added separately.
+
+### How: reuse evidence
+
+| Claim | Existing owner | Callers/consumers | Evidence |
+|---|---|---|---|
+| Existing matcher is deliberately one-to-one and must remain unchanged | associate_times | frozen experiments and scorers | experiments/shared/geometry.py:91 |
+| Recorded depth can use table rows and existing decoding | RecordedSensorDepth, depth_metres | depth.run | src/walkthrough/steps/depth.py:39,70 |
+| Recorded poses can use the existing reference reader | ReferencePoses | tracking.run | src/walkthrough/steps/tracking.py:57 |
+| NumPy searchsorted already locates adjacent timestamp candidates | associate_times | new reference-only nearest helper | experiments/shared/geometry.py:107 |
+| Pipeline repeats output validation done before publication | run | visual consumers | src/walkthrough/pipeline.py:59,79,89 |
+| Proposal fields are checked before output assembly and by output validator | _count, validate | objects.run, pipeline.run | src/walkthrough/steps/objects.py:203,296 |
+
+- Add one reference-only nearest-timestamp helper in steps/contracts.py; reuse the readers' finite ordered timestamp checks and validate finite nonnegative tolerance at construction, match with binary search, break equal-distance ties toward the earlier timestamp, include the exact tolerance boundary, and permit reference reuse. Shared one-to-one matching remains untouched.
+- Stream RecordedSensorDepth without collecting decoded colour frames; add named units_per_metre and max_depth_m fields with experiment source comments. Retain path/PNG/grid validation and missing-timestamp rejection.
+- Stream ReferencePoses into lightweight PoseRecords, never retaining RGB-D frames; unmatched records have status lost and pose None. Ordinary tracking still refuses incomplete placement.
+- Keep tracking/mapping/objects validation in their layer before writing, remove the duplicate pipeline calls. Remove the earlier duplicate proposal-field traversal; keep the final object output validator with frame-specific errors. Capture/depth/surface validation is outside this correction scope.
+- Return unavailable reasons before load_depth/load_mapping/load_objects timing starts when inputs/methods are missing; real method-load errors still receive failed timing samples.
+- Add one-line built-in method docstrings naming their experiment owners.
+- Add portable timestamp collision, genuine-gap, tie/boundary, invalid-setting, memory-lifetime, missing-pose-status, single-validation and timing regressions in src/walkthrough/tests/test_reference_inputs.py and test_layers.py. Use the actual first 20 XYZ timestamps, plus a local real-image integration check; portable tests must not depend on an untracked dataset download.
+- Update declared READMEs and the task index for this correction.
+
+### Invariants and recovery
+
+| Producer/owner | Consumer | Representation | Survives restart? |
+|---|---|---|---|
+| Reference table readers | reference-only matcher | finite increasing timestamps in seconds | table files remain unchanged |
+| Colour/RGB-D iterator | reference adapters | one decoded frame at a time; same frame IDs/order | capture/depth artifacts remain unchanged |
+| Reference adapter | layer saver | one prediction/record per input; reference label; supplied pose only when present | saved JSON/arrays |
+| Layer validator | saver and pipeline | malformed outputs fail before publication | run remains incomplete |
+
+Source of truth is the selected recording, not a generated reference file. No new process or persistent state boundary is introduced. A failed or interrupted run keeps the existing incomplete-run behavior and a new run recomputes outputs. Existing method call signatures and scorer association semantics remain unchanged. Added depth fields preserve inherited defaults (5000 units/m, 4 m); no experiment method settings change.
+
+### Verification
+
+Contract tests assert nearest reference reuse at colliding real timestamps, true gaps rejected, tie goes earlier, exact tolerance accepted, invalid timestamps/settings rejected, previous decoded frames collectible before the next frame arrives, lost status on an unmatched pose, and exactly one tracking/mapping/objects validation per pipeline run. Missing methods have zero load samples; a selected loader failure retains one failed sample.
+
+Before/after targets: XYZ missing depth 6/798 -> 0/798; first 20 frames missing 3/20 -> 0/20. Retained decoded frames bounded independently of sequence length. Existing 195 focused checks remain passing; production coverage >=80%. Run a real 20-frame depth/pose/surface integration and the full CPU suite. Review changed Python and finished diff before closure.
+
+### Correction receipts
+
+| Receipt | Result |
+|---|---|
+| Closing implementation commit | Filled from the scoped correction commit before closing |
+| Files changed | pipeline.py; steps/contracts.py, depth.py, tracking.py, mapping.py, objects.py, capture.py, surface.py; tests/test_layers.py, test_reference_inputs.py, test_reference_inputs_real.py; walkthrough README, src README, task index and this record |
+| Before | XYZ 6/798 unmatched depth frames, first 20 3/20 unmatched; both reference adapters buffer all decoded frames; three absent-method load stages recorded as failed; tracking/mapping/objects output validation invoked twice, object proposal fields checked three times; missing pose status supplied |
+| After | XYZ 0/798 unmatched, first 20 0/20 unmatched; real 20-frame depth/pose/surface run succeeds; first decoded frame and its arrays collectible before frame 3 arrives in both adapters; absent methods/settings create zero load samples; selected loader failures still timed; one output validation per tracking/mapping/objects layer, one object proposal-field traversal; missing pose status lost |
+| Delta | Six full-sequence gaps and three first 20 gaps removed; no whole-sequence decoded-frame retention in either adapter; pipeline 107 -> 101 lines, total runner 1606 -> 1629 lines excluding tests/visualization |
+| Test status | Full CPU suite 805 passed, 7 optional skips in 186.95 s (outputs/task59_checks/correction_full.log). Focused run after timestamp-subtype and decimal-boundary review fixes: 254 passed in 121.52 s, 93% production coverage, 1363 statements/89 missed (outputs/task59_checks/correction_targeted.log). After the final tracking identity-check consolidation, seven count/order/timestamp/lost/object/publication checks passed in 8.82 s. Portable reference suite 52 passed. Two real-image/table checks passed in 5.51 s. |
+| Red-first evidence | Original portable reference cases: 31 failed / 16 passed; timing/duplicate validation cases: 4 failed / 1 passed. NumPy timestamp regression:1 failed then passed. Decimal tolerance regression:4 failed then passed. |
+| Static checks | Ruff passes changed Python; in-process Black at 120 reports no changes; scoped mypy passes seven core modules with --explicit-package-bases --follow-imports=silent --ignore-missing-imports. A broader import-following check reports seven existing errors only in unchanged experiments/shared/phone_session.py; that module was not changed. |
+| Plan review | correction_plan PASS; corrected its two advisory evidence citations before implementation |
+| Code review | correction_code_review APPROVE, no actionable defects |
+| Python review | python_review PASS after fixing NumPy float timestamp compatibility and formatting |
+| Diff review | correction_diff PASS after fixing decimal tolerance boundary; final tracking consolidation recheck recorded before closure |
+| Documentation | Declared walkthrough README, src README and task index updated this session; original shared/root README updates remain documented in the historical implementation receipts |
+| Decision outcome | All requested corrections implemented and verified; genuine unmatched depth still fails, unmatched poses remain lost, and the shared one-to-one scorer/experiment matcher is unchanged |
+
+Review findings and resolutions:
+
+- A float subtype such as np.float64 was incorrectly rejected as a source timestamp. Accept float/int subclasses while rejecting bool and nonfinite values; the regression failed before the fix and passes afterward.
+- A decimal boundary such as source 1.02 / reference 1.0 / tolerance 0.02 was incorrectly rejected by subtraction rounding. Check the inclusive timestamp interval, matching existing association semantics; four adapter regressions failed before the fix and pass afterward.
+- The final tracking cleanup removes its repeated frame-identity traversal, retaining explicit count/lost diagnostics and identity/timestamp/pose validation before saving. Seven boundary/publication checks pass.
+
+Bounded exceptions remain explicit: the original <=1450 total-line estimate was waived in the original receipts. Correctness and setting validation add 23 net lines, so the corrected runner is 1629 lines (179 over that estimate); the main runner remains below 120 lines. Peak memory for the complete application and sustained phone performance remain Task57, not proven by the frame-lifetime tests. Optional real-image tests skip when the dataset is absent; the timestamp collision tests always run. No correction feature remains pending.

@@ -36,6 +36,8 @@ class CaptureSource(MethodChoice, Protocol):
 
 @dataclass(frozen=True)
 class PhoneExport:
+    """Read experiment 01's phone capture report and image bundle."""
+
     report: Path
     bundle: Path
     name: str = field(default="phone_export", init=False)
@@ -94,6 +96,8 @@ class PhoneExport:
 
 @dataclass(frozen=True)
 class TumSequence:
+    """Read RGB inputs with experiment 03's TUM table and calibration."""
+
     root: Path
     name: str = field(default="tum_sequence", init=False)
     control: str | None = field(default=None, init=False)

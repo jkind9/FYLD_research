@@ -9,7 +9,7 @@ import pytest
 from PIL import Image
 
 from src.walkthrough import pipeline
-from src.walkthrough.steps import objects
+from src.walkthrough.steps import mapping, objects, tracking
 from src.walkthrough.steps.capture import TumSequence
 from src.walkthrough.steps.depth import RecordedSensorDepth
 from src.walkthrough.steps.tracking import ReferencePoses
@@ -32,6 +32,46 @@ def test_every_completed_layer_records_load_prediction_and_visual_timing(config)
         assert stages[f"load_{row.name}"]["successful_samples"] == 1
         assert stages[f"prediction_{row.name}"]["successful_samples"] == 1
         assert stages[f"visual_{row.name}"]["successful_samples"] == 1
+
+
+@pytest.mark.parametrize("layer", ["depth", "mapping", "objects"])
+def test_absent_method_does_not_record_loading_failure(config, layer):
+    choices = {layer: objects.ObjectSettings() if layer == "objects" else None}
+    result = pipeline.run(replace(config, **choices))
+    step = next(row for row in result.steps if row.name == layer)
+    assert step.status == "unavailable"
+    assert f"load_{layer}" not in timing(result)["stages"]
+
+
+def test_selected_loader_failure_records_failed_loading(config):
+    class BrokenLoader:
+        name = "broken_loader"
+        control = None
+
+        def load(self):
+            raise OSError("checkpoint unreadable")
+
+    result = pipeline.run(replace(config, depth=BrokenLoader()))
+    assert result.steps[1].status == "failed"
+    samples = [row for row in timing(result)["samples"] if row["stage"] == "load_depth"]
+    assert len(samples) == 1 and samples[0]["status"] == "failed"
+
+
+def test_completed_outputs_are_validated_once_before_saving(config, monkeypatch):
+    calls = {"tracking": 0, "mapping": 0, "objects": 0}
+
+    def counted(name, validator):
+        def validate(*args):
+            calls[name] += 1
+            return validator(*args)
+
+        return validate
+
+    for module in (tracking, mapping, objects):
+        name = module.__name__.rsplit(".", 1)[-1]
+        monkeypatch.setattr(module, "validate", counted(name, module.validate))
+    assert pipeline.run(config).complete
+    assert calls == {"tracking": 1, "mapping": 1, "objects": 1}
 
 
 def test_frame_layers_report_frame_counts_and_fps(config):
@@ -60,10 +100,7 @@ def test_result_rows_name_method_and_frames(config):
     assert rows["tracking"].method == "identity_backend"
     assert rows["surface"].method == "metric_points"
     assert rows["objects"].method == "whole_image"
-    assert all(
-        rows[name].frames == 3
-        for name in ("capture", "depth", "tracking", "surface", "objects")
-    )
+    assert all(rows[name].frames == 3 for name in ("capture", "depth", "tracking", "surface", "objects"))
     assert rows["mapping"].frames is None
     saved = json.loads((result.path / "output/result.json").read_text())
     assert saved["controls"] == result.controls and saved["is_measurement"] is False
@@ -83,14 +120,9 @@ def test_skip_reason_follows_partial_rule(config):
     def bad_depth(frames, *, run):
         raise ValueError("deliberate depth failure")
 
-    failed = pipeline.run(
-        replace(config, depth=providers.Fixture("bad_depth", bad_depth))
-    )
+    failed = pipeline.run(replace(config, depth=providers.Fixture("bad_depth", bad_depth)))
     assert failed.steps[1].status == "failed"
-    assert (
-        failed.steps[3].reason
-        == "Waiting on earlier layers: depth is failed, tracking is skipped"
-    )
+    assert failed.steps[3].reason == "Waiting on earlier layers: depth is failed, tracking is skipped"
 
 
 def test_skip_reasons_trace_to_root_cause(config):
@@ -122,9 +154,7 @@ def test_depth_contract_refuses_wrong_count_or_order(config, defect, reason):
             predictions = [predictions[1], predictions[0], *predictions[2:]]
         yield from predictions
 
-    result = pipeline.run(
-        replace(config, depth=providers.Fixture("bad_depth", bad_depth))
-    )
+    result = pipeline.run(replace(config, depth=providers.Fixture("bad_depth", bad_depth)))
     assert result.steps[1].status == "failed"
     assert reason in result.steps[1].reason
     assert not (result.path / "output/predictions/depth.json").exists()
@@ -137,9 +167,7 @@ def test_multi_view_depth_fits_contract(config):
         time.sleep(0.02)
         yield from providers.flat_depth(iter(observations), run=run)
 
-    result = pipeline.run(
-        replace(config, depth=providers.Fixture("multi_view", all_frames_depth))
-    )
+    result = pipeline.run(replace(config, depth=providers.Fixture("multi_view", all_frames_depth)))
     assert result.complete
     rows = [row for row in timing(result)["samples"] if row["stage"] == "depth_frame"]
     assert len(rows) == 3
@@ -149,18 +177,14 @@ def test_multi_view_depth_fits_contract(config):
 
 def test_tracking_lost_frame_reason_is_visible(config):
     def lost_frame(frames, *, run):
-        records = providers.pose_tracking.track(
-            frames, providers.IdentityBackend(), run=run
-        )
+        records = providers.pose_tracking.track(frames, providers.IdentityBackend(), run=run)
         return [
             records[0],
             replace(records[1], pose=None, reason="deliberate lost observation"),
             records[2],
         ]
 
-    result = pipeline.run(
-        replace(config, tracking=providers.Fixture("lost_frame", lost_frame))
-    )
+    result = pipeline.run(replace(config, tracking=providers.Fixture("lost_frame", lost_frame)))
     assert result.steps[2].status == "failed"
     frame_id = read(result, "capture")["frames"][1]["frame_id"]
     assert f"first {frame_id}: deliberate lost observation" in result.steps[2].reason
@@ -169,22 +193,32 @@ def test_tracking_lost_frame_reason_is_visible(config):
 
 def test_tracking_contract_refuses_changed_source_timestamp(config):
     def changed_timestamp(frames, *, run):
-        records = providers.pose_tracking.track(
-            frames, providers.IdentityBackend(), run=run
-        )
+        records = providers.pose_tracking.track(frames, providers.IdentityBackend(), run=run)
         return [replace(records[0], timestamp_s=999.0), *records[1:]]
 
-    result = pipeline.run(
-        replace(
-            config, tracking=providers.Fixture("changed_timestamp", changed_timestamp)
-        )
-    )
+    result = pipeline.run(replace(config, tracking=providers.Fixture("changed_timestamp", changed_timestamp)))
     assert result.steps[2].status == "failed"
     frame_id = read(result, "capture")["frames"][0]["frame_id"]
     assert frame_id in result.steps[2].reason
     assert "timestamp" in result.steps[2].reason.lower()
     assert not (result.path / "output/predictions/tracking.json").exists()
     assert not (result.path / "metadata/manifest.json").exists()
+
+
+@pytest.mark.parametrize("defect", ["missing", "extra", "swapped"])
+def test_tracking_contract_refuses_wrong_count_or_order(config, defect):
+    def bad_tracking(frames, *, run):
+        records = providers.pose_tracking.track(frames, providers.IdentityBackend(), run=run)
+        if defect == "missing":
+            return records[:-1]
+        if defect == "extra":
+            return [*records, records[-1]]
+        return [records[1], records[0], records[2]]
+
+    result = pipeline.run(replace(config, tracking=providers.Fixture("bad_tracking", bad_tracking)))
+    assert result.steps[2].status == "failed"
+    assert not (result.path / "output/predictions/tracking.json").exists()
+    assert all(row.status == "skipped" for row in result.steps[3:])
 
 
 def test_reference_depth_on_tum_sample(config, tmp_path):
@@ -225,10 +259,7 @@ def test_reference_poses_reach_objects_only_under_control(config, tmp_path):
     assert result.controls["tracking"] == "reference" and not result.is_measurement
     records = read(result, "tracking")["records"]
     assert all(row["pose"]["source"] == "supplied" for row in records)
-    assert all(
-        row["world_id"] == "tum_groundtruth"
-        for row in read(result, "surface")["shards"]
-    )
+    assert all(row["world_id"] == "tum_groundtruth" for row in read(result, "surface")["shards"])
     assert len(read(result, "objects")["origins"]) == 1
     unlabelled = pipeline.run(
         replace(
@@ -246,15 +277,9 @@ def test_reference_poses_reach_objects_only_under_control(config, tmp_path):
 def test_surface_contract_refuses_bad_points(config, defect):
     def bad_surface(depth, valid, calibration, pose):
         count = int(valid.sum())
-        return (
-            np.full((count, 3), np.nan)
-            if defect == "nonfinite"
-            else np.zeros((count - 1, 3))
-        )
+        return np.full((count, 3), np.nan) if defect == "nonfinite" else np.zeros((count - 1, 3))
 
-    result = pipeline.run(
-        replace(config, surface=providers.Fixture("bad_surface", bad_surface))
-    )
+    result = pipeline.run(replace(config, surface=providers.Fixture("bad_surface", bad_surface)))
     assert result.steps[3].status == "failed"
     frame_id = read(result, "capture")["frames"][0]["frame_id"]
     assert frame_id in result.steps[3].reason
@@ -267,10 +292,7 @@ def test_object_contract_refuses_proposal_without_identity(config, monkeypatch):
     def missing_identity(*args, **kwargs):
         decisions, tracks, next_number = original(*args, **kwargs)
         return (
-            [
-                {key: value for key, value in row.items() if key != "object_id"}
-                for row in decisions
-            ],
+            [{key: value for key, value in row.items() if key != "object_id"} for row in decisions],
             tracks,
             next_number,
         )

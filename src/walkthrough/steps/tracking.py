@@ -10,7 +10,6 @@ from typing import Protocol
 from numpy.typing import NDArray
 
 from experiments.shared.contracts import Pose
-from experiments.shared.geometry import associate_times
 from experiments.shared.runs import Run, write_json
 
 from ..records import StepResult, Unavailable, failed_step
@@ -23,8 +22,10 @@ from .contracts import (
     TrackingEstimator,
     TrackingOutput,
     check_capture_clock,
+    check_reference_tolerance,
     load_rgbd_frames,
     method_label,
+    nearest_references,
     read_pose,
 )
 
@@ -39,6 +40,8 @@ class TrackingMethod(MethodChoice, Protocol):
 
 @dataclass(frozen=True)
 class CpuOdometry:
+    """Load experiment 03's CPU RGB-D odometry backend."""
+
     name: str = field(default="cpu_odometry", init=False)
     control: str | None = field(default=None, init=False)
 
@@ -48,10 +51,15 @@ class CpuOdometry:
 
 @dataclass(frozen=True)
 class ReferencePoses:
+    """Supply experiment 03's TUM ground-truth poses as a reference control."""
+
     groundtruth: Path
-    tolerance_s: float = 0.02
+    tolerance_s: float = 0.02  # inherited from experiment 03 dataset.py:79
     name: str = field(default="reference_poses", init=False)
     control: str = field(default="reference", init=False)
+
+    def __post_init__(self) -> None:
+        check_reference_tolerance(self.tolerance_s)
 
     def load(self) -> TrackingEstimator:
         references = pose_evaluation.read_references(self.groundtruth)
@@ -64,23 +72,15 @@ class ReferencePoses:
         run: Run,
         references: list[tuple[float, NDArray]],
     ) -> list[PoseRecord]:
-        observations = list(frames)
-        matches = dict(
-            associate_times(
-                [frame.timestamp_s for frame in observations],
-                [row[0] for row in references],
-                self.tolerance_s,
-            )
-        )
         records = []
-        for index, frame in enumerate(observations):
-            if index in matches:
-                pose = Pose(references[matches[index]][1], "tum_groundtruth", "0", "supplied")
+        for frame, matched in nearest_references(frames, [row[0] for row in references], self.tolerance_s):
+            if matched is not None:
+                pose = Pose(references[matched][1], "tum_groundtruth", "0", "supplied")
                 reason = "reference control"
             else:
                 pose = None
                 reason = f"No ground-truth pose within {self.tolerance_s:g} s"
-            records.append(PoseRecord(frame.frame_id, frame.timestamp_s, "supplied", pose, reason))
+            records.append(PoseRecord(frame.frame_id, frame.timestamp_s, "supplied" if pose else "lost", pose, reason))
         return records
 
 
@@ -94,11 +94,9 @@ def run(
             estimate = method.load()
         with run_context.measure("prediction_tracking", frames=len(capture["frames"])):
             records = estimate(load_rgbd_frames(run_context.path, capture, depth), run=run_context)
-            source_ids = [frame["frame_id"] for frame in capture["frames"]]
-            if len(records) != len(source_ids):
-                raise ValueError(f"Tracking returned {len(records)} records for {len(source_ids)} frames")
-            if [record.frame_id for record in records] != source_ids:
-                raise ValueError("Tracking record order must match capture")
+            frame_count = len(capture["frames"])
+            if len(records) != frame_count:
+                raise ValueError(f"Tracking returned {len(records)} records for {frame_count} frames")
             lost = [record for record in records if record.pose is None]
             if lost:
                 raise ValueError(

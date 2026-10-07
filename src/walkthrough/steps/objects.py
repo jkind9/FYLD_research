@@ -45,6 +45,8 @@ class DetectorMethod(MethodChoice, Protocol):
 
 @dataclass(frozen=True)
 class Yolo26x:
+    """Load experiment 06's CPU detector from an acquired checkpoint."""
+
     checkpoint: Path
     name: str = field(default="yolo26x", init=False)
     control: str | None = field(default=None, init=False)
@@ -55,6 +57,8 @@ class Yolo26x:
 
 @dataclass(frozen=True)
 class ClassicalSegmentation:
+    """Select a mask method from experiment 06's segmentation comparison."""
+
     method: str
     name: str = field(default="classical_segmentation", init=False)
     control: str | None = field(default=None, init=False)
@@ -69,6 +73,8 @@ class ClassicalSegmentation:
 
 @dataclass(frozen=True)
 class ClassicalAppearance:
+    """Use experiment 06's classical appearance comparison."""
+
     name: str = field(default="classical_appearance", init=False)
     control: str | None = field(default=None, init=False)
 
@@ -110,11 +116,11 @@ def run(
     artifact = "output/predictions/objects.json"
     name = settings.detector.name if settings.detector is not None else None
     try:
+        if settings.max_distance_m is None or settings.ambiguity_margin_m is None:
+            raise Unavailable("Counting needs inherited distance and ambiguity settings")
+        if settings.detector is None:
+            raise Unavailable("Object detector requires an already acquired checkpoint")
         with run_context.measure("load_objects"):
-            if settings.max_distance_m is None or settings.ambiguity_margin_m is None:
-                raise Unavailable("Counting needs inherited distance and ambiguity settings")
-            if settings.detector is None:
-                raise Unavailable("Object detector requires an already acquired checkpoint")
             detector = settings.detector.load()
             segment = settings.segmentation.load() if settings.segmentation is not None else None
             appearance = settings.appearance.load() if settings.appearance is not None else None
@@ -200,9 +206,6 @@ def _count(
                     settings.max_distance_m,
                     settings.ambiguity_margin_m,
                 )
-                for proposal in decisions:
-                    if not PROPOSAL_FIELDS <= proposal.keys():
-                        raise ValueError(f"Object proposal needs {sorted(PROPOSAL_FIELDS)}")
                 origins = {**origins, origin: updated}
                 observations.append(
                     {

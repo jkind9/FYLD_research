@@ -56,8 +56,6 @@ def run(spec: PipelineSpec, *, scores: tuple[validation.ScoreRequest, ...] = ())
             status["tracking"] = StepResult("tracking", "skipped", reason)
         else:
             status["tracking"], tracked = tracking.run(run_context, captured, measured, spec.tracking)
-        if tracked is not None:
-            tracking.validate(captured, tracked)
         with run_context.measure("visual_tracking"):
             visualization.tracking(run_context.path, status["tracking"], tracked)
 
@@ -76,8 +74,6 @@ def run(spec: PipelineSpec, *, scores: tuple[validation.ScoreRequest, ...] = ())
             status["mapping"] = StepResult("mapping", "skipped", reason)
         else:
             status["mapping"], mapped = mapping.run(run_context, reconstructed, spec.mapping)
-        if mapped is not None:
-            mapping.validate(mapped)
         with run_context.measure("visual_mapping"):
             visualization.mapping(run_context.path, status["mapping"], mapped)
 
@@ -86,8 +82,6 @@ def run(spec: PipelineSpec, *, scores: tuple[validation.ScoreRequest, ...] = ())
             status["objects"] = StepResult("objects", "skipped", reason)
         else:
             status["objects"], recognised = objects.run(run_context, captured, measured, tracked, spec.objects)
-        if recognised is not None:
-            objects.validate(captured, recognised)
         with run_context.measure("visual_objects"):
             visualization.objects(run_context.path, status["objects"], captured, recognised)
 
