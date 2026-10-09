@@ -74,7 +74,7 @@ hyperparameters n/a: no model experiments are run or changed.
 
 | field | value |
 |---|---|
-| closing commit | awaiting project audit checkpoint; report SHA-256 531848a1e0f9aa5974fa6bbc0a7d3f428fd2db129cc1e1cff6ffc5599417b393 |
+| closing commit | 56680f36c33023ecc7781f0d92d47d5fa3b4991c |
 | files changed | HARNESS_WORKFLOW_AUDIT.md; this audit task; project Task68 backlog record; Task68 row in task_list/README.md. Unrelated product source and task updates are excluded. |
 | test | All 12 requested topics/checks present, including follow-ups; 38 local links resolve; 19 unique web source URLs. Python syntax-tree measurements were checked on a bounded maintained-source sample. Earlier read-only default pytest discovery: 857 cases. Explicit depth/area discovery: 71 cases and 4 access errors, retained as findings. Disposable CLI/hook reproductions confirm dry-run mutation, permissive closure/start, repeated single-file escape and Stop with no active task. Earlier structural board lint passed. |
 | before / after | 0 consolidated reports to 1 full root report, updated to 12,399 words / 86,845 bytes. Findings distinguish observed defects, bounded successes, limitations and proposed improvements. |
@@ -101,3 +101,5 @@ Resumed the attached harness session from active harness Task06, completed hando
 ### Authorized checkpoint follow-up, 2026-10-09
 
 Harness source commit `2cd9102d6931f1fa8568d722a069e3b293d92d67`; task receipt commit `4b2de540e06bd9b60aeb4e741aed567014d63973`. Harness Tasks03,05,08 closed through the checkpoint-enforcing CLI. Tasks02,04,06,07,09 retain named acceptance checks. Report updated to reflect these committed states. Latest report SHA-256: `531848a1e0f9aa5974fa6bbc0a7d3f428fd2db129cc1e1cff6ffc5599417b393`. Earlier uncommitted statements are historical. Task65 and all unrelated application work remain unchanged. Tests n/a: report and traceability update only.
+
+Audit delivery checkpoint: `56680f36c33023ecc7781f0d92d47d5fa3b4991c` records the report, Task66, Task68 and its board link. This receipt amendment identifies that checkpoint. The existing staged Task55 move was preserved byte for byte.
