@@ -8,7 +8,7 @@ import importlib
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol, TypedDict
+from typing import TYPE_CHECKING, Any, NotRequired, Protocol, TypedDict
 
 import numpy as np
 from numpy.typing import NDArray
@@ -56,11 +56,17 @@ class ColourFrame:
 
 @dataclass(frozen=True)
 class DepthPrediction:
-    """What a depth method returns per frame: camera-axis metres and a trusted-pixel mask."""
+    """What a depth method returns per frame: camera-axis metres and a trusted-pixel mask.
+
+    `diagnostics` is optional per-frame evidence from the method (for example the scale it
+    applied); the depth layer saves it as `method_diagnostics`. Values must be finite numbers,
+    booleans or None.
+    """
 
     frame_id: str
     depth: NDArray[np.floating]
     valid: NDArray[np.bool_]
+    diagnostics: dict[str, Any] | None = None
 
 
 class DepthEstimator(Protocol):
@@ -106,6 +112,7 @@ class DepthArtifact(TypedDict):
     calibration: dict[str, Any]
     source: str
     depth_definition: str
+    method_diagnostics: NotRequired[dict[str, float | int | bool | None]]
 
 
 class DepthOutput(TypedDict):
@@ -127,6 +134,7 @@ class SurfaceShard(TypedDict):
     world_id: str
     segment_id: str
     units: str
+    camera_centre_m: list[float]  # this frame's camera position in the shard's world
 
 
 class SurfaceOutput(TypedDict):
@@ -139,6 +147,8 @@ class MappingOutput(TypedDict):
     methods: dict[str, str]
     control: str | None
     measurements: dict[str, Any]
+    # One record per tracking origin: metadata plus "arrays", a saved npz of its grids.
+    maps: NotRequired[list[dict[str, Any]]]
 
 
 class ObjectsOutput(TypedDict):
@@ -197,20 +207,38 @@ def check_capture_clock(capture: CaptureOutput) -> None:
         raise ValueError("Tracking requires one camera and one declared capture clock")
 
 
+# Experiment 03's RGB-D frames and odometry only accept depth below 4 m (the Kinect
+# working range): experiments/03_camera_pose_estimation/src/dataset.py:43 and backend.py:74.
+RGBD_MAX_DEPTH_M = 4.0
+
+
 def load_rgbd_frames(run_path: Path, capture: CaptureOutput, depth: DepthOutput) -> Iterator[RGBDFrame]:
-    """Yield RGB-D frames one at a time, for one camera and one declared clock."""
+    """Yield RGB-D frames one at a time, for one camera and one declared clock.
+
+    The depth layer may report valid metres beyond RGBD_MAX_DEPTH_M (a learned model can
+    reach 20 m). Those pixels are marked invalid here, at the handoff, so tracking and
+    object placement use only depth inside their working range. Saved depth is unchanged.
+    A frame whose valid depth is all out of range is refused rather than passed on empty.
+    """
     check_capture_clock(capture)
     rows = capture["frames"]
     for row, measured in zip(rows, depth["frames"], strict=True):
         with Image.open(run_path / row["image"]) as image:
             colour = np.asarray(image.convert("RGB"))
         with np.load(run_path / measured["arrays"], allow_pickle=False) as arrays:
+            depth_m = arrays["depth"]
+            in_range = arrays["valid"] & (depth_m < RGBD_MAX_DEPTH_M)
+            if arrays["valid"].any() and not in_range.any():
+                raise ValueError(
+                    f"Frame {row['frame_id']}: all valid depth is out-of-range for tracking "
+                    f"(at or beyond {RGBD_MAX_DEPTH_M} m)"
+                )
             yield RGBDFrame(
                 row["frame_id"],
                 row["timestamp_s"],
                 row["timestamp_s"],
                 Calibration(**measured["calibration"]),
                 colour,
-                arrays["depth"],
-                arrays["valid"],
+                depth_m,
+                in_range,
             )

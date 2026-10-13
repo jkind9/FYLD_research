@@ -124,3 +124,49 @@ def test_skipped_layer_is_never_called(tmp_path: Path, monkeypatch: Any) -> None
     assert [(row.status, row.reason) for row in result.steps[1:]] == [
         ("skipped", "Not requested")
     ] * 5
+
+
+def test_each_layer_receives_only_its_declared_inputs_after_validation(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """Each layer gets the saved outputs it reads, its own method, and validated inputs."""
+    spec = _spec(tmp_path)
+    events: list[tuple[str, tuple]] = []
+    outputs = {name: {"fixture": name} for name in STEP_NAMES}
+
+    for name in STEP_NAMES:
+
+        def layer(run: Any, *args: Any, _name: str = name) -> tuple[StepResult, dict]:
+            events.append(("run", (_name, *args)))
+            artifact = f"output/predictions/{_name}.json"
+            write_json(run.path / artifact, outputs[_name])
+            return StepResult(_name, "complete", "Fixture saved", _name, 1, artifact), outputs[_name]
+
+        monkeypatch.setattr(getattr(pipeline, name), "run", layer)
+        monkeypatch.setattr(pipeline.visualization, name, lambda *args: None)
+        if hasattr(getattr(pipeline, name), "validate"):
+            monkeypatch.setattr(
+                getattr(pipeline, name),
+                "validate",
+                lambda *args, _name=name: events.append(("validate", (_name, *args))),
+            )
+
+    result = pipeline.run(spec)
+
+    runs = {args[0]: args[1:] for kind, args in events if kind == "run"}
+    assert runs["capture"] == (spec.source,)
+    assert runs["depth"] == (outputs["capture"], spec.depth)
+    assert runs["tracking"] == (outputs["capture"], outputs["depth"], spec.tracking)
+    assert runs["surface"] == (outputs["depth"], outputs["tracking"], spec.surface)
+    assert runs["mapping"] == (outputs["surface"], spec.mapping)
+    assert runs["objects"] == (
+        outputs["capture"],
+        outputs["depth"],
+        outputs["tracking"],
+        spec.objects,
+    )
+    order = [(kind, args[0]) for kind, args in events]
+    # Layers with a pipeline-level validator are checked before the next layer runs.
+    for validated, following in (("capture", "depth"), ("depth", "tracking"), ("surface", "mapping")):
+        assert order.index(("validate", validated)) < order.index(("run", following))
+    assert result.complete

@@ -1,0 +1,9 @@
+# Task54 Windows measurement environment, captured 2026-10-07.
+# The CUDA wheel index used for the run is PyTorch's cu128 index.
+torch==2.11.0+cu128
+torchvision==0.26.0+cu128
+transformers==5.14.1
+numpy==2.4.2
+Pillow==12.3.0
+opencv-python==5.0.0.93
+psutil==7.2.2

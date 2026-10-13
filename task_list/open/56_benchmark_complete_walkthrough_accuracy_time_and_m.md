@@ -5,7 +5,7 @@ status: open
 priority: HIGH
 type: infra
 approval_status: planning authorised 2026-10-06; execution requires task-specific review and frozen settings
-blocked_by: [52, 53, 54, 55]
+blocked_by: [52, 53]
 blocks: []
 verification_test: "experiments/evaluation/tests/test_complete_walkthrough.py"
 plan_reviewed: null

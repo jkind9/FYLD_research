@@ -89,6 +89,7 @@ def run(
                             "world_id": pose.world_id,
                             "segment_id": pose.segment_id,
                             "units": "metres",
+                            "camera_centre_m": [float(value) for value in pose.matrix[:3, 3]],
                         }
                     )
             output: SurfaceOutput = {

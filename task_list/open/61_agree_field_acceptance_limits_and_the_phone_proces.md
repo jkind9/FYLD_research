@@ -45,7 +45,7 @@ Own the field decisions that Task51 held before it was rescoped on 6 October 202
 7. Sustained-use limits on the phone: session length, memory, battery and heat (Task57).
 8. Session roles for the held-out test: which recordings are used for tuning and which only for the final score (Task53).
 
-Fixed inputs already decided: deployment must be on a phone (owner, 7 October 2026); the Redmi Note 11 Pro (model 2201116TG) is the selected handset; development stays on existing recorded data until phone work resumes.
+Fixed inputs already decided: minimum throughput is 1 frame per second; any method or pipeline slower than that is not worth using (owner, 7 October 2026). This is a floor under item 5, not the agreed live-update rate, which stays pending. Deployment must be on a phone (owner, 7 October 2026); the Redmi Note 11 Pro (model 2201116TG) is the selected handset; development stays on existing recorded data until phone work resumes.
 
 ## Why
 

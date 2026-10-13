@@ -45,14 +45,19 @@ class DetectorMethod(MethodChoice, Protocol):
 
 @dataclass(frozen=True)
 class Yolo26x:
-    """Load experiment 06's CPU detector from an acquired checkpoint."""
+    """Load experiment 06's detector from an acquired checkpoint, on the CPU or GPU 0."""
 
     checkpoint: Path
+    device: str = "cpu"  # "cpu" or "0" (GPU 0), the two values experiment 06 accepts
     name: str = field(default="yolo26x", init=False)
     control: str | None = field(default=None, init=False)
 
+    def __post_init__(self) -> None:
+        if self.device not in ("cpu", "0"):
+            raise ValueError("Yolo26x device must be 'cpu' or '0' (GPU 0)")
+
     def load(self) -> Detector:
-        return detector_owner.YoloDetector(Path(self.checkpoint), "cpu")
+        return detector_owner.YoloDetector(Path(self.checkpoint), self.device)
 
 
 @dataclass(frozen=True)

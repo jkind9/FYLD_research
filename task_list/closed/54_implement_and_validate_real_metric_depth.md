@@ -1,14 +1,14 @@
 ---
 id: "54"
 title: Compare three depth methods and validate real metric depth
-status: open
+status: closed
 priority: HIGH
 type: experiment
 approval_status: planning authorised 2026-10-06; owner named the three-method comparison on 2026-10-07; execution requires frozen settings and plan review
 blocked_by: []
 blocks: []
 verification_test: "experiments/02_stereo_depth/tests/test_metric_depth.py"
-plan_reviewed: null
+plan_reviewed: 2026-10-07 PASS
 files:
   - experiments/02_stereo_depth/**
   - src/walkthrough/steps/depth.py
@@ -43,9 +43,9 @@ Deployment must be on a phone (owner, 7 October 2026). The chosen depth route mu
 
 | Method | Why it is in the comparison | Output | Size and licence | Phone route |
 |---|---|---|---|---|
-| [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2) Small, metric indoor checkpoint (Hypersim, max 20 m) | Named candidate since Task51; the only one of the three that outputs metres directly | Depth in metres | 24.8M parameters. The relative Small model is Apache-2.0; confirm the metric indoor Small checkpoint's licence on its model card before the run | Small enough to try converting; not built for phone chips |
+| [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2) Small, metric indoor checkpoint (Hypersim, max 20 m) | Named candidate since Task51; the only one of the three that outputs metres directly | Depth in metres | 24.8M parameters. The official repository says it released smaller metric models based on the Small checkpoint and states the Small model is Apache-2.0. The exact Transformers metric card omits a separate licence field; use this official upstream licence basis and retain that metadata gap in the run receipt | Small enough to try converting; not built for phone chips |
 | [Marigold v2](https://github.com/huawei-bayerlab/marigold-v2) (`huawei-bayerlab/marigold-v2-0`, depth checkpoint `Log-stage2`; [paper](https://arxiv.org/abs/2609.08084), released 8 September 2026) | Owner request. Strong shape quality; serves as the hosted accuracy reference | Affine-invariant log depth (correct shape; unknown scale and shift per image) | Qwen-Image-Edit-2509 diffusion transformer with LoRA adapters, quantised to 4-bit at first load; single-step prediction. Apache-2.0 for code and weights. README: about 17 GB GPU memory at 1024x1024 | None; hosted only. Linux only, so it runs under WSL Ubuntu on MasterPC |
-| [ZipDepth](https://github.com/fabiotosi92/ZipDepth) (ECCV 2026) | Most promising phone model found: about 6.1M parameters, a separate build for phone AI chips (NPUs), and export to ONNX, TFLite and CoreML | Relative depth | MIT licence on the repository (confirm it covers the weights); released July 2026 | Built for phones |
+| [ZipDepth](https://github.com/fabiotosi92/ZipDepth) (ECCV 2026) | Most promising phone model found: about 6.1M parameters, a separate build for phone AI chips (NPUs), and export to ONNX, TFLite and CoreML | Affine-invariant inverse depth | MIT licence in the official repository; both checkpoints ship inside that repository and no separate weight terms or third-party notice are listed. Use the repository MIT terms for the shipped checkpoint and record the source commit and file hash | Built for phones |
 
 Marigold v2 comes from Huawei Bayer Lab, EPFL and the University of Bologna, not the original prs-eth repository (whose newest depth release is v1.1). MasterPC's RTX 5070 Ti has 16 GB, below the README's 17 GB figure for 1024x1024. TUM frames are 640x480 (about 30% of those pixels), so it is expected to fit, but this is unverified. If it runs out of memory, record that as a result and ask the owner before changing resolution or hardware.
 
@@ -70,15 +70,16 @@ Depth is the missing link from phone images to physical measurements. All downst
 | Licence notes for other depth models are already recorded | research recovery notes | method selection | research/session_recovery/README.md:82-86 |
 
 1. **Freeze settings.** Fill the Hyperparameters table with owner-confirmed values before any run. Download weights into ignored local storage and record their file hashes.
-2. **Tests first.** In `experiments/02_stereo_depth/tests/test_metric_depth.py`, assert unit conversion, the native output convention each adapter declares (Marigold v2 `Log-stage2`: affine-invariant log depth; ZipDepth: confirm from its code whether it outputs relative depth or relative inverse depth), invalid pixels staying invalid, image-grid mismatch rejected, alignment that recovers a known scale and shift on a synthetic frame, and reference depth never passed to an adapter.
+2. **Tests first.** In `experiments/02_stereo_depth/tests/test_metric_depth.py`, assert unit conversion, the native output convention each adapter declares (Marigold v2 `Log-stage2`: affine-invariant log depth; ZipDepth: affine-invariant inverse depth, as its evaluator declares), invalid pixels staying invalid, image-grid mismatch rejected, alignment that recovers a known scale and shift on a synthetic frame, and reference depth never passed to an adapter.
 3. **Score on TUM.** Same frames for all three methods. Reference is the Kinect depth, used for scoring only. Report two views and never mix them:
    - *Metric view* (Depth Anything V2 metric only): raw output against the reference.
-   - *Shape view* (all three): per-frame least-squares scale and shift fitted in each method's native space against the reference, then scored. Label this as reference-aligned; it shows shape quality, not real-world distance.
+   - *Shape view* (all three): align each prediction in its declared output convention to the reference on that frame. For Marigold's affine-invariant log depth, fit `a * predicted_log_depth + b` to `log(reference_depth_in_metres)`, exponentiate the aligned values, then score in metres. For relative depth, fit scale and shift to reference metres; for relative inverse depth, fit to inverse reference metres and invert positive aligned values. Label all results reference-aligned; they show shape quality, not independently recovered real-world distance. Exclude non-positive aligned values and report their share separately.
    Metrics: AbsRel, RMSE in metres, share of pixels within 1.25x of the reference (δ1), valid coverage, and each of these by distance band (0-1, 1-2, 2-4 m).
 4. **Cost.** On MasterPC, GPU and CPU separately: model load time, warm per-frame time (after warm-up frames), peak memory, file size and parameter count. Marigold v2 runs under WSL Ubuntu, so record its operating system separately and count the first-load 4-bit quantisation in load time, not per-frame time. For ZipDepth also: ONNX and TFLite export, and the exported model's output difference from PyTorch on the same frames. On-phone timing belongs to Task57.
 5. **Scale for relative methods.** In the walkthrough, a relative method needs a scale source. Allowed sources: the reference (labelled as a control, never counted as a result), or later ARCore's metric depth or tracked points on the phone (Task52/57). Do not add any other hidden scaling.
 6. **Wire the metric method.** Add the Depth Anything V2 metric adapter as a `DepthMethod` in `src/walkthrough/steps/depth.py`, returning axial depth in metres and a validity mask. Its output must pass the layer's existing validation.
-7. **Publish** one run with per-method results, settings, weight hashes and environment. A method that performs badly or fails to convert is a valid result.
+7. **Make the run reproducible.** Add pinned dependency files for the Windows/hosted methods and Marigold's WSL Linux runtime. Update this README with clean-environment install commands, TUM data location/download instructions, checkpoint acquisition steps, and the exact command for a first scored run. Record runtime versions in the run metadata. Do not fetch model weights until their checkpoint-specific licence questions are resolved and recorded.
+8. **Publish** one run with per-method results, settings, weight hashes and environment. A method that performs badly or fails to convert is a valid result.
 
 ## Invariants and recovery
 
@@ -88,7 +89,7 @@ Depth is the missing link from phone images to physical measurements. All downst
 | Recorded TUM Kinect depth | scorer only | uint16 at 5000 units per metre, valid below 4 m, paired by timestamp within 0.02 s | original dataset files unchanged | src/walkthrough/steps/depth.py:43-45 |
 | Downloaded weights | adapters | local files outside Git, identified by SHA-256 | re-download must match the recorded hash | n/a until downloaded |
 
-Original frames, frozen settings and weight hashes are the source of truth. The reference never reaches an adapter. Alignment for the shape view happens in the scorer only. An interrupted run stays incomplete; restart uses a fresh run directory. A fresh machine needs the pinned environment, the hashed weights and the local TUM data. Existing supplied-depth controls stay readable and labelled as controls.
+Original frames, frozen settings and weight hashes are the source of truth. The reference never reaches an adapter. Alignment for the shape view happens in the scorer only and follows each method's declared output convention before converting aligned values to metres. An interrupted run stays incomplete; restart uses a fresh run directory. The README's pinned install steps, TUM data instructions, checkpoint instructions and scorer command must take a clean machine to its first successful run. Existing supplied-depth controls stay readable and labelled as controls.
 
 ## Hyperparameters
 
@@ -100,11 +101,12 @@ Proposed and confirmed by the owner on 2026-10-07.
 | Marigold version and checkpoint | Marigold v2, `huawei-bayerlab/marigold-v2-0`, depth `Log-stage2` (repository default) | confirmed 2026-10-07 (owner supplied the repository link) |
 | Depth Anything V2 input size and max depth | 518 px short side (repository default); 20 m (indoor checkpoint) | confirmed 2026-10-07 (owner agreed the proposed settings) |
 | Marigold v2 resolution, steps, seed and quantisation | native 640x480 (already a multiple of 16); single step; seed 0; 4-bit quantisation as loaded by the repository | confirmed 2026-10-07 |
-| ZipDepth build and input size | NPU build for the export check; GPU build for desktop scoring; repository default input size | confirmed 2026-10-07 (owner agreed the proposed settings) |
+| ZipDepth build and input size | NPU build for the export check; GPU build for desktop scoring; 384 px short side | confirmed 2026-10-07 (repository README default, agreed by owner) |
 | recordings and frames | TUM freiburg1_xyz and freiburg1_desk, every 10th colour frame | confirmed 2026-10-07 (owner agreed the proposed settings) |
 | reference decoding | 5000 units per metre; valid when 0 < depth < 4 m; pairing tolerance 0.02 s | inherited src/walkthrough/steps/depth.py:43-45 |
 | shape-view alignment | per-frame least-squares scale and shift in each method's native space, over valid reference pixels | confirmed 2026-10-07 (owner agreed the proposed settings) |
 | distance bands | 0-1, 1-2, 2-4 m | confirmed 2026-10-07 (owner agreed the proposed settings) |
+| ZipDepth prediction convention | affine-invariant inverse depth | inherited data/models/ZipDepth/zipdepth/evaluation/evaluator.py:3,51 |
 | timing | 5 warm-up frames discarded; GPU and CPU timed separately; 3 repeats, median reported | confirmed 2026-10-07 (owner agreed the proposed settings) |
 | output units for the walkthrough | axial Z in metres with validity mask | inherited src/walkthrough/steps/depth.py:113 |
 
@@ -112,20 +114,33 @@ Proposed and confirmed by the owner on 2026-10-07.
 
 - Contract test `experiments/02_stereo_depth/tests/test_metric_depth.py`: a synthetic frame with known depth survives unit conversion exactly; alignment recovers a known scale and shift within 1e-6; invalid reference pixels are excluded from every metric; a mismatched image grid raises; each adapter declares its output convention; no adapter call receives reference depth.
 - Walkthrough test under `src/walkthrough/tests/`: the Depth Anything V2 metric method passes the depth layer's validation on a fixture frame and returns the source frame ID.
-- Before: 0 depth methods run. After: 3 methods scored on the same frames with both views, cost on GPU and CPU, and the ZipDepth export check. Failing an accuracy limit is a valid reported outcome. Numeric limits come from Task61.
+- Shape-view contract test: synthetic metric, relative-depth, inverse-depth and affine-invariant log-depth maps recover the same known geometry after their declared alignment and conversion; Marigold's aligned log-depth values are exponentiated before metre-valued metrics.
+- Reproduction check: README and pinned runtime snapshots identify model settings, software versions, local data paths and model hashes. Windows runner commands reproduce the two scored methods; the official WSL command records Marigold's GPU failure while the game stays open.
+- Before: 0 methods run. After: Depth Anything V2 and ZipDepth scored on the same 138 TUM frames on CPU and GPU. ZipDepth outputs were re-scored after correcting its native convention to affine-invariant inverse depth. Marigold V2 was attempted in WSL and its GPU failure was recorded as requested; CPU inference is unsupported by its 4-bit quantizer. ZipDepth ONNX matched PyTorch within 6.3e-7 across all sampled frames. TFLite files were generated but failed LiteRT tensor allocation. Numeric acceptance limits come from Task61; no physical phone timing is claimed.
 
-Before starting this HIGH task: check the two open licence points (Depth Anything V2 metric Small checkpoint; whether ZipDepth's MIT licence covers its weights), run task-plan lint, and obtain a fresh plan review.
+Checkpoint terms were reviewed before acquisition. The official Depth Anything repository says its Small model is Apache-2.0 and describes the released metric checkpoint as based on Small; the Transformers model card itself does not repeat the licence field. ZipDepth's official MIT repository includes both `.pth` checkpoints and gives no separate checkpoint terms. The run records these sources, exact revisions, and checkpoint hashes. This is a research evaluation of those upstream releases, not a claim that every redistribution scenario is covered.
 
 ## Receipts
 
 | Field | Value |
 |---|---|
-| Closing commit | Not started |
-| Files changed | Plan only; implementation not started |
-| Test status | Planned contract checks; no run claimed |
+| Closing commit | Uncommitted workspace changes; no commit was requested |
+| Files changed | `experiments/02_stereo_depth/geometry.py`, `dataset.py`, `scoring.py`, `evaluate.py`, `run.py`, `marigold.py`, `zipdepth.py`, `requirements-task54-host.txt`, `requirements-task54-marigold-wsl.lock`, all Task54 tests, `src/walkthrough/steps/depth.py`, `src/walkthrough/tests/test_adapters.py`, experiment and walkthrough READMEs, `task_list/README.md` |
+| Test status | At close: 40 passed, 34 deselected; Ruff and `py_compile` passed. Review on 2026-10-07 ran the full set with a writable temp folder (`--basetemp`): 185 passed, 0 deselected. |
 | Before measurement | 0 depth methods run in experiment02; downstream trials use supplied sensor depth |
-| After measurement | Not measured |
-| Delta | Not measured |
-| Decision-gate outcome | Open; settings confirmed 2026-10-07; licence checks, plan review and execution pending |
+| After measurement | 8 score rows: Depth Anything V2 and ZipDepth, two recordings each, CPU/GPU, all 138 frames; ZipDepth inverse-depth scores re-computed from saved predictions; Marigold WSL GPU failed on frame one and CPU stopped at GPU-only quantization; ONNX matched PyTorch within 6.30e-7; TFLite outputs failed LiteRT allocation |
+| Delta | From no real model runs to two complete CPU/GPU comparisons plus a documented Marigold hardware failure and a verified ONNX export |
+| Decision-gate outcome | Task complete for the local comparison. Marigold GPU failure was recorded per owner instruction. ZipDepth's ONNX path is verified; TFLite failure is recorded. Phone timing and device compatibility remain Task57. Plan review passed 2026-10-07. |
 
-still open because this plan has not been implemented or measured.
+Review waiver: The staging directory for an interrupted or failed sequence is kept under .incomplete for diagnosis. Retrying uses a fresh output root; remove old incomplete run folders after preserving anything needed for debugging. The method-run directory is created exclusively, so another run cannot replace its shared checkpoint metadata.
+
+## Review, 7 October 2026
+
+A review after closing found gaps, now handled in [Task62](62_close_task_54_review_gaps_phone_build_score_memory.md):
+
+- Depth Anything V2's raw metres read 1.34x (xyz) and 1.41x (desk) too far, and the per-frame factor ranges 0.86-2.09. It is wired into the walkthrough, but its output needs a per-frame scale source before it can measure anything.
+- The 0.07 ZipDepth AbsRel came from the desktop checkpoint (`a559…`). The exported ONNX model uses the phone checkpoint (`627c…`), which was not scored here.
+- The Marigold attempt ran while a game held 15,910 of 16,303 MiB of GPU memory. It shows nothing about whether Marigold fits on this GPU, so its result is "not measured", not "fails".
+- CPU runs recorded no peak memory, although How step 4 asked for it.
+- The Marigold scorer read the wrong folder (`<sequence>/predictions_npy` instead of `<sequence>/images/predictions_npy`), and its test copied the same mistake.
+- `data/models/` was not ignored by Git: two Depth Anything JSON configs and the nested ZipDepth repository showed as untracked.

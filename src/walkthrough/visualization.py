@@ -1,6 +1,7 @@
 """Create method-labelled, display-only views from saved walkthrough outputs."""
 
 import html
+import importlib
 import json
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,8 @@ from PIL.PngImagePlugin import PngInfo
 from experiments.shared.runs import write_json
 from experiments.shared.visualization import depth_preview, sample_points
 
+map_preview = importlib.import_module("experiments.05_birds_eye_mapping.preview")
+
 from .records import StepResult
 from .steps.artifacts import (
     CaptureOutput,
@@ -22,6 +25,7 @@ from .steps.artifacts import (
     SurfaceOutput,
     TrackingOutput,
 )
+from .steps.contracts import RGBD_MAX_DEPTH_M
 
 STAGE_ORDER = ("capture", "depth", "tracking", "surface", "mapping", "objects")
 DISPLAY_POINT_CAP = 20_000
@@ -49,6 +53,9 @@ def _wrap_text(text: str, font: ImageFont.ImageFont, width: int) -> list[str]:
     if current:
         lines.append(current)
     return lines
+
+
+DEPTH_DISPLAY_MAXIMUM_M = RGBD_MAX_DEPTH_M
 
 
 def _label_png(
@@ -82,6 +89,8 @@ def _label_png(
     png_info = PngInfo()
     png_info.add_text("stage", stage)
     png_info.add_text("producer_methods", json.dumps(methods, sort_keys=True))
+    if note:
+        png_info.add_text("note", note)
     labelled.save(path, pnginfo=png_info)
 
 
@@ -273,20 +282,27 @@ def _depth_frame(
         depth_values = arrays["depth"]
         valid = arrays["valid"]
         display_depth = np.where(valid, depth_values, np.nan)
-    maximum = float(np.max(depth_values[valid])) if valid.any() else 1.0
+    # One fixed scale for every frame and method, so colours compare across previews.
+    # It matches tracking's working range: yellow also marks depth tracking will ignore.
+    maximum = DEPTH_DISPLAY_MAXIMUM_M
     preview_path = _visual_root(run_path) / "depth" / f"frame_{index:06d}.png"
     legend = depth_preview(
         display_depth,
         preview_path,
         "predicted_output",
         frame["arrays"],
-        maximum=max(maximum, np.finfo(float).eps),
+        maximum=maximum,
     )
     legend["producer_method"] = methods["depth"]
     legend["display_method"] = "experiments.shared.visualization.depth_preview"
     legend["source_frame_id"] = frame["frame_id"]
     write_json(preview_path.with_suffix(".json"), legend)
-    _label_png(preview_path, "depth", methods)
+    _label_png(
+        preview_path,
+        "depth",
+        methods,
+        f"Colour: blue 0 m to yellow {maximum:g} m; yellow also means {maximum:g} m or more; black means no depth",
+    )
     mask_path = preview_path.with_name(preview_path.stem + "_valid.png")
     source_frame = capture_by_id[frame["frame_id"]]
     valid_count = int(valid.sum())
@@ -588,13 +604,36 @@ def mapping(
             _artifact(
                 "output/predictions/mapping.json",
                 "data",
-                "Mapping measurements (no map geometry is currently supplied)",
+                "Mapping measurements",
                 "output/predictions/surface.json",
                 methods["mapping"],
                 details=output["measurements"],
             )
         )
+        artifacts.extend(
+            _map_image(run_path, record, methods)
+            for record in output.get("maps", [])
+            if record.get("arrays")
+        )
     _publish_stage(run_path, status, methods, artifacts)
+
+
+def _map_image(run_path: Path, record: dict[str, Any], methods: dict[str, str]) -> dict[str, Any]:
+    """Draw one origin's saved top-down grid: height colours, unseen cells grey."""
+    with np.load(run_path / record["arrays"], allow_pickle=False) as grids:
+        observed, max_height_m = grids["observed"], grids["max_height_m"]
+    destination = _visual_root(run_path) / "mapping" / f"origin_{record['origin']:06d}.png"
+    scale = map_preview.footprint_preview(observed, max_height_m, record["cell_size_m"], destination)
+    _label_png(destination, "mapping", methods, f"Plane: {record['plane_source']}")
+    return _artifact(
+        destination.relative_to(run_path).as_posix(),
+        "image",
+        f"Top-down map · origin {record['origin']} ({record['world_id']}, segment {record['segment_id']})",
+        record["arrays"],
+        methods["mapping"],
+        "experiments.05_birds_eye_mapping.preview.footprint_preview",
+        {**scale, "plane_source": record["plane_source"]},
+    )
 
 
 def objects(

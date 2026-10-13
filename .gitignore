@@ -82,6 +82,8 @@ data/**/*
 !data/**/
 !data/README.md
 data/**/review_temp/
+# Downloaded model weights and cloned model repositories stay local; runs record their hashes.
+data/models/
 # Derived object-reference publication stays local; its frozen source manifest
 # lives under experiments/06_object_recognition/datasets/.
 data/object_revisits/desk_smoke_v1/

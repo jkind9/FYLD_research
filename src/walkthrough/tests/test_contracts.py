@@ -173,3 +173,30 @@ def test_tum_capture_detaches_calibration_from_other_frames_and_runs(tmp_path):
     frames[0]["calibration"]["fx"] = 1.0
     assert frames[1]["calibration"]["fx"] == original_fx
     assert pose_dataset.CALIBRATION.fx == original_fx
+
+
+def test_rgbd_frames_drop_depth_beyond_the_tracking_range(tmp_path):
+    """A real depth model may report 20 m; tracking's frames only accept depth below 4 m."""
+    from src.walkthrough.steps.capture import pose_dataset
+    from src.walkthrough.steps.contracts import RGBD_MAX_DEPTH_M, load_rgbd_frames
+
+    calibration = pose_dataset.CALIBRATION
+    shape = (calibration.height, calibration.width)
+    Image.fromarray(np.zeros((*shape, 3), dtype=np.uint8), mode="RGB").save(tmp_path / "frame.png")
+    depth_m = np.full(shape, 1.5)
+    depth_m[0, 0] = 5.0  # valid metres from the depth layer, outside the tracking range
+    depth_m[0, 1] = RGBD_MAX_DEPTH_M  # the limit itself is excluded, as in experiment 03
+    np.savez(tmp_path / "depth.npz", depth=depth_m, valid=np.ones(shape, dtype=bool))
+    capture = {
+        "frames": [
+            {"frame_id": "f0", "source_id": "clip", "timestamp_s": 1.0, "timestamp_source": "dataset", "image": "frame.png"}
+        ]
+    }
+    depth_output = {"frames": [{"arrays": "depth.npz", "calibration": calibration.__dict__}]}
+
+    (frame,) = load_rgbd_frames(tmp_path, capture, depth_output)
+
+    assert RGBD_MAX_DEPTH_M == 4.0
+    assert not frame.valid[0, 0] and not frame.valid[0, 1]
+    assert frame.valid[0, 2]
+    assert frame.depth[0, 0] == 5.0  # the depth value itself is left unchanged

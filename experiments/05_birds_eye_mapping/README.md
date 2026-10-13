@@ -4,7 +4,7 @@ This folder is part of layer 4, environment visualisation, in the five-layer pip
 
 This folder answers: **given a 3D model of the site, can we produce a top-down map that gives correct heights, boundaries and areas in metres, and shows clearly what was never seen?** This is where the brief's "estimate the size of the worksite" becomes a number.
 
-**Status:** planned. No code or test shapes exist yet.
+**Status:** the first measurement component exists and is in the six-layer walkthrough (Task55, 7 October 2026). `measure.py` fits the dominant plane, lays a 5 cm grid over it and reports seen area, area on the plane, region size, unseen area and height range. `preview.py` draws the top-down map. Known-shape tests pass. It has not been compared with a physical survey (Task53), so no real-world accuracy is claimed.
 
 ## How a bird's-eye map works
 
@@ -20,6 +20,50 @@ Common traps:
 - Outlier points, such as a reflection, can create false walls or false holes.
 
 The outputs are a height map (an image where each pixel is a height), a top-down colour image (an orthographic view, with no perspective) and the observed/unknown mask, all with the cell size and the grid's position recorded.
+
+## The first method: grid footprint
+
+`measure.py` follows the five steps above with these settings (Task55, chosen under the owner's delegation on 7 October 2026):
+
+| Step | What the code does | Setting |
+|---|---|---|
+| Choose the ground | `fit_dominant_plane`: RANSAC on a seeded random sample, then a least-squares refit on all points near the winning plane. "Up" is passed in by the caller; the walkthrough points it towards the cameras. | inlier distance 0.02 m, 500 tries, 50,000-point sample, seed 0 |
+| Lay a grid | Axes are the two main directions of the points lying on the plane, so furniture standing on it cannot turn the grid. The grid starts at the lowest coordinate on each axis. | 5 cm cells |
+| Summarise each cell | Highest point above the plane | — |
+| Mark what was seen | A cell with at least one point is seen; every other cell is unknown | at least 1 point |
+| Measure | Seen footprint, area on the plane itself (points within 0.02 m of it), the region rectangle around all seen cells (length along the plane's longest direction, width across it, measured on cell edges), the unknown area inside that rectangle, and the highest and lowest cell tops | metres and square metres |
+
+The region rectangle is only the box around what was seen. Space outside it is not claimed either way.
+
+Points can be passed as one array or as `PointChunks`, one chunk per frame. Chunks are read one at a time on each of three passes (grid axes, grid extent, cell contents), so memory stays at about one frame plus the grid however long the recording; the result is identical to passing one array. A grid that would need more than 16,000,000 cells (200 m x 200 m at 5 cm, usually caused by stray far points) is refused with the span it would have covered. In the walkthrough, an origin that cannot be measured (too few points, points on a line, no plane) is skipped with its reason saved, and the other origins are still measured.
+
+`preview.py` draws one grid as a top-down picture: blue at the plane to yellow at the highest cell, purple where a cell's top is more than 2 cm below the plane (for example floor beside a desk-top plane), grey where nothing was seen. The footer gives the size, cell size and colour scale.
+
+### Known-shape tests
+
+`tests/test_measurement.py` (20 tests) checks answers written from the shape definitions, never from the projection code. Every shape has one point at its corner and all others at 0.005 + 0.01k m, so no point sits on a cell edge.
+
+| Shape | Expected and checked |
+|---|---|
+| Flat 2 m x 3 m rectangle | 6.00 m² seen and on the plane, 0 unknown, 3.00 m x 2.00 m |
+| Same with a 1 m x 1 m hole | 5.00 m² seen, 1.00 m² unknown, region still 3.00 m x 2.00 m |
+| Rectangle turned 30° and tilted 20°, plane found by RANSAC | area within 0.50 m² (perimeter x cell) of 6.00 m², sides within 0.10 m |
+| 0.5 m board 0.8 m above the centre or a corner | area unchanged at 6.00 m², grid not turned, highest point 0.80 m |
+| Noisy floor (2 mm) with 30% clutter | normal within 1°, identical for the same seed |
+| Empty, non-finite, wrong-shape or non-metre input; bad cell size | refused with a clear error |
+
+Run them with `python -m pytest experiments/05_birds_eye_mapping/tests -q`.
+
+### First real runs
+
+The walkthrough's `GridFootprint` method measured 30 frames of TUM `freiburg1_xyz`. The dominant plane is the desk top. Results with the two depth sources ([walkthrough README](../../src/walkthrough/README.md#first-real-method-runs-7-october-2026)):
+
+| Depth source | Points on the plane | Desk-plane area | Seen footprint | Region | Unknown inside region |
+|---|---|---|---|---|---|
+| Kinect sensor depth | 51% | 2.21 m² | 4.09 m² | 4.40 x 3.10 m | 9.56 m² |
+| Depth Anything V2 Metric Small | 17% | 7.44 m² | 16.37 m² | 5.25 x 5.85 m | 14.35 m² |
+
+Learned depth inflates every area three to four times. The desk has no tape-measured size yet, so neither row is checked against reality.
 
 ## Methods: hosted and on the phone
 
@@ -74,7 +118,8 @@ Recognising whether work is finished is a separate task. It needs its own defini
 
 ## What can be improved
 
-- **Build the test shapes and projection first.** This layer has no measured result yet; the known-shape tests are the cheapest way to get one.
+- **Survey a real floor.** The known-shape tests pass, but no real area has been checked against a tape measure (Task53).
+- **Choose the plane deliberately.** The dominant plane is whatever surface holds most points (the desk top on TUM). A site floor needs gravity from the phone or a declared marker.
 - **Score ARCore plane areas on both phones** against a tape-measured floor. If close enough, this becomes the on-site size check.
 - **Carry uncertainty into area.** Camera drift and depth noise both blur boundaries. Report an area range, not just a single number.
 - **Handle multi-level sites**, such as trenches and stacked materials, with height slices rather than one highest surface.
@@ -82,10 +127,10 @@ Recognising whether work is finished is a separate task. It needs its own defini
 
 Projection code will move to [experiments/shared](../shared/README.md) once its tests pass, so any geometry source can use it. See the [experiment guide](../README.md) for how the layers connect.
 
-## Current delivery ownership, 6 October 2026
+## Current delivery ownership, 7 October 2026
 
-[Task55](../../task_list/open/55_implement_site_dimensions_and_area_measurement.md) owns the first dimensions/area component and independent known-shape tests. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) integrates its outputs into the complete walkthrough benchmark. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) supplies physical reference measurements. This remains planned work; a surface viewer is not a measured area result.
+[Task55](../../task_list/closed/55_implement_site_dimensions_and_area_measurement.md) built the first dimensions/area component, its known-shape tests and its walkthrough method. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns the complete walkthrough benchmark. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) supplies the physical reference measurements that real areas still need.
 
 ## Walkthrough measurement boundary
 
-Step 5 is explicitly unavailable. Task55 must supply real mapping, dimensions, a defined area method and independent error analysis. The canonical runner records this absence; it does not infer area from sampled viewer points or fill unseen space. Deterministic mapping controls stay in root tests. See [the six-step runner](../../src/walkthrough/README.md).
+Step 5 of the walkthrough uses `GridFootprint` (`src/walkthrough/steps/mapping.py`) when `--mapping grid-footprint` is passed. It measures each tracking origin separately, never joining separate worlds, saves each origin's grids under `output/predictions/mapping/`, and the visual index shows one top-down map per origin. It does not infer area from sampled viewer points or fill unseen space. See [the six-step runner](../../src/walkthrough/README.md).

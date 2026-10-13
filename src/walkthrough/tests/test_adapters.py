@@ -2,8 +2,12 @@
 
 import hashlib
 import json
-from dataclasses import replace
+import sys
+from contextlib import nullcontext
+from dataclasses import asdict, replace
+from functools import partial
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -13,8 +17,9 @@ from experiments.shared.runs import verify_run
 from src.walkthrough import pipeline, validation
 from src.walkthrough.config import STEP_NAMES, PipelineSpec
 from src.walkthrough.records import StepResult, Unavailable
+from src.walkthrough.steps import depth as depth_step
 from src.walkthrough.steps.capture import calibration_for
-from src.walkthrough.steps.contracts import DepthPrediction
+from src.walkthrough.steps.contracts import Calibration, ColourFrame, DepthPrediction
 from src.walkthrough.tests import providers
 
 
@@ -177,7 +182,8 @@ def test_unsupported_phone_geometry_refused(config, change, reason):
         calibration_for({**row, "phone_grid": {**row["phone_grid"], **change}})
 
 
-def test_tracking_range_is_refused_without_clipping(config):
+def test_tracking_refuses_frames_with_no_depth_inside_its_range(config):
+    """Far pixels are dropped at the handoff; a frame left with none is refused, not clipped."""
     def out_of_range(frames, *, run):
         for frame in frames:
             yield DepthPrediction(
@@ -395,3 +401,194 @@ def test_unexpected_method_error_propagates_and_records_failure(config):
         == "failed"
     )
     assert not (run_path / "metadata/manifest.json").exists()
+
+
+def test_depth_anything_v2_requires_an_existing_local_checkpoint(monkeypatch):
+    loader_calls = []
+
+    class OfflineLoader:
+        @classmethod
+        def from_pretrained(cls, checkpoint, **options):
+            loader_calls.append((checkpoint, options))
+            raise AssertionError("missing local checkpoint must not trigger a download")
+
+    monkeypatch.setitem(
+        sys.modules,
+        "transformers",
+        SimpleNamespace(
+            AutoImageProcessor=OfflineLoader,
+            AutoModelForDepthEstimation=OfflineLoader,
+        ),
+    )
+    missing_checkpoint = Path(__file__).with_name("missing-local-depth-checkpoint")
+    assert not missing_checkpoint.exists()
+    method = depth_step.DepthAnythingV2Metric(missing_checkpoint)
+
+    assert method.output_convention == "metric_depth"
+    with pytest.raises(FileNotFoundError, match="Local model checkpoint"):
+        method.load()
+    assert loader_calls == []
+
+
+class _FakeTensor:
+    """Just enough of a torch tensor for the Depth Anything predictor path."""
+
+    def __init__(self, array):
+        self.array = np.asarray(array)
+
+    def to(self, device):
+        return self
+
+    def unsqueeze(self, axis):
+        return _FakeTensor(np.expand_dims(self.array, axis))
+
+    def __getitem__(self, key):
+        return _FakeTensor(self.array[key])
+
+    def detach(self):
+        return self
+
+    def cpu(self):
+        return self
+
+    def numpy(self):
+        return self.array
+
+
+class _FakeProcessor:
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, *, images, return_tensors):
+        self.calls.append((images, return_tensors))
+        return {"pixel_values": _FakeTensor(np.zeros((1, 3, 2, 2)))}
+
+
+class _FakeModel:
+    """Returns a fixed 2x2 metric map; the 21 m pixel is beyond the 20 m limit."""
+
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, **inputs):
+        self.calls.append(inputs)
+        return SimpleNamespace(
+            predicted_depth=_FakeTensor(np.array([[[1.0, 2.0], [3.0, 21.0]]]))
+        )
+
+
+class _FakeTorch:
+    inference_mode = staticmethod(nullcontext)
+    nn = SimpleNamespace(
+        functional=SimpleNamespace(
+            interpolate=lambda tensor, *, size, mode, align_corners: tensor
+        )
+    )
+
+
+def test_depth_anything_v2_prediction_receives_colour_without_reference():
+    colour = np.arange(12, dtype=np.uint8).reshape(2, 2, 3)
+    frame = ColourFrame(
+        "frame-1",
+        1.0,
+        Calibration(2, 2, 1.0, 1.0, 0.0, 0.0, "x-right_y-down_z-forward"),
+        colour,
+    )
+    processor, model = _FakeProcessor(), _FakeModel()
+
+    predictions = list(
+        depth_step._predict_metric_depth(
+            iter([frame]),
+            run=None,
+            processor=processor,
+            model=model,
+            torch=_FakeTorch,
+            device="cpu",
+        )
+    )
+
+    assert len(processor.calls) == 1
+    image, return_tensors = processor.calls[0]
+    assert return_tensors == "pt"
+    np.testing.assert_array_equal(np.asarray(image), colour)
+    assert set(model.calls[0]) == {"pixel_values"}
+    assert len(model.calls) == 1
+    assert len(predictions) == 1
+    assert predictions[0].frame_id == frame.frame_id
+    np.testing.assert_array_equal(
+        predictions[0].depth[:1], [[1.0, 2.0]]
+    )
+    assert predictions[0].depth[1, 0] == 3.0
+    assert np.isnan(predictions[0].depth[1, 1])
+    np.testing.assert_array_equal(
+        predictions[0].valid, [[True, True], [True, False]]
+    )
+
+
+def test_depth_anything_v2_output_passes_the_depth_layer(tmp_path, monkeypatch):
+    """The adapter's real predictor output must survive depth.run's grid and mask checks."""
+    calibration = Calibration(2, 2, 1.0, 1.0, 0.0, 0.0, "x-right_y-down_z-forward")
+    Image.fromarray(np.arange(12, dtype=np.uint8).reshape(2, 2, 3), mode="RGB").save(
+        tmp_path / "frame.png"
+    )
+    capture = {
+        "frames": [
+            {
+                "frame_id": "frame-1",
+                "timestamp_s": 1.0,
+                "image": "frame.png",
+                "calibration": asdict(calibration),
+                "phone_grid": None,
+            }
+        ]
+    }
+    run_context = SimpleNamespace(
+        path=tmp_path, measure=lambda *_args, **_kwargs: nullcontext()
+    )
+    monkeypatch.setattr(
+        depth_step.DepthAnythingV2Metric,
+        "load",
+        lambda self: partial(
+            depth_step._predict_metric_depth,
+            processor=_FakeProcessor(),
+            model=_FakeModel(),
+            torch=_FakeTorch,
+            device="cpu",
+            max_depth_m=self.max_depth_m,
+        ),
+    )
+    method = depth_step.DepthAnythingV2Metric(tmp_path / "unused-checkpoint", device="cpu")
+
+    row, output = depth_step.run(run_context, capture, method)
+
+    assert row.status == "complete", row.reason
+    assert output["frames"][0]["frame_id"] == "frame-1"
+    assert output["frames"][0]["depth_definition"] == "camera_axis_z_metres"
+    assert output["control"] is None
+    saved = np.load(tmp_path / output["frames"][0]["arrays"])
+    np.testing.assert_array_equal(saved["valid"], [[True, True], [True, False]])
+    np.testing.assert_array_equal(saved["depth"][0], [1.0, 2.0])
+
+
+def test_depth_preview_uses_one_fixed_labelled_colour_scale(tmp_path):
+    """Every depth preview shares a 0-4 m scale, so colours compare across frames and methods."""
+    from src.walkthrough import visualization
+
+    shape = (4, 6)
+    Image.fromarray(np.zeros((*shape, 3), dtype=np.uint8), mode="RGB").save(tmp_path / "rgb.png")
+    depth_m = np.full(shape, 2.0)
+    depth_m[0, 0] = 20.0  # one far learned-depth pixel must not rescale the rest
+    np.savez(tmp_path / "depth.npz", depth=depth_m, valid=np.ones(shape, dtype=bool))
+    frame = {"frame_id": "f0", "arrays": "depth.npz"}
+    capture_by_id = {"f0": {"image": "rgb.png", "source_frame_id": "f0"}}
+
+    artifacts = visualization._depth_frame(
+        tmp_path, 0, frame, {"depth": "fixture"}, capture_by_id, {"input": "fixture"}
+    )
+
+    assert artifacts[0]["details"]["display_maximum_m"] == 4.0
+    with Image.open(tmp_path / artifacts[0]["path"]) as preview:
+        assert "0 m to yellow 4 m" in preview.text["note"]
+        # 2 m sits mid-scale: red channel about half, blue channel about half.
+        red, _, blue = preview.getpixel((3, 2))
+        assert 110 <= red <= 145 and 110 <= blue <= 145
