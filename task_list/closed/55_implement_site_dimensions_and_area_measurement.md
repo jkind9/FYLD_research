@@ -123,7 +123,7 @@ Mapping is the only walkthrough layer without a method, so no run completes all 
 
 | Field | Value |
 |---|---|
-| Closing commit | Uncommitted workspace changes; no commit was requested |
+| Closing commit | `bfb70f2` |
 | Files changed | New: `experiments/05_birds_eye_mapping/measure.py`, `preview.py`, `tests/test_measurement.py`, `src/walkthrough/tests/test_mapping.py`. Changed: `src/walkthrough/steps/mapping.py` (GridFootprint, MappingResult, validate_maps, grids saved after validation), `steps/surface.py` and `steps/contracts.py` (`camera_centre_m`, optional `maps`), `visualization.py` (top-down map per origin), `cli.py` (`--mapping grid-footprint`); experiment 05 README, walkthrough README, task board |
 | Test status | 20 known-shape tests pass (`experiments/05_birds_eye_mapping/tests`); 185 walkthrough + experiment 05 tests pass together; Ruff clean. Tests written first and seen failing (module missing; then 7 red for the review findings) |
 | Before measurement | 0 site-area calculations; 0 known-shape tests; 0 runs with a real mapping layer |

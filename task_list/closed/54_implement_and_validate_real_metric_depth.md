@@ -124,7 +124,7 @@ Checkpoint terms were reviewed before acquisition. The official Depth Anything r
 
 | Field | Value |
 |---|---|
-| Closing commit | Uncommitted workspace changes; no commit was requested |
+| Closing commit | `bfb70f2` |
 | Files changed | `experiments/02_stereo_depth/geometry.py`, `dataset.py`, `scoring.py`, `evaluate.py`, `run.py`, `marigold.py`, `zipdepth.py`, `requirements-task54-host.txt`, `requirements-task54-marigold-wsl.lock`, all Task54 tests, `src/walkthrough/steps/depth.py`, `src/walkthrough/tests/test_adapters.py`, experiment and walkthrough READMEs, `task_list/README.md` |
 | Test status | At close: 40 passed, 34 deselected; Ruff and `py_compile` passed. Review on 2026-10-07 ran the full set with a writable temp folder (`--basetemp`): 185 passed, 0 deselected. |
 | Before measurement | 0 depth methods run in experiment02; downstream trials use supplied sensor depth |

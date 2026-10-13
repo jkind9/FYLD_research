@@ -150,7 +150,7 @@ Same 30 frames, only depth changed: raw Depth Anything gives camera RMSE 218 mm 
 
 | field | value |
 |---|---|
-| closing commit | Not closed; implementation will be recorded in the current commit |
+| commit | `bfb70f2` contains the implementation; task remains open |
 | files changed | Scale scoring and correction, report charts, experiment runner and result notes, tests, and the declared walkthrough and experiment READMEs |
 | test | Regression tests are included in the change; tests were not run during this commit request |
 | before / after | On the 30-frame xyz clip, raw Depth Anything was 218 mm camera RMSE and 152 mm lag-20 surface gap. The RGB-only overlap chain measured 113 mm and 32 mm, at 3.25 depth-layer fps. Full-length results are not yet summarized. |

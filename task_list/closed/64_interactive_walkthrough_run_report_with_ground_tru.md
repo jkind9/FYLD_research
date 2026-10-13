@@ -86,7 +86,7 @@ hyperparameters n/a: no experiment; display caps (60 frames, 150,000 points, col
 
 | field | value |
 |---|---|
-| closing commit | Uncommitted workspace changes; no commit was requested |
+| closing commit | `bfb70f2` |
 | files changed | New: `tools/demos/run_report.py`, `tools/demos/run_pages.py`, `tools/demos/web/page_run.js`, `tools/demos/tests/test_run_report.py`, `src/walkthrough/tests/test_depth_score.py`. Changed: `src/walkthrough/validation.py` (depth scorer), `src/walkthrough/cli.py` (`score_requests`, depth score when `depth.txt` exists, `--report-pages`); walkthrough README; board |
 | test | 4 depth-scorer tests and 2 report tests written first and seen failing; 268 walkthrough, experiment 02/05 and demo tests pass, then 18 report/CLI/scorer tests after the last fixes; Ruff clean; all six pages of a real report open offline in headless Chromium with no errors (`tools.demos.screenshot`) |
 | before / after | 0 interactive pages and 0 error graphs per run, depth unscored → 6 pages per run; per-frame camera-position and depth error graphs. Real 30-frame xyz runs (`outputs/task64_report_runs/`): Depth Anything depth AbsRel 0.389, camera RMSE 0.218 m, 0.92 fps processing; Kinect reference AbsRel 0.000, camera RMSE 0.021 m |

@@ -147,7 +147,7 @@ The pre-start lint and fresh plan review passed on 2026-10-06. Do not run model 
 
 | Field | Value |
 |---|---|
-| Closing commit | Not committed; Task51 remains in progress |
+| Closing commit | Not closed; overlapping acceptance-criteria edits are in `bfb70f2`; Task51 remains in progress |
 | Files changed | `src/walkthrough/cli.py`, `config.py`, `pipeline.py`, `records.py`, `provenance.py`, `validation.py`, `visualization.py`, `steps/artifacts.py`, `steps/capture.py`, `steps/depth.py`, `steps/tracking.py`, `steps/surface.py`, `steps/mapping.py`, `steps/objects.py`; `src/README.md`, `src/walkthrough/README.md`, `data/README.md`, `task_list/README.md`, root `README.md`, capture experiment README; this task file |
 | Test status | The test suite was not run and the contract test was not updated. The two-frame TUM clip completed all six layers in a labelled software-control run at `outputs/task51_visual_e2e_runs/20261007T073231.235212Z_3a03158a79104e3b9481e77c77d41b38`. Its visual manifest lists 6 stage statuses and 17 artifacts; every listed file exists and names a source and producer. The mask labels report 100% valid coverage because the fixture marks all 307,200 pixels valid; the RGB coverage overlay makes this visible. The object overlay labels its one full-frame box as synthetic software-control output, not a detector result. All local links resolve. The two full coloured PLY exports retain all 307,200 points per frame and include the method and source frame in their headers. Fixtures do not measure model accuracy. |
 | Before measurement | 0 prerecorded-dataset adapters in `src/walkthrough`; no visual index exported by the walkthrough |

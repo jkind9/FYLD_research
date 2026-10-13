@@ -106,7 +106,7 @@ Values inherited from Task54 are unchanged. New sparse-scale settings were chose
 
 | field | value |
 |---|---|
-| closing commit | Uncommitted workspace changes; no commit was requested |
+| closing commit | `bfb70f2` |
 | files changed | `experiments/02_stereo_depth/run.py` (process peak memory, `.cache` skipped in checkpoint lists), `geometry.py` (fit/apply split), `scoring.py` (`score_sparse_fit`), `evaluate.py` (`aggregate_scores` public), `marigold.py` (correct prediction folder, cost summary, chosen recordings, HYPERPARAMETERS), new `sparse_scale.py`, new `marigold_wsl_run.sh`, `requirements-task54-host.txt` (+psutil); tests `test_sparse_scale.py` (new), `test_run.py`, `test_marigold.py`; `src/walkthrough/steps/depth.py` (bias warning), `src/walkthrough/tests/test_adapters.py` (Depth Anything through the depth layer); `.gitignore` (`data/models/`); experiment 02 and walkthrough READMEs; Task54 receipts and review notes; board |
 | test | experiment 02: 51 passed; walkthrough: 185 passed with experiment 05; Ruff clean. New tests were seen failing first (missing module; 4 red for memory, `.cache`, Marigold folder) |
 | before / after | Phone-build frames scored 0 of 138 → 138 of 138 (AbsRel 0.0703 xyz, 0.0682 desk; CPU 24 ms, GPU 5 ms). CPU result files with memory 0 of 4 → every new run (Depth Anything 1.8 GB, ZipDepth 1.4 GB process peak). Methods scored 2 of 3 → 3 of 3 on xyz (Marigold 0.0356, 16.6 s per frame); Marigold desk not scored, dropped under the owner's 1 fps rule. Sparse-scale table for 10/50/200/1000 points, 5 seeds, 4 methods: `runs/task62/sparse_scale.json` |

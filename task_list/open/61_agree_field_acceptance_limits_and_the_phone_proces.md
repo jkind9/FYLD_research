@@ -76,11 +76,11 @@ Each of the 8 items has an owner answer with date (and units where numeric), or 
 
 | field | value |
 |---|---|
-| closing commit | (fill in) |
-| files changed | (fill in) |
-| test | (fill in) |
-| before / after | (fill in) |
-| result | (fill in) |
+| closing commit | Not closed; minimum-throughput decision is recorded in `bfb70f2` |
+| files changed | `task_list/open/61_agree_field_acceptance_limits_and_the_phone_proces.md` |
+| test | n/a: owner decision recorded; no code changed |
+| before / after | Minimum throughput was undecided; owner set the floor at 1 frame per second. The live update rate remains open. |
+| result | Decision recorded; other field acceptance limits remain open. |
 
 Notes / caveats / follow-ups:
 
