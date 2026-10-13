@@ -97,7 +97,12 @@ def _fake_run(path, depths_m, scale_ratios, camera_errors_m):
            {"measurements": {"origin 0 plane area": {"value": 2.5, "units": "square metres"}}})
     per_frame = [{"frame_id": f"f{i}", "abs_rel": 0.1, "scale_ratio": s, "fitted_abs_rel": 0.05}
                  for i, s in enumerate(scale_ratios)]
-    errors = [{"frame_id": f"f{i}", "position_error_m": e} for i, e in enumerate(camera_errors_m)]
+    errors = [
+        {"frame_id": f"f{i}", "position_error_m": e,
+         "estimated_position": [float(i) + e, 0.0, float(i) * 0.5],
+         "reference_position": [float(i), 0.0, float(i) * 0.5]}
+        for i, e in enumerate(camera_errors_m)
+    ]
     _write(path / "output/scores.json", {
         "depth": {"status": "scored", "result": {"overall": {"abs_rel": 0.1}, "per_frame": per_frame}},
         "tracking": {"status": "scored", "result": {"position_rmse_m": 0.2, "tracked_edges": 3, "possible_transitions": 3,
@@ -140,6 +145,50 @@ def test_markdown_table_has_one_row_per_run(tmp_path):
     table = scale_drift.markdown_table([row])
 
     assert table.count("\n| steady |") == 1
+
+
+def test_trajectory_html_compares_aligned_paths_and_error_against_ground_truth(tmp_path):
+    raw = _fake_run(tmp_path / "raw", [2.0] * 4, [1.0] * 4, [0.2, 0.2, 0.2, 0.2])
+    overlap = _fake_run(tmp_path / "overlap", [2.0] * 4, [1.0] * 4, [0.1, 0.1, 0.1, 0.1])
+    for path, rmse in ((raw, 0.2), (overlap, 0.1)):
+        scores_path = path / "output/scores.json"
+        scores = json.loads(scores_path.read_text())
+        scores["tracking"]["result"]["position_rmse_m"] = rmse
+        _write(scores_path, scores)
+
+    html = scale_drift.trajectory_comparison_html([("test sequence", raw, overlap)])
+
+    assert "test sequence" in html
+    assert "Ground truth" in html and "Raw depth" in html and "Overlap chain" in html
+    assert "0.200 m to 0.100 m (50.0% lower" in html
+    assert "position error by matched frame" in html
+    assert "TUM motion-capture poses are used only for scoring" in html
+
+
+def test_trajectory_html_refuses_runs_with_different_matched_frames(tmp_path):
+    raw = _fake_run(tmp_path / "raw", [2.0] * 4, [1.0] * 4, [0.0] * 4)
+    overlap = _fake_run(tmp_path / "overlap", [2.0] * 4, [1.0] * 4, [0.0] * 4)
+    scores_path = overlap / "output/scores.json"
+    scores = json.loads(scores_path.read_text())
+    scores["tracking"]["result"]["errors"].pop()
+    _write(scores_path, scores)
+
+    with pytest.raises(ValueError, match="same frames"):
+        scale_drift.trajectory_comparison_html([("test sequence", raw, overlap)])
+
+
+def test_trajectory_html_refuses_different_ground_truth_and_empty_comparisons(tmp_path):
+    raw = _fake_run(tmp_path / "raw", [2.0] * 4, [1.0] * 4, [0.0] * 4)
+    overlap = _fake_run(tmp_path / "overlap", [2.0] * 4, [1.0] * 4, [0.0] * 4)
+    scores_path = overlap / "output/scores.json"
+    scores = json.loads(scores_path.read_text())
+    scores["tracking"]["result"]["errors"][0]["reference_position"][0] += 1.0
+    _write(scores_path, scores)
+
+    with pytest.raises(ValueError, match="different reference paths"):
+        scale_drift.trajectory_comparison_html([("test sequence", raw, overlap)])
+    with pytest.raises(ValueError, match="At least one"):
+        scale_drift.trajectory_comparison_html([])
 
 
 def test_space_guard_refuses_below_the_minimum(tmp_path):

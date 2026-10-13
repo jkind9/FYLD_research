@@ -1,7 +1,7 @@
 ---
 id: "65"
 title: Diagnose and fix frame to frame depth scale drift
-status: in_progress
+status: done
 priority: HIGH
 type: experiment
 approval_status: owner brief 2026-10-08 ("Diagnose before fixing ... shortlist and test"); GPU use not permitted without asking; settings marked "proposed by Claude" are not owner-ruled
@@ -17,6 +17,11 @@ files:
   - tools/demos/tests/test_run_report.py
   - experiments/02_stereo_depth/scale_drift.py
   - experiments/02_stereo_depth/tests/test_scale_drift.py
+  - experiments/02_stereo_depth/runs/task65/xyz_scale_drift.json
+  - experiments/02_stereo_depth/runs/task65/xyz_scale_drift.md
+  - experiments/02_stereo_depth/runs/task65/desk_scale_drift.json
+  - experiments/02_stereo_depth/runs/task65/desk_scale_drift.md
+  - outputs/task65_runs/camera_path_comparison.html
 docs:
   - experiments/02_stereo_depth/README.md
   - src/walkthrough/README.md
@@ -168,3 +173,22 @@ Notes / caveats / follow-ups:
 - 2026-10-08 deviation (Claude, not owner-ruled): full-length pose-triangulated runs use noise 0 instead of 5 mm. On the 30-frame clip the 5 mm setting gave scale/sensor-fit ratios 0.44-1.76 (camera RMSE 4.4 m), because frame steps are 20-35 mm and independent 5 mm noise per frame swamps them; with exact poses the ratios are 0.64-1.05 (offline check on the saved Depth Anything run). Independent per-frame noise is also unlike phone tracking error, which grows as slow drift. The 30-frame clip keeps both settings. Added CLI flags `--pose-noise-m` and `--chain-smoothing-frames` (tested) so the queue can set them; the first queue was stopped mid-way through the full xyz Depth Anything run and restarted (its partial folder `outputs/task65_runs/xyz/depth-anything/20261008T144321.148301Z_*` is incomplete and not used).
 - 2026-10-08 deviation: the planned `requirements-task65-video-depth.txt` was not written; the harness documentation hook refuses creating or editing `.txt` files. The one added package (`easydict==1.13`, LGPL-3.0, installed into `.venv-yolo` from a downloaded wheel) and the code commit and weight hashes are recorded in the experiment 02 README instead.
 - Plan review 3, 2026-10-08: PASS; 3 advisory notes applied (697 frames, pose-less frame rule for the motion-capture gap, `partners_used` is a count).
+
+## Files
+
+- experiments/02_stereo_depth/README.md (+24 -0, 283 lines)
+- experiments/02_stereo_depth/scale_drift.py (+108 -0, 432 lines)
+- experiments/02_stereo_depth/tests/test_scale_drift.py (+50 -1, 197 lines)
+
+## Checked
+
+- `python -B -m pytest experiments/02_stereo_depth/tests/test_scale_drift.py -q -> 9 passed; python -B -m ruff check experiments/02_stereo_depth/scale_drift.py experiments/02_stereo_depth/tests/test_scale_drift.py -> all checks passed; camera_path_comparison.html parse -> 3 comparisons and 6 charts, RMSE values match saved scores`
+- new duplicate blocks: 0
+- complexity share (functions over 10): 0.27 (was 0.25); approximate (python could not start)
+- dead code on added lines: not checked (vulture not installed)
+- prose patterns: 0 in 3452 words
+- folders that could not be read, skipped: experiments/02_stereo_depth/tests/.test-marigold-temp/tmpby3p9_1j, experiments/02_stereo_depth/tests/.test-marigold-temp/tmpdpztkok_, experiments/02_stereo_depth/tests/tmphix76bln, experiments/02_stereo_depth/tests/tmpx6_7h35w, tmp1bephq0l, tmp2jlt8lv9
+
+## Left over
+
+The ZNCC/rolling graph-fit proposal remains unimplemented. Full-length surface-gap summaries and a phone run with real metric motion remain outstanding.

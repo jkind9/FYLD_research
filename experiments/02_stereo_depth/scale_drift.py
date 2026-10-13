@@ -23,6 +23,7 @@ import importlib
 import json
 import shutil
 import sys
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -279,6 +280,107 @@ def markdown_table(rows: list[dict[str, Any]], headline_lag: str = "20") -> str:
     return "\n".join(lines) + "\n"
 
 
+def _trajectory_data(run_path: Path) -> dict[str, Any]:
+    tracking = _read(run_path / "output/scores.json").get("tracking", {}).get("result", {})
+    errors = tracking.get("errors", [])
+    if not errors:
+        raise ValueError(f"No ground-truth trajectory scores in {run_path}")
+    required = ("frame_id", "estimated_position", "reference_position", "position_error_m")
+    for row in errors:
+        if any(key not in row for key in required):
+            raise ValueError(f"Trajectory score row lacks fields in {run_path}: {row.get('frame_id')}")
+    return {"rmse_m": tracking["position_rmse_m"], "errors": errors}
+
+
+def _svg_path_plot(name: str, trajectories: list[tuple[str, str, list[list[float]]]]) -> str:
+    width, height, margin = 900, 420, 55
+    points = [point for _, _, path in trajectories for point in path]
+    xmin, xmax = min(p[0] for p in points), max(p[0] for p in points)
+    zmin, zmax = min(p[2] for p in points), max(p[2] for p in points)
+    dx, dz = max(xmax - xmin, 1e-9), max(zmax - zmin, 1e-9)
+    sx = (width - 2 * margin) / dx
+    sz = (height - 2 * margin) / dz
+    scale = min(sx, sz)
+    ox = (width - dx * scale) / 2
+    oy = (height - dz * scale) / 2
+    def convert(path: list[list[float]]) -> str:
+        return " ".join(f"{ox + (p[0] - xmin) * scale:.1f},{height - oy - (p[2] - zmin) * scale:.1f}" for p in path)
+    lines = []
+    for label, colour, path in trajectories:
+        start_x, start_y = convert(path[:1]).split(",")
+        lines.append(f'<polyline points="{convert(path)}" fill="none" stroke="{colour}" stroke-width="2.5"/>')
+        lines.append(f'<circle cx="{start_x}" cy="{start_y}" r="4" fill="{colour}"/>')
+        legend_y = 24 + 22 * (len(lines) // 3)
+        lines.append(f'<text x="{width - 175}" y="{legend_y}" fill="{colour}">{escape(label)}</text>')
+    lines.append(f'<text x="{width / 2}" y="{height - 8}" text-anchor="middle">world X (m)</text>')
+    lines.append(f'<text x="14" y="{height / 2}" transform="rotate(-90 14 {height / 2})" text-anchor="middle">world Z (m)</text>')
+    return f'<svg viewBox="0 0 {width} {height}" role="img" aria-label="{escape(name)} camera path, top-down X versus Z">' + "".join(lines) + "</svg>"
+
+
+def _svg_error_plot(name: str, trajectories: list[tuple[str, str, list[float]]]) -> str:
+    width, height, margin = 900, 300, 52
+    maximum = max((max(values) for _, _, values in trajectories if values), default=1.0)
+    maximum = max(maximum, 1e-9)
+    lines = [f'<line x1="{margin}" y1="{height - margin}" x2="{width - 15}" y2="{height - margin}" stroke="#666"/>',
+             f'<line x1="{margin}" y1="15" x2="{margin}" y2="{height - margin}" stroke="#666"/>']
+    for index, (label, colour, values) in enumerate(trajectories):
+        span = max(1, len(values) - 1)
+        converted = " ".join(
+            f"{margin + i * (width - margin - 20) / span:.1f},{height - margin - v * (height - 2 * margin) / maximum:.1f}"
+            for i, v in enumerate(values)
+        )
+        lines.append(f'<polyline points="{converted}" fill="none" stroke="{colour}" stroke-width="2"/>')
+        lines.append(f'<text x="{margin + 10}" y="{30 + 20 * index}" fill="{colour}">{escape(label)}</text>')
+    lines.extend((f'<text x="{width / 2}" y="{height - 7}" text-anchor="middle">matched frame</text>',
+                  f'<text x="13" y="{height / 2}" transform="rotate(-90 13 {height / 2})" text-anchor="middle">position error (m)</text>',
+                  f'<text x="{margin - 8}" y="24" text-anchor="end">{maximum:.2f}</text>',
+                  f'<text x="{margin - 8}" y="{height - margin}" text-anchor="end">0</text>'))
+    return f'<svg viewBox="0 0 {width} {height}" role="img" aria-label="{escape(name)} position error by matched frame">' + "".join(lines) + "</svg>"
+
+
+def trajectory_comparison_html(comparisons: list[tuple[str, Path, Path]]) -> str:
+    """Build an offline before/after view from saved tracking scores and reference poses."""
+    sections = []
+    for name, raw_path, corrected_path in comparisons:
+        raw, corrected = _trajectory_data(raw_path), _trajectory_data(corrected_path)
+        raw_rows, corrected_rows = raw["errors"], corrected["errors"]
+        raw_ids = [row["frame_id"] for row in raw_rows]
+        corrected_ids = [row["frame_id"] for row in corrected_rows]
+        if raw_ids != corrected_ids:
+            raise ValueError(f"{name}: raw and corrected runs do not score the same frames")
+        if any(not np.allclose(a["reference_position"], b["reference_position"], atol=1e-6)
+               for a, b in zip(raw_rows, corrected_rows, strict=True)):
+            raise ValueError(f"{name}: raw and corrected runs use different reference paths")
+        trajectories = [
+            ("Ground truth", "#202020", [row["reference_position"] for row in raw_rows]),
+            ("Raw depth", "#dc5a3a", [row["estimated_position"] for row in raw_rows]),
+            ("Overlap chain", "#2878b5", [row["estimated_position"] for row in corrected_rows]),
+        ]
+        errors = [("Raw depth", "#dc5a3a", [row["position_error_m"] for row in raw_rows]),
+                  ("Overlap chain", "#2878b5", [row["position_error_m"] for row in corrected_rows])]
+        rmse_before, rmse_after = raw["rmse_m"], corrected["rmse_m"]
+        reduction = 100 * (1 - rmse_after / rmse_before) if rmse_before else 0.0
+        sections.append(
+            f'<section><h2>{escape(name)}</h2><p>{len(raw_rows)} matched frames; '
+            f'camera-position RMSE changed from {rmse_before:.3f} m to {rmse_after:.3f} m '
+            f'({reduction:.1f}% lower with overlap-chain depth).</p>'
+            f'<div class="plots">{_svg_path_plot(name, trajectories)}{_svg_error_plot(name, errors)}</div></section>'
+        )
+    if not sections:
+        raise ValueError("At least one trajectory comparison is required")
+    return """<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camera path before and after depth scale correction</title>
+<style>body{font:16px system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#18202a}h1{font-size:1.8rem}section{border-top:1px solid #ccd2d8;padding:1rem 0 2rem}.plots{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:1rem}svg{width:100%;height:auto;border:1px solid #ddd;background:#fff}p{line-height:1.5}</style>
+<h1>Camera path before and after depth scale correction</h1>
+<p>Each estimated path is aligned to the ground truth at the first matched pose, using the project's frozen trajectory scorer. The left chart shows a top-down X–Z projection. The right chart shows position error at each matched frame. Raw depth uses Depth Anything without scale correction. The overlap chain uses the same depth model with RGB-only scale correction from tracked features. TUM motion-capture poses are used only for scoring.</p>
+""" + "\n".join(sections) + "</html>"
+
+
+def write_trajectory_comparison(comparisons: list[tuple[str, Path, Path]], output: Path) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(trajectory_comparison_html(comparisons), encoding="utf-8")
+
+
 def check_free_space(path: Path, minimum_gb: float = HYPERPARAMETERS["minimum_free_space_gb"]["value"]) -> float:
     """Stop (exit) when the disk holding `path` has less than `minimum_gb` free."""
     free_gb = shutil.disk_usage(path).free / 1e9
@@ -297,6 +399,9 @@ def main(argv: list[str] | None = None) -> int:
     summary = commands.add_parser("summarise")
     summary.add_argument("--run", action="append", required=True, help="LABEL=RUN_FOLDER")
     summary.add_argument("--output", type=Path, required=True)
+    trajectory = commands.add_parser("trajectory-html")
+    trajectory.add_argument("--comparison", action="append", nargs=3, metavar=("NAME", "RAW_RUN", "OVERLAP_RUN"), required=True)
+    trajectory.add_argument("--output", type=Path, required=True)
     space = commands.add_parser("check-space")
     space.add_argument("--path", type=Path, default=Path("."))
     space.add_argument("--minimum-gb", type=float, default=HYPERPARAMETERS["minimum_free_space_gb"]["value"])
@@ -307,6 +412,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(make_clip(args.source, args.output, sequence=args.sequence), indent=2))
     elif args.command == "check-space":
         print(f"{check_free_space(args.path, args.minimum_gb):.1f} GB free")
+    elif args.command == "trajectory-html":
+        write_trajectory_comparison([(name, Path(raw), Path(chain)) for name, raw, chain in args.comparison], args.output)
+        print(f"Wrote {args.output}")
     else:
         rows = []
         for entry in args.run:

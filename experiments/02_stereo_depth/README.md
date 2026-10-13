@@ -210,7 +210,7 @@ ZipDepth NPU export used the original fused model graph, `dynamo=False`, and ONN
 
 In the walkthrough, Depth Anything V2 Metric Small gets each frame's shape about right but its size wrong, and by a different amount in each frame. On 30 TUM xyz frames its median predicted/sensor distance moves between 1.21 and 1.63. When the frames are combined, the same surface lands at a different distance from each camera, so the 3D view shows it several times along the viewing direction. The camera tracker (Open3D RGB-D odometry) reads each jump in size as camera motion: at frame 16 the size jumps from 1.39 to 1.62 and camera error from 147 to 337 mm in the same frame.
 
-[Task65](../../task_list/open/65_diagnose_and_fix_frame_to_frame_depth_scale_drift.md) measures this and tests fixes. Results are below the survey.
+[Task65](../../task_list/done/65_diagnose_and_fix_frame_to_frame_depth_scale_drift.md) measures this and tests fixes. Results are below the survey.
 
 ### What existing systems do (survey, 8 October 2026)
 
@@ -242,6 +242,30 @@ Shortlisted and tested here:
 1. **Overlap chain** (no phone sensor). Each frame's scale is carried from the frames before it, through corners tracked into it and a PnP solve. It is the scale-propagation idea of the first row, made light enough for a CPU.
 2. **Triangulation with metric camera motion** (the phone route). Corners are triangulated with the camera's metric motion, standing in for ARCore or IMU tracking, and each frame's scale is fitted to them. This is the VI-Depth and PTC-Depth idea in its simplest form.
 3. **Metric Video Depth Anything Small** (no phone sensor). It is the one permissive, small video depth model.
+
+### Standard evaluation and the rolling-correlation idea
+
+The research scan already covered temporal scale alignment, video depth models, multi-view reconstruction, phone motion sensors, and depth fusion. It found no single standard algorithm for correcting frame-to-frame metric-depth scale. There is a standard way to compare camera paths: the TUM RGB-D benchmark publishes Kinect colour/depth sequences with motion-capture camera poses and an official trajectory evaluator. This project uses its `freiburg1_xyz` and `freiburg1_desk` recordings and compares camera position against those poses. These runs keep the project's first-matched-pose alignment and every-second-frame sampling, so they are not leaderboard results from the full-rate official evaluation.
+
+Published work supports using geometry or shared multi-frame constraints instead of comparing raw depth arrays. *Consistent Video Depth Estimation* links tracked image points through 3D and adjusts depth jointly across a video. Video Depth Anything trains temporal features and constrains depth changes across frames. *Video Depth without Video Models* is especially close to the rolling-average suggestion: it predicts depth on overlapping video snippets and jointly fits each snippet's scale and shift so predictions agree where snippets overlap. Our earlier CPU check of Metric Video Depth Anything Small was 0.77 fps by itself and 0.81 fps with the overlap chain, below the project's 1 fps depth-layer floor.
+
+ZNCC (zero-mean normalized cross-correlation) is useful when two image patches show the same content after a translation, with brightness offset and contrast changes. A depth map from a moving camera does not meet that assumption: camera rotation requires an intrinsics-based image warp, translation causes depth-dependent parallax, and occlusion changes which surfaces are visible. Rotating a fixed-size NumPy array would rotate image coordinates, not the measured 3D points. Sliding one depth array along its value axis would test additive depth offsets; the error seen here is mostly multiplicative scale. A true 3D volume correlation would first need camera poses and a shared voxel grid, which risks circularly using the same uncertain poses and scale we are trying to fix. We therefore did not use ZNCC as the scale estimator.
+
+The useful part of the idea is consensus across several overlapping frames. The existing overlap-chain method already estimates each frame from up to four earlier partners (lags 1, 2, 4, and 8) and takes their median, rather than trusting one previous frame. A later experiment could solve all supported pairwise scale constraints together in log-scale, weighted by match count and reprojection error, with no additive depth shift. The overlapping-snippet method above is a published precedent for joint scale alignment. This graph-wide fit remains a proposal; it has not been implemented or measured here.
+
+### Camera path comparison: raw depth and overlap chain
+
+The [offline camera-path report](../../outputs/task65_runs/camera_path_comparison.html) compares Depth Anything V2 Metric Small with the same depth method corrected by the RGB-only overlap chain. It plots the top-down camera path against TUM motion-capture ground truth and the per-frame position error. Lower RMSE means a closer camera path.
+
+| TUM recording sample | Frames matched | Raw depth camera RMSE | Overlap-chain RMSE | Change |
+|---|---:|---:|---:|---:|
+| `freiburg1_xyz`, short clip | 30 | 218 mm | 113 mm | 48% lower |
+| `freiburg1_xyz`, full every-second-frame clip | 398 | 1,359 mm | 371 mm | 73% lower |
+| `freiburg1_desk`, full every-second-frame clip | 298 | 1,720 mm | 1,009 mm | 41% lower |
+
+Both full-recording paths improve, but still miss ground truth by 0.37 m on xyz and 1.01 m on desk. The result supports the scale-drift diagnosis and the overlap chain as a candidate. It does not make the camera path accurate enough for deployment. The Kinect-depth rows are sensor-backed controls, not RGB-only alternatives.
+
+Sources: [TUM RGB-D benchmark and trajectory evaluation](https://cvg.cit.tum.de/data/datasets/rgbd-dataset), [TUM evaluation instructions](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/rgbdslam_eval), [Consistent Video Depth Estimation](https://arxiv.org/abs/2004.15021), [Video Depth Anything (CVPR 2025)](https://openaccess.thecvf.com/content/CVPR2025/html/Chen_Video_Depth_Anything_Consistent_Depth_Estimation_for_Super-Long_Videos_CVPR_2025_paper.html), [Video Depth without Video Models (CVPR 2025)](https://openaccess.thecvf.com/content/CVPR2025/html/Ke_Video_Depth_without_Video_Models_CVPR_2025_paper.html).
 
 ### Code and model files
 
