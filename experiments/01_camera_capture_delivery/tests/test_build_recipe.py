@@ -11,7 +11,6 @@ import struct
 import sys
 import tarfile
 import zipfile
-from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -26,11 +25,15 @@ verify = importlib.import_module("verify")
 export = importlib.import_module("export")
 bytecode = importlib.import_module("verify_bytecode")
 warm = importlib.import_module("warm")
+pytestmark = pytest.mark.usefixtures("publication_time")
 
 
 def deployment_name(app, evidence):
-    day = datetime.now(timezone.utc).strftime("%Y%m%d")
-    return f"{app}_{day}_{evidence['apk_sha256'][:8]}"
+    return f"{app}_v{evidence['manifest']['version']}_20261014T220000Z_{evidence['apk_sha256'][:8]}"
+
+
+def deployed_apk(folder):
+    return next(folder.glob("*.apk"))
 
 SOURCE = b"print(42)\n"
 FILENAME = "/scratch/app/main.py"
@@ -358,8 +361,8 @@ def test_export_complete_bundle_and_refuse_overwrite(verified, tmp_path):
     output = tmp_path / "offline"
     published = export.publish_bundle(apk, evidence, output, "fixture-001", verifier_dir(evidence))
     assert published == output / deployment_name("smoke", evidence)
-    assert recipe.sha256(published / apk.name) == recipe.sha256(apk)
-    assert (published / f"{apk.name}.bin").read_bytes() == apk.read_bytes()
+    assert recipe.sha256(deployed_apk(published)) == recipe.sha256(apk)
+    assert deployed_apk(published).with_suffix(".apk.bin").read_bytes() == apk.read_bytes()
     assert json.loads((published / "verification.json").read_text())["apk_sha256"] == recipe.sha256(apk)
     assert (published / "README.md").is_file()
     before = (published / "verification.json").read_bytes()
@@ -407,7 +410,7 @@ def test_camera_export_revalidates_and_publishes_camera_receipt(verified, tmp_pa
     saved = json.loads((published / "verification.json").read_text(encoding="utf-8"))
     assert saved == camera
     assert "Camera2 capability checks" in (published / "README.md").read_text(encoding="utf-8")
-    assert recipe.sha256(published / apk.name) == recipe.sha256(apk)
+    assert recipe.sha256(deployed_apk(published)) == recipe.sha256(apk)
 
 
 def test_camera_export_rejects_smoke_apk_with_forged_camera_receipt(verified):
@@ -513,7 +516,7 @@ def test_export_interruption_preserves_prior_bundle(verified, tmp_path, monkeypa
     apk, evidence, _ = verified
     output = tmp_path / "offline"
     prior = export.publish_bundle(apk, evidence, output, "prior", verifier_dir(evidence))
-    before = (prior / apk.name).read_bytes()
+    before = deployed_apk(prior).read_bytes()
 
     def interrupt(*args):
         raise OSError("simulated interruption before publication")
@@ -523,7 +526,7 @@ def test_export_interruption_preserves_prior_bundle(verified, tmp_path, monkeypa
     with pytest.raises(OSError, match="simulated interruption"):
         export.publish_bundle(apk, evidence, output, "interrupted", verifier_dir(evidence))
     assert not (output / "smoke_20261015_12345678").exists()
-    assert (prior / apk.name).read_bytes() == before
+    assert deployed_apk(prior).read_bytes() == before
     assert not (output / ".publish.lock").exists()
     assert list(output.glob(".staging-*"))
 
@@ -600,7 +603,7 @@ def test_export_cli_reruns_verifiers_before_offline_handoff(verified, tmp_path, 
     assert calls[0][0][0:3] == (apk, evidence["settings"], source)
     assert calls[0][1] == {"camera_profile": None}
     assert target.is_dir()
-    assert recipe.sha256(target / apk.name) == recipe.sha256(apk)
+    assert recipe.sha256(deployed_apk(target)) == recipe.sha256(apk)
     assert str(target) in capsys.readouterr().out
 
 
