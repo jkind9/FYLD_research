@@ -53,7 +53,22 @@ Because ARCore's pose already depends on ARCore's own internal calibration, this
 
 ## Calibration
 
-*Planned (step 2 of Stream B).* Kalibr (BSD-3) estimates, from a video of a printed grid of AprilTag markers, the camera's focal length, image centre and lens distortion; the rotation and offset between the camera and the motion sensors; and the time offset between them. It also needs each sensor's noise level and how fast its bias wanders, which come from a long recording with the phone at rest. ARCore ships these numbers for every supported phone; an open rebuild has to measure them per phone model.
+ARCore ships calibration numbers for every supported phone. An open rebuild has to measure them for each phone model. There are four:
+
+1. **The camera model.** Focal lengths and image centre in pixels (chapter 1), plus lens distortion: how far straight lines bend near the edges.
+2. **Where the camera sits relative to the motion sensors.** A rotation and an offset of a few centimetres, written `T_cam_imu`. The tracker needs it to turn a rotation the gyroscope measures into the rotation the camera sees.
+3. **The time offset.** Covered above.
+4. **How noisy the motion sensors are.** A tracker weighs camera against motion sensors by their noise. Overstated noise wastes the motion sensors; understated noise lets their errors pull the path off.
+
+**Kalibr** (BSD-3, from ETH Zurich) measures the first three from a video of a printed grid of AprilTag markers. AprilTags are square black-and-white codes whose corners can be found to a fraction of a pixel, and each tag carries its own number. The grid's real size is known. Every frame then gives exact 2D-to-3D correspondences, the same idea as the chessboard calibration in chapter 1. For the camera-to-sensor part, the phone is waved in front of the grid, turning and moving along every axis. Kalibr fits one smooth path for the phone through time (a continuous-time spline) that explains the tag corners seen by the camera and the readings of the gyroscope and accelerometer together. The time offset is one more unknown in that fit.
+
+**Noise comes from lying still.** With the phone at rest, the gyroscope should read zero. What it reads is noise. The *Allan deviation* measures how much the average reading wanders when averaged over windows of different lengths (τ). Plotted on log-log axes, pure white noise falls along a line of slope -1/2: averaging longer helps. A slowly wandering bias (a *random walk*) rises along a line of slope +1/2: averaging longer hurts. The white-noise level is read where the -1/2 line crosses τ = 1 s, and the random walk where the +1/2 line crosses τ = 3 s. The +1/2 line appears only after minutes to hours, so the rest recording must be long. TUM-VI used 111 hours for its BMI160, a phone-class sensor, and measured gyroscope white noise of 8.0e-5 rad/s/√Hz. Values from a rest recording are then inflated, 2x for white noise and 10x for random walk as TUM-VI did, because a phone in motion is noisier than one on a table.
+
+**Checking the pipeline on known answers.** Before trusting it on the Redmi, the project runs the same steps on TUM-VI's published calibration recordings. TUM-VI is a benchmark whose authors calibrated their rig with Kalibr and published the result. If the pipeline reproduces their camera-to-IMU transform and a near-zero time offset (they had already removed a 5.3 ms offset), it is working. A second check is free: ARCore reports both the camera pose and the pose of the phone's sensor axes. Their difference is ARCore's own camera-to-IMU calibration, which Kalibr's result on the Redmi should agree with.
+
+**Phone-specific traps.** Phone cameras use a rolling shutter (chapter 11) while Kalibr's camera-to-IMU model assumes all rows are captured at once, so the calibration video should use slow, smooth motion in good light. The printed grid must be measured with a ruler, because printers rescale pages. Focus must stay fixed.
+
+> **Project result (14 October 2026).** On TUM-VI's calibration recordings the pipeline reproduced the published calibration: focal lengths within 0.01 px, image centre within 0.04 px, camera-to-IMU rotation within 0.014 degrees, offset within 1.0 mm, and a time shift of 0.13 ms where TUM-VI had already removed its offset. Kalibr took under a minute on the CPU. Redmi calibration waits for its recordings (a waved calibration video and about 3 hours at rest).
 
 ## Choosing a tracker
 

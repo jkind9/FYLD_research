@@ -7,7 +7,7 @@ Visual-inertial odometry (VIO) is the core part: it fuses camera images with gyr
 | Step | What | Status (14 October 2026) |
 |---|---|---|
 | 1. Raw recorder (Task88) | Phone app records camera frames, gyroscope, accelerometer and ARCore's poses on one clock; the computer receives, checks and converts the recording | App and host tools built and tested on synthetic recordings; first Redmi recording waits for the owner to install the app |
-| 2. Calibration | Kalibr: camera intrinsics, camera-to-IMU rotation, offset and time shift (printed target); IMU noise from a long recording at rest | Not started |
+| 2. Calibration (Task90) | Kalibr: camera intrinsics, camera-to-IMU rotation, offset and time shift (printed target); IMU noise from a long recording at rest | Pipeline built; reproduces TUM-VI's published calibration (0.014 degrees, 1.0 mm, 0.13 ms); A4 target ready; Redmi calibration waits for its recordings |
 | 3. Offline comparison | Basalt (BSD-3), Kimera-VIO (BSD-2), OKVIS2 (BSD-style), with OpenVINS (GPL-3.0, reference only), run in WSL on the recordings and scored against ARCore's poses and tape-measured distances, with time per frame | Not started |
 | 4. Port to the phone | Best system built for Android (NDK); learned depth resized to its tracked points replaces ARCore's depth | Not started |
 
@@ -71,3 +71,49 @@ Use the `.venv-sfm` environment (numpy, scipy, OpenCV). The receiver uses only t
 ### Results
 
 The app builds (debug APK, package `org.fyld.rawrecorder` 0.1, minimum Android 8.0, ARCore 1.56.0). It has not yet run on the Redmi. The first device recording will report camera frame rate, gyroscope and accelerometer rates, dropped frames, the clock-base check and the measured offset here.
+
+## Step 2: calibration (Task90)
+
+A tracker needs four things about the phone: the camera model (focal lengths, image centre, lens distortion), the rotation and offset from the motion sensors (IMU) to the camera, the time offset between them, and the IMU's noise. Kalibr (BSD-3) measures the first three from a video of a printed grid of AprilTag markers; the noise comes from a long recording at rest, fitted with the Allan deviation. Sources and exact wording: [research/visual_inertial_odometry/calibration.md](../../research/visual_inertial_odometry/calibration.md).
+
+### Tools
+
+| Command | What it does |
+|---|---|
+| `python experiments/open_vio/calibration/prepare.py --recording <walk> --out <run> --tag-size <measured m> [--rest <rest recording>]` | Kalibr's bag-creator folder (`cam0/<t_ns>.png`, `imu0.csv`), `target.yaml` (AprilGrid 6 x 8, spacing 0.3) and, with a rest recording, `allan.json` and `imu.yaml` (Allan values x2 for white noise, x10 for random walk, as TUM-VI used with Kalibr). `--mav0 <EuRoC mav0>` instead of `--recording` takes any EuRoC/ASL folder |
+| `python experiments/open_vio/calibration/allan.py <rest recording>` | Allan deviation of each gyroscope and accelerometer axis; noise density read at tau = 1 s on the slope -1/2 line, random walk at tau = 3 s on the slope +1/2 line; no random walk when the recording is too short to show that line |
+| `wsl -- bash experiments/open_vio/calibration/run_kalibr.sh image` | Builds Kalibr's Docker image from its own `Dockerfile_ros1_20_04` (Kalibr needs ROS 1, which WSL's Ubuntu 24.04 does not have) |
+| `wsl -- bash .../run_kalibr.sh cameras <kalibr folder> <target.yaml> <model> <out>` | Bag creation and camera calibration (`data-camchain.yaml`) |
+| `wsl -- bash .../run_kalibr.sh imu <kalibr folder> <target.yaml> <camchain.yaml> <imu.yaml> <out> [offset search s]` | Camera-IMU calibration (`data-camchain-imucam.yaml`: `T_cam_imu`, `timeshift_cam_imu`) |
+| `python experiments/open_vio/calibration/compare.py <data-camchain-imucam.yaml> [--reference <camchain.yaml>] [--recording <walk>]` | Rotation (degrees), translation (m) and time-shift differences against a reference calibration and against the camera-to-IMU transform implied by ARCore's own poses in a recording |
+
+| `wsl -- env RUNS=<runs> DATA=<data/tumvi> bash experiments/open_vio/calibration/tumvi_check.sh` | The TUM-VI check: camera calibration on calib-cam1 (pinhole-equidistant, as TUM-VI published), then camera-IMU calibration on calib-imu1 with that camera result and TUM-VI's own IMU noise file |
+
+Each Kalibr stage writes START and END lines (or FAILED) to `<out>/kalibr.log`. From Git Bash, set `MSYS_NO_PATHCONV=1` first, or Git Bash rewrites `/mnt/c/...` arguments into Windows paths before `wsl` sees them. Kalibr's tools run through `rosrun kalibr <tool>`; the display options are `--dont-show-report` (there is no `--dont-show-plots`), with `MPLBACKEND=Agg` set because the container has no screen.
+
+### Check on TUM-VI, 14 October 2026
+
+TUM-VI's own calibration (Kalibr, published in each recording's `dso/camchain.yaml`) is the reference. Same pipeline as for the Redmi: `prepare.py --mav0`, then `tumvi_check.sh`. Kalibr ran on the CPU in 17 s (camera, 436 images) and 42 s (camera-IMU, 1,038 images, 10,346 IMU readings).
+
+| Quantity | This pipeline | TUM-VI published | Difference | Acceptance |
+|---|---|---|---|---|
+| Focal lengths (px) | 190.985, 190.965 | 190.978, 190.973 | 0.007, -0.008 | — |
+| Image centre (px) | 254.972, 256.933 | 254.932, 256.897 | 0.040, 0.036 | — |
+| Camera reprojection error (px) | 0.06 (camera stage), 0.10 (camera-IMU stage) | — | — | — |
+| Camera-to-IMU rotation | — | — | 0.014 degrees | 1 degree |
+| Camera-to-IMU translation | — | — | 1.0 mm | 2 cm |
+| Time shift (t_imu = t_cam + shift) | 0.13 ms | about 0 (TUM-VI removed a 5.3 ms offset before publishing) | 0.13 ms | 1 ms |
+
+All three acceptance limits are met. The first camera attempt diverged ("Max. attemps reached... Giving up...") after its intermediate estimate had already reached 191.07 px; adding Kalibr's robust Blake-Zisserman estimator (`--use-blakezisserman`) fixed it. Kalibr exits with code 0 even when it gives up, so `run_kalibr.sh` checks for the result file and logs FAILED when it is missing. Run files: `runs/kalibr_tumvi/{cam1,imu1}/out/` (reports `data-report-cam.pdf`, `data-report-imucam.pdf`, `compare.json`).
+
+This shows the tools and conversion work on a hardware-synchronised, global-shutter rig. The Redmi adds a rolling shutter, software timestamps and a noisier IMU, so its result must still be checked against ARCore's transform and the clock check.
+
+### Printed target for the Redmi
+
+`runs/target/aprilgrid_6x8_24mm.pdf` (made by `rosrun kalibr kalibr_create_target_pdf --type apriltag --nx 6 --ny 8 --tsize 0.024 --tspace 0.3`): 6 x 8 tags of 24 mm with 7.2 mm gaps, 200 x 262 mm, fits A4. Print at actual size (no "fit to page"), glue flat to stiff card, and measure one tag's black square edge with a ruler; pass that value to `prepare.py --tag-size`.
+
+### Recording for calibration (owner, Redmi)
+
+1. **Camera and camera-IMU (one walk recording, about 60-90 s).** Target flat on a wall, well lit. Start "Record walk", hold the phone 30-60 cm from the target, then move slowly: tilt up and down, left and right, roll the phone, move it sideways, up and down, closer and further, keeping the whole grid in view most of the time. Avoid knocks at the start and end. Stop, Send.
+2. **Noise (rest recording, about 3 hours).** Phone flat on a table, plugged in, nothing touching the table. "Record motion sensors only", leave it, Stop, Send.
+3. On the computer: `prepare.py --recording <walk> --rest <rest> --tag-size <measured> --out experiments/open_vio/runs/kalibr_redmi`, then `run_kalibr.sh cameras ... pinhole-radtan` and `run_kalibr.sh imu ... 0.1` (a 100 ms offset search, since Camera2 stamps the start of exposure), then `compare.py ... --recording <walk>` for the ARCore cross-check.
