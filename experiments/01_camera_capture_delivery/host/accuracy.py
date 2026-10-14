@@ -6,6 +6,7 @@ import argparse
 from collections import Counter
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -56,7 +57,9 @@ def _distance(frames, measured):
 
 def score(frames, measured):
     """Live camera poses, in metres, without alignment, scale fitting or anchor correction."""
-    frames = list(frames)
+    # A long walk's JPEGs and depth arrays must be released as each frame is read.
+    frames = [SimpleNamespace(seq=f.seq, t_ns=f.t_ns, tracking=f.tracking, failure=f.failure,
+                              pose=f.pose, anchor_updates=f.anchor_updates) for f in frames]
     if not frames:
         raise ValueError("session has no frames")
     if any(b.seq <= a.seq or b.t_ns <= a.t_ns for a, b in zip(frames, frames[1:])):
@@ -72,9 +75,10 @@ def score(frames, measured):
     first, last = _checkpoint(by_seq, start), _checkpoint(by_seq, end)
     tape = _positive(loop["tape_length_m"], "tape_length_m")
     closure = float(np.linalg.norm(last[:3] - first[:3]))
-    turn = float(np.degrees(2 * np.arccos(np.clip(abs(np.dot(first[3:], last[3:])), 0, 1))))
+    q_first, q_last = first[3:] / np.linalg.norm(first[3:]), last[3:] / np.linalg.norm(last[3:])
+    turn = float(np.degrees(2 * np.arccos(np.clip(abs(np.dot(q_first, q_last)), 0, 1))))
     return {"walk": measured["walk"], "environment": measured["environment"],
-            "pose_source": "live ARCore camera poses; no scale fit or anchor correction",
+            "pose_source": "received camera poses; no scale fit or anchor correction",
             "loop": loop | {"closure_mm": closure * 1000,
                             "closure_percent_of_tape_length": closure / tape * 100, "turn_error_deg": turn},
             "tracking": _tracking(selected),
@@ -91,6 +95,7 @@ def main():
     measured = json.loads(args.measurements.read_text(encoding="utf-8"))
     result = score(session_v1.read_session(args.session), measured)
     result["session"] = metadata
+    result["measurements"] = measured
     result["measurements_file"] = str(args.measurements.resolve())
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n", encoding="utf-8")
