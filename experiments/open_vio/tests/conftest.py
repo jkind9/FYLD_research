@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "host"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "calibration"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from synthetic import write_recording  # noqa: E402
