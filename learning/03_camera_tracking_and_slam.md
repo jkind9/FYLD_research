@@ -51,6 +51,26 @@ They solve the same problem. SLAM is usually live and processes frames in order;
 
 The lesson generalises: **joint refinement over many frames beats chaining frame-to-frame motion**, and a camera path should come from image features (or the phone's VIO), not from aligning learned depth maps.
 
+## The state of the art, and what runs on a phone
+
+There is no single best SLAM system: accuracy and speed trade against each other. The families, from most accurate to cheapest (a review of 14 October 2026; numbers are the authors' claims, from different hardware):
+
+| Family | Examples | Accuracy on TUM RGB-D | Speed | Hardware |
+|---|---|---|---|---|
+| Foundation-model SLAM | MASt3R-SLAM, FoundationSLAM, VGGT-SLAM 2.0 | About 16-20 mm | 4-15 frames per second | A large GPU, several GB of memory |
+| Learned SLAM / odometry | DROID-SLAM, DPVO | About 16-32 mm | 13-19 fps on a desktop GPU; 29-68 ms per frame on a Jetson Orin NX | GPU |
+| Classic feature SLAM | ORB-SLAM3, stella_vslam | About 9-38 mm | About 30 fps on a desktop CPU; 8-18 ms per frame on Jetson boards | CPU |
+| Classic visual-inertial odometry (VIO) | VINS-Mono, OpenVINS, Basalt, OKVIS2 | Scored on EuRoC instead: about 0.25-0.33 m on its machine-hall sequences | OpenVINS about 6 ms per frame for tracking on a laptop | CPU and an IMU |
+| Platform VIO | ARCore, ARKit | Not scored on TUM; about 0.02 m drift per second for the best commercial tracker in a 2022 study | Live, at no cost to the app | Built into the phone |
+
+What this means here:
+
+- **On the phone, the tracker is ARCore.** Research systems can run on phones (ORB-SLAM2 ports report about 30 fps on recent Snapdragon chips), but their visual-inertial versions need the camera and IMU clocks synchronised, which Android makes hard. ARCore does that inside the platform and gives metres and gravity. Its accuracy on our phone is not yet measured (Task75), and published evidence is thin.
+- **On recorded data, a live CPU SLAM system replaces the offline SfM stand-in.** ORB-SLAM3 (GPLv3, allowed as a reference) and stella_vslam (BSD-2) both process frames in order on a CPU.
+- **Learned and foundation-model SLAM are the most accurate but need a GPU**, which is not allowed for now.
+
+The full review, with sources: [research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md](../research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md).
+
 ## When tracking fails
 
 If a tracker loses its place (blur, a blank wall, a person walking past), later frames start a new *segment* with its own origin. Segments must never be silently joined: two segments share a map only after a checked transform links them. The project's tracking and SfM code keep each segment (SfM "model") separate and score them separately.

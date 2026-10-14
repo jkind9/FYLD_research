@@ -63,6 +63,12 @@ A name can be a whole software package, one complete system, one algorithm insid
 | Name | Kind of system | Notes |
 |---|---|---|
 | **ORB-SLAM3** | Feature-based SLAM | Named after the ORB features it uses. The classic reference. |
+| **stella_vslam** | Feature-based SLAM (a BSD-2 fork of OpenVSLAM) | Monocular, stereo or depth input; no IMU |
+| **VINS-Mono, OpenVINS, Basalt, OKVIS2** | Visual-inertial odometry or SLAM | Camera plus IMU; GPLv3 (VINS-Mono, OpenVINS) or BSD-3 (Basalt) |
+| **cuVSLAM** | GPU-accelerated feature SLAM (NVIDIA) | CUDA only; about 1-3 ms per frame on desktop and Jetson GPUs |
+| **LEVIO** | VIO for microcontrollers | 20 fps under 100 mW, but metres of error on EuRoC |
+| **FoundationSLAM, AIM-SLAM** | Foundation-model dense SLAM | Large GPU; claim the best TUM accuracy |
+| **CUT3R** | Streaming 3D reconstruction (poses and points frame by frame) | GPU; about 30 fps, weaker poses |
 | **RTAB-Map** | SLAM with strong revisit detection and dense mapping | Has an Android app that runs on top of ARCore |
 | **DROID-SLAM, DPV-SLAM / DPVO** | Learned SLAM / learned visual odometry | Need a GPU |
 | **MASt3R-SLAM, MASt3R-SfM** | Learned SLAM / SfM built on the MASt3R matching model | Non-commercial licence |

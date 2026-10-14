@@ -29,6 +29,8 @@ The project's main findings in the order they were found, with the numbers behin
 - **14 October. Depth Anything 3 Small wins on synthetic data only.** Given the camera poses and sized to the points: 79 mm on ICL, 15% better than V2. On the real TUM recordings it is two to three times worse (best 238 mm desk, 299 mm xyz). 4.4-5.6 frames per second on the CPU (Task80).
 - **14 October. The deployed system must be live.** The owner ruled that tracking and mapping must run live, or update at least once per second, on the phone or a server. Whole-clip structure from motion is therefore a scoring reference, not a deployable part. Everything downstream (per-frame sizing, metric readings, fusion) already works one frame at a time.
 
+- **14 October. State-of-the-art review.** The most accurate SLAM systems (learned and foundation-model, about 16-20 mm on TUM) need a GPU; classic CPU systems (ORB-SLAM3, stella_vslam) run live with 1.5-2.5 times the error; on Android the platform's own tracker (ARCore) is the practical choice. Next: a live CPU SLAM run on the recorded data, and an ARCore recorder app for the Redmi (`research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md`).
+
 ## What this adds up to
 
 1. **Get the camera path from a live SLAM system with joint refinement**, not from aligning depth maps. On the phone that is ARCore's tracking. SfM was the offline stand-in used to prove the design on recorded data.
