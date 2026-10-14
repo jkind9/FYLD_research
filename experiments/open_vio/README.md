@@ -6,7 +6,7 @@ Visual-inertial odometry (VIO) is the core part: it fuses camera images with gyr
 
 | Step | What | Status (14 October 2026) |
 |---|---|---|
-| 1. Capture app (Task96, continuing Task95 and Task88) | One phone app records the inputs for every reconstruction method; the PC receives one v2 session folder, checks it and converts it for the open trackers | App and readers built and tested on synthetic sessions; APK staged; first Redmi walk and rest wait for the owner |
+| 1. Capture app (Task96, continuing Task95 and Task88) | One phone app records the inputs for every reconstruction method; the PC receives one v2 session folder, checks it and converts it for the open trackers | Redmi checks passed at 33.4 MB/s; Record walk crashes; Task97 adds a diagnostic APK; a complete walk and rest are still needed |
 | 2. Calibration (Task90) | Kalibr: camera intrinsics, camera-to-IMU rotation, offset and time shift (printed target); IMU noise from a long recording at rest | Pipeline built; reproduces TUM-VI's published calibration (0.014 degrees, 1.0 mm, 0.13 ms); A4 target ready; Redmi calibration waits for its recordings |
 | 3. Offline comparison (Task91) | Basalt (BSD-3), Kimera-VIO (BSD-2), OKVIS2 (BSD-style), with OpenVINS (GPL-3.0, reference only), run in WSL on the recordings and scored against ARCore's poses and tape-measured distances, with time per frame | All four built and run on TUM-VI room1 with one camera: Basalt 0.146 m, OKVIS2 0.505 m (own noise settings), Kimera lost track, OpenVINS 0.064 m (reference); Redmi runs wait for recordings |
 | 4. Port to the phone | Best system built for Android (NDK); learned depth resized to its tracked points replaces ARCore's depth | Not started |
@@ -75,7 +75,7 @@ Use the `.venv-sfm` environment (numpy, scipy, OpenCV and Pillow). The receiver 
 
 ### Results
 
-The capture app builds (debug APK, package `org.fyld.capture`, minimum Android 8.0, ARCore 1.56.0); its APK is staged for the owner. The v2 readers and reconnect path pass synthetic tests. The capture app has not yet run on the Redmi. Capture with zero drops, sustained Wi-Fi speed, storage use, sending time after Stop and the measured clock offset remain unmeasured.
+The capture app builds (debug APK, package `org.fyld.capture`, minimum Android 8.0, ARCore 1.56.0). The v2 readers and reconnect path pass synthetic tests. The Redmi's capture checks passed with 100% tracking over 15 s and a 33.4 MB/s link-speed check, but Record walk crashes: the PC retained incomplete attempts with 0 and 100 frames. Task97's diagnostic APK collects crash information without USB ([experiment 01](../01_camera_capture_delivery/README.md#redmi-trial-and-crash-diagnostics-task97)). A complete walk and rest, zero-drop capture, sustained transfer, storage use, sending time after Stop and the measured clock offset remain unverified.
 
 ## Step 2: calibration (Task90)
 

@@ -51,7 +51,7 @@ The gyroscope measures how fast the phone turns. ARCore's poses also show how fa
 
 Because ARCore's pose already depends on ARCore's own internal calibration, this measurement is a check, not the final number. Kalibr (next section) measures the offset independently, from the camera images and the gyroscope alone.
 
-> **Project result (14 October 2026).** The capture app builds (Task96) and its 20 JVM tests pass; the converter and clock check read its session folders and pass their tests on synthetic sessions. The first Redmi recording, with measured rates and offset, waits for the owner to install the app.
+> **Project result (14 October 2026).** The capture app builds (Task96); Task97's diagnostic build passes 27 JVM tests. The converter and clock check read its session folders and pass their tests on synthetic sessions. The Redmi's checks passed with a 33.4 MB/s Wi-Fi link, but Record walk crashes. The PC retained incomplete trials with 0 and 100 frames; a complete recording and measured clock offset still wait for the crash diagnosis and owner retry.
 
 ## Calibration
 

@@ -68,7 +68,7 @@ import javax.microedition.khronos.opengles.GL10;
  * deflating the grey frames pays; the report is saved and sent to the PC. The camera image fills the screen.
  */
 public class CaptureActivity extends Activity implements GLSurfaceView.Renderer, SharedCameraRig.Listener {
-    static final String VERSION = "1.0";
+    static final String VERSION = "1.1";
     static final long TRACKING_MS = 15000;
     static final int SAMPLE_EVERY = 15, SAMPLES = 20;
     private static final int GREEN = 0xFF2E9E4F, RED = 0xFFD64545, GREY = 0xFF8A8A8A;
@@ -125,6 +125,7 @@ public class CaptureActivity extends Activity implements GLSurfaceView.Renderer,
     @Override
     protected void onCreate(Bundle saved) {
         super.onCreate(saved);
+        CrashDiagnostics.install(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         root = new File(getExternalFilesDir(null), "sessions");
         root.mkdirs();
@@ -596,6 +597,7 @@ public class CaptureActivity extends Activity implements GLSurfaceView.Renderer,
             next.run();
         }, "uploader");
         uploaderThread.start();
+        CrashDiagnostics.send(getApplicationContext(), host, text -> sendText = text);
     }
 
     // ---- Run all checks --------------------------------------------------------------------------
@@ -692,6 +694,7 @@ public class CaptureActivity extends Activity implements GLSurfaceView.Renderer,
         }
         String sent = "";
         if (!host().isEmpty()) {
+            CrashDiagnostics.send(getApplicationContext(), host(), text -> sendText = text);
             try {
                 Uploader.sendReport(host(), Uploader.PORT, json);
                 sent = " Sent to the computer.";
