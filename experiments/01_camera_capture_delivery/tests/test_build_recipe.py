@@ -359,6 +359,7 @@ def test_export_complete_bundle_and_refuse_overwrite(verified, tmp_path):
     published = export.publish_bundle(apk, evidence, output, "fixture-001", verifier_dir(evidence))
     assert published == output / deployment_name("smoke", evidence)
     assert recipe.sha256(published / apk.name) == recipe.sha256(apk)
+    assert (published / f"{apk.name}.bin").read_bytes() == apk.read_bytes()
     assert json.loads((published / "verification.json").read_text())["apk_sha256"] == recipe.sha256(apk)
     assert (published / "README.md").is_file()
     before = (published / "verification.json").read_bytes()
