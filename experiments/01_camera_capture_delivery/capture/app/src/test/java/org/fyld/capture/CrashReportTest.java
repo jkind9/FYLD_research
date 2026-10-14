@@ -3,7 +3,6 @@ package org.fyld.capture;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import org.json.JSONArray;
@@ -15,7 +14,6 @@ import org.junit.rules.TemporaryFolder;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -74,18 +72,14 @@ public class CrashReportTest {
         for (boolean hasJavaCrash : new boolean[]{false, true}) {
             if (hasJavaCrash) new CrashReport(file, metadata(), null)
                     .uncaughtException(new Thread("camera"), new IllegalArgumentException("bad capture"));
-            try (ServerSocket server = new ServerSocket(0)) {
-                CompletableFuture<JSONObject> received = CompletableFuture.supplyAsync(() -> readReport(server));
-                assertTrue(CrashReport.send(file, metadata(), exits, "127.0.0.1", server.getLocalPort()));
-                JSONObject report = received.get(5, TimeUnit.SECONDS);
-                assertEquals("crash_diagnostics", report.getString("type"));
-                assertEquals("2201116TG", report.getJSONObject("device").getString("model"));
-                assertEquals(5, report.getJSONArray("process_exits").getJSONObject(0).getInt("reason"));
-                assertEquals(!hasJavaCrash, report.isNull("java_crash"));
-                if (hasJavaCrash) {
-                    assertEquals("camera", report.getJSONObject("java_crash").getString("thread"));
-                    assertTrue(file.isFile());
-                }
+            JSONObject report = receive(file, exits);
+            assertEquals("crash_diagnostics", report.getString("type"));
+            assertEquals("2201116TG", report.getJSONObject("device").getString("model"));
+            assertEquals(5, report.getJSONArray("process_exits").getJSONObject(0).getInt("reason"));
+            assertEquals(!hasJavaCrash, report.isNull("java_crash"));
+            if (hasJavaCrash) {
+                assertEquals("camera", report.getJSONObject("java_crash").getString("thread"));
+                assertTrue(file.isFile());
             }
         }
     }
@@ -112,12 +106,14 @@ public class CrashReportTest {
     }
 
     @Test
-    public void unreadableSavedCrashIsReportedAsAFileError() throws Exception {
+    public void invalidSavedJavaTraceDoesNotBlockSystemExitDiagnostics() throws Exception {
         File file = tmp.newFile("last-crash.json");
         Files.write(file.toPath(), "{broken".getBytes(StandardCharsets.UTF_8));
-        IOException error = assertThrows(IOException.class,
-                () -> CrashReport.send(file, metadata(), new JSONArray(), "127.0.0.1", 1));
-        assertTrue(error.getMessage().contains("saved crash"));
+        JSONObject report = receive(file, new JSONArray().put(new JSONObject().put("reason", 5)));
+        assertTrue(report.isNull("java_crash"));
+        assertTrue(report.getString("java_crash_error").contains("saved crash"));
+        assertEquals("{broken", report.getString("java_crash_text"));
+        assertEquals(5, report.getJSONArray("process_exits").getJSONObject(0).getInt("reason"));
     }
 
     @Test
@@ -126,6 +122,14 @@ public class CrashReportTest {
         Arrays.fill(bytes, (byte) 0x85);
         assertArrayEquals(bytes, Base64.getDecoder().decode(CrashReport.trace(new ByteArrayInputStream(bytes))));
         assertEquals("", CrashReport.trace(new ByteArrayInputStream(new byte[0])));
+    }
+
+    private JSONObject receive(File file, JSONArray exits) throws Exception {
+        try (ServerSocket server = new ServerSocket(0)) {
+            CompletableFuture<JSONObject> received = CompletableFuture.supplyAsync(() -> readReport(server));
+            assertTrue(CrashReport.send(file, metadata(), exits, "127.0.0.1", server.getLocalPort()));
+            return received.get(5, TimeUnit.SECONDS);
+        }
     }
 
     private JSONObject readReport(ServerSocket server) {
