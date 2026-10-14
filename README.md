@@ -15,6 +15,7 @@ The work is split into six execution steps. Each layer is built and tested on it
 - [Hosted or on the phone](#hosted-or-on-the-phone)
 - [Layer by layer](#layer-by-layer)
 - [What has been measured so far](#what-has-been-measured-so-far)
+- [ARCore: what it gives, its terms, and an open-source replacement](#arcore-what-it-gives-its-terms-and-an-open-source-replacement)
 - [What is still unknown](#what-is-still-unknown)
 - [Data used for testing](#data-used-for-testing)
 - [What comes next](#what-comes-next)
@@ -232,17 +233,52 @@ All results below are on recorded public data on a desktop computer. None is fro
 
 **Late-object births fixed, 5 October:** the historical replay blocked new same-class identities after the first object, leaving 90 of 95 book detections undecided. Task46 removes that restriction and replays the same cached boxes, depth and poses. It produces six provisional book identities and leaves five book detections undecided. Across all classes, unresolved detections fall from 226 to 56 and provisional identities rise from 18 to 55. These are policy outcomes, not a verified physical-object count. [Demo 06](demo_outputs/06_objects_in_3d.html) shows the corrected replay; box-and-depth 3D association is the next priority.
 
+### Results from 13-14 October 2026
+
+These changed the design: the camera path should come from a live tracker using image features (on the phone, ARCore), and learned depth should only fill in surfaces, resized each frame to the tracker's points. Details in [learning/10_findings_timeline.md](learning/10_findings_timeline.md).
+
+| Question | Data | Result |
+|---|---|---|
+| Is the old tracker the weak point? | TUM xyz and desk, Kinect depth | Yes: 34 and 112 mm path error after a best fit, against 9-18 mm for published SLAM ([tracking review](research/camera_tracking_and_slam/tracking_review_2026-10-13.md)) |
+| Camera path from images alone, offline | TUM xyz, desk; ICL | 11.9, 21.5-24 and 34 mm with COLMAP structure from motion ([experiments/sfm](experiments/sfm/README.md)) |
+| Camera path from images alone, live on a CPU | Same | ORB-SLAM3 12.8 / 25.8 / 39 mm; stella_vslam (BSD-2) 17.1 / 28.3 / 38 mm; 5-12 ms per frame ([experiments/live_slam](experiments/live_slam/README.md)) |
+| Real-world size | Same, 20 depth readings | Path within 1.15 times the best possible; more readings add nothing ([experiments/sfm](experiments/sfm/README.md), Task78) |
+| Surface from learned depth sized to tracked points | ICL, desk, xyz | 93 / 156 / 166 mm mean distance, within 8-27 mm of the best possible with true poses; newer models (Prompt Depth Anything, Depth Anything 3 Small) not better on real data |
+| ARCore on the project's Redmi | 15 s walk indoors | Tracking on 100% of 891 frames, 4.9 ms per update; raw depth 160 x 90 from motion; 19 tracked points per frame; 29 frames per second streamed with poses to a computer over Wi-Fi ([experiment 01](experiments/01_camera_capture_delivery/README.md)) |
+
 Each experiment folder links to interactive viewers for its runs, such as a camera-path viewer, a point-surface viewer and the 60-frame object replay. These are generated locally and are not stored in the repository.
 
 ## Android package build
+
+The current phone app is the Redmi check app (14 October 2026): it runs ARCore, shows the camera, checks tracking and depth, and streams frames with their poses to a computer; built and documented in [experiment 01](experiments/01_camera_capture_delivery/README.md#redmi-check-app-arcore-and-host-streaming-task85). The older packaging test below is kept for its build record.
 
 A verified 64-bit Android (`arm64`) test APK now comes from the repository build command in [experiment 01](experiments/01_camera_capture_delivery/README.md). The APK runs only `print(42)`, so it does not test camera access or ARCore. It is package `org.fyld.toolchainsmoke`, version `0.1`, with SHA-256 `2a1f1f821408d637cbb8416e465b273245c5813013a73684f7f70dab45fc26e5`. Its test-signing certificate has SHA-256 `45e634374292b269842a381e50dc1bb08d6b30db388ed4572a880d9b1670e1c3`.
 
 Packaging took 27.34 seconds using the installed Android tools and cached libraries. A fresh dependency build stopped because the JPEG source archive was missing. No local Docker image matched the pinned tools, so no container build was run. No source or build image was downloaded. These results check APK packaging only; they do not show that it installs on a phone or can access a camera.
 
+## ARCore: what it gives, its terms, and an open-source replacement
+
+ARCore is Google's augmented-reality library on Android. On the phone it gives, live and in metres: the camera's position and direction for every frame (from the camera and motion sensors together), the direction of gravity, tracked 3D points, depth images made from the phone's motion, flat surfaces, and the camera calibration. How it works inside is in [learning/11_inside_arcore.md](learning/11_inside_arcore.md).
+
+**Can a product use it?** On a reading of Google's published terms (checked clause by clause on 14 October 2026), nothing forbids selling a product that uses ARCore's on-device features, and no fee is stated. The conditions: show the notice "This application runs on Google Play Services for AR (ARCore), which is provided by Google and governed by the Google Privacy Policy" and keep a privacy policy; do not resell ARCore itself or reverse engineer it; assess the clause that forbids uses where failure "could lead to death, personal injury, or environmental damage" against how site measurements will be used; accept that Google can change or withdraw ARCore and accepts no liability; and use phones that shipped with Google Play and are on Google's device list. The ARCore library is not open source. This is not legal advice; a qualified review is needed before launch. Details: [research/phone_ar_platforms/arcore_commercial_terms.md](research/phone_ar_platforms/arcore_commercial_terms.md).
+
+**What would replace it.** Each ARCore function has an open-source counterpart (licences checked from each project on 14 October 2026; details in [research/phone_ar_platforms/arcore_open_replacement.md](research/phone_ar_platforms/arcore_open_replacement.md)):
+
+| ARCore function | Open-source or hand-built replacement | Licence |
+|---|---|---|
+| Camera images and motion-sensor readings on one clock | Android Camera2 and SensorManager | Android platform |
+| Camera and motion-sensor calibration | Kalibr (offline, printed target) | BSD-3-Clause |
+| Camera path in metres with gravity | Basalt, Kimera-VIO or OKVIS2 visual-inertial odometry | BSD-3 / BSD-2 / BSD-style |
+| Camera path without motion sensors (fallback) | stella_vslam, measured here at 17-28 mm and 5-8 ms per frame | BSD-2-Clause |
+| Recognising revisits and correcting the path | DBoW2 or FBoW, with Ceres or g2o | BSD-style or MIT; BSD-3 or BSD |
+| Depth images | Learned depth (Depth Anything V2 Small or ZipDepth) resized to tracked points, run with ONNX Runtime or LiteRT | Apache-2.0 (Depth Anything); MIT or Apache-2.0 (runtimes) |
+| Flat surfaces, anchors | RANSAC plane fit (Task55 code, Open3D); positions stored relative to keyframes | Own code; MIT |
+
+GPL-licensed systems (ORB-SLAM3, OpenVINS, VINS-Mono) are used only as accuracy references. The hard parts of a rebuild are aligning camera and motion-sensor clocks on Android, per-phone calibration, rolling-shutter cameras, fast and reliable start-up, and porting desktop C++ to the phone. The rebuild must use published methods: reverse engineering ARCore is forbidden, and Google holds patents on ARCore's designs, so a patent check is needed before copying a specific design.
+
 ## What is still unknown
 
-- **Phones.** The Redmi's camera permission and camera inventory are verified from its exported report. Original image capture, runtime depth, measured timing, independent calibration, battery use and heat remain untested. Samsung availability is unconfirmed.
+- **Phones.** ARCore runs on the Redmi (tracking, depth and streaming verified on 14 October), but its accuracy against tape-measured distances, battery use, heat, long walks, outdoor use and stairs are untested. Samsung availability is unconfirmed.
 - **Worksites.** All tests are indoors. The current depth reader ignores anything 4 m away or more. Street-scale and outdoor accuracy are untested.
 - **True object positions and sizes.** There is no surveyed reference for where the desk objects really are, or their full dimensions. A detected position is a point on the object's visible surface, not its centre. Visible size and full size are different measurements and need separate references.
 - **Confidence.** Detector scores, similarity scores and the spread of depth points are not probabilities. None has been calibrated against real errors.
@@ -266,18 +302,21 @@ A reference used for scoring is never fed to the method being scored, unless a r
 
 ## What comes next
 
-The work targets accuracy, latency and phone deployment together. The [task board](task_list/README.md#next-order) is the execution order.
+The owner ruled on 14 October 2026 that the system must be live (or update at least once per second) on the phone or a server, and that development splits into two streams. Both deliver the same per-frame data, so the processing side does not care which one produced it.
 
-1. Task51 connects the six-step runner under `src/walkthrough/` on prerecorded footage and its available references, using current model classes on MasterPC. Use local files now; leave FastAPI upload and camera streaming for later.
-2. Implement and score real depth on recorded data (Task54). The chosen route must have a path that runs on the phone. Implement dimensions and area with known-shape tests (Task55).
-3. Agree the field acceptance limits and whether the phone only records or also processes (Task61).
-4. When phone work resumes: build a usable phone recording (Task52), collect independent measurements and identities (Task53), and check the workload on the phone early (Task57).
-5. Run one complete walkthrough against independent answers; measure total processing time and memory (Task56).
-6. Complete the sustained phone deployment and compare its answers, delay, memory, heat, battery and offline behaviour (Task57).
+**Stream A: the ARCore product route.**
 
-Object matching, masks, appearance and surface refinements are parked until that complete test shows a weakness they would fix. The first complete test does not wait for them.
+1. Extend the Redmi app's stream to carry ARCore's tracked points, raw depth with confidence, every pose correction and the tracking state, under one written "phone session" definition shared by the app and the computer ([experiment 01, "Next: extend the stream"](experiments/01_camera_capture_delivery/README.md)).
+2. A live processing entry point on the computer that reads the stream and updates the surface, map and object counts at least once per second (absorbs Tasks 76 and 77).
+3. Measure ARCore against tape-measured distances on real walks, including stairs and outdoors (Task75); show the required ARCore notice; agree field acceptance limits (Task61).
 
-Numerical field acceptance limits remain pending owner decisions in Task61. Sampling and resolution settings remain unmeasured. Depth Anything V2 is a candidate, not an accepted or measured method. For footage without ground truth, a later task must evaluate uncertainty against independently labelled examples; confidence values alone do not establish error. An experiment can finish with a negative result; a failed method must not be presented as product success.
+**Stream B: the open-source route, replacing ARCore.**
+
+1. A recorder that saves raw camera frames and motion-sensor readings on one clock, with ARCore's poses alongside as the reference (ARCore's shared-camera mode allows both at once).
+2. Calibrate the Redmi's camera and motion sensors (Kalibr), then run open visual-inertial systems (Basalt, Kimera-VIO, OKVIS2) offline on those recordings and score them against ARCore and tape measurements, as Task84 did for visual-only SLAM.
+3. Port the best one to the phone and replace ARCore's depth with learned depth resized to its points.
+
+Both streams feed the same processing layers in `src/walkthrough`, so the surface, measurement and counting work carries over unchanged. GPU use is still not allowed; all processing runs on the CPU for now.
 
 ## Possible later output: a phone VR viewer
 

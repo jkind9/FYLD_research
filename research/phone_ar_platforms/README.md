@@ -9,6 +9,7 @@ What ARCore and Apple's frameworks give a phone app: camera pose, depth and thei
 | [arcore/README.md](arcore/README.md) | ARCore and Android phone telemetry inventory |
 | [arcore_raw_depth.md](arcore_raw_depth.md) | ARCore Raw Depth |
 | [arcore_internals.md](arcore_internals.md) | How ARCore works inside: MSCKF-style tracking, concurrent odometry and mapping, depth from motion; drift measurements (14 October 2026) |
+| [arcore_open_replacement.md](arcore_open_replacement.md) | What would replace each ARCore function with open-source or hand-built parts, with checked licences (14 October 2026) |
 | [arcore_commercial_terms.md](arcore_commercial_terms.md) | ARCore commercial terms, required user notice and product risks (14 October 2026) |
 | [apple_roomplan.md](apple_roomplan.md) | Apple RoomPlan |
 

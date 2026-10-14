@@ -108,6 +108,10 @@ Published drift for ARCore (on another phone, loop closure switched off): 0.09-0
 - **Ask users to move, not just turn**, and to point at textured surfaces, so depth from motion has parallax.
 - **Treat stairs and vehicles as hard cases** to test explicitly in the field.
 
+## Rebuilding it from open parts
+
+Every part above has an open-source counterpart: Android's own camera and motion-sensor interfaces for the inputs, Kalibr for calibration, Basalt, Kimera-VIO or OKVIS2 for the visual-inertial front end (BSD licences), DBoW2 or FBoW with Ceres or g2o for revisits and the map, and learned depth resized to the tracked points instead of depth from motion. The hard parts are the ones ARCore hides: aligning camera and motion-sensor clocks to about a millisecond, calibrating each phone model, rolling-shutter cameras, and starting up quickly. A rebuild must come from published methods, not from taking ARCore apart (its terms forbid reverse engineering), and Google's patents on its designs need checking before any specific design is copied. The map with checked licences: [research/phone_ar_platforms/arcore_open_replacement.md](../research/phone_ar_platforms/arcore_open_replacement.md).
+
 ## Further reading
 
 - [research/phone_ar_platforms/arcore_internals.md](../research/phone_ar_platforms/arcore_internals.md): sources, quotes and saved papers.
