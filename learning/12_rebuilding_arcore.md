@@ -72,7 +72,13 @@ ARCore ships calibration numbers for every supported phone. An open rebuild has 
 
 ## Choosing a tracker
 
-*Planned (step 3).* Basalt (BSD-3), Kimera-VIO (BSD-2) and OKVIS2 (BSD-style) will run offline on the Redmi recordings, with OpenVINS (GPL-3.0) as a reference. Each is scored the way chapter 9 describes, against ARCore's poses and tape-measured distances, and timed per frame. The best is then ported to the phone.
+Four open trackers were built and run on the same public recording, TUM-VI room1: 141 s of walking inside a room fitted with motion-capture cameras, which measure the true path to about a millimetre. Each got only what the phone has: one camera and the IMU.
+
+They take different approaches. **Basalt** keeps a short window of recent frames and solves for all their poses together (a *sliding-window optimiser*), tracking small image patches from frame to frame. **OKVIS2** does the same with corner features and adds loop closure. **Kimera-VIO** builds a *factor graph* (a network of constraints between poses, landmarks and IMU readings) and solves it with the GTSAM library. **OpenVINS** uses a *filter* (an MSCKF, the method chapter 11 says ARCore builds on), which updates one best guess and its uncertainty at each frame instead of re-solving a window.
+
+> **Project result (14 October 2026), one camera plus IMU, error of the whole path with no size fit.** Basalt: 0.146 m over a 146 m walk, every frame tracked, its own size correct to 0.7%, 44 ms per frame. OKVIS2: 0.505 m, but only with its own noise settings; with the published ones it ran away after 48 s. Kimera-VIO lost track a quarter of the way in. OpenVINS: 0.064 m, the best, but its GPL licence rules it out of the product; it shows what a filter can reach.
+
+Two lessons carry over to the phone. The noise settings matter as much as the method: the same OKVIS2 went from 0.5 m to hundreds of kilometres with different IMU noise values. And one public recording is not the phone: TUM-VI's camera has a global shutter and its IMU is wired to the camera's trigger. The ranking has to be repeated on Redmi recordings, scored against ARCore's path. Basalt is the first candidate to port.
 
 ## Try it
 
