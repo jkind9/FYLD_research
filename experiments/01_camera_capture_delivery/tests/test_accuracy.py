@@ -52,6 +52,13 @@ def test_stairs_use_full_3d_distance_and_quaternion_sign_does_not_change_turn(wa
     assert accuracy.score(frames, measured)["loop"]["turn_error_deg"] == 180
 
 
+def test_quaternion_rounding_does_not_create_a_turn_error(walk):
+    frames, measured = walk
+    frames[0] = frame(0, (0, 0, 0), turn=(0, 0, 0, 0.9999))
+    frames[-1] = frame(4, (0, 0, 0), turn=(0, 0, 0, 0.9999))
+    assert accuracy.score(frames, measured)["loop"]["turn_error_deg"] == 0
+
+
 def test_tracking_loss_is_counted_once_and_path_does_not_bridge_it(walk):
     frames, measured = walk
     frames[2] = frame(2, None, state="PAUSED")
