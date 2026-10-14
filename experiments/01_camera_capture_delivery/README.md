@@ -233,6 +233,8 @@ For the next check, press **Capture one rear-camera control**, then immediately 
 
 ## Redmi check app: ARCore and host streaming (Task85)
 
+> **Superseded on 14 October 2026 (Task96).** The check app's source moved to `capture/` and became the capture app described [below](#the-capture-app-and-pc-receiver-task96-14-october-2026). `build-phonecheck.sh` is retired. This section and the next two record what was built and measured before that.
+
 A second, separate app tests the two things the deployment design depends on: whether Google's ARCore tracking works on the Redmi, and whether the phone can stream camera frames to a computer fast enough. It is plain Java built with Gradle (the native route proposed under "Alternative implementation routes"), because ARCore needs a GL context and Google's install flow, which the Python packaging route does not provide. The Camera2 capability app above is unchanged.
 
 | Button | What it checks | Report entries |
@@ -281,7 +283,7 @@ The stream now follows one written definition, [phone_session_v1.md](phone_sessi
 |---|---|---|
 | Phone | `SessionFrame.java` (encoder, no Android types), `FrameCapture.java` (reads ARCore), `HostStream.java` | `SessionFrameTest.java`, 4 JVM tests run by the build script: the encoder must reproduce the fixture header and payload byte for byte, and project points to the fixture's pixels |
 | Computer | `host/session_v1.py` (reader and checks), `host/receiver.py` (saves `session.json`, `frames/`, `depth/`, `frames.jsonl`) | `tests/test_session_v1.py` and `tests/test_phonecheck_host.py`, 24 tests: the fixture parses to its written values, 9 kinds of bad frame are refused, a loopback session is saved and read back |
-| Both | the fixture `phonecheck/app/src/test/resources/session_v1/` | both test sets read the same two files |
+| Both | the fixture, now in `tests/fixtures/session_v1/` | both test sets read the same two files (the Java side until Task96) |
 
 The receiver checks every frame and closes the connection on a bad one, so a fault in the phone code shows up at once rather than in later processing. Read a saved session with `session_v1.read_session(<session folder>)`; `world_from_camera_cv(pose)` gives the pose in the project's OpenCV camera axes.
 
@@ -297,9 +299,46 @@ The check app now has an **ARCore and privacy notice** button above its status, 
 
 Task75 stays open: real tape-measured recordings and the offline COLMAP comparison have not been done. Task61 owns acceptance limits. Live object overcounting remains the issue recorded under Task89.
 
-### Next: one capture app (Task95, planned 14 October 2026)
+## The capture app and PC receiver (Task96, 14 October 2026)
 
-The owner decided on 14 October that the phone only captures for now and the PC stores and processes. The check app and Stream B's raw recorder (`experiments/open_vio/recorder/`) will merge into one app that records every frame (lossless grey and colour JPEG), the motion sensors on the camera's clock, the camera's per-frame settings and every ARCore output to the phone, then sends the session to the PC in one folder that `src/live`, the open trackers and the offline methods all read. The live phone session v1 stream stays as a second mode. The inputs each method needs are tabled in the root README under "What comes next".
+Task96 continues Task95, which was closed as a hand-over on 14 October without being built.
+
+**Why.** The owner decided on 14 October that for now the phone only captures; the PC receives, stores and processes everything. Running on the phone comes later, inside the same app. Several 3D reconstruction methods must be compared on the *same* walk, so the recording holds everything every method reads (the root README tables the methods and their inputs under "What comes next").
+
+**One app.** `capture/` (package `org.fyld.capture`, label "FYLD capture") replaces both the check app and Stream B's raw recorder. Both were moved into it with `git mv`, not copied: the check app's activity, ARCore reader, preview, report and tracking statistics, and Stream B's `SharedCameraRig`, `ImuLogger`, `FrameWriter`, `RecordingMeta` and `Uploader`. ARCore runs in shared-camera mode, so it tracks while the app receives every Camera2 frame from the same capture session. The definition of what it records and sends is [phone_session_v2.md](phone_session_v2.md).
+
+| What | Per | Contents |
+|---|---|---|
+| Frame | Camera2 image (30 fps) | `seq` from 0 with no gaps; lossless grey plane (raw, or Deflater level 1 when the check below says it pays); colour JPEG quality 90; Camera2 timestamp and phone wall clock; exposure, frame duration, rolling-shutter readout, focus distance, ISO, stabilisation mode; ARCore's record for that image (timestamp, tracking state and failure reason, camera pose, device pose, image and texture intrinsics, tracked points, raw depth with confidence when new, keyframe anchors and corrections as in v1) |
+| IMU batch | about 100 ms | uncalibrated gyroscope and accelerometer at the fastest rate, with Android's bias columns, on elapsedRealtime |
+| Telemetry | second | battery %, thermal status, free storage, queue length in frames and bytes, frames captured, queued, sent, acknowledged and dropped, ARCore update time |
+| Session | once | phone, Android and ARCore versions; camera id and timestamp source, camera configuration and calibration; sensor details; both Android clocks at start and end |
+
+**How it sends.** Capture never waits for the network. Each message is written to the phone's storage at once (one file per message); a sender thread drains them in order with up to 64 unacknowledged, and deletes a file only when the PC's cumulative acknowledgement covers it. After Stop it keeps sending, and the screen shows frames and MB left and an estimated time (the screen stays on). After a dropped connection, or one that makes no progress for 20 s (a write to a PC that went out of Wi-Fi range can otherwise block for minutes), it reconnects; the PC answers its hello with the last message it holds with no gap, and the phone resends from there. A session left on the phone when the app closed is finished and sent at the next start. Recording refuses to start, and stops with a message, below 1 GB free.
+
+**Buttons.** *Record walk* and *Record motion sensors only (phone at rest)*, each pressed again to stop; the second closes the camera and ARCore for the 3-hour calibration rest recording. *Run all checks*: ARCore set-up, a 15 s tracking run, a link-speed check (50 MiB to the receiver, MB/s as the phone timed it), and a compression check that times JPEG and deflate on 20 camera images from the tracking run and decides whether deflate pays (rule in phone_session_v2.md); the report is saved on the phone and sent to the PC. The ARCore and privacy notice stays above the status, now saying the link is unencrypted.
+
+**PC receiver.**
+
+```text
+python experiments/01_camera_capture_delivery/host/capture_receiver.py --out experiments/01_camera_capture_delivery/runs/capture --port 8766
+```
+
+It prints this PC's address (192.168.68.123 on the owner's network) to type into the app, and writes one folder per session: `session.json`, `frames.jsonl`, `cam0/<seq>.png` (lossless grey), `frames/<seq>.jpg`, `depth/<seq>.bin`, `imu.csv`, `telemetry.jsonl`, and at the end `summary.json` (frames, missing frame numbers, IMU rates and gaps, a clock-base check, MB/s achieved, connections, and how long sending ran after Stop). It checks every message and refuses a bad one with an error message. `Receiver(..., on_frame=...)` calls back for each new frame, which is how `python -m src.live.run --listen 8766 --out <run>` processes a walk while it arrives. Use `.venv-sfm` (numpy, Pillow). **Local network only:** the protocol has no authentication or encryption; sending over the internet needs a tunnel with authentication, which is out of scope.
+
+**Tests.**
+
+| Side | Checked by | What |
+|---|---|---|
+| Phone (JVM, run by the build script) | `SessionV2Test.java` (9), `SendingTest.java` (11) | the encoders reproduce the shared fixture `capture/app/src/test/resources/session_v2/` (frame header and payload byte for byte, IMU batch, telemetry, end, hello and settings); points project like the host; deflate inflates back exactly; the deflate rule; the queue numbers, deletes only acknowledged files and continues numbering after a restart; image, capture result and ARCore record are matched out of order and released in order, with the 500 ms limit and drops when full; a fake PC that drops the connection without acknowledging two messages, then says where it is: the sender resumes with every message once and in order and deletes the delivered session; a PC that answers hello and then stops reading: the sender abandons the blocked connection after the no-progress limit and delivers on the next (with the limit removed this test fails); a refused session is kept and skipped |
+| PC | `tests/test_session_v2.py` (22), `tests/test_capture_receiver.py` (23) | the fixture parses to its written values; deflated grey reads back; 13 kinds of bad frame, 3 bad IMU batches and bad telemetry, end and hello are refused; a fake phone (`tests/fake_phone.py`) streams 40 frames with a window of 8, is cut off after message 25 and resumes: 40 frames, none missing or repeated, 2 connections; resends are acknowledged and not stored twice; a gap and a bad frame are refused; the speed check and report connections; the summary's IMU rates, clock base, MB/s and sending time after Stop |
+| Readers | `src/live/tests/test_stream.py`, `experiments/open_vio/tests` | a synthetic v2 folder written through the receiver's store is read by `session_v2.read_session`, replayed by `src/live`, and converted by `recording.py --euroc` |
+
+**Build of 14 October:** `wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh` runs the 20 JVM tests (all pass) and builds `runs/capture_apk/capture-debug.apk`, SHA-256 `d260cda55fa5cfe80f5f92b87bee55c1a1afb09b5c77f917c481961413c18f5d`, 914 KB. It is staged for installing from email as `mobile deployment/capture_20261014/fyld-capture.apk` and `.apk.bin` (ignored by Git), because MIUI blocks installs over USB.
+
+**Interruption checks.** Regression tests cover saving the phone numbering checkpoint before deletion, recovering an end message whose marker was interrupted, and the first anchor timestamp. PC tests interrupt frame, IMU and telemetry commits, preserve earlier committed rows, recover end metadata and notify completion after the final acknowledgement. A temporary storage error also rolls back without restarting the receiver. Missing camera settings remain null in the clock report, and an unavailable link measurement no longer aborts the checks.
+
+**Not yet measured on the phone.** Nothing above has run on the Redmi. Zero dropped frames remains unverified: if the writer falls behind its 30-frame memory buffer, overflow is counted as dropped. The owner run is: start the receiver; install; *Run all checks* (gives the link speed and the compression choice); the house walk (start upstairs, go down, come back up, press Stop); then a 60 s rest with *Record motion sensors only*. For each session the report will give capture fps and dropped frames, IMU rates, Wi-Fi MB/s and the time sending ran after Stop (all in `summary.json`), storage used (telemetry), and the clock check (`python experiments/open_vio/host/clock_check.py <session>`); then `python -m src.live.run --replay <session> --out outputs/live/<name>` and `python experiments/open_vio/host/recording.py <session> --euroc <out>`. Two things are assumed until then: that the app's 640 x 480 Camera2 image has the same field of view as ARCore's CPU image (both are 640 x 480 4:3 from the same sensor), so ARCore's image intrinsics apply to it; and that ARCore's raw depth works in shared-camera mode.
 
 ## Current delivery ownership, 6 October 2026
 

@@ -1,4 +1,4 @@
-"""Check that a raw recording's camera, gyroscope and accelerometer share one clock, and measure the offset.
+"""Check that a capture session's camera, gyroscope and accelerometer share one clock, and measure the offset.
 
     python experiments/open_vio/host/clock_check.py <recording folder>
 
@@ -15,12 +15,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
 from scipy.spatial.transform import Rotation
 
 import recording
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "01_camera_capture_delivery" / "host"))
+from session_v2 import stream_stats  # noqa: E402
 
 HYPERPARAMETERS = {
     "offset_search_ms": {"value": 200, "source": "proposed by Claude 2026-10-14, not owner-ruled"},
@@ -73,20 +77,11 @@ def camera_to_gyro_offset(rec: recording.Recording) -> tuple[float, float]:
     return estimate_offset(mid, pose_speed, gyro_t, gyro_speed)
 
 
-def _stream(times: np.ndarray) -> dict | None:
-    if len(times) < 2:
-        return None
-    steps = np.diff(times) * 1e-6
-    return {"samples": int(len(times)), "rate_hz": float((len(times) - 1) / ((times[-1] - times[0]) * 1e-9)),
-            "median_interval_ms": float(np.median(steps)), "max_interval_ms": float(steps.max()),
-            "gaps_over_1_5x": int(np.sum(steps > 1.5 * np.median(steps)))}
-
-
 def report(rec: recording.Recording) -> dict:
     start = rec.meta["clock"]["start"]["elapsed_realtime_ns"]
     firsts = recording.first_stamps(rec)
-    out = {"recording": str(rec.root), "kind": rec.meta.get("kind"), "camera": _stream(rec.image_times) if rec.is_walk else None,
-           "gyro": _stream(rec.gyro_times), "accel": _stream(rec.accel_times),
+    out = {"recording": str(rec.root), "kind": rec.meta.get("kind"), "camera": stream_stats(rec.image_times) if rec.is_walk else None,
+           "gyro": stream_stats(rec.gyro_times), "accel": stream_stats(rec.accel_times),
            "first_stamp_after_start_ms": {k: (v - start) * 1e-6 for k, v in firsts.items()},
            "same_clock_base": all(abs(v - start) <= recording.CLOCK_BASE_TOLERANCE_NS for v in firsts.values()),
            "imu_types": {k: v.get("type") for k, v in rec.meta.get("imu", {}).items()},
@@ -94,11 +89,17 @@ def report(rec: recording.Recording) -> dict:
            "expected_arcore_pose_lag_ms": None, "camera_imu_clock_offset_ms": None}
     if rec.is_walk and rec.camera_rows:
         rows = list(rec.camera_rows.values())
-        exposure = float(np.median([r["exposure_ns"] for r in rows])) * 1e-6
-        skew = float(np.median([r["rolling_shutter_skew_ns"] for r in rows])) * 1e-6
-        focus = [r["focus_distance_dpt"] for r in rows]
+
+        def reported(key):  # a phone may leave a capture value out
+            return [r[key] for r in rows if r[key] is not None]
+
+        exposure_values, skew_values = reported("exposure_ns"), reported("rolling_shutter_skew_ns")
+        exposure = float(np.median(exposure_values)) * 1e-6 if exposure_values else None
+        skew = float(np.median(skew_values)) * 1e-6 if skew_values else None
+        focus = reported("focus_distance_dpt")
         out |= {"exposure_ms_median": exposure, "rolling_shutter_skew_ms_median": skew,
-                "focus_distance_dpt_range": [min(focus), max(focus)], "expected_arcore_pose_lag_ms": exposure / 2 + skew / 2,
+                "focus_distance_dpt_range": [min(focus), max(focus)] if focus else None,
+                "expected_arcore_pose_lag_ms": (exposure + skew) / 2 if exposure is not None and skew is not None else None,
                 "frames_dropped_by_app": rec.meta.get("counts", {}).get("frames_dropped")}
     if rec.is_walk and rec.arcore:
         out["arcore_frames_matching_an_image"] = recording.arcore_match_fraction(rec)

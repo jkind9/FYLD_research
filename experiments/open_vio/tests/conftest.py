@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "host"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "calibration"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "vio"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "01_camera_capture_delivery" / "tests"))  # fake_phone
 
 from synthetic import write_recording  # noqa: E402
 

@@ -22,10 +22,11 @@ This replaces Tasks 76 and 77. The camera path now comes first (from ARCore, bef
 ## Run it
 
 ```text
-# live, from the phone (the app's "Stream to computer" button; type this computer's address into the app)
-.venv-yolo\Scripts\python -m src.live.run --listen 8765 --out outputs/live/<name>
+# live, from the capture app (Record walk; type this computer's address into the app): runs the v2 capture
+# receiver on port 8766, saves the session under <out>/sessions and processes frames as they arrive
+.venv-yolo\Scripts\python -m src.live.run --listen 8766 --out outputs/live/<name>
 
-# a saved session (from the receiver or the stand-in below), fed at its recorded speed
+# a saved session (v2 from the capture receiver, v1 from the old receiver or the stand-in below), fed at its recorded speed
 .venv-yolo\Scripts\python -m src.live.run --replay <session folder> --out outputs/live/<name>
 ```
 

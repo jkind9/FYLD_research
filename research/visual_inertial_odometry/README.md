@@ -8,7 +8,7 @@ Visual-inertial odometry (VIO) follows a camera through space by fusing its imag
 |---|---|
 | [vio_systems.md](vio_systems.md) | Basalt, Kimera-VIO, OKVIS2 and OpenVINS: licences, methods, monocular support, how they were run, results on TUM-VI room1, patent caution (Task91) |
 | [calibration.md](calibration.md) | Kalibr, Basalt calibration and the Allan deviation; TUM-VI's calibration facts used as the reference; phone-specific traps (Task90) |
-| [phone_recording_and_clocks.md](phone_recording_and_clocks.md) | Android camera and motion-sensor clocks, ARCore's shared-camera mode and pose conventions, published phone recorders, and how the project measures the camera-to-IMU time offset (Task88) |
+| [phone_recording_and_clocks.md](phone_recording_and_clocks.md) | Android camera and motion-sensor clocks, ARCore's shared-camera mode and pose conventions, published phone recorders, how the project measures the camera-to-IMU time offset (Task88), and the Android interfaces the capture app adds for telemetry, storage and compression (Task96) |
 
 ## Papers
 

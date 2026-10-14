@@ -1,9 +1,10 @@
-"""Read, check and convert a recording made by the raw recorder app (experiments/open_vio/recorder).
+"""Read, check and convert a session recorded by the capture app (experiments/01_camera_capture_delivery/capture).
 
-    python experiments/open_vio/host/recording.py <recording folder> [--euroc <output folder>]
+    python experiments/open_vio/host/recording.py <session folder> [--euroc <output folder>]
 
-A recording folder holds meta.json, gyro.csv and accel.csv, and for a walk also cam0.csv, cam0/<t_ns>.pgm
-and arcore.csv. Every time is integer nanoseconds on the phone's elapsedRealtime clock. The EuRoC/ASL
+The session folder is what the PC capture receiver writes (phone session v2, phone_session_v2.md): session.json,
+imu.csv, and for a walk frames.jsonl and cam0/<seq>.png. Every camera and motion-sensor time is integer
+nanoseconds on the phone's elapsedRealtime clock. The EuRoC/ASL
 output (mav0/cam0, mav0/imu0) is the layout Basalt, Kimera-VIO, OKVIS2 and Kalibr's bag creator read;
 arcore_camera_tum.txt is ARCore's camera path in OpenCV camera axes, in the live-SLAM harness's format.
 """
@@ -12,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -28,6 +30,7 @@ class Recording:
     root: Path
     meta: dict
     image_times: np.ndarray
+    image_names: dict = field(default_factory=dict)  # t_ns -> file name in cam0/
     camera_rows: dict = field(default_factory=dict)  # t_ns -> {exposure_ns, rolling_shutter_skew_ns, ...}
     gyro_times: np.ndarray = field(default_factory=lambda: np.zeros(0, np.int64))
     gyro: np.ndarray = field(default_factory=lambda: np.zeros((0, 3)))
@@ -41,43 +44,48 @@ class Recording:
         return self.meta.get("kind") == "walk"
 
 
-def _rows(path: Path) -> tuple[list[str], list[list[str]]]:
-    lines = path.read_text(encoding="utf-8").splitlines()
-    return lines[0].split(","), [line.split(",") for line in lines[1:] if line.strip()]
+POSE_KEYS = ("tx", "ty", "tz", "qx", "qy", "qz", "qw")
+DEVICE_KEYS = ("dev_tx", "dev_ty", "dev_tz", "dev_qx", "dev_qy", "dev_qz", "dev_qw")
 
 
-def _imu(path: Path) -> tuple[np.ndarray, np.ndarray]:
-    _, rows = _rows(path)
-    return np.array([int(r[0]) for r in rows], dtype=np.int64), np.array([[float(v) for v in r[1:4]] for r in rows]).reshape(-1, 3)
+def _arcore_row(frame: dict) -> dict:
+    """A frame's ARCore record as one flat row: t_ns, camera_t_ns, tracking, camera pose, device pose, failure."""
+    record = frame["arcore"]
+    row = {"t_ns": record["t_ns"], "camera_t_ns": frame["camera_t_ns"], "tracking": record["tracking"], "failure": record["failure"]}
+    for keys, pose in ((POSE_KEYS, record["pose"]), (DEVICE_KEYS, record["device_pose"])):
+        row |= dict(zip(keys, pose if pose is not None else [float("nan")] * 7))
+    return row
 
 
 def load(root: Path) -> Recording:
     root = Path(root)
-    meta = json.loads((root / "meta.json").read_text(encoding="utf-8"))
+    meta = json.loads((root / "session.json").read_text(encoding="utf-8"))
     rec = Recording(root, meta, np.zeros(0, np.int64))
-    for name in ("gyro", "accel"):
-        if (root / f"{name}.csv").exists():
-            times, values = _imu(root / f"{name}.csv")
-            setattr(rec, f"{name}_times", times)
-            setattr(rec, name, values)
-        else:
-            rec.missing.append(f"{name}.csv")
+    if (root / "imu.csv").exists():
+        rows = [line.split(",") for line in (root / "imu.csv").read_text(encoding="utf-8").splitlines()[1:] if line.strip()]
+        for name in ("gyro", "accel"):
+            mine = [r for r in rows if r[0] == name]
+            setattr(rec, f"{name}_times", np.array([int(r[1]) for r in mine], dtype=np.int64))
+            setattr(rec, name, np.array([[float(v) for v in r[2:5]] for r in mine]).reshape(-1, 3))
+    else:
+        rec.missing.append("imu.csv")
     if not rec.is_walk:
         return rec
-    images = (root / "cam0").glob("*.pgm") if (root / "cam0").is_dir() else []
-    rec.image_times = np.array(sorted(int(p.stem) for p in images), dtype=np.int64)
+    if not (root / "frames.jsonl").exists():
+        rec.missing.append("frames.jsonl")
+        return rec
+    frames = [json.loads(line) for line in (root / "frames.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+    for frame in frames:
+        name = f"{frame['seq']:06d}.png"
+        if (root / "cam0" / name).exists():
+            rec.image_names[frame["camera_t_ns"]] = name
+        if frame["camera"] is not None:
+            rec.camera_rows[frame["camera_t_ns"]] = frame["camera"]
+        if frame["arcore"] is not None:
+            rec.arcore.append(_arcore_row(frame))
+    rec.image_times = np.array(sorted(rec.image_names), dtype=np.int64)
     if not len(rec.image_times):
-        rec.missing.append("cam0/*.pgm")
-    for name in ("cam0.csv", "arcore.csv"):
-        if not (root / name).exists():
-            rec.missing.append(name)
-            continue
-        header, rows = _rows(root / name)
-        parsed = [dict(zip(header, row)) for row in rows]
-        if name == "cam0.csv":
-            rec.camera_rows = {int(r["t_ns"]): {k: float(v) for k, v in r.items() if k != "t_ns"} for r in parsed}
-        else:
-            rec.arcore = parsed
+        rec.missing.append("cam0/*.png")
     return rec
 
 
@@ -85,8 +93,8 @@ def tracking_poses(rec: Recording) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ARCore camera times (ns, the Android camera clock), positions and quaternions (x, y, z, w) while tracking."""
     rows = [r for r in rec.arcore if r["tracking"] == "TRACKING"]
     times = np.array([int(r["camera_t_ns"]) for r in rows], dtype=np.int64)
-    positions = np.array([[float(r[k]) for k in ("tx", "ty", "tz")] for r in rows]).reshape(-1, 3)
-    quats = np.array([[float(r[k]) for k in ("qx", "qy", "qz", "qw")] for r in rows]).reshape(-1, 4)
+    positions = np.array([[float(r[k]) for k in POSE_KEYS[:3]] for r in rows]).reshape(-1, 3)
+    quats = np.array([[float(r[k]) for k in POSE_KEYS[3:]] for r in rows]).reshape(-1, 4)
     return times, positions, quats
 
 
@@ -112,7 +120,7 @@ def problems(rec: Recording) -> list[str]:
     """Everything that stops the recording being used as it is; empty when it is usable."""
     found = [f"missing {name}" for name in rec.missing]
     if "end" not in rec.meta.get("clock", {}):
-        found.append("recording did not stop cleanly (meta.json has no end clock stamp)")
+        found.append("recording did not stop cleanly (session.json has no end clock stamp)")
     for name, times in (("camera", rec.image_times), ("gyro", rec.gyro_times), ("accel", rec.accel_times)):
         if len(times) > 1 and np.any(np.diff(times) <= 0):
             found.append(f"{name} timestamps are not strictly increasing")
@@ -123,23 +131,20 @@ def problems(rec: Recording) -> list[str]:
     if rec.is_walk:
         unmatched = [t for t in rec.image_times if int(t) not in rec.camera_rows]
         if unmatched:
-            found.append(f"{len(unmatched)} images have no cam0.csv row")
+            found.append(f"{len(unmatched)} images have no camera settings")
         if rec.arcore and arcore_match_fraction(rec) < ARCORE_MATCH_MINIMUM:
             found.append(f"ARCore camera timestamps match only {100 * arcore_match_fraction(rec):.0f}% of images")
     return found
 
 
 def to_euroc(rec: Recording, out: Path) -> Path:
-    import cv2
-
     out = Path(out)
     cam = out / "mav0" / "cam0"
     (cam / "data").mkdir(parents=True, exist_ok=True)
     with open(cam / "data.csv", "w", encoding="utf-8") as listing:
         listing.write("#timestamp [ns],filename\n")
         for t in rec.image_times:
-            image = cv2.imread(str(rec.root / "cam0" / f"{t}.pgm"), cv2.IMREAD_UNCHANGED)
-            cv2.imwrite(str(cam / "data" / f"{t}.png"), image)
+            shutil.copyfile(rec.root / "cam0" / rec.image_names[int(t)], cam / "data" / f"{t}.png")
             listing.write(f"{t},{t}.png\n")
     imu = out / "mav0" / "imu0"
     imu.mkdir(parents=True, exist_ok=True)

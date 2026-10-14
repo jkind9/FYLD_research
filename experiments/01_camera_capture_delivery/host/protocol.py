@@ -1,8 +1,9 @@
-"""Messages between the Redmi check app and the host: a JSON header and a binary payload, each length-prefixed.
+"""Messages between the Redmi app and the host: a JSON header and a binary payload, each length-prefixed.
 
 Message: 4-byte big-endian header length, UTF-8 JSON header, 4-byte big-endian payload length, payload.
-Acknowledgement (host to phone, one per frame): the frame's 4-byte big-endian sequence number.
-The Java side is phonecheck/app/src/main/java/org/fyld/phonecheck/HostStream.java.
+Phone session v2 (capture_receiver.py) uses this framing both ways, acknowledgements included. Phone session v1
+(receiver.py) acknowledged each frame with its 4-byte big-endian sequence number (write_ack, read_ack).
+The Java side is capture/app/src/main/java/org/fyld/capture/SessionMessages.java.
 """
 
 from __future__ import annotations

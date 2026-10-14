@@ -38,6 +38,18 @@ Consequence: on a phone whose camera reports REALTIME, camera and motion-sensor 
 
 ARCore's own pose already depends on its internal calibration, so this is a check, not a calibration. Kalibr measures the offset independently in the calibration task.
 
+## What the capture app adds (Task96, 14 October 2026)
+
+Task96 merged Task88's recorder into one capture app that streams to the PC during the walk ([phone_session_v2.md](../../experiments/01_camera_capture_delivery/phone_session_v2.md)). It relies on these Android interfaces beyond the ones above (read 14 October 2026; summaries in our words):
+
+| Interface | What the app uses it for | Source |
+|---|---|---|
+| `PowerManager.getCurrentThermalStatus()` (Android 10 and later) | Telemetry: the phone's thermal state, 0 (`THERMAL_STATUS_NONE`) to 6 (`THERMAL_STATUS_SHUTDOWN`); -1 on older phones | [PowerManager reference](https://developer.android.com/reference/android/os/PowerManager#getCurrentThermalStatus()) |
+| `BatteryManager.getIntProperty(BATTERY_PROPERTY_CAPACITY)` | Telemetry: battery level in % | [BatteryManager reference](https://developer.android.com/reference/android/os/BatteryManager#BATTERY_PROPERTY_CAPACITY) |
+| `File.getUsableSpace()` | Free storage, for the 1 GB guard and telemetry; it counts only space this app may use, unlike `getFreeSpace()` | [File reference](https://developer.android.com/reference/java/io/File#getUsableSpace()) |
+| `java.util.zip.Deflater`, level 1 (`BEST_SPEED`) | Optional lossless compression of the grey frames; *Run all checks* times it on the phone and the app uses it only when it pays | [Deflater reference](https://developer.android.com/reference/java/util/zip/Deflater) |
+| Camera2 `CaptureResult` keys (`SENSOR_TIMESTAMP`, `SENSOR_EXPOSURE_TIME`, `SENSOR_FRAME_DURATION`, `SENSOR_ROLLING_SHUTTER_SKEW`, `LENS_FOCUS_DISTANCE`, `SENSOR_SENSITIVITY`, `LENS_OPTICAL_STABILIZATION_MODE`) | Per-frame camera settings, matched to each image by its sensor timestamp (as in Task88) | [CaptureResult reference](https://developer.android.com/reference/android/hardware/camera2/CaptureResult) |
+
 ## Patent note
 
 Nothing here comes from inside ARCore: only Android and ARCore public interfaces and published papers. Recording ARCore's output as a reference does not copy its design. No design here touches the two Google patents named in [../phone_ar_platforms/arcore_open_replacement.md](../phone_ar_platforms/arcore_open_replacement.md) (US 10,802,147 concurrent odometry and mapping; US 11,145,075 depth from motion).

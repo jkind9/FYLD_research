@@ -1,4 +1,6 @@
-"""Receive frames and check reports from the Redmi check app, save them, and acknowledge each frame.
+"""Receive phone session v1 frames and check reports, save them, and acknowledge each frame (the old live stream).
+
+The capture app sends phone session v2 to capture_receiver.py instead; this receiver stays for v1 senders.
 
     python experiments/01_camera_capture_delivery/host/receiver.py --out experiments/01_camera_capture_delivery/runs/phonecheck
 

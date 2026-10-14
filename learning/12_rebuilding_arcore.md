@@ -32,14 +32,16 @@ So on the Redmi the clocks share a base. That does not make them agree to the mi
 
 ARCore states its camera pose at "the centre of exposure of the centre row". So if the camera and gyroscope clocks agreed perfectly, ARCore's pose would still appear half an exposure plus half a readout later than the image timestamp. The project subtracts this to get the true clock offset.
 
-## The raw recorder
+## The raw recorder, now part of the capture app
 
-The project's recorder app (Task88) saves, during one walk:
+The project's recorder app (Task88) saved, during one walk, what the capture app (Task96) now records and sends to the PC:
 
-- every camera frame's grey image, 640 x 480, lossless, named by its timestamp;
+- every camera frame's grey image, 640 x 480, lossless, numbered from 0 with no gaps;
 - per frame: exposure time, readout time, focus distance, sensitivity and stabilisation mode;
 - the gyroscope and accelerometer at the fastest rate the phone allows, in their *uncalibrated* form (Android's own bias correction can jump mid-walk, which a tracker would read as motion);
-- ARCore's camera pose for each frame, as the reference answer.
+- ARCore's camera pose for each frame, as the reference answer, and the pose of the phone's motion-sensor frame (the *device pose*), for the calibration cross-check.
+
+Since Task96 the recorder's parts live inside one capture app with the check app's ARCore outputs (points, raw depth, anchor corrections) and a colour JPEG of every frame, so the open trackers and the ARCore-based methods read the same walk ([phone_session_v2.md](../experiments/01_camera_capture_delivery/phone_session_v2.md)). The phone writes every frame to its own storage first and streams it to the PC as Wi-Fi allows; nothing is dropped because the link is slow.
 
 ARCore and the app share the camera through ARCore's *shared-camera mode*: ARCore runs normally, and the same capture session sends a copy of every image to the app. The recording therefore holds both the inputs an open tracker needs and ARCore's answer for the same walk, without any extra equipment. A second mode records the motion sensors alone with the phone at rest, for calibration.
 
@@ -49,7 +51,7 @@ The gyroscope measures how fast the phone turns. ARCore's poses also show how fa
 
 Because ARCore's pose already depends on ARCore's own internal calibration, this measurement is a check, not the final number. Kalibr (next section) measures the offset independently, from the camera images and the gyroscope alone.
 
-> **Project result (14 October 2026).** The recorder app builds and its host tools pass 19 tests on synthetic recordings. The first Redmi recording, with measured rates and offset, waits for the owner to install the app.
+> **Project result (14 October 2026).** The capture app builds (Task96) and its 20 JVM tests pass; the converter and clock check read its session folders and pass their tests on synthetic sessions. The first Redmi recording, with measured rates and offset, waits for the owner to install the app.
 
 ## Calibration
 

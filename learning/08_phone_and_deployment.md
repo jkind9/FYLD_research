@@ -56,7 +56,21 @@ What a recording must therefore hold:
 
 ARCore's *shared-camera mode* makes this possible on one phone: ARCore tracks as usual and the same camera session also hands every image to the app.
 
-> **Project status (14 October 2026).** Two partial apps exist: the check app (colour, ARCore outputs, no motion sensors, live stream) and the raw recorder (lossless grey, motion sensors, ARCore poses, no depth). Task95 merges them into one capture app. The first test walk goes through a house, down and back up the stairs, which is a known hard case for ARCore (chapter 11).
+### Getting every frame to the PC
+
+The camera produces more data than the link has carried so far. Lossless 640 x 480 grey at 30 frames a second is 9.2 MB/s, and the colour JPEG adds about 2 MB/s. The only phone-to-PC measurement, 0.70 MB/s, waited for the PC to confirm each frame before sending the next (*stop-and-wait*), so most of the time the link sat idle waiting for an answer. At 0.70 MB/s a 2-minute walk (about 1.3 GB) would take about 32 minutes to send.
+
+The capture app therefore separates capturing from sending:
+
+- **A queue on the phone's storage.** Every message (a frame, a batch of motion-sensor readings, a telemetry line) is numbered and written to a file at once. Capture never waits for the network; a slow link only makes the queue longer.
+- **A window.** The sender keeps up to 64 messages on the way without waiting for confirmation, so the link stays busy.
+- **Cumulative acknowledgements.** The PC answers with one number: the highest message it holds with no gap below it. One answer confirms everything before it, and the phone deletes those files.
+- **Resume.** After a dropped connection the phone reconnects and asks where to start; the PC answers with that same number, and the phone resends from the next message. Nothing is lost and nothing is stored twice. A connection that stops moving for 20 s is treated as dropped, because a write to a PC that has gone out of Wi-Fi range can otherwise hang for minutes.
+- **Sending after Stop.** The queue keeps draining after the walk ends; the screen shows what is left and an estimated time.
+
+The same ideas run inside TCP itself and most file-transfer tools; the app repeats them one level up because a TCP connection does not survive the phone dropping off Wi-Fi.
+
+> **Project status (14 October 2026).** The capture app (Task96, continuing Task95) merges the check app and the raw recorder into one app that records every input in the list above and streams it to the PC as described ([experiments/01_camera_capture_delivery](../experiments/01_camera_capture_delivery/README.md#the-capture-app-and-pc-receiver-task96-14-october-2026)). It builds, and its phone code passes 20 tests on the computer, including a fake PC that drops the connection and one that stops reading, and recovery of interrupted queue updates. It has not yet run on the Redmi; the real link speed, and whether compressing the grey frames pays, will be measured by its *Run all checks*. Zero dropped frames also needs checking: if the writer falls behind its 30-frame memory buffer, overflow is counted as dropped. The first test walk goes through a house, down and back up the stairs, which is a known hard case for ARCore (chapter 11).
 
 ## What is still unmeasured
 
@@ -71,4 +85,5 @@ ARCore's *shared-camera mode* makes this possible on one phone: ARCore tracks as
 ## Further reading
 
 - [research/phone_ar_platforms](../research/phone_ar_platforms/README.md): ARCore notes, raw depth, Apple RoomPlan, the RealityCheck drift paper.
+- [research/visual_inertial_odometry/phone_recording_and_clocks.md](../research/visual_inertial_odometry/phone_recording_and_clocks.md): camera and motion-sensor clocks, ARCore's shared-camera mode, and the Android interfaces the capture app uses for telemetry, storage and compression.
 - [research/camera_tracking_and_slam/orb_slam/android](../research/camera_tracking_and_slam/orb_slam/android/README.md): why most Android SLAM ports are not ready to use.

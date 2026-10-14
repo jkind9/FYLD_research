@@ -46,3 +46,15 @@ def test_report_lists_rates_gaps_and_clock_base(make_recording):
 def test_report_for_motion_sensors_alone_skips_the_camera(make_recording):
     report = clock_check.report(recording.load(make_recording(kind="imu_only")))
     assert report["camera"] is None and report["camera_to_gyro_offset_ms"] is None
+
+
+def test_report_keeps_unreported_camera_settings_explicit(make_recording):
+    rec = recording.load(make_recording())
+    for row in rec.camera_rows.values():
+        for key in ("exposure_ns", "rolling_shutter_skew_ns", "focus_distance_dpt"):
+            row[key] = None
+    report = clock_check.report(rec)
+    assert report["focus_distance_dpt_range"] is None
+    assert report["exposure_ms_median"] is None and report["rolling_shutter_skew_ms_median"] is None
+    assert report["expected_arcore_pose_lag_ms"] is None
+    assert report["camera_imu_clock_offset_ms"] is None

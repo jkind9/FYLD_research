@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "host"))
 import session_v1
 
-FIXTURE = ROOT / "phonecheck" / "app" / "src" / "test" / "resources" / "session_v1"
+FIXTURE = ROOT / "tests" / "fixtures" / "session_v1"
 
 
 def fixture():

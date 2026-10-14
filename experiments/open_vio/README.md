@@ -6,26 +6,30 @@ Visual-inertial odometry (VIO) is the core part: it fuses camera images with gyr
 
 | Step | What | Status (14 October 2026) |
 |---|---|---|
-| 1. Raw recorder (Task88) | Phone app records camera frames, gyroscope, accelerometer and ARCore's poses on one clock; the computer receives, checks and converts the recording | App and host tools built and tested on synthetic recordings; first Redmi recording waits for the owner to install the app |
+| 1. Capture app (Task96, continuing Task95 and Task88) | One phone app records the inputs for every reconstruction method; the PC receives one v2 session folder, checks it and converts it for the open trackers | App and readers built and tested on synthetic sessions; APK staged; first Redmi walk and rest wait for the owner |
 | 2. Calibration (Task90) | Kalibr: camera intrinsics, camera-to-IMU rotation, offset and time shift (printed target); IMU noise from a long recording at rest | Pipeline built; reproduces TUM-VI's published calibration (0.014 degrees, 1.0 mm, 0.13 ms); A4 target ready; Redmi calibration waits for its recordings |
 | 3. Offline comparison (Task91) | Basalt (BSD-3), Kimera-VIO (BSD-2), OKVIS2 (BSD-style), with OpenVINS (GPL-3.0, reference only), run in WSL on the recordings and scored against ARCore's poses and tape-measured distances, with time per frame | All four built and run on TUM-VI room1 with one camera: Basalt 0.146 m, OKVIS2 0.505 m (own noise settings), Kimera lost track, OpenVINS 0.064 m (reference); Redmi runs wait for recordings |
 | 4. Port to the phone | Best system built for Android (NDK); learned depth resized to its tracked points replaces ARCore's depth | Not started |
 
 Rules for this stream: build only from published methods (never take ARCore apart); note any design that might touch Google's patents US 10,802,147 or US 11,145,075 for a later patent check; CPU only; live or at least one update per second for anything deployable; permissive licences for anything that ships, GPL only as reference.
 
-## Step 1: the raw recorder (Task88)
+## Step 1: the capture app (Task96)
 
 ### What it records
 
-The app (`recorder/`, package `org.fyld.rawrecorder`) opens the rear camera through ARCore's shared-camera mode: ARCore tracks as usual while a second 640 x 480 stream from the same capture session goes to the app. One button records a walk; a second records the motion sensors alone with the camera closed (for the IMU noise measurement in step 2, which needs hours at rest). A third sends the last recording to the computer over Wi-Fi.
+Task96 continues Task95 and moves Task88's recorder classes into experiment 01's [capture app](../01_camera_capture_delivery/README.md#the-capture-app-and-pc-receiver-task96-14-october-2026), package `org.fyld.capture`. It replaces both the raw recorder and the check app. ARCore's shared-camera mode supplies Camera2 images while ARCore tracks. The phone captures; the PC stores and processes. One recording supplies the same walk to every reconstruction method. The [phone session v2 definition](../01_camera_capture_delivery/phone_session_v2.md) lists every message, field, unit and clock.
+
+The app writes numbered messages to a queue on phone storage before sending them. A sender drains the queue during capture and after Stop, with up to 64 messages unacknowledged. Cumulative acknowledgements permit deletion only after the PC stores a message. After reconnecting, the sender resumes from the PC's last message held without a gap. The screen stays on and shows frames, MB and estimated time left. Recording refuses to start, and stops with a message, below 1 GB free. The separate motion-sensors-only button closes the camera and ARCore for the calibration rest recording.
 
 | File | Contents | Units and clock |
 |---|---|---|
-| `meta.json` | Phone, Android and ARCore versions; camera id, timestamp source (REALTIME or UNKNOWN), reported calibration and lens pose; ARCore camera configuration and CPU-image intrinsics; each motion sensor's type, name, vendor, resolution and minimum delay; both Android clocks (`elapsedRealtimeNanos`, `nanoTime`) at start and end; counts of frames saved and dropped | — |
-| `cam0/<t_ns>.pgm` | Luminance (grey) plane of every camera image, lossless 8-bit PGM, 640 x 480, sensor orientation (landscape) | file name = Camera2 sensor timestamp, ns |
-| `cam0.csv` | Per capture: `t_ns, exposure_ns, frame_duration_ns, rolling_shutter_skew_ns, focus_distance_dpt, iso, ois_mode` (-1 when the phone does not report a value) | ns; focus in dioptres |
-| `gyro.csv`, `accel.csv` | `t_ns, x, y, z, bx, by, bz`: the uncalibrated sensor (no Android bias correction) and Android's own bias estimate; the calibrated sensor with zero bias columns if the phone has no uncalibrated one | rad/s, m/s^2; Android sensor axes |
-| `arcore.csv` | Per new ARCore frame: `t_ns` (ARCore's timestamp), `camera_t_ns` (the Android camera timestamp of that image), tracking state, camera pose `tx..qw`, device pose `dev_tx..dev_qw` (ARCore's pose of the Android sensor frame), failure reason | metres; camera pose in OpenGL camera axes (x right, y up, looking down -z), camera-to-world |
+| `session.json` | Phone, Android and ARCore versions; camera id, timestamp source, calibration and configuration; sensor details; both Android clocks at start and end; final counts and stop reason | clocks in ns; wall clock in ms since 1970 |
+| `cam0/<seq>.png`, `frames/<seq>.jpg` | Lossless 8-bit grey and colour JPEG quality 90 from the same Camera2 image, 640 x 480, sensor orientation | zero-padded frame sequence from 0 |
+| `frames.jsonl` | One line per frame: sequence, Camera2 and wall timestamps; exposure, frame duration, readout, focus, ISO and OIS; matching ARCore timestamp, tracking and failure reason, camera and device poses, image and texture intrinsics, tracked points, depth references, anchors and corrections | timestamps and exposure/readout in ns; focus in dioptres; poses in metres; intrinsics in pixels; ARCore axes as v1 |
+| `depth/<seq>.bin` | New ARCore raw depth followed by confidence | little-endian uint16 millimetres, then uint8 confidence |
+| `imu.csv` | `sensor,t_ns,x,y,z,bx,by,bz`: uncalibrated gyro and accel plus Android's bias estimates; calibrated fallback with zero bias columns where necessary | elapsedRealtime ns; rad/s, m/s^2; Android sensor axes |
+| `telemetry.jsonl` | Once a second: battery, heat, free storage, queue frames and bytes, captured/sent/acknowledged/dropped counts and ARCore update time | %, Android thermal status, bytes, counts, ms |
+| `summary.json` | Frames and missing sequence numbers; IMU rates and gaps; clock-base check; received MB/s; sending time after Stop | Hz, ns, MB/s, seconds |
 
 Camera, gyroscope and accelerometer stamps are all on Android's `elapsedRealtimeNanos` clock when the camera reports a REALTIME timestamp source, as the Redmi does. The sources and wording are in [research/visual_inertial_odometry/phone_recording_and_clocks.md](../../research/visual_inertial_odometry/phone_recording_and_clocks.md).
 
@@ -33,13 +37,14 @@ Camera, gyroscope and accelerometer stamps are all on Android's `elapsedRealtime
 
 | Setting | Value | Why |
 |---|---|---|
-| Image | 640 x 480 YUV, grey plane only | ARCore's own CPU image size; close to the 752 x 480 the VIO systems were tuned on; colour is not used by VIO |
+| Image | 640 x 480 YUV; lossless grey plus colour JPEG quality 90 | Grey for VIO; colour for depth and detection from the same walk |
 | Frame rate | ARCore's camera configuration (30 fps on the Redmi) | ARCore issues the capture requests while it runs |
 | Focus | ARCore's FIXED focus mode; the focus distance of every frame is recorded | Calibration assumes fixed intrinsics; ARCore owns the request in shared mode, so the app cannot set focus itself |
 | Stabilisation, exposure | Whatever ARCore requests; per-frame optical stabilisation mode, exposure and readout recorded | As above; they are checked rather than forced |
 | Motion sensors | Uncalibrated gyroscope and accelerometer, fastest rate (`SENSOR_DELAY_FASTEST`, `HIGH_SAMPLING_RATE_SENSORS` permission) | Android's bias correction can jump mid-recording |
-| Writer | 60-frame buffer pool; a full pool drops the frame and counts it | Memory stays bounded; drops are visible |
-| Upload | TCP port 8766, one message per file with SHA-256, each acknowledged | The check app uses 8765 |
+| Writer | Queue on phone storage; 30 frames held in memory before the writer; overflow is counted as dropped | Network delays grow the disk queue; the Redmi run must check that capture and storage keep up |
+| Grey compression | Deflater level 1 only when the phone's timed check finds it pays; otherwise raw | The CPU cost and link speed decide; the PC always stores PNG |
+| Sending | TCP port 8766, window of 64 messages, cumulative acknowledgements and reconnect/resume | Port 8765 stays free for the old v1 live stream |
 
 All settings are proposals by Claude of 14 October 2026, not owner rulings.
 
@@ -47,30 +52,30 @@ All settings are proposals by Claude of 14 October 2026, not owner rulings.
 
 | Command | What it does |
 |---|---|
-| `python experiments/open_vio/host/receive_recording.py --out experiments/open_vio/runs/recordings` | Listens for the app's upload; saves each file after checking its size and SHA-256; refuses paths outside the recording; writes `received.json` |
+| `python experiments/01_camera_capture_delivery/host/capture_receiver.py --out experiments/open_vio/runs/recordings --port 8766` | Prints the PC address, validates incoming messages, stores a v2 folder per session, acknowledges cumulatively and resumes after reconnect |
 | `python experiments/open_vio/host/recording.py <recording> [--euroc <out>]` | Lists problems (missing files, timestamps not increasing, a stream on another clock, images without metadata, ARCore frames matching no image, a recording that did not stop cleanly); writes the EuRoC/ASL layout (`mav0/cam0/data/*.png`, `mav0/imu0/data.csv` at gyroscope times with the accelerometer interpolated) read by Basalt, Kimera-VIO, OKVIS2 and Kalibr's bag creator, and `arcore_camera_tum.txt` (ARCore's path in OpenCV camera axes, `time x y z qx qy qz qw`, the live-SLAM harness format) |
 | `python experiments/open_vio/host/clock_check.py <recording>` | Writes `clock_check.json`: rates and gaps per stream, whether all streams start on the same clock, the share of ARCore frames that match a saved image, and the camera-to-gyroscope offset |
 
 The offset is measured by cross-correlating the gyroscope's angular speed with the angular speed of ARCore's camera rotation (the Twist-n-Sync method family). Positive means the gyroscope stamps a motion later than the camera. ARCore places its pose at the centre of exposure of the middle image row, while Camera2 stamps the start of exposure of the first row, so even a perfectly aligned phone shows half the exposure plus half the readout time; `camera_imu_clock_offset_ms` is what remains after removing it. Published phones showed offsets up to 30 ms (MARS logger paper), so the offset is measured, not assumed. Kalibr measures it independently in step 2.
 
-Use the `.venv-sfm` environment (numpy, scipy, OpenCV). The receiver uses only the standard library and experiment 01's `host/protocol.py` framing.
+Use the `.venv-sfm` environment (numpy, scipy, OpenCV and Pillow). The receiver reuses experiment 01's `host/protocol.py` framing and offers an `on_frame` callback; `python -m src.live.run --listen 8766 --out <run>` uses it for live processing. Replay reads the same v2 folder. The protocol has no authentication or encryption: LAN only; internet use needs a tunnel and authentication, outside this task.
 
 ### Build, install, record
 
-1. Build in WSL: `wsl -d Ubuntu -- bash experiments/open_vio/build/build-recorder.sh` (writes `runs/apk/rawrecorder-debug.apk` and its SHA-256).
-2. Install: copy the APK to the phone and open it (MIUI blocks installs over USB debugging without a SIM; the check app was installed from email).
-3. On the computer: start `receive_recording.py` (it prints the address to type into the app; allow Python through the Windows firewall on private networks).
-4. Walk: press "Record walk" once ARCore says tracking, walk slowly for about 60 s pointing at textured things, end where you started, press Stop, then "Send last recording".
-5. Rest: put the phone flat on a table, press "Record motion sensors only", leave it (60 s for a first check; about 3 hours for the noise measurement), Stop, Send.
-6. Check: `clock_check.py` and `recording.py --euroc` on each received folder.
+1. Build in WSL: `wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh`. This runs the JVM tests, builds the APK and stages `.apk` and `.apk.bin` in `mobile deployment/capture_<date>/`. The rawrecorder and phonecheck build scripts are retired.
+2. Install from email on the Redmi (MIUI blocks adb installs). Start `capture_receiver.py` on the PC; enter `192.168.68.123` and port `8766` in the app. Allow Python through the Windows firewall on private networks.
+3. Run all checks: ARCore setup and tracking, a 50 MiB link-speed test and a timed compression check. The ARCore notice remains in the app.
+4. First walk: start upstairs, go downstairs, return upstairs, Stop. Leave the app open while the queue drains; sending continues after Stop.
+5. Rest: phone flat on a table, "Record motion sensors only", 60 s, Stop; wait until sending finishes. Use about 3 hours for the later calibration noise recording.
+6. Check: `clock_check.py <session>` and `recording.py <session> --euroc <out>`; then `python -m src.live.run --replay <walk session> --out <run>`. Report capture fps, dropped frames, IMU rates, Wi-Fi MB/s, sending time after Stop, storage used and `camera_imu_clock_offset_ms`.
 
 ### Tests
 
-`python -m pytest experiments/open_vio/tests` (19 tests, no phone needed): a synthetic recording in the app's format is read and validated; each problem above is detected; the EuRoC conversion writes the expected images, IMU rows and reference path; ARCore poses convert to OpenCV axes and back; the offset search recovers synthetic shifts of +12 ms and -20 ms within 1 ms and reports no peak for a motionless signal; the upload receiver saves and acknowledges files, and refuses a corrupted file or a path outside the recording.
+`python -m pytest experiments/open_vio/tests` needs no phone. Synthetic v2 sessions exercise validation, EuRoC images and IMU rows, ARCore reference paths, coordinate conversion and the clock-offset search. The offset search recovers synthetic shifts of +12 ms and -20 ms within 1 ms and reports no peak for a motionless signal. Experiment 01 tests the shared JVM/Python fixture and a fake phone disconnecting and resuming without missing or duplicate frames. `src/live/tests/test_stream.py` checks v2 replay.
 
 ### Results
 
-The app builds (debug APK, package `org.fyld.rawrecorder` 0.1, minimum Android 8.0, ARCore 1.56.0). It has not yet run on the Redmi. The first device recording will report camera frame rate, gyroscope and accelerometer rates, dropped frames, the clock-base check and the measured offset here.
+The capture app builds (debug APK, package `org.fyld.capture`, minimum Android 8.0, ARCore 1.56.0); its APK is staged for the owner. The v2 readers and reconnect path pass synthetic tests. The capture app has not yet run on the Redmi. Capture with zero drops, sustained Wi-Fi speed, storage use, sending time after Stop and the measured clock offset remain unmeasured.
 
 ## Step 2: calibration (Task90)
 
@@ -114,8 +119,8 @@ This shows the tools and conversion work on a hardware-synchronised, global-shut
 
 ### Recording for calibration (owner, Redmi)
 
-1. **Camera and camera-IMU (one walk recording, about 60-90 s).** Target flat on a wall, well lit. Start "Record walk", hold the phone 30-60 cm from the target, then move slowly: tilt up and down, left and right, roll the phone, move it sideways, up and down, closer and further, keeping the whole grid in view most of the time. Avoid knocks at the start and end. Stop, Send.
-2. **Noise (rest recording, about 3 hours).** Phone flat on a table, plugged in, nothing touching the table. "Record motion sensors only", leave it, Stop, Send.
+1. **Camera and camera-IMU (one walk recording, about 60-90 s).** Target flat on a wall, well lit. Start "Record walk", hold the phone 30-60 cm from the target, then move slowly: tilt up and down, left and right, roll the phone, move it sideways, up and down, closer and further, keeping the whole grid in view most of the time. Avoid knocks at the start and end. Stop and wait for the sending queue to empty.
+2. **Noise (rest recording, about 3 hours).** Phone flat on a table, plugged in, nothing touching the table. "Record motion sensors only", leave it, Stop and wait for sending to finish.
 3. On the computer: `prepare.py --recording <walk> --rest <rest> --tag-size <measured> --out experiments/open_vio/runs/kalibr_redmi`, then `run_kalibr.sh cameras ... pinhole-radtan` and `run_kalibr.sh imu ... 0.1` (a 100 ms offset search, since Camera2 stamps the start of exposure), then `compare.py ... --recording <walk>` for the ARCore cross-check.
 
 ## Step 3: offline comparison of open trackers (Task91)

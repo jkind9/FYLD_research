@@ -148,7 +148,7 @@ def test_long_walk_does_not_retain_received_images(walk):
 
 @pytest.mark.parametrize("invocation", ["subprocess", "main"])
 def test_cli_reads_receiver_session_and_preserves_reference_control_label(tmp_path, invocation, monkeypatch):
-    fixture = HOST.parent / "phonecheck/app/src/test/resources/session_v1"
+    fixture = HOST.parent / "tests/fixtures/session_v1"
     header = json.loads((fixture / "frame_header.json").read_text())
     payload = (fixture / "frame_payload.bin").read_bytes()
     session = tmp_path / "session"

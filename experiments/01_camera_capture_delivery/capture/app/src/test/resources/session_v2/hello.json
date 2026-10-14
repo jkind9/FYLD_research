@@ -1,0 +1,62 @@
+{
+  "type": "hello",
+  "version": 2,
+  "session": "20261014_201500_walk",
+  "wall_ms": 1760449990000,
+  "info": {
+    "kind": "walk",
+    "app": "org.fyld.capture 1.0",
+    "device": {
+      "manufacturer": "Xiaomi",
+      "model": "2201116TG",
+      "android": "13",
+      "sdk": 33,
+      "arcore_apk_version": "1.56.0"
+    },
+    "camera": {
+      "id": "0",
+      "size": [
+        640,
+        480
+      ],
+      "timestamp_source": "REALTIME"
+    },
+    "arcore": {
+      "cpu_image": [
+        640,
+        480
+      ],
+      "texture": [
+        1920,
+        1080
+      ],
+      "fps": "[30, 30]",
+      "depth_mode": "RAW_DEPTH_ONLY",
+      "focus_mode": "FIXED"
+    },
+    "imu": {
+      "gyro": {
+        "type": "android.sensor.gyroscope_uncalibrated"
+      },
+      "accel": {
+        "type": "android.sensor.accelerometer_uncalibrated"
+      }
+    },
+    "clock": {
+      "start": {
+        "elapsed_realtime_ns": 5000100000000,
+        "nano_time_ns": 4999100000000,
+        "wall_ms": 1760449990000
+      }
+    },
+    "settings": {
+      "jpeg_quality": 90,
+      "grey_encoding": "raw",
+      "window": 64,
+      "anchor_interval_s": 1.0,
+      "arcore_wait_ms": 500,
+      "imu_batch_ms": 100,
+      "min_free_bytes": 1000000000
+    }
+  }
+}

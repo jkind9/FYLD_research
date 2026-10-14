@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="arcore_notice"><![CDATA[This application runs on <a href=\"https://play.google.com/store/apps/details?id=com.google.ar.core\">Google Play Services for AR</a> (ARCore), which is provided by Google and governed by the <a href=\"https://policies.google.com/privacy\">Google Privacy Policy</a>.<br/><br/>This research app records camera images, motion-sensor readings, camera positions, tracked points and available depth, keeps them on the phone until they are sent, and sends them to the computer address you enter. The computer saves the session. The link is not encrypted: use it on your own local network only.<br/><br/>ARCore functionality is provided by Google and is subject to the <a href=\"https://policies.google.com/terms\">Google Terms of Service</a> and <a href=\"https://developers.google.com/ar/develop/terms\">ARCore Additional Terms of Service</a>.]]></string>
+</resources>

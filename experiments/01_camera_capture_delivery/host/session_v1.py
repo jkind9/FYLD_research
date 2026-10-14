@@ -97,21 +97,21 @@ def check_session(header: dict) -> dict:
     return header
 
 
-def parse_frame(header: dict, payload: bytes) -> Frame:
-    _require(header.get("type") == "frame" and header.get("version") == VERSION, f"frame must be type frame, version {VERSION}")
-    tracking = header["tracking"]
+def parse_arcore(record: dict, depth_payload: bytes) -> dict:
+    """Checks ARCore's per-frame fields (shared by v1 frames and v2 arcore records); returns them as Frame fields.
+
+    depth_payload is what follows the images: raw depth, then confidence, when the record has new depth.
+    """
+    tracking = record["tracking"]
     _require(tracking in STATES, f"tracking must be one of {STATES}")
-    _require((header["pose"] is not None) == (tracking == "TRACKING"), "pose must be given exactly when tracking")
-    pose = _pose(header["pose"], "pose") if header["pose"] is not None else None
-    intrinsics = _intrinsics(header["intrinsics"], "intrinsics")
-
-    image = header["image"]
-    _require(image["format"] == "jpeg" and payload[:2] == b"\xff\xd8", "image must be JPEG")
-    depth_header = header.get("depth")
+    _require((record["pose"] is not None) == (tracking == "TRACKING"), "pose must be given exactly when tracking")
+    pose = _pose(record["pose"], "pose") if record["pose"] is not None else None
+    intrinsics = _intrinsics(record["intrinsics"], "intrinsics")
+    depth_header = record.get("depth")
     depth_bytes = (depth_header["bytes"], depth_header["confidence_bytes"]) if depth_header else (0, 0)
-    _require(len(payload) == image["bytes"] + sum(depth_bytes), "payload length does not match the header")
+    _require(len(depth_payload) == sum(depth_bytes), "payload length does not match the header")
 
-    points = header["points"]
+    points = record["points"]
     _require(all(len(p) == 7 for p in points), "each point needs [id, x, y, z, u, v, confidence]")
     _require(pose is not None or not points, "points need a pose")
     table = np.array(points, dtype=np.float64).reshape(-1, 7)
@@ -123,20 +123,26 @@ def parse_frame(header: dict, payload: bytes) -> Frame:
     if depth_header:
         w, h = depth_header["width"], depth_header["height"]
         _require(depth_bytes == (w * h * 2, w * h), "depth sizes do not match width x height")
-        start = image["bytes"]
-        millimetres = np.frombuffer(payload, dtype="<u2", count=w * h, offset=start).reshape(h, w)
+        millimetres = np.frombuffer(depth_payload, dtype="<u2", count=w * h).reshape(h, w)
         depth = Depth(int(depth_header["t_ns"]), millimetres.astype(np.float32) / 1000.0,
-                      np.frombuffer(payload, dtype=np.uint8, count=w * h, offset=start + w * h * 2).reshape(h, w),
+                      np.frombuffer(depth_payload, dtype=np.uint8, count=w * h, offset=w * h * 2).reshape(h, w),
                       _intrinsics(depth_header["intrinsics"], "depth intrinsics"))
 
-    anchor = header.get("anchor")
-    return Frame(
-        seq=int(header["seq"]), t_ns=int(header["t_ns"]), sent_ms=int(header["sent_ms"]), tracking=tracking,
-        failure=header["failure"], pose=pose, intrinsics=intrinsics, image_jpeg=payload[:image["bytes"]],
-        image_size=(int(image["width"]), int(image["height"])), point_ids=table[:, 0].astype(np.int64),
+    anchor = record.get("anchor")
+    return dict(
+        tracking=tracking, failure=record["failure"], pose=pose, intrinsics=intrinsics, point_ids=table[:, 0].astype(np.int64),
         points_world=table[:, 1:4], points_pixel=table[:, 4:6], points_confidence=table[:, 6], depth=depth,
         anchor_created=(int(anchor["id"]), _pose(anchor["pose"], "anchor pose")) if anchor else None,
-        anchor_updates={int(a[0]): _pose(list(a[1:]), "anchor correction") for a in header["anchors"]})
+        anchor_updates={int(a[0]): _pose(list(a[1:]), "anchor correction") for a in record["anchors"]})
+
+
+def parse_frame(header: dict, payload: bytes) -> Frame:
+    _require(header.get("type") == "frame" and header.get("version") == VERSION, f"frame must be type frame, version {VERSION}")
+    image = header["image"]
+    _require(image["format"] == "jpeg" and payload[:2] == b"\xff\xd8", "image must be JPEG")
+    return Frame(seq=int(header["seq"]), t_ns=int(header["t_ns"]), sent_ms=int(header["sent_ms"]),
+                 image_jpeg=payload[:image["bytes"]], image_size=(int(image["width"]), int(image["height"])),
+                 **parse_arcore(header, payload[image["bytes"]:]))
 
 
 def read_session(folder: Path) -> Iterator[Frame]:

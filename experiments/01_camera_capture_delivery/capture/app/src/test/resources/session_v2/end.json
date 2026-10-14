@@ -1,0 +1,27 @@
+{
+  "type": "end",
+  "version": 2,
+  "session": "20261014_201500_walk",
+  "n": 15,
+  "reason": "stop",
+  "clock": {
+    "end": {
+      "elapsed_realtime_ns": 5000300000000,
+      "nano_time_ns": 4999300000000,
+      "wall_ms": 1760450100000
+    }
+  },
+  "counts": {
+    "frames": 214,
+    "frames_captured": 215,
+    "frames_dropped": 1,
+    "frames_without_arcore": 3,
+    "frames_without_camera_settings": 0,
+    "depth_frames": 70,
+    "anchors": 7,
+    "gyro_samples": 40000,
+    "accel_samples": 40000,
+    "imu_batches": 1000,
+    "telemetry": 100
+  }
+}

@@ -15,7 +15,7 @@ import receiver
 import report
 import session_v1
 
-FIXTURE = Path(__file__).resolve().parents[1] / "phonecheck" / "app" / "src" / "test" / "resources" / "session_v1"
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "session_v1"
 
 
 def test_message_round_trip():

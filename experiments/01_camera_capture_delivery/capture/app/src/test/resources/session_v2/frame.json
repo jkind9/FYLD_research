@@ -1,0 +1,122 @@
+{
+  "type": "frame",
+  "version": 2,
+  "session": "20261014_201500_walk",
+  "n": 12,
+  "seq": 7,
+  "camera_t_ns": 5000123456789,
+  "wall_ms": 1760450000000,
+  "camera": {
+    "exposure_ns": 8000000,
+    "frame_duration_ns": 33333333,
+    "rolling_shutter_skew_ns": 20000000,
+    "focus_distance_dpt": 0.5,
+    "iso": 400,
+    "ois_mode": 0
+  },
+  "grey": {
+    "width": 4,
+    "height": 3,
+    "encoding": "raw",
+    "bytes": 12
+  },
+  "colour": {
+    "format": "jpeg",
+    "width": 4,
+    "height": 3,
+    "quality": 90,
+    "bytes": 4
+  },
+  "arcore": {
+    "t_ns": 123456789000,
+    "tracking": "TRACKING",
+    "failure": "NONE",
+    "pose": [
+      0.5,
+      1.25,
+      -2.0,
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "device_pose": [
+      0.5,
+      1.25,
+      -2.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "intrinsics": [
+      400.0,
+      400.0,
+      320.0,
+      240.0
+    ],
+    "texture_intrinsics": [
+      500.0,
+      500.0,
+      960.0,
+      540.0
+    ],
+    "points": [
+      [
+        11,
+        -1.5,
+        1.5,
+        -2.125,
+        370.0,
+        265.0,
+        0.5
+      ],
+      [
+        12,
+        -0.5,
+        0.75,
+        -1.75,
+        120.0,
+        140.0,
+        0.25
+      ]
+    ],
+    "depth": {
+      "t_ns": 123456700000,
+      "width": 4,
+      "height": 3,
+      "intrinsics": [
+        2.5,
+        2.5,
+        2.0,
+        1.5
+      ],
+      "bytes": 24,
+      "confidence_bytes": 12
+    },
+    "anchor": {
+      "id": 3,
+      "pose": [
+        0.5,
+        1.25,
+        -2.0,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "anchors": [
+      [
+        1,
+        0.0,
+        0.0,
+        0.0625,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  }
+}

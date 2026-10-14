@@ -23,8 +23,8 @@ def test_imu_only_recording_needs_no_camera_files(make_recording):
 
 def test_missing_file_is_a_problem(make_recording):
     root = make_recording()
-    (root / "accel.csv").unlink()
-    assert any("accel.csv" in p for p in recording.problems(recording.load(root)))
+    (root / "imu.csv").unlink()
+    assert any("imu.csv" in p for p in recording.problems(recording.load(root)))
 
 
 def test_recording_that_did_not_stop_cleanly_is_reported(make_recording):
@@ -33,9 +33,10 @@ def test_recording_that_did_not_stop_cleanly_is_reported(make_recording):
 
 def test_timestamps_that_go_backwards_are_reported(make_recording):
     root = make_recording()
-    lines = (root / "gyro.csv").read_text().splitlines()
-    lines[5], lines[6] = lines[6], lines[5]
-    (root / "gyro.csv").write_text("\n".join(lines) + "\n")
+    lines = (root / "imu.csv").read_text().splitlines()
+    gyro = [i for i, line in enumerate(lines) if line.startswith("gyro,")]
+    lines[gyro[5]], lines[gyro[6]] = lines[gyro[6]], lines[gyro[5]]
+    (root / "imu.csv").write_text("\n".join(lines) + "\n")
     assert any("gyro" in p and "increasing" in p for p in recording.problems(recording.load(root)))
 
 
@@ -46,20 +47,12 @@ def test_camera_on_another_clock_is_reported(make_recording):
 
 def test_arcore_frames_that_match_no_image_are_reported(make_recording):
     root = make_recording()
-    for image in sorted((root / "cam0").glob("*.pgm"))[::2]:
+    for image in sorted((root / "cam0").glob("*.png"))[::2]:
         image.unlink()
-    lines = (root / "cam0.csv").read_text().splitlines()
-    kept = {p.stem for p in (root / "cam0").glob("*.pgm")}
-    (root / "cam0.csv").write_text("\n".join([lines[0]] + [l for l in lines[1:] if l.split(",")[0] in kept]) + "\n")
     rec = recording.load(root)
     assert recording.arcore_match_fraction(rec) == pytest.approx(0.5, abs=0.02)
-    rows = (root / "arcore.csv").read_text().splitlines()
-    shifted = [rows[0]]
-    for row in rows[1:]:
-        cells = row.split(",")
-        cells[1] = str(int(cells[1]) + 5)  # camera timestamp 5 ns away from every image
-        shifted.append(",".join(cells))
-    (root / "arcore.csv").write_text("\n".join(shifted) + "\n")
+    for image in (root / "cam0").glob("*.png"):
+        image.unlink()
     rec = recording.load(root)
     assert recording.arcore_match_fraction(rec) == 0.0
     assert any("ARCore" in p for p in recording.problems(rec))

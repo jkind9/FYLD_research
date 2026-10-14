@@ -1,0 +1,19 @@
+{
+  "type": "telemetry",
+  "version": 2,
+  "session": "20261014_201500_walk",
+  "n": 14,
+  "elapsed_realtime_ns": 5000200000000,
+  "wall_ms": 1760450000077,
+  "battery_pct": 81,
+  "thermal_status": 1,
+  "free_bytes": 52000000000,
+  "queue_frames": 42,
+  "queue_bytes": 16800000,
+  "frames_captured": 215,
+  "frames_queued": 214,
+  "frames_sent": 180,
+  "frames_acknowledged": 172,
+  "frames_dropped": 1,
+  "arcore_update_ms": 6.5
+}

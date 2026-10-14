@@ -1,0 +1,28 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "org.fyld.capture"
+    compileSdk 36
+    buildToolsVersion "35.0.0"
+    defaultConfig {
+        applicationId "org.fyld.capture"
+        minSdk 26  // java.nio.file for the queue on the phone's storage
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Google ARCore SDK; the phone also needs "Google Play Services for AR", which the app asks to install.
+    implementation "com.google.ar:core:1.56.0"
+    // JVM tests of the encoders, the queue and the sender; org.json replaces Android's stubbed copy on the test class path.
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.json:json:20240303"
+}

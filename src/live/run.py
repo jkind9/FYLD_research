@@ -1,11 +1,11 @@
-"""Live processing entry point: a phone session v1 stream in, surface, map and object counts updated in a loop.
+"""Live processing entry point: a phone session in, surface, map and object counts updated in a loop.
 
     python -m src.live.run --replay <saved session folder> --out <run folder>
-    python -m src.live.run --listen 8765 --out <run folder>
+    python -m src.live.run --listen 8766 --out <run folder>
 
---replay feeds a saved session (from the receiver or src.live.stand_in) at its recorded speed, as the phone
-would send it. --listen receives one phone connection (saved under <out>/sessions) and processes it while it
-streams. Frames that arrive while an update runs are not queued: each update takes the newest frame.
+--replay feeds a saved session (v2 from the capture receiver, or v1 from the old receiver or src.live.stand_in)
+at its recorded speed, as the phone would send it. --listen runs the v2 capture receiver (saving under
+<out>/sessions) and processes frames as they arrive, until the capture app's session ends. Frames that arrive while an update runs are not queued: each update takes the newest frame.
 Writes updates.jsonl (one line per update), surface.ply and summary.json. CPU only.
 """
 
@@ -23,7 +23,7 @@ import numpy as np
 from experiments.shared.contracts import Calibration
 
 from .processor import LiveProcessor
-from .stream import receiver, replay
+from .stream import capture_receiver, replay
 
 DEPTH_CHECKPOINT = Path("data/models/depth_anything_v2_metric_indoor_small")
 DETECTOR_CHECKPOINT = Path("checkpoints/yolo26x.pt")
@@ -72,9 +72,10 @@ def run(args: argparse.Namespace) -> dict:
             if args.replay:
                 replay(args.replay, processor.add, speed=args.speed)
             else:
-                server = receiver.Receiver(args.out / "sessions", port=args.listen, on_frame=processor.add)
-                print(f"Listening on port {server.port}", flush=True)
-                server.serve_one()
+                server = capture_receiver.Receiver(args.out / "sessions", port=args.listen, on_frame=processor.add).start()
+                print(f"Listening on port {server.port}: {', '.join(capture_receiver.addresses())}", flush=True)
+                server.wait()
+                server.close()
         finally:
             done.set()
 
