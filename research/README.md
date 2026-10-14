@@ -20,6 +20,7 @@ Notes and papers are grouped by topic. Each folder's README lists its notes, sav
 | [structure_from_motion](structure_from_motion/README.md) | Solving camera poses and sparse points together; COLMAP, GLOMAP and newer methods |
 | [depth_estimation](depth_estimation/README.md) | Phone stereo and learned depth from images or video |
 | [feed_forward_3d](feed_forward_3d/README.md) | Networks that output 3D points and camera poses in one pass (VGGT, MapAnything, Depth Anything 3) |
+| [visual_inertial_odometry](visual_inertial_odometry/README.md) | Open-source replacement for ARCore's tracking (Stream B): phone camera and motion-sensor clocks, recording, calibration and open visual-inertial systems |
 | [phone_ar_platforms](phone_ar_platforms/README.md) | ARCore and Apple frameworks: pose, depth and their measured accuracy |
 | [vr_and_stereo_viewing](vr_and_stereo_viewing/README.md) | Headset viewing: stereo video, panoramas, head turning versus head movement |
 | [datasets_and_benchmarks](datasets_and_benchmarks/README.md) | Recordings with reference answers (TUM, ETH3D, EuRoC, ICL-NUIM) |

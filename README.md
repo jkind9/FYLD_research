@@ -312,7 +312,7 @@ The owner ruled on 14 October 2026 that the system must be live (or update at le
 
 **Stream B: the open-source route, replacing ARCore.**
 
-1. A recorder that saves raw camera frames and motion-sensor readings on one clock, with ARCore's poses alongside as the reference (ARCore's shared-camera mode allows both at once).
+1. A recorder that saves raw camera frames and motion-sensor readings on one clock, with ARCore's poses alongside as the reference (ARCore's shared-camera mode allows both at once). **Built 14 October 2026** (Task88, [experiments/open_vio](experiments/open_vio/README.md)): the app, a Wi-Fi receiver, a converter to the folder layout open trackers read, and a clock check that measures the camera-to-gyroscope offset; tested on synthetic recordings, waiting for its first Redmi recording.
 2. Calibrate the Redmi's camera and motion sensors (Kalibr), then run open visual-inertial systems (Basalt, Kimera-VIO, OKVIS2) offline on those recordings and score them against ARCore and tape measurements, as Task84 did for visual-only SLAM.
 3. Port the best one to the phone and replace ARCore's depth with learned depth resized to its points.
 

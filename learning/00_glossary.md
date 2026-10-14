@@ -32,11 +32,15 @@ Terms used across the learning chapters, in alphabetical order. Each entry says 
 | **Pose graph** | A graph whose nodes are camera poses and whose edges are measured motions between them. Optimising it spreads a loop-closure correction along the path. |
 | **Relative pose error (RPE)** | Error of the motion over a short window (1 s here), which shows drift independently of where the path started. |
 | **Reprojection error** | Distance in pixels between where a 3D point projects into an image and where it was actually seen. Bundle adjustment minimises it. |
+| **Rolling shutter** | A camera sensor that reads its rows one after another rather than all at once. The last row is read 10-30 ms after the first on a phone (the *readout time*, reported by Android as rolling-shutter skew), so fast motion bends straight lines and each row has its own capture time. |
 | **Scale ambiguity** | From images alone, a scene and every camera position can be made twice as large and still match the photos. Real size must come from somewhere else: a depth sensor, a known distance, or the IMU. |
+| **Shared camera (ARCore)** | An ARCore mode in which ARCore tracks as usual while the app receives its own copy of every camera image from the same capture session. The project's raw recorder uses it to save images and ARCore's poses together. |
 | **SfM (structure from motion)** | Recovering camera poses and 3D points together from overlapping images. Usually offline over all images at once. COLMAP is the standard tool. |
 | **SLAM** | Simultaneous localisation and mapping: tracking the camera while building a map, usually live, with loop closure. |
 | **TUM RGB-D** | A benchmark of Kinect colour-and-depth recordings with motion-capture camera paths. The project uses its `freiburg1_xyz` and `freiburg1_desk` recordings. |
 | **ICL-NUIM** | A synthetic benchmark (rendered images) of a living room with exact camera paths and an exact 3D surface model. The project uses living room trajectory 2. |
+| **Time offset (camera to IMU)** | How much later (or earlier) the motion sensors stamp a motion than the camera does. Visual-inertial trackers need it to about a millisecond; phones have shown up to 30 ms. Measured by matching turning speed seen by the gyroscope and by the camera. |
+| **Timestamp source (Android camera)** | Which clock a phone camera stamps its images on. REALTIME is the same clock as the motion sensors (`elapsedRealtimeNanos`); UNKNOWN is a clock that cannot be compared with them. |
 | **Triangulation** | Finding a 3D point from its pixel positions in two or more views with known poses. |
 | **VIO (visual-inertial odometry)** | Tracking that combines camera images with the IMU. Gives metric size and gravity. ARCore works this way. |
 | **Voxel** | A small cube of 3D space, the 3D version of a pixel. |
