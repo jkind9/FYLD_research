@@ -10,15 +10,15 @@ verification_test: research/session_recovery/evidence_manifest.csv
 plan_reviewed: null
 files:
   - research/session_recovery/**
-  - research/orb_slam/**
+  - research/camera_tracking_and_slam/orb_slam/**
   - research/README.md
   - task_list/README.md
 docs:
   - research/README.md
   - research/session_recovery/README.md
-  - research/orb_slam/README.md
-  - research/orb_slam/user_sources/README.md
-  - research/orb_slam/android/README.md
+  - research/camera_tracking_and_slam/orb_slam/README.md
+  - research/camera_tracking_and_slam/orb_slam/user_sources/README.md
+  - research/camera_tracking_and_slam/orb_slam/android/README.md
 baseline_metric:
   source: research/README.md
   field: recoverable source artifacts preserved locally
@@ -81,7 +81,7 @@ tests n/a: no code changed; artifact integrity, local links and source claims ch
 | Field | Value |
 |---|---|
 | Closing commit | n/a: workspace is not a Git repository; no commit requested |
-| Files changed | research/README.md; research/session_recovery/README.md; raw trace, 17 original artifacts, source_urls.csv and evidence_manifest.csv; research/orb_slam/README.md and user_sources/android READMEs; task_list/README.md; this task |
+| Files changed | research/README.md; research/session_recovery/README.md; raw trace, 17 original artifacts, source_urls.csv and evidence_manifest.csv; research/camera_tracking_and_slam/orb_slam/README.md and user_sources/android READMEs; task_list/README.md; this task |
 | Verification | 17 source/copy SHA-256 matches plus trace hash match; 36 relative links resolve; all 8 user URLs present; factual reviews corrected VGGT rate/submap scope and SLAM-Share provenance wording |
 | Before measurement | 0 original session artifacts preserved in research |
 | After measurement | 17 source artifacts copied and hash-checked; supplied trace copied and hash-checked; 328 distinct URL strings indexed; 4 new research READMEs |

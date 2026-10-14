@@ -28,6 +28,6 @@ A low tracking error does not prove an accurate surface. A detailed image does n
 
 ## How to read the source notes
 
-The [reading guide](README.md) groups the sources by the question they answer. Published numbers belong to their stated experiment. Local results are separate. Unknown hardware or licence terms remain marked as unknown.
+The [reading guide](reading_guide.md) groups the sources by the question they answer. Published numbers belong to their stated experiment. Local results are separate. Unknown hardware or licence terms remain marked as unknown.
 
 The current repository has preliminary desktop experiments using supplied colour and depth images. Those experiments do not establish depth estimation from ordinary phone video or construction-site performance. The source notes are background for selecting the next controlled experiment.

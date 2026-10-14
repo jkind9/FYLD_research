@@ -81,11 +81,11 @@ Learned depth inflates every area three to four times. The desk has no tape-meas
 
 | Source | What it is | Why it matters here |
 |---|---|---|
-| [Construction progress from top-down images](../../research/sources/20_construction_orthographic_progress.md) | Research using orthographic views to track construction work | Shows top-down views are useful on real sites. Its completion results do not measure geometry accuracy. |
+| [Construction progress from top-down images](../../research/construction_site_context/construction_orthographic_progress.md) | Research using orthographic views to track construction work | Shows top-down views are useful on real sites. Its completion results do not measure geometry accuracy. |
 | [OctoMap](https://octomap.github.io/octomap/doc/index.html) | A widely used 3D mapping library | Its occupied, free and unknown states are the model for keeping unseen areas visible. |
 | [ANYbotics elevation_mapping](https://github.com/ANYbotics/elevation_mapping) | Height mapping for walking robots | Handles uneven ground and carries position uncertainty into heights. |
 | [ARCore planes](https://developers.google.com/ar/reference/java/com/google/ar/core/Plane) | Android's live plane detection | The cheapest on-phone area estimate on both test phones. |
-| [Apple RoomPlan](../../research/sources/07_apple_roomplan.md) | Apple's room-scanning API | Shows a finished floor-plan product. It needs Apple hardware with a laser sensor, which our phones lack, and it models rooms as boxes rather than measured surfaces. |
+| [Apple RoomPlan](../../research/phone_ar_platforms/apple_roomplan.md) | Apple's room-scanning API | Shows a finished floor-plan product. It needs Apple hardware with a laser sensor, which our phones lack, and it models rooms as boxes rather than measured surfaces. |
 
 ## How this layer will be tested
 

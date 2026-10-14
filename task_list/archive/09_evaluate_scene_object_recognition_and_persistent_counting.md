@@ -64,8 +64,8 @@ The brief includes size and distinct counts after revisits. Detection, segmentat
 
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
-| Size and revisit counting are in the brief | Edge review | This experiment | research/edge_products/README.md:3 |
-| Persistent map-based records are proposed | Edge review | Inventory association | research/edge_products/README.md:32 |
+| Size and revisit counting are in the brief | Edge review | This experiment | research/products/edge_products/README.md:3 |
+| Persistent map-based records are proposed | Edge review | Inventory association | research/products/edge_products/README.md:32 |
 | Reconstruction has an independent reference-input plan | Experiment 04 | Later integration | experiments/04_surface_reconstruction/README.md:3 |
 
 1. Define target classes, identity labels and counting policy before collection/tuning. Keep scene/activity classification separate.

@@ -2,7 +2,7 @@
 
 Recovered on 2 October 2026. Claude found useful material that had not reached the research files. The largest gap was methods that split camera tracking and mapping between a device and a nearby server. This page records the findings, their sources and how they could be tested within the five existing experiments.
 
-The follow-up [ORB-SLAM and current tracking review](../orb_slam/README.md) checks ORB-SLAM3, leading comparisons and newer 2026 edge implementations in response to the user's priority.
+The follow-up [ORB-SLAM and current tracking review](../camera_tracking_and_slam/orb_slam/README.md) checks ORB-SLAM3, leading comparisons and newer 2026 edge implementations in response to the user's priority.
 
 ## What was preserved
 

@@ -33,8 +33,48 @@ def read_references(path: Path) -> list[tuple[float, np.ndarray]]:
     return references
 
 
+MIN_SPREAD_M = 1e-9
+RPE_WINDOW_S = 1.0
+RPE_ACCEPT_S = (0.9, 1.1)
+
+
 def _rmse(values: list[float]) -> float | None:
     return float(np.sqrt(np.mean(np.square(values)))) if values else None
+
+
+def _best_fit(estimated: np.ndarray, reference: np.ndarray, with_size: bool) -> tuple[np.ndarray, float] | None:
+    """Umeyama least-squares alignment of estimated to reference positions; errors and size."""
+    if len(estimated) < 3:
+        return None
+    mean_e, mean_r = estimated.mean(axis=0), reference.mean(axis=0)
+    centred_e, centred_r = estimated - mean_e, reference - mean_r
+    # A path along one line leaves the rotation about that line undetermined.
+    if np.linalg.svd(centred_r, compute_uv=False)[1] <= MIN_SPREAD_M:
+        return None
+    variance_e = float(np.mean(np.sum(centred_e**2, axis=1)))
+    if variance_e <= 0:
+        return None
+    u, d, vt = np.linalg.svd(centred_r.T @ centred_e / len(estimated))
+    sign = np.diag([1.0, 1.0, np.sign(np.linalg.det(u) * np.linalg.det(vt))])
+    rotation = u @ sign @ vt
+    size = float(np.trace(np.diag(d) @ sign) / variance_e) if with_size else 1.0
+    aligned = size * estimated @ rotation.T + (mean_r - size * rotation @ mean_e)
+    return np.linalg.norm(aligned - reference, axis=1), size
+
+
+def _relative_one_second(times: np.ndarray, estimated: list[np.ndarray], reference: list[np.ndarray]) -> tuple[list[float], list[float]]:
+    """Motion error over the frame nearest 1 s later (TUM evaluate_rpe.py, delta 1 s)."""
+    translations, rotations = [], []
+    for i, start in enumerate(times):
+        j = int(np.argmin(np.abs(times - (start + RPE_WINDOW_S))))
+        if not RPE_ACCEPT_S[0] <= times[j] - start <= RPE_ACCEPT_S[1]:
+            continue
+        delta_est = np.linalg.inv(estimated[i]) @ estimated[j]
+        delta_ref = np.linalg.inv(reference[i]) @ reference[j]
+        residual = np.linalg.inv(delta_ref) @ delta_est
+        translations.append(float(np.linalg.norm(residual[:3, 3])))
+        rotations.append(float(Rotation.from_matrix(residual[:3, :3]).magnitude()))
+    return translations, rotations
 
 
 def _matrix(record: Record) -> np.ndarray:
@@ -59,6 +99,7 @@ def evaluate(
         if record.pose is not None:
             segments.setdefault(record.pose.segment_id, []).append(i)
     positions, translations, rotations, details, all_errors = [], [], [], [], []
+    rigid_all, scaled_all, sizes, rpe_t_all, rpe_r_all = [], [], [], [], []
     for segment, indices in segments.items():
         matched = [i for i in indices if i in lookup]
         successful = [i for i in matched if records[i].status == "tracked"]
@@ -91,6 +132,24 @@ def evaluate(
                 residual = np.linalg.inv(delta_ref) @ delta_est
                 edge_t.append(float(np.linalg.norm(residual[:3, 3])))
                 edge_r.append(float(Rotation.from_matrix(residual[:3, :3]).magnitude()))
+        rigid = scaled = None
+        rpe_t, rpe_r = [], []
+        if successful and len(matched) >= 2:
+            est = np.array([_matrix(records[i])[:3, 3] for i in matched])
+            ref = np.array([lookup[i][:3, 3] for i in matched])
+            rigid, scaled = _best_fit(est, ref, False), _best_fit(est, ref, True)
+            rpe_t, rpe_r = _relative_one_second(
+                np.array([records[i].timestamp_s for i in matched]),
+                [_matrix(records[i]) for i in matched],
+                [lookup[i] for i in matched],
+            )
+        if rigid is not None:
+            rigid_all.extend(rigid[0].tolist())
+        if scaled is not None:
+            scaled_all.extend(scaled[0].tolist())
+            sizes.append(scaled[1])
+        rpe_t_all.extend(rpe_t)
+        rpe_r_all.extend(rpe_r)
         positions.extend(errors)
         translations.extend(edge_t)
         rotations.extend(edge_r)
@@ -104,6 +163,11 @@ def evaluate(
                 "relative_pairs": len(edge_t),
                 "relative_translation_rmse_m": _rmse(edge_t),
                 "relative_rotation_rmse_rad": _rmse(edge_r),
+                "ate_rigid_rmse_m": None if rigid is None else _rmse(rigid[0].tolist()),
+                "ate_scaled_rmse_m": None if scaled is None else _rmse(scaled[0].tolist()),
+                "ate_scaled_size": None if scaled is None else scaled[1],
+                "rpe_1s_translation_rmse_m": _rmse(rpe_t),
+                "rpe_1s_rotation_rmse_rad": _rmse(rpe_r),
             }
         )
     attempted = sum(r.status in {"tracked", "failed"} for r in records[1:])
@@ -115,6 +179,13 @@ def evaluate(
         "relative_translation_rmse_m": _rmse(translations),
         "relative_rotation_rmse_rad": _rmse(rotations),
         "relative_pairs": len(translations),
+        "ate_rigid_rmse_m": _rmse(rigid_all),
+        "ate_scaled_rmse_m": _rmse(scaled_all),
+        # One size per segment; an overall size only exists when one segment was fitted.
+        "ate_scaled_size": sizes[0] if len(sizes) == 1 else None,
+        "rpe_1s_translation_rmse_m": _rmse(rpe_t_all),
+        "rpe_1s_rotation_rmse_rad": _rmse(rpe_r_all),
+        "alignment_note": "position_rmse_m: first matched pose, size 1; ate_rigid: best-fit rotation and shift per segment (TUM ATE); ate_scaled: best fit with one size per segment; rpe_1s: alignment-free motion error over 1 s",
         "segments": details,
         "errors": all_errors,
         "unmatched_estimates": len(records) - len(matches),

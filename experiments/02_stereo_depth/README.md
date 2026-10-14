@@ -46,7 +46,7 @@ Every depth result also needs the calibration of the camera that took it: focal 
 | [Depth Pro](https://arxiv.org/abs/2410.02073) (Apple) | Hosted | Metric depth from a single image, with sharp edges. | Apple sample-code licence; check terms. |
 | [ARCore Depth API](https://developers.google.com/ar/develop/java/depth/raw-depth) | On the phone | Depth from motion, plus a per-pixel confidence. Uses a depth sensor if the phone has one. Both test phones are listed by Google as supporting it ([device list](https://developers.google.com/ar/devices), checked 4 October 2026). | Google terms. Confidence values are not calibrated error bars. Quality on our phones is unmeasured. |
 | OpenCV semi-global block matching ([StereoSGBM](https://docs.opencv.org/4.x/d2/d85/classcv_1_1StereoSGBM.html)) | Either | Classical stereo matching with no learned weights. The planned first baseline. | Apache-2.0. Runs on a CPU. |
-| [MobileStereoNet](https://arxiv.org/abs/2108.09770), [HITNet](https://arxiv.org/abs/2007.12140), [BANet](../../research/sources/04_banet.md) | On the phone | Learned stereo networks designed to be small and fast. | Check code and weight terms for each. |
+| [MobileStereoNet](https://arxiv.org/abs/2108.09770), [HITNet](https://arxiv.org/abs/2007.12140), [BANet](../../research/depth_estimation/banet.md) | On the phone | Learned stereo networks designed to be small and fast. | Check code and weight terms for each. |
 | [Depth Anything V2](https://arxiv.org/abs/2406.09414) Small | On the phone | Small single-image depth model. Relative depth by default; metric versions exist. | The Small model is Apache-2.0; larger models are non-commercial. |
 
 On-phone models run through a mobile runtime: [LiteRT](https://ai.google.dev/edge/litert) (formerly TensorFlow Lite), [ONNX Runtime Mobile](https://onnxruntime.ai/docs/tutorials/mobile/), [ExecuTorch](https://pytorch.org/executorch) or the precompiled models on [Qualcomm AI Hub](https://aihub.qualcomm.com/). Published speeds come from the authors' hardware and do not predict speed on these phones.
@@ -55,13 +55,13 @@ On-phone models run through a mobile runtime: [LiteRT](https://ai.google.dev/edg
 
 | Source | What it is | Why it matters here |
 |---|---|---|
-| [ARCore Raw Depth](https://developers.google.com/ar/develop/java/depth/raw-depth) and the [project note](../../research/sources/06_arcore_raw_depth.md) | Google's documentation for phone depth with confidence | The cheapest route to depth on both test phones. It separates fresh depth from depth reused from earlier frames. |
+| [ARCore Raw Depth](https://developers.google.com/ar/develop/java/depth/raw-depth) and the [project note](../../research/phone_ar_platforms/arcore_raw_depth.md) | Google's documentation for phone depth with confidence | The cheapest route to depth on both test phones. It separates fresh depth from depth reused from earlier frames. |
 | [FoundationStereo](https://arxiv.org/abs/2501.09898) | A 2025 stereo model trained on 1 million synthetic pairs | The strongest hosted option if the phones can capture two lenses at once. |
 | [Depth Anything 3](https://arxiv.org/abs/2511.10647) | A 2025 model that predicts consistent depth across many views | The strongest hosted option for single-lens video. |
-| [MobiDepth](../../research/sources/01_mobidepth.md) | Research on stereo depth from two phone cameras | Explains how lens differences and capture timing on real phones affect depth. |
+| [MobiDepth](../../research/depth_estimation/mobidepth.md) | Research on stereo depth from two phone cameras | Explains how lens differences and capture timing on real phones affect depth. |
 | [Middlebury stereo, version 3](https://vision.middlebury.edu/stereo/submit3/) | A stereo benchmark with exact reference depth | The scoring data for this layer. |
 
-More background: [HiMoDepth](../../research/sources/02_himodepth.md) on keeping image detail in phone stereo, [MobileStereoNet](../../research/sources/03_mobilestereonet.md), [BANet](../../research/sources/04_banet.md) and [HyperSight](../../research/sources/05_hypersight.md) on using camera motion for longer range.
+More background: [HiMoDepth](../../research/depth_estimation/himodepth.md) on keeping image detail in phone stereo, [MobileStereoNet](../../research/depth_estimation/mobilestereonet.md), [BANet](../../research/depth_estimation/banet.md) and [HyperSight](../../research/depth_estimation/hypersight.md) on using camera motion for longer range.
 
 ## Where this layer stands
 
@@ -262,6 +262,34 @@ The [offline camera-path report](../../outputs/task65_runs/camera_path_compariso
 | `freiburg1_xyz`, short clip | 30 | 218 mm | 113 mm | 48% lower |
 | `freiburg1_xyz`, full every-second-frame clip | 398 | 1,359 mm | 371 mm | 73% lower |
 | `freiburg1_desk`, full every-second-frame clip | 298 | 1,720 mm | 1,009 mm | 41% lower |
+
+**Rescored with the standard best-fit path error (Task70, 13 October 2026).** The numbers above pin the estimated path to the true path at the first frame only. The TUM benchmark instead lines up the whole path (best fit), and image-only methods are scored after also fitting one overall size. The 30-frame clip, from `runs/task65/clip30_scale_drift.md`:
+
+| 30-frame xyz run | First pose | Best fit | Best fit with size | Fitted size |
+|---|---:|---:|---:|---:|
+| recorded | 21 mm | 13 mm | 13 mm | 0.97 |
+| depth-anything | 218 mm | 118 mm | 100 mm | 0.47 |
+| reference-frame | 56 mm | 30 mm | 29 mm | 0.95 |
+| reference-global | 167 mm | 79 mm | 78 mm | 1.22 |
+| overlap-chain | 113 mm | 51 mm | 26 mm | 0.72 |
+| video-depth-anything | 93 mm | 37 mm | 32 mm | 1.19 |
+| video-depth-anything-chain | 63 mm | 26 mm | 10 mm | 0.83 |
+| zipdepth-scaled | 72 mm | 25 mm | 24 mm | 0.94 |
+| chain-pose-anchor-exact | 71 mm | 21 mm | 21 mm | 0.97 |
+
+A fitted size well below 1 means the estimated path is too long; raw Depth Anything's path is about twice the true length on this clip. The full-length clips (`runs/task65/{xyz,desk}_scale_drift.md`):
+
+| Full-length run | xyz first pose | xyz best fit | xyz best fit with size (size) | desk first pose | desk best fit | desk best fit with size (size) |
+|---|---:|---:|---:|---:|---:|---:|
+| recorded | 67 mm | 34 mm | 34 mm (1.01) | 220 mm | 112 mm | 112 mm (1.00) |
+| depth-anything | 1359 mm | 962 mm | 177 mm (0.06) | 1720 mm | 823 mm | 710 mm (0.55) |
+| reference-frame | 231 mm | 133 mm | 98 mm (0.64) | 1553 mm | 517 mm | 401 mm (0.70) |
+| reference-global | 644 mm | 456 mm | 164 mm (0.17) | 1179 mm | 892 mm | 783 mm (0.47) |
+| overlap-chain | 371 mm | 253 mm | 128 mm (0.38) | 1009 mm | 663 mm | 438 mm (0.60) |
+| zipdepth-scaled | 356 mm | 279 mm | 139 mm (0.34) | 481 mm | 299 mm | 289 mm (0.92) |
+| chain-pose-anchor-exact | 260 mm | 159 mm | 119 mm (0.57) | 934 mm | 480 mm | 438 mm (0.79) |
+
+Even with the Kinect sensor's depth (`recorded`), the walkthrough tracker misses the desk path by 112 mm after a best fit. Structure from motion on the same frames, from the images alone, scores 24 mm on desk and 12 mm on xyz (experiments/sfm/README.md), so the tracker itself, not only the depth, limits the camera path.
 
 Both full-recording paths improve, but still miss ground truth by 0.37 m on xyz and 1.01 m on desk. The result supports the scale-drift diagnosis and the overlap chain as a candidate. It does not make the camera path accurate enough for deployment. The Kinect-depth rows are sensor-backed controls, not RGB-only alternatives.
 

@@ -1,0 +1,10 @@
+# Separate environment for experiments/sfm (Python 3.12.10), created 2026-10-13.
+# COLMAP itself is the official 4.2.1 Windows build without CUDA; see README.md.
+pycolmap==4.2.1
+numpy==2.4.2
+scipy==1.17.1
+open3d==0.19.0
+opencv-python-headless==5.0.0.93
+pillow==12.3.0
+pytest==9.1.1
+ruff==0.17.0

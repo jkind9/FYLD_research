@@ -20,7 +20,7 @@ The project needs camera tracking, surface geometry, metric scale and a defensib
 
 ## Tracking and reconstruction
 
-[RTAB-Map](https://github.com/introlab/rtabmap) is a candidate for tracking with revisits and loop closure. Its selected reference checkout has not been built or executed. [COLMAP](https://colmap.github.io/) supports camera reconstruction from overlapping images and multi-view stereo. An image-only reconstruction needs independent metric scale before reporting metres or square metres. Its source checkout remains unbuilt; a separate pycolmap wheel completed a preliminary sparse CPU run. The [COLMAP source note](sources/11_colmap.md) records that run's limits.
+[RTAB-Map](https://github.com/introlab/rtabmap) is a candidate for tracking with revisits and loop closure. Its selected reference checkout has not been built or executed. [COLMAP](https://colmap.github.io/) supports camera reconstruction from overlapping images and multi-view stereo. An image-only reconstruction needs independent metric scale before reporting metres or square metres. Its source checkout remains unbuilt; a separate pycolmap wheel completed a preliminary sparse CPU run. The [COLMAP source note](structure_from_motion/colmap.md) records that run's limits.
 
 [Open3D colour/depth integration](https://www.open3d.org/docs/release/tutorial/pipelines/rgbd_integration.html) combines calibrated frames and camera poses into a surface volume and can extract a mesh. Here, Open3D supports the permitted colour/depth baseline. A point cloud output must not be described as an executed mesh pipeline.
 

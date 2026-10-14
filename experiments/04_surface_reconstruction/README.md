@@ -48,9 +48,9 @@ From there, there are several ways to build a model:
 | [nvblox](https://arxiv.org/abs/2311.00626) | GPU fused mapping (ICRA 2024) | The realistic route to live meshes on an edge computer. |
 | [3D Gaussian splatting](https://arxiv.org/abs/2308.04079) | The 2023 paper behind splat scenes | The leading way to make realistic, navigable views. |
 | [2D Gaussian splatting](https://arxiv.org/abs/2403.17888) | A splat variant designed for accurate surfaces | Closes some of the gap between realistic and measurable. |
-| [COLMAP](https://colmap.github.io/) and the [project note](../../research/sources/11_colmap.md) | The standard photogrammetry toolkit | Image-only reconstruction and final camera refinement. |
+| [COLMAP](https://colmap.github.io/) and the [project note](../../research/structure_from_motion/colmap.md) | The standard photogrammetry toolkit | Image-only reconstruction and final camera refinement. |
 
-More background: [Open3D RGB-D note](../../research/sources/13_open3d_rgbd.md), [ICL-NUIM note](../../research/sources/18_icl_nuim.md), [ElasticFusion](https://thomaswhelan.ie/Whelan16ijrr.pdf) for patches with drift correction, and the [edge mapping products review](../../research/edge_products/README.md).
+More background: [Open3D RGB-D note](../../research/camera_tracking_and_slam/open3d_rgbd.md), [ICL-NUIM note](../../research/datasets_and_benchmarks/icl_nuim.md), [ElasticFusion](https://thomaswhelan.ie/Whelan16ijrr.pdf) for patches with drift correction, and the [edge mapping products review](../../research/products/edge_products/README.md).
 
 ## What can be improved
 
@@ -186,7 +186,7 @@ The [official Open3D0.19 RGB-D integration tutorial](https://www.open3d.org/docs
 
 ## Research and reuse
 
-[ICL-NUIM](../../research/sources/18_icl_nuim.md) supplies controlled surface comparison. [Open3D](../../research/sources/13_open3d_rgbd.md) informs fusion choices. [COLMAP](../../research/sources/11_colmap.md) offers an image-based comparison whose scale needs separate establishment. [Construction capture guidance](../../research/sources/19_construction_capture_guidance.md) explains viewpoint limitations.
+[ICL-NUIM](../../research/datasets_and_benchmarks/icl_nuim.md) supplies controlled surface comparison. [Open3D](../../research/camera_tracking_and_slam/open3d_rgbd.md) informs fusion choices. [COLMAP](../../research/structure_from_motion/colmap.md) offers an image-based comparison whose scale needs separate establishment. [Construction capture guidance](../../research/construction_site_context/construction_capture_guidance.md) explains viewpoint limitations.
 
 Promote a surface agreement when Experiment 05 consumes it alongside synthetic geometry independently of the reconstructor. Check dataset, tool and weight permissions separately. Fixture results establish implementation checks, not acquired-scene accuracy. See the [experiment guide](../README.md).
 

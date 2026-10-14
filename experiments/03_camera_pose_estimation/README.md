@@ -41,7 +41,7 @@ A **camera pose** is a position (x, y, z in metres) and an orientation (which wa
 | [ARCore motion tracking](https://developers.google.com/ar/develop/fundamentals) | On the phone | Built-in visual-inertial tracking, live | Google terms. Both test phones are ARCore-supported; accuracy on them is unmeasured. |
 | [Jetson-ORB-SLAM3](https://github.com/ClarityLab-Org/Jetson-ORB-SLAM3) | Edge box | ORB-SLAM3 with its front end on an NVIDIA Jetson GPU | GPLv3. Authors report 32 frames per second on a 7 W Jetson Orin Nano. |
 
-For a deeper comparison, including Android ports and why most are not ready to use, see the [ORB-SLAM research note](../../research/orb_slam/README.md) and the [Android SLAM review](../../research/orb_slam/android/README.md).
+For a deeper comparison, including Android ports and why most are not ready to use, see the [ORB-SLAM research note](../../research/camera_tracking_and_slam/orb_slam/README.md) and the [Android SLAM review](../../research/camera_tracking_and_slam/orb_slam/android/README.md).
 
 ## Top 5 sources
 
@@ -50,8 +50,8 @@ For a deeper comparison, including Android ports and why most are not ready to u
 | [ORB-SLAM3](https://arxiv.org/abs/2007.11898) | The standard feature-based SLAM paper and code (2021) | The classical reference for tracking, revisits and multiple maps. |
 | [MASt3R-SLAM](https://arxiv.org/abs/2412.12392) | Learned dense SLAM (CVPR 2025) | The strongest learned comparison when a GPU is available. |
 | [VGGT-SLAM 2.0](https://arxiv.org/abs/2601.19887) | Feed-forward SLAM (2026) | Works without calibration and also runs on a Jetson edge computer. |
-| [RTAB-Map](https://github.com/introlab/rtabmap) and the [project note](../../research/sources/12_rtabmap.md) | Long-term SLAM with place recognition | Best route to correcting drift on revisits, including on Android. |
-| [TUM RGB-D benchmark](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) and the [project note](../../research/sources/15_tum_rgbd.md) | Recordings with a motion-capture reference path | The scoring data for this layer. |
+| [RTAB-Map](https://github.com/introlab/rtabmap) and the [project note](../../research/camera_tracking_and_slam/rtabmap.md) | Long-term SLAM with place recognition | Best route to correcting drift on revisits, including on Android. |
+| [TUM RGB-D benchmark](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) and the [project note](../../research/datasets_and_benchmarks/tum_rgbd.md) | Recordings with a motion-capture reference path | The scoring data for this layer. |
 
 ## What can be improved
 
@@ -137,6 +137,8 @@ The review page links scores, poses and shared timing metadata. Loading, backend
 
 Scoring places each segment into the reference frame using its first matched reference pose, with scale fixed at one. Anchor-only segments have unavailable accuracy. Relative errors use only adjacent successful matched observations within a segment. Scores pool squared errors by sample count and retain separate segment scores. This baseline has no loop closure or map recovery.
 
+**Best-fit scores (Task70, 13 October 2026).** The first-pose score above lets a small turning error at the start swing the whole path, so it cannot be compared with published results. `evaluate` now also reports, per segment and pooled: `ate_rigid_rmse_m`, the error after the rotation and shift that best match the whole path (Umeyama least squares, size 1; the TUM benchmark's absolute trajectory error); `ate_scaled_rmse_m` with `ate_scaled_size`, the same with one fitted size, which is the score published for image-only methods; and `rpe_1s_translation_rmse_m` and `rpe_1s_rotation_rmse_rad`, the motion error over 1 s windows (partner frame 0.9-1.1 s later in the same segment). A segment with fewer than 3 matched poses, or whose true positions lie on one line, gets `None`. The fitted size is always reported beside the scaled error, so a wrong size stays visible: metric evaluation still reads the rigid score. Existing fields are unchanged. Tests: `tests/test_evaluation.py`.
+
 ## Input and output agreement
 
 Input contains timestamped images, calibration and optional depth in metres with a validity mask. Sensor observations require units, reference frames and clock relationships. Declare whether depth is registered to the image camera before combining pixels and depth.
@@ -192,7 +194,7 @@ The CPU suite passes 130 tests. Timing and tracking together have 91% statement 
 
 ## Research and reuse
 
-[TUM RGB-D](../../research/sources/15_tum_rgbd.md) supplies independent movement references. [Open3D](../../research/sources/13_open3d_rgbd.md) informs a CPU baseline. [RTAB-Map](../../research/sources/12_rtabmap.md) addresses revisits. [MASt3R-SLAM](../../research/sources/14_mast3r_slam.md) is a later comparison with separate permission and hardware questions.
+[TUM RGB-D](../../research/datasets_and_benchmarks/tum_rgbd.md) supplies independent movement references. [Open3D](../../research/camera_tracking_and_slam/open3d_rgbd.md) informs a CPU baseline. [RTAB-Map](../../research/camera_tracking_and_slam/rtabmap.md) addresses revisits. [MASt3R-SLAM](../../research/camera_tracking_and_slam/mast3r_slam.md) is a later comparison with separate permission and hardware questions.
 
 The geometry agreement has passed known-transform and failure tests. Reconstruction also accepts supplied poses independently. CPU tracking and independent scoring have now completed the short trial above. See the [experiment guide](../README.md).
 

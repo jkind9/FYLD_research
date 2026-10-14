@@ -102,3 +102,7 @@ data/controlled_scene/input/
 experiments/**/output/
 experiments/**/debug/
 experiments/01_camera_capture_delivery/build/container-readiness.json
+.worktrees/
+
+# Papers and lecture slides are third-party copyright; they stay local. READMEs name each source.
+*.pdf

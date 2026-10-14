@@ -138,6 +138,33 @@ def test_summary_reports_known_numbers_for_two_runs(tmp_path):
     assert "surface_gap_m" in text
 
 
+def test_summary_rescores_saved_poses_with_best_fit(tmp_path):
+    recording = tmp_path / "recording"
+    recording.mkdir()
+    times = 10.0 + np.arange(4)
+    truth = np.stack([np.cos(times), np.sin(times), 0.3 * times], axis=1)
+    (recording / "groundtruth.txt").write_text(
+        "".join(f"{t} {x} {y} {z} 0 0 0 1\n" for t, (x, y, z) in zip(times, truth)))
+    run = _fake_run(tmp_path / "half", [2.0] * 4, [1.0] * 4, [0.0] * 4)
+    records = json.loads((run / "output/predictions/tracking.json").read_text())["records"]
+    for record, position in zip(records, truth * 0.5):
+        record["pose"]["T_world_camera"][0][3], record["pose"]["T_world_camera"][1][3], record["pose"]["T_world_camera"][2][3] = position
+    _write(run / "output/predictions/tracking.json", {"records": records})
+    _write(run / "metadata/configuration.json", {"source": {"root": str(recording)}})
+
+    row = scale_drift.summarise_run(run, lags=(1,))
+
+    assert row["camera_best_fit"]["ate_scaled_size"] == pytest.approx(2.0)
+    assert row["camera_best_fit"]["ate_scaled_rmse_m"] == pytest.approx(0.0, abs=1e-9)
+    assert row["camera_best_fit"]["ate_rigid_rmse_m"] > 0.1
+    assert "best fit" in scale_drift.markdown_table([{**row, "label": "half"}])
+
+
+def test_summary_without_a_recording_has_no_best_fit(tmp_path):
+    run = _fake_run(tmp_path / "run", [2.0] * 4, [1.0] * 4, [0.0] * 4)
+    assert scale_drift.summarise_run(run, lags=(1,))["camera_best_fit"] is None
+
+
 def test_markdown_table_has_one_row_per_run(tmp_path):
     run = _fake_run(tmp_path / "run", [2.0] * 4, [1.0] * 4, [0.0] * 4)
     row = {**scale_drift.summarise_run(run), "label": "steady"}

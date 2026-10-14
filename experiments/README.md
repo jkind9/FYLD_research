@@ -11,6 +11,7 @@ The project is built as six execution steps, each tested on its own with known i
 | 5. Mapping, dimensions and area | [05_birds_eye_mapping](05_birds_eye_mapping/README.md) | How big is the observed site, and what remains unknown? | Real method unavailable under Task55 |
 | 🟥 6. Object recognition and counting | [06_object_recognition](06_object_recognition/README.md) | Which objects are there, where, and how many distinct ones? | Early trials and a 60-frame replay |
 | Support | [geometry_validation](geometry_validation/README.md), [shared](shared/README.md), [datasets](datasets/README.md) | Coordinate checks, shared records and run export, test data guidance | In use |
+| Standalone | [sfm](sfm/README.md) | Camera path and 3D structure from images alone (COLMAP 4.2.1), scored against true paths and surfaces; outputs are read by later tasks, not wired into the walkthrough | Desk: every frame placed, 24 mm best-fit error with size (walkthrough tracker 112 mm with Kinect depth) |
 
 Each layer README starts with a guide: how the layer works from first principles, hosted and on-phone method options with licences, its top 5 sources and what can be improved. The detailed experiment record follows.
 
@@ -37,7 +38,7 @@ The six pieces are camera capture and delivery, stereo depth, camera tracking, 3
 | [05: Bird's-eye mapping](05_birds_eye_mapping/README.md) | Geometry, a declared reference plane and selected region | Top-down views, heights, observed coverage and defined area measurements | Analytic shapes with known heights, boundaries and holes; no reconstruction required |
 | [06: Object recognition and counting](06_object_recognition/README.md) | Images, optional depth/poses and prior object observations | Object labels, persistent identities, supporting views and distinct counts | Checked detections and known poses first; separately labelled revisits and inventory |
 
-The [dataset guide](datasets/README.md) explains suitable recorded inputs, references, permissions and download status. The [research reading guide](../research/sources/README.md) explains the underlying methods.
+The [dataset guide](datasets/README.md) explains suitable recorded inputs, references, permissions and download status. The [research reading guide](../research/reading_guide.md) explains the underlying methods.
 
 ## Folder structure and processing flow
 

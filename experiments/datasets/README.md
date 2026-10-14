@@ -101,8 +101,8 @@ The following are not first choices for the current baseline: ARKitScenes has a 
 | --- | --- |
 | KITTI | Useful outdoor stereo/odometry, but publisher terms specify CC BY-NC-SA 3.0. Company use permission has not been established. [Terms](https://www.cvlibs.net/datasets/kitti/) |
 | Scene Flow / FlyingThings3D | Publisher explicitly prohibits commercial use; its FAQ also says there is no metric scene scale. [Terms and FAQ](https://lmb.informatik.uni-freiburg.de/resources/datasets/SceneFlowDatasets.en.html) |
-| ETH3D | Existing research notes identify CC BY-NC-SA 4.0; permission for company use remains unresolved. [Existing source summary](../../research/sources/16_eth3d.md) |
-| EuRoC MAV | Useful synchronized stereo/inertial data, but current archive availability and terms remain unverified. [Existing source summary](../../research/sources/17_euroc_mav.md) |
+| ETH3D | Existing research notes identify CC BY-NC-SA 4.0; permission for company use remains unresolved. [Existing source summary](../../research/datasets_and_benchmarks/eth3d.md) |
+| EuRoC MAV | Useful synchronized stereo/inertial data, but current archive availability and terms remain unverified. [Existing source summary](../../research/datasets_and_benchmarks/euroc_mav.md) |
 
 ## Before an experiment run
 

@@ -47,7 +47,7 @@ Tracking needs independent camera poses; reconstruction needs an independent sur
 
 | Claim | Existing owner | Consumers | Evidence |
 |---|---|---|---|
-| Requirements and references already documented | Existing dataset/source/experiment note | This task and downstream experiments | research/sources/18_icl_nuim.md:13 |
+| Requirements and references already documented | Existing dataset/source/experiment note | This task and downstream experiments | research/datasets_and_benchmarks/icl_nuim.md:13 |
 | Existing bounded download, extraction and provenance patterns are archived | Prototype acquisition helpers; preserve unchanged, adapt into active acquisition module with ICL attribution and stricter Windows/gzip checks | Archived sample downloader | archive/task00_prototype/src/fyld_scene_mapping/acquisition.py:22; archive/task00_prototype/src/fyld_scene_mapping/acquisition.py:71; archive/task00_prototype/src/fyld_scene_mapping/acquisition.py:164 |
 
 1. Review TUM formats, ICL calibration/conversion and data permissions from linked publisher sources.

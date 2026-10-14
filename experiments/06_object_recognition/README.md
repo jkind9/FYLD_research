@@ -55,7 +55,7 @@ Phone models run through [LiteRT](https://ai.google.dev/edge/litert), [ONNX Runt
 | [ByteTrack](https://arxiv.org/abs/2110.06864) | Short-term multi-object tracking | The light frame-to-frame tracker; shows why short-term tracks alone re-count returning objects. |
 | [DINOv2](https://arxiv.org/abs/2304.07193) | Self-supervised image features | The main learned option for comparing object appearance across views. |
 
-More background: [mobile mapping and counting review](../../research/edge_products/README.md), [Fusion++](https://arxiv.org/abs/1808.08378) for persistent object maps, [Deep SORT](https://arxiv.org/abs/1703.07402), and the [ranked model shortlist](../../research/README.md#ranked-shortlist) with versions and licences.
+More background: [mobile mapping and counting review](../../research/products/edge_products/README.md), [Fusion++](https://arxiv.org/abs/1808.08378) for persistent object maps, [Deep SORT](https://arxiv.org/abs/1703.07402), and the [ranked model shortlist](../../research/README.md#ranked-shortlist) with versions and licences.
 
 ## What can be improved
 

@@ -20,11 +20,11 @@ Phones change images in ways that matter for measurement. Autofocus changes the 
 
 **Using two lenses at once.** Android groups physical lenses behind a "logical" camera. Whether an app may stream two rear lenses at the same moment is decided by the manufacturer for each phone. Android's [multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) reports it. Having three rear lenses does not mean stereo is available, so this must be checked on both phones before stereo depth is planned around them.
 
-**ARCore.** Google's augmented-reality toolkit can track the phone and provide depth on supported devices. Its [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback) records camera video and motion-sensor data in an MP4. It does not guarantee that every API output, such as depth maps or camera poses, is stored automatically. The default CPU image used for tracking is 640×480; the high-resolution GPU display texture is not recorded. A recorder must explicitly save any additional fields needed for later replay and check that they survive playback. Google's current [supported-device table](https://developers.google.com/ar/devices) lists Redmi Note 11 Pro with Depth API support. Xiaomi's [official device guide](https://alsgp0.fds.api.xiaomi.com/xiaomi-b2c-i18n-upload/user-guides/1c100fb724c5e54a94ff40e423c5d7ef.pdf) identifies the supplied Redmi code `2201116TG` as Redmi Note 11 Pro. This makes ARCore a supported-device candidate, not a runtime or measurement result. The Samsung handset is not confirmed available, and the received Redmi APK did not include ARCore. See the [24-row API inventory](../../research/arcore/README.md). No project phone has produced an ARCore measurement.
+**ARCore.** Google's augmented-reality toolkit can track the phone and provide depth on supported devices. Its [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback) records camera video and motion-sensor data in an MP4. It does not guarantee that every API output, such as depth maps or camera poses, is stored automatically. The default CPU image used for tracking is 640×480; the high-resolution GPU display texture is not recorded. A recorder must explicitly save any additional fields needed for later replay and check that they survive playback. Google's current [supported-device table](https://developers.google.com/ar/devices) lists Redmi Note 11 Pro with Depth API support. Xiaomi's [official device guide](https://alsgp0.fds.api.xiaomi.com/xiaomi-b2c-i18n-upload/user-guides/1c100fb724c5e54a94ff40e423c5d7ef.pdf) identifies the supplied Redmi code `2201116TG` as Redmi Note 11 Pro. This makes ARCore a supported-device candidate, not a runtime or measurement result. The Samsung handset is not confirmed available, and the received Redmi APK did not include ARCore. See the [24-row API inventory](../../research/phone_ar_platforms/arcore/README.md). No project phone has produced an ARCore measurement.
 
 **Delivery.** The safest pattern is save first, upload later: record to the phone, check the file, then upload over Wi-Fi with file hashes so losses are detected. Live streaming is a separate, harder condition. It adds dropped frames and delay, and needs capture time kept apart from arrival time.
 
-**Capture technique.** Walk slowly, overlap views, film the same spot from different positions, and return to the start at the end. Revisits let the tracker correct drift. [Construction capture guidance](../../research/sources/19_construction_capture_guidance.md) covers this for real sites.
+**Capture technique.** Walk slowly, overlap views, film the same spot from different positions, and return to the start at the end. Revisits let the tracker correct drift. [Construction capture guidance](../../research/construction_site_context/construction_capture_guidance.md) covers this for real sites.
 
 ## Methods: hosted and on the phone
 
@@ -47,8 +47,8 @@ In the **hosted** route the phone only records and uploads; everything else runs
 | [ARCore Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) | Google's API for saving and replaying an ARCore session | One file holds images, IMU, camera position and depth from the phone. |
 | [Android multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) | Official documentation for using several lenses | Decides whether phone stereo is possible on each handset. |
 | [ARCore supported devices](https://developers.google.com/ar/devices) | Google's list of phones and their ARCore features | Both test phones are listed with depth support. |
-| [MobiDepth](../../research/sources/01_mobidepth.md) | Research on stereo depth from two phone cameras | Explains lens differences and timing problems on real phones. |
-| [Construction capture guidance](../../research/sources/19_construction_capture_guidance.md) | Evidence about taking useful site photos | How to film a site so later layers can reconstruct it. |
+| [MobiDepth](../../research/depth_estimation/mobidepth.md) | Research on stereo depth from two phone cameras | Explains lens differences and timing problems on real phones. |
+| [Construction capture guidance](../../research/construction_site_context/construction_capture_guidance.md) | Evidence about taking useful site photos | How to film a site so later layers can reconstruct it. |
 
 ## What can be improved
 
@@ -155,7 +155,7 @@ Decide which device and capture route supplies reproducible inputs. Agree numeri
 
 ## Research and reuse
 
-[MobiDepth](../../research/sources/01_mobidepth.md) and [HiMoDepth](../../research/sources/02_himodepth.md) explain lens and timing differences. They do not establish support on these phones. [Construction capture guidance](../../research/sources/19_construction_capture_guidance.md) motivates overlapping views from approved safe positions.
+[MobiDepth](../../research/depth_estimation/mobidepth.md) and [HiMoDepth](../../research/depth_estimation/himodepth.md) explain lens and timing differences. They do not establish support on these phones. [Construction capture guidance](../../research/construction_site_context/construction_capture_guidance.md) motivates overlapping views from approved safe positions.
 
 ## Camera and streaming leads supplied during planning
 

@@ -11,12 +11,12 @@ verification_test: ""
 plan_reviewed: 2026-10-05 PASS
 files:
   - task_list/closed/42_examine_the_arcore_toolkit_for_capture_depth_and_t.md
-  - research/arcore/README.md
+  - research/phone_ar_platforms/arcore/README.md
   - research/README.md
   - experiments/01_camera_capture_delivery/README.md
   - task_list/README.md
 docs:
-  - research/arcore/README.md
+  - research/phone_ar_platforms/arcore/README.md
   - research/README.md
   - experiments/01_camera_capture_delivery/README.md
   - task_list/README.md
@@ -38,7 +38,7 @@ ARCore is Google's augmented-reality toolkit for Android phones. It can track a 
 
 ## What
 
-Write `research/arcore/README.md`: one row per feature, saying what it gives, its units, timing and accuracy notes, whether it works offline, which layer it serves, whether Google's device table enumerates that feature, the product-family device-list result where the table applies, the exact handset SKU status, and runtime status. Distinguish “listed”, “not listed”, “not enumerated by this table”, “not applicable”, and “not tested”; “not listed” does not mean unsupported.
+Write `research/phone_ar_platforms/arcore/README.md`: one row per feature, saying what it gives, its units, timing and accuracy notes, whether it works offline, which layer it serves, whether Google's device table enumerates that feature, the product-family device-list result where the table applies, the exact handset SKU status, and runtime status. Distinguish “listed”, “not listed”, “not enumerated by this table”, “not applicable”, and “not tested”; “not listed” does not mean unsupported.
 
 **Camera and tracking (layers 1 and 3)**
 - Camera pose per frame and tracking state, including the reason tracking failed (too dark, too fast, too few features).
@@ -109,8 +109,8 @@ The project is building its own depth and camera tracking. ARCore may supply alt
 | Room-mapping platform research covering ARCore, ARKit and RoomPlan exists | Task37 | research README section G | task_list/closed/37_research_arcore_arkit_and_roomplan_mapping.md:51 |
 | Phone product-family evidence exists, but does not confirm a hardware SKU or runtime ARCore support | Task08 | Task42 device-status rows | task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:48 |
 | ARCore pose, Raw Depth and anchors already summarised from primary sources | research README section G | Task42 source inventory | research/README.md:153-155 |
-| ARCore Recording and Playback and native pose already reviewed for SLAM use | Android SLAM review | layer 3 | research/orb_slam/android/README.md:19 |
-| ARCore Raw Depth source note exists | research source notes | layer 2 | research/sources/06_arcore_raw_depth.md:3 |
+| ARCore Recording and Playback and native pose already reviewed for SLAM use | Android SLAM review | layer 3 | research/camera_tracking_and_slam/orb_slam/android/README.md:19 |
+| ARCore Raw Depth source note exists | research source notes | layer 2 | research/phone_ar_platforms/arcore_raw_depth.md:3 |
 | Phone capability checks have an owner | task 08 | layer 1 | task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md:51 |
 | A smoke-app build and export path exists; it does not provide an ARCore recorder | Task24 | build handoff only | task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md:40 |
 
@@ -142,8 +142,8 @@ tests n/a: research document only; no code.
 
 | field | value |
 |---|---|
-| closing commit | `14957e6` (research/arcore inventory) |
-| files changed | `research/arcore/README.md`, `research/README.md`, `experiments/01_camera_capture_delivery/README.md`, `task_list/README.md`, this task record |
+| closing commit | `14957e6` (research/phone_ar_platforms/arcore inventory) |
+| files changed | `research/phone_ar_platforms/arcore/README.md`, `research/README.md`, `experiments/01_camera_capture_delivery/README.md`, `task_list/README.md`, this task record |
 | test | Research-only contract check: 24 named feature rows link official sources and report output/units, network needs, limits, layer and support status. `git diff --check` and task-plan lint pass. No phone run or code test applies. |
 | before / after | Before: 0 of 24 rows in one feature-by-feature inventory; product-family Depth API flags existed but exact SKU and runtime status were not established. After: 24 rows, dated official source list, separate family/SKU/runtime labels and conditional recording proposal; no project phone measurement. |
 | result | Documentation implemented. ADVIO is identified as an estimated-path comparison, not surveyed truth. Independent Claude review of the pinned source set and owner decisions remain outstanding. |

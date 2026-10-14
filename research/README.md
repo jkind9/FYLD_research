@@ -1,28 +1,47 @@
-﻿# Research evidence
+# Research evidence
 
 Original source review: 1 October 2026. [Recovered Claude research](session_recovery/README.md), added on 2 October, records missing edge SLAM sources, phone capture requirements, source corrections and unresolved leads. It also preserves the supplied trace. Read that addendum alongside the older tables; their unknown fields have not all been revised. Paper results are publisher claims, not results reproduced by this project.
 
-Start with the [reading guide and 21 individual source summaries](sources/README.md). The [background explanation](sources/00_start_here.md) introduces depth, camera movement, reconstruction and the different measurements needed to assess a site map.
+Start with the [reading guide](reading_guide.md), which orders the 21 source notes now kept in the topic folders below. The [background explanation](start_here.md) introduces depth, camera movement, reconstruction and the different measurements needed to assess a site map.
 
 For a quick start by topic, each layer README opens with its top 5 sources and a table of hosted and on-phone methods with licences: [capture](../experiments/01_camera_capture_delivery/README.md), [depth](../experiments/02_stereo_depth/README.md), [camera position](../experiments/03_camera_pose_estimation/README.md), [surfaces](../experiments/04_surface_reconstruction/README.md), [top-down map](../experiments/05_birds_eye_mapping/README.md) and [objects](../experiments/06_object_recognition/README.md). Those tables add 2025–2026 methods checked on 4 October 2026 (for example SAM 3, Depth Anything 3, MapAnything and FoundationStereo); the detailed notes below remain the deeper review.
 
 The current [six-piece experiment plan](../experiments/README.md) connects research to independent tests. Start with verified geometry and supplied-input reconstruction; inspect phones alongside this work. The new [object recognition and persistent counting plan](../experiments/06_object_recognition/README.md) relates the supplied recognition papers to multi-view labels, moving-feature removal and revisit identities. Its ScienceDirect source remains unverified. The [dataset guide](../experiments/datasets/README.md) explains reference inputs for each stage. Earlier implementation and local outputs are preserved in [the prototype archive](../archive/task00_prototype/README.md).
 
+**Paper and lecture PDFs are not in Git.** They are third-party copyright, so the `papers/` and `lectures/` folders exist only on the working machine. Each topic README names the paper, and the file name holds its arXiv number where it has one (for example `glomap_2407.20219.pdf` is arXiv 2407.20219).
+
+## Topic folders, 13 October 2026
+
+Notes and papers are grouped by topic. Each folder's README lists its notes, saved papers and the matching course lectures.
+
+| Folder | What it covers |
+| --- | --- |
+| [camera_tracking_and_slam](camera_tracking_and_slam/README.md) | Following the camera through video. Start with the [13 October review](camera_tracking_and_slam/tracking_review_2026-10-13.md): the project's tracker, not depth, is the main gap |
+| [structure_from_motion](structure_from_motion/README.md) | Solving camera poses and sparse points together; COLMAP, GLOMAP and newer methods |
+| [depth_estimation](depth_estimation/README.md) | Phone stereo and learned depth from images or video |
+| [feed_forward_3d](feed_forward_3d/README.md) | Networks that output 3D points and camera poses in one pass (VGGT, MapAnything, Depth Anything 3) |
+| [phone_ar_platforms](phone_ar_platforms/README.md) | ARCore and Apple frameworks: pose, depth and their measured accuracy |
+| [vr_and_stereo_viewing](vr_and_stereo_viewing/README.md) | Headset viewing: stereo video, panoramas, head turning versus head movement |
+| [datasets_and_benchmarks](datasets_and_benchmarks/README.md) | Recordings with reference answers (TUM, ETH3D, EuRoC, ICL-NUIM) |
+| [construction_site_context](construction_site_context/README.md) | Site capture practice and product context |
+| [products](products/README.md) | Existing products and open-source projects |
+| [3d_vision_fundamentals](3d_vision_fundamentals/README.md) | Course lectures on the full chain from image formation to multi-view stereo and Gaussian splatting |
+
+Files that cover every topic stay in this folder:
+
 | File | Purpose |
 | --- | --- |
-| [e2e_product_research/README.md](e2e_product_research/README.md) | Search of 5 October 2026 for existing products and open-source projects that already measure a site and count objects from phone video, hosted or on the phone; closest matches and where this project could still add something |
-| [edge_products/README.md](edge_products/README.md) | Commercial stereo/edge mapping routes, actual map-rate evidence and a shared approach to worksite measurement and distinct-object counting |
-| [orb_slam/README.md](orb_slam/README.md) | ORB-SLAM3 as a central tracking reference, current alternatives, 2026 edge implementations and fair benchmark comparisons |
-| [session_recovery/README.md](session_recovery/README.md) | Findings recovered from the interrupted Claude session, evidence status, experiment connections and original trace |
+| [reading_guide.md](reading_guide.md) | Suggested reading order through the source notes |
+| [start_here.md](start_here.md) | Background on depth, camera movement, reconstruction and site measurement |
 | [literature_review.md](literature_review.md) | Primary sources and what they establish |
-| [papers.csv](papers.csv) | Searchable evidence table; unknown fields stay explicit |
-| [sources.bib](sources.bib) | Verified bibliographic fields |
 | [method_comparison.md](method_comparison.md) | Input requirements and evaluation choices |
 | [licences.md](licences.md) | Separate code, weight and dataset permissions |
-| [dataset_catalog.md](dataset_catalog.md) | Calibration, ground truth and dataset suitability |
 | [roadmap.md](roadmap.md) | Later experiments and completion evidence |
 | [limitations.md](limitations.md) | Boundaries of the present demonstration |
+| [papers.csv](papers.csv) | Searchable evidence table; unknown fields stay explicit |
+| [sources.bib](sources.bib) | Verified bibliographic fields |
 | [repositories.json](repositories.json) | Pinned reference checkouts and execution status |
+| [session_recovery/README.md](session_recovery/README.md) | Findings recovered from the interrupted Claude session of 2 October, kept as history |
 
 Historical prototype results used TUM supplied depth for scale and an image-only branch with arbitrary scale. Current bounded controls and desk replay are recorded in the root and experiment READMEs. Their receipts do not establish full pipeline or site validation; do not substitute paper benchmarks for local measurements.
 
@@ -162,7 +181,7 @@ The supplied [Alpha3D article](https://www.alpha3d.io/kb/metaverse/convert-norma
 
 Google's current supported-device list names the Galaxy S23 family and the Redmi Note 11 Pro and Redmi Note 11 Pro 5G product families as supporting the Depth API. The list does not show the supplied Redmi handset code `2201116TG`, so it does not confirm that exact handset. Task08 has no confirmed Samsung handset access, and its received Redmi capability APK did not include ARCore or capture images. Runtime support remains untested, and neither device has produced a project AR-depth measurement. [Google supported-device list](https://developers.google.com/ar/devices)
 
-[Task42's 24-row ARCore and Android telemetry inventory](arcore/README.md) distinguishes product-name Depth API flags from exact handset and runtime evidence. It records the feature outputs, units, network needs and API limits, and proposes a recording only for a separately approved task. No ARCore app was built or run.
+[Task42's 24-row ARCore and Android telemetry inventory](phone_ar_platforms/arcore/README.md) distinguishes product-name Depth API flags from exact handset and runtime evidence. It records the feature outputs, units, network needs and API limits, and proposes a recording only for a separately approved task. No ARCore app was built or run.
 
 Transferable investigations: scan guidance for missing coverage, depth lineage/confidence, local observations retained before global refinement, planes/surfaces separated from object boxes, anchors/correction-aware geometry, relocalisation, and repeated-observation handling. Compare Android API exports with required project records first; an Apple scan is a separate hardware/control acquisition. Costs include hardware access, capture labour, export fidelity, processing, energy and independent room measurements. No phone accuracy, latency, power, or worksite suitability result was measured in this source review.
 
@@ -198,3 +217,22 @@ Review usability must be measured separately from metric accuracy. Unknown surfa
 After a reviewed reference plan: Task31 policy comparison can start on cached proposals; Task34 rectangle/classical/oracle mask comparison isolates contamination; Task32 support/distribution comparison isolates spatial uncertainty; Task33 appearance/context and combined association follows fixed supports; Task35 sequential/error tests follow defined anchors and support. Task36 points/patch/mesh display can be scoped independently, with geometric claims waiting for references. Task37 and Task38 platform/dataset research can proceed independently; their acquisitions need separate approval. Task13 and Task25 remain a separate frozen camera stream.
 
 Targets are questions/measurements, not invented success thresholds. Each owning task must record settings, costs, acquisition permissions and a decision rule before execution. A negative or inconclusive outcome is useful if the limitations and failure causes are measured.
+
+## Where files moved on 13 October 2026
+
+Older task records and commits name the earlier paths. Links in the repository were rewritten to the new ones.
+
+| Earlier path | Current path |
+| --- | --- |
+| `research/sources/README.md` | `research/reading_guide.md` |
+| `research/sources/00_start_here.md` | `research/start_here.md` |
+| `research/sources/01_mobidepth.md` to `05_hypersight.md` | `research/depth_estimation/` (number prefix dropped) |
+| `research/sources/06_arcore_raw_depth.md`, `07_apple_roomplan.md` | `research/phone_ar_platforms/` |
+| `research/sources/08_vggt.md` to `10_infinite_vggt.md` | `research/feed_forward_3d/` |
+| `research/sources/11_colmap.md` | `research/structure_from_motion/colmap.md` |
+| `research/sources/12_rtabmap.md` to `14_mast3r_slam.md` | `research/camera_tracking_and_slam/` |
+| `research/sources/15_tum_rgbd.md` to `18_icl_nuim.md`, `research/dataset_catalog.md` | `research/datasets_and_benchmarks/` |
+| `research/sources/19_...` to `21_fyld_public_context.md` | `research/construction_site_context/` |
+| `research/arcore/` | `research/phone_ar_platforms/arcore/` |
+| `research/orb_slam/` | `research/camera_tracking_and_slam/orb_slam/` |
+| `research/e2e_product_research/`, `research/edge_products/` | `research/products/` |

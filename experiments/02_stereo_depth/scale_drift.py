@@ -36,6 +36,7 @@ from .run import _resolve_sequence_root
 
 pose_dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
 pose_evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
+pose_tracking = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
 consistency = importlib.import_module("src.walkthrough.consistency")
 contracts = importlib.import_module("src.walkthrough.steps.contracts")
 
@@ -46,6 +47,8 @@ HYPERPARAMETERS = {
     "gap_lags_frames": {"value": [1, 5, 10, 20, 29], "source": "proposed by Claude 2026-10-08, not owner-ruled"},
     "reference_pose_tolerance_s": {"value": 0.02, "source": "inherited experiment 03 dataset.py:79"},
     "minimum_free_space_gb": {"value": 30, "source": "proposed by Claude 2026-10-08, not owner-ruled"},
+    "camera_best_fit": {"value": "Umeyama per segment, rigid and with size; relative error over 1 s (0.9-1.1 s)",
+                        "source": "inherited experiments/03_camera_pose_estimation/src/evaluation.py (Task70)"},
 }
 GAP_LAGS = tuple(HYPERPARAMETERS["gap_lags_frames"]["value"])
 
@@ -139,6 +142,7 @@ def summarise_run(run_path: Path, *, lags: tuple[int, ...] = GAP_LAGS) -> dict[s
         "reference_pose_gap_m": _gaps(run, run_path, reference[0], lags) if reference else None,
         "reference_pose_missing_frames": reference[1] if reference else None,
         "camera_rmse_m": tracking.get("position_rmse_m"),
+        "camera_best_fit": _best_fit_camera(run),
         "tracked_steps": [tracking.get("tracked_edges"), tracking.get("possible_transitions")],
         "plane_area_m2": _plane_area(run["mapping"]),
         **_speeds(run["timing"]),
@@ -199,15 +203,40 @@ def _gaps(run: dict[str, Any], run_path: Path, poses: list[Pose], lags: tuple[in
     }
 
 
+def _recording_root(run: dict[str, Any]) -> Path | None:
+    """The recording folder named in the run's configuration, if it has a ground-truth file."""
+    source = (run["configuration"].get("source") or {}) if run["configuration"] else {}
+    root = source.get("root") if isinstance(source, dict) else None
+    if not root:
+        return None
+    root = Path(root) if Path(root).is_absolute() else Path(run["configuration"].get("repo", ".")) / root
+    return root if (root / "groundtruth.txt").is_file() else None
+
+
+BEST_FIT_FIELDS = ("ate_rigid_rmse_m", "ate_scaled_rmse_m", "ate_scaled_size",
+                   "rpe_1s_translation_rmse_m", "rpe_1s_rotation_rmse_rad", "position_rmse_m")
+
+
+def _best_fit_camera(run: dict[str, Any]) -> dict[str, Any] | None:
+    """Rescore the run's saved poses with Task70's best-fit scores; None without ground truth."""
+    root = _recording_root(run)
+    if root is None or not run["tracking"]:
+        return None
+    records = []
+    for row in run["tracking"]["records"]:
+        pose = contracts.read_pose(row["pose"])
+        # Same segment key as the walkthrough scorer (src/walkthrough/validation.py:53-54).
+        keyed = Pose(pose.matrix, pose.world_id, json.dumps([pose.world_id, pose.segment_id]), pose.source)
+        records.append(pose_tracking.Record(row["frame_id"], row["timestamp_s"], row["status"], keyed, row["reason"]))
+    result = pose_evaluation.evaluate(records, pose_evaluation.read_references(root / "groundtruth.txt"))
+    return {name: result[name] for name in BEST_FIT_FIELDS}
+
+
 def _reference_poses(run: dict[str, Any], run_path: Path) -> tuple[list[Pose], int] | None:
     """The recording's motion-capture pose for each frame; a frame without one gets its own
     world label, so `gap_by_lag` never pairs it. Returns the poses and the missing count."""
-    source = (run["configuration"].get("source") or {}) if run["configuration"] else {}
-    root = source.get("root") if isinstance(source, dict) else None
-    if not root or not run["capture"]:
-        return None
-    root = Path(root) if Path(root).is_absolute() else Path(run["configuration"].get("repo", ".")) / root
-    if not (root / "groundtruth.txt").is_file():
+    root = _recording_root(run)
+    if root is None or not run["capture"]:
         return None
     references = pose_evaluation.read_references(root / "groundtruth.txt")
     tolerance = HYPERPARAMETERS["reference_pose_tolerance_s"]["value"]
@@ -259,20 +288,25 @@ def markdown_table(rows: list[dict[str, Any]], headline_lag: str = "20") -> str:
         return "—" if value is None else pattern.format(value)
 
     header = (
-        "| Run | Control | Depth AbsRel | After per-frame fit | Scale ratio min-max | Camera RMSE (mm) "
+        "| Run | Control | Depth AbsRel | After per-frame fit | Scale ratio min-max | Camera RMSE, first pose (mm) "
+        "| Camera, best fit (mm) | Camera, best fit with size (mm) | Fitted size "
         f"| Surface gap, {headline_lag} frames apart (mm) | Same, motion-capture poses (mm) | Plane area (m²) "
         "| Depth layer fps | Processing fps |"
     )
-    lines = [header, "|---|---|---|---|---|---|---|---|---|---|---|"]
+    lines = [header, "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for row in rows:
         own = row["surface_gap_m"].get(headline_lag, {}).get("median_abs_m")
         mocap = (row["reference_pose_gap_m"] or {}).get(headline_lag, {}).get("median_abs_m")
         scale = row["scale_ratio"]
+        fit = row.get("camera_best_fit") or {}
+        rigid, scaled = fit.get("ate_rigid_rmse_m"), fit.get("ate_scaled_rmse_m")
         lines.append(
             f"| {row.get('label', row['run'])} | {', '.join(f'{k}: {v}' for k, v in row['controls'].items()) or 'none'} "
             f"| {number(row['depth_abs_rel'], '{:.3f}')} | {number(row['fitted_abs_rel_median'], '{:.3f}')} "
             f"| {number(scale['min'], '{:.2f}')}-{number(scale['max'], '{:.2f}')} "
             f"| {number(row['camera_rmse_m'] and row['camera_rmse_m'] * 1000, '{:.0f}')} "
+            f"| {number(rigid and rigid * 1000, '{:.0f}')} | {number(scaled and scaled * 1000, '{:.0f}')} "
+            f"| {number(fit.get('ate_scaled_size'), '{:.2f}')} "
             f"| {number(own and own * 1000, '{:.0f}')} | {number(mocap and mocap * 1000, '{:.0f}')} "
             f"| {number(row['plane_area_m2'], '{:.2f}')} | {number(row['depth_layer_fps'], '{:.2f}')} "
             f"| {number(row['processing_fps'], '{:.2f}')} |"

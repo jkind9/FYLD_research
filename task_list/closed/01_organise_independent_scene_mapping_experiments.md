@@ -26,9 +26,9 @@ files:
   - task_list/**
   - research/README.md
   - research/roadmap.md
-  - research/sources/README.md
-  - research/sources/13_open3d_rgbd.md
-  - research/sources/15_tum_rgbd.md
+  - research/reading_guide.md
+  - research/camera_tracking_and_slam/open3d_rgbd.md
+  - research/datasets_and_benchmarks/tum_rgbd.md
   - data/**
 docs:
   - README.md
@@ -64,7 +64,7 @@ The user has changed direction from an integrated prototype to independent exper
 | Claim | Existing owner | Callers/consumers | Evidence |
 |---|---|---|---|
 | Earlier prototype owns the combined pipeline | experiments.run_experiment | archived benchmark.py and test.py | archive/task00_prototype/src/fyld_scene_mapping/experiments.py:45 |
-| Stereo/mobile evidence is collected already | HiMoDepth source note | new stereo/capture plans | research/sources/02_himodepth.md:1 |
+| Stereo/mobile evidence is collected already | HiMoDepth source note | new stereo/capture plans | research/depth_estimation/himodepth.md:1 |
 | Original acceptance remains unfinished | Task 00 receipts | archived prototype readers | task_list/archive/00_finish_and_validate_the_phase_1_scene_mapping_prot.md:119 |
 
 - Archive Task 00 as superseded; retain unfinished validation explicitly.

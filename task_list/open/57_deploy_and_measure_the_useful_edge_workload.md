@@ -55,7 +55,7 @@ APK packaging and a camera report do not deploy the project's useful workload. E
 | Native camera app/build path already exists | capture experiment | device packaging | experiments/01_camera_capture_delivery/README.md:165; experiments/01_camera_capture_delivery/native/camera/java/org/fyld/capture/CameraActivity.java:1 |
 | Cached smoke build does not run measurement | Task24 | deployment baseline distinction | task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md:123 |
 | Shared records and lineage exist | shared contracts | device adapter/export | experiments/shared/contracts.py:73; experiments/shared/runs.py:59 |
-| ARCore feature inventory is not device proof | ARCore research | runtime feasibility | research/arcore/README.md:3; research/arcore/README.md:7 |
+| ARCore feature inventory is not device proof | ARCore research | runtime feasibility | research/phone_ar_platforms/arcore/README.md:3; research/phone_ar_platforms/arcore/README.md:7 |
 
 1. After Task51, test actual hardware/runtime/license compatibility with the selected useful workload. Record installed package/build, model precision/backend, cold startup and measured memory; explicitly report unsupported execution. This first checkpoint does not require Task56 to pass.
 2. Reuse Task52 recorder/exports and the chosen model/methods. Keep algorithm changes in their owning tasks; device conversion/precision changes get explicit settings and output comparisons, never silent degraded fallback.

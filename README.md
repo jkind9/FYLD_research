@@ -5,7 +5,7 @@ This repository is a research project. It asks whether a person walking through 
 1. **A measured 3D model of the visible site**, so its size, areas and dimensions can be read off in metres.
 2. **A count of distinct objects**, where an object that leaves the camera view and comes back is counted once, not twice.
 
-The work is split into six execution steps. Each layer is built and tested on its own with known inputs, then connected to the others. This README explains the problem, the layers, what has been measured so far and what is still unknown. It is meant to be read on its own. The experiment folders hold the detail.
+The work is split into six execution steps. Each layer is built and tested on its own with known inputs, then connected to the others. This README explains the problem, the layers, what has been measured so far and what is still unknown. It is meant to be read on its own. The experiment folders hold the detail. New to SLAM and 3D vision? The [learning folder](learning/README.md) explains every part from first principles, with this project's results.
 
 ## Contents
 
@@ -114,7 +114,7 @@ There are two ways to deploy the same six execution steps. The owner decided on 
 
 Google listed both candidate models as supporting ARCore depth when checked on 4 October 2026 ([ARCore supported devices](https://developers.google.com/ar/devices)). Only the Redmi is confirmed available for this test. A listing does not establish runtime support or measurement quality on the handset; those still need to be checked.
 
-ARCore offers more than camera position and depth. Outdoors it can label every pixel as road, pavement, building, vehicle, person and so on (Scene Semantics). It can supply building and terrain shapes from Street View data within about 100 m (Streetscape Geometry), and can give a location fix with heading (Geospatial). The toolkit and phone-sensor inventory is recorded in [research/arcore](research/arcore/README.md). Task52 turns the selected inputs into a tested recording; the inventory itself establishes no runtime result.
+ARCore offers more than camera position and depth. Outdoors it can label every pixel as road, pavement, building, vehicle, person and so on (Scene Semantics). It can supply building and terrain shapes from Street View data within about 100 m (Streetscape Geometry), and can give a location fix with heading (Geospatial). The toolkit and phone-sensor inventory is recorded in [research/phone_ar_platforms/arcore](research/phone_ar_platforms/arcore/README.md). Task52 turns the selected inputs into a tested recording; the inventory itself establishes no runtime result.
 
 | Layer | Hosted: phone records, server does the rest | On the phone, offline | Offline check worth doing on site |
 |---|---|---|---|
@@ -144,7 +144,7 @@ Check each licence before anything ships. Each layer README lists more options, 
 - **Phone available:** Redmi Note 11 Pro 4G, model 2201116TG, Android 13; Samsung S23 availability is unconfirmed.
 - **Where it stands:** a native Camera2 capability session from the Redmi lists one rear camera and one front camera, with no advertised simultaneous-camera sets. Its export contains no image captures. The staged camera APK still needs a verified rear-camera image export; runtime depth and camera position remain untested. The Android Debug Bridge (ADB) is available in WSL, but its latest device query found no attached handset. A local browser preview and video-stream test is possible over HTTPS, but it cannot report the native concurrent-camera support and sensor details needed to assess stereo.
 - **Stand-in today:** public benchmark recordings (see [Data used for testing](#data-used-for-testing)).
-- **Key sources:** [ARCore Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) · [Android multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) · [ARCore supported devices](https://developers.google.com/ar/devices) · [MobiDepth, phone stereo timing](research/sources/01_mobidepth.md) · [Construction photo capture guidance](research/sources/19_construction_capture_guidance.md)
+- **Key sources:** [ARCore Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) · [Android multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) · [ARCore supported devices](https://developers.google.com/ar/devices) · [MobiDepth, phone stereo timing](research/depth_estimation/mobidepth.md) · [Construction photo capture guidance](research/construction_site_context/construction_capture_guidance.md)
 - **Details:** [experiments/01_camera_capture_delivery](experiments/01_camera_capture_delivery/README.md)
 
 ### 🟪 2. Depth estimation

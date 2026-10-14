@@ -13,7 +13,7 @@ The active plan is [six independent experiments](../experiments/README.md). The 
 
 The 2 October recommendation starts implementation with task 03's geometry contracts, then task 04's supplied-input reconstruction. Task 08 checks both phones alongside that work. Task 09 adds [recognition and inventory](../experiments/06_object_recognition/README.md): begin association controls with checked observations, then compare detector predictions and reconstructed geometry. Current datasets support geometry controls, but a labelled site-object/revisit benchmark remains missing. Scene/activity classification is separate from object identity.
 
-The [dataset guide](../experiments/datasets/README.md) gives download status, permissions and format caveats. The [reading guide](sources/README.md) gives the source background. Depth, tracking, reconstruction and map projection can be investigated before phone capture succeeds.
+The [dataset guide](../experiments/datasets/README.md) gives download status, permissions and format caveats. The [reading guide](reading_guide.md) gives the source background. Depth, tracking, reconstruction and map projection can be investigated before phone capture succeeds.
 
 Connect pieces by replacing one reference input at a time. Use matching observations for the comparison: the TUM starter cannot supply stereo pairs, so a stereo-to-tracking integration test needs a different verified sequence. Execution on the phone or backend remains a separate measured choice.
 

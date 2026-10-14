@@ -2,7 +2,7 @@
 
 **Take-away:** RoomPlan is the only finished product found that measures a space and places separate objects in 3D, entirely on the phone. It shows the whole idea works as a product. It needs an iPhone or iPad with a laser depth sensor (LiDAR), works indoors, and knows only 16 furniture and appliance types. It cannot run on the Android phones in this project.
 
-Checked on 5 October 2026 from Apple's developer page and Apple's machine learning research article. Nothing was run. Part of the [end-to-end product research](../README.md). The [RoomPlan source note](../../sources/07_apple_roomplan.md) covers the developer interface and export format; this note covers how it finds and tracks objects.
+Checked on 5 October 2026 from Apple's developer page and Apple's machine learning research article. Nothing was run. Part of the [end-to-end product research](../README.md). The [RoomPlan source note](../../../phone_ar_platforms/apple_roomplan.md) covers the developer interface and export format; this note covers how it finds and tracks objects.
 
 ## At a glance
 
@@ -59,4 +59,4 @@ Neither test phone can run RoomPlan. If a laser-equipped iPhone becomes availabl
 
 - [Apple RoomPlan developer overview](https://developer.apple.com/augmented-reality/roomplan)
 - [Apple machine learning research: 3D parametric room representation with RoomPlan](https://machinelearning.apple.com/research/roomplan)
-- [RoomPlan source note in this repository](../../sources/07_apple_roomplan.md)
+- [RoomPlan source note in this repository](../../../phone_ar_platforms/apple_roomplan.md)

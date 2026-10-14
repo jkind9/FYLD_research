@@ -50,7 +50,7 @@ The workspace has 0 Git commits and the revised direction needs durable tasks. A
 |---|---|---|---|
 | Environments and payloads already have ignore rules | Root ignore file | Git index | .gitignore:1 |
 | Geometry/reconstruction plans exist | Task board | Implementation | task_list/README.md:17 |
-| Revisit inventory is part of the brief | Edge review | Recognition plan | research/edge_products/README.md:3 |
+| Revisit inventory is part of the brief | Edge review | Recognition plan | research/products/edge_products/README.md:3 |
 
 1. Retain first-party source/tests, existing documents/plans and task receipts.
 2. Add phone and recognition plans; prioritise geometry then supplied-input reconstruction.

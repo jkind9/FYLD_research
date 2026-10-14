@@ -6,14 +6,14 @@ priority: MED
 type: infra
 blocked_by: []
 blocks: []
-verification_test: research/edge_products/README.md
+verification_test: research/products/edge_products/README.md
 plan_reviewed: null
 files:
-  - research/edge_products/README.md
+  - research/products/edge_products/README.md
   - research/README.md
   - task_list/README.md
 docs:
-  - research/edge_products/README.md
+  - research/products/edge_products/README.md
   - research/README.md
 baseline_metric:
   source: research/README.md
@@ -33,7 +33,7 @@ Find products that build a three-dimensional scene on a portable computer during
 
 ## What
 
-Add a primary-source product review in research/edge_products/README.md and link it from the research index. Separate mobile stereo rigs from ordinary phone camera products and numerical map results from depth or display rates.
+Add a primary-source product review in research/products/edge_products/README.md and link it from the research index. Separate mobile stereo rigs from ordinary phone camera products and numerical map results from depth or display rates.
 
 ## Why
 
@@ -71,7 +71,7 @@ tests n/a: documentation-only research; no code or hardware run.
 | field | value |
 | --- | --- |
 | closing commit | n/a: workspace is not a Git repository; no commit requested |
-| files changed | research/edge_products/README.md; research/README.md; task_list/README.md; this task record |
+| files changed | research/products/edge_products/README.md; research/README.md; task_list/README.md; this task record |
 | test | Primary vendor pages and paper abstracts checked; two local index links resolve; task lint checked at closure |
 | before / after | 0 / 4 product routes; 1 vendor live mesh benchmark explicitly above the requested 1 Hz |
 | result | Review captured; ZED recommended for evaluation; end-to-end field accuracy, count quality and sustained throughput remain unmeasured |

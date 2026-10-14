@@ -2,7 +2,7 @@
 
 Primary sources checked on 2 October 2026. ORB-SLAM3 should be a central reference for this project. It provides camera tracking, map reuse and recovery across several sensor configurations. Current research also includes learned trackers, dense image-only mapping and hardware acceleration. None of the checked sources establishes a single best method across accuracy, recovery, surface quality and phone runtime.
 
-This review extends the [recovered Claude research](../session_recovery/README.md). It does not report a local algorithm comparison. No listed method was installed, downloaded or reproduced in this review. Published rates and errors below are author results under their stated conditions.
+This review extends the [recovered Claude research](../../session_recovery/README.md). It does not report a local algorithm comparison. No listed method was installed, downloaded or reproduced in this review. Published rates and errors below are author results under their stated conditions.
 
 The [eight user-supplied sources](user_sources/README.md) cover lighting-based reconstruction, learned depth, dynamic scenes and Android demonstrations. The [dedicated Android review](android/README.md) separates native tracking from phone recording followed by desktop processing.
 
@@ -40,7 +40,7 @@ The [author repository](https://github.com/ClarityLab-Org/Jetson-ORB-SLAM3) exis
 
 [FastTrack](https://arxiv.org/abs/2509.10757), IROS 2025 with a July 2026 arXiv revision, accelerates ORB-SLAM3 tracking with CUDA. Its abstract reports up to 2.8× improvement on desktop and Jetson Xavier NX in stereo-inertial tests on EuRoC and TUM-VI. Keep this as a hardware-optimization lead; code availability, terms and full accuracy/runtime conditions were not established in this review.
 
-For splitting work across a network, the [recovery review](../session_recovery/README.md) covers Edge-SLAM, AdaptSLAM, COVINS-G and SwarmMap. These are distinct from accelerating one device's computation. ORB-SLAM2/3 underpins several of those systems, which strengthens its value as a common experimental reference.
+For splitting work across a network, the [recovery review](../../session_recovery/README.md) covers Edge-SLAM, AdaptSLAM, COVINS-G and SwarmMap. These are distinct from accelerating one device's computation. ORB-SLAM2/3 underpins several of those systems, which strengthens its value as a common experimental reference.
 
 ## What the benchmark evidence actually supports
 
