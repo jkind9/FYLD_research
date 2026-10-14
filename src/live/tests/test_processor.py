@@ -49,6 +49,8 @@ def test_update_uses_the_newest_frame_and_reports_surface_map_and_counts(image):
     assert record["size"] == pytest.approx(2.0 / 3.0)
     assert record["surface_points"] > 0 and "map" in record
     assert record["counts"] == {"cup": 1}
+    assert record["detections"] == [{"label": "cup", "confidence": 0.9, "outcome": "new", "object_id": "object-0001",
+                                     "nearest_same_class_m": None}]
     assert processor.update() is None  # nothing new since
 
 
@@ -62,6 +64,8 @@ def test_a_pose_correction_moves_the_surface_and_the_objects(image):
     record = processor.update()
     assert np.allclose(np.median(processor.surface(), 0) - before, [0.5, 0.0, 0.0], atol=0.02)
     assert record["counts"] == {"cup": 1} and record["corrections"] == 1
+    [seen] = record["detections"]
+    assert seen["outcome"] == "matched" and seen["nearest_same_class_m"] == pytest.approx(0.0, abs=0.02)
 
 
 def test_run_replays_a_session_and_writes_updates_surface_and_summary(tmp_path, monkeypatch):

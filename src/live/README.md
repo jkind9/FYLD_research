@@ -50,6 +50,21 @@ Median stage times on TUM xyz: depth model 250 ms, map 200 ms, surface 35 ms, fu
 - **ICL at Task72's 1 cm voxel does not; at 2 cm it just does.** At 1 cm, extracting and thinning 2.6 million surface points costs about 670 ms per update. At 2 cm the longest gap is 0.98 s, and the map (360 ms) is the largest stage, so a bigger room would cross 1 s. Next speed-up: keep each finished fragment's thinned points instead of re-thinning the whole surface every update.
 - **ICL surface accuracy** (`src.live.score`, true path and rendered depth standing in for ARCore): 46 mm mean distance at 1 cm and 52 mm at 2 cm; 71% and 69% of points within 5 cm; 22% of the room covered. Only 28-37 frames were fused, about one a second, so this is not comparable with Task72's every-frame 93 mm.
 - **Object counts are far too high.** TUM xyz ends with 15 chairs, 7 TVs and 6 people. Live updates see each object about twice a second, through learned depth, so a sighting often lands more than 0.35 m from the last one and starts a new object. The counting rule was tuned on reference depth at every frame (Task46). It needs its own task.
+- **Why the counts are too high (Task93).** Each update now logs every detection (class, confidence, new or matched, distance to the nearest object of its class before matching), and `python -m src.live.count_report <run>/updates.jsonl` splits the new identities. Replays on 14 October:
+
+  | | TUM xyz | TUM desk |
+  |---|---:|---:|
+  | New identities | 51 | 45 |
+  | ... 0.35-0.7 m from an object of the same class | 23 | 21 |
+  | ... 0.7-1.5 m away | 7 | 8 |
+  | ... over 1.5 m away | 3 | 3 |
+  | ... first of their class, or not placed | 18 | 13 |
+  | ... detector confidence under 0.5 | 21 | 23 |
+  | ... seen in only one update | 15 | 14 |
+  | Chairs / TVs, all identities | 14 / 7 | 5 / 9 |
+  | Chairs / TVs, seen in 3 or more updates | 9 / 7 | 2 / 7 |
+
+  The main cause is position scatter: almost half the new identities appear just past the 0.35 m matching distance from an object of the same class. That distance was set for cups placed from reference depth at every frame. Chairs and screens placed from the median of learned depth inside their box move further than that between views, and live updates see each object only about twice a second. Low-confidence detections and one-off sightings add more, but dropping them is not enough: counting only identities seen 3 or more times still leaves 9 chairs and 7 TVs on xyz. Next step: a matching distance that grows with the object's size or distance from the camera, then a check against a counted inventory of a real scene (none exists for TUM).
 - **No corrections were exercised on real data.** The stand-in has none; the anchor maths is covered by tests only.
 
 ## Tests

@@ -116,7 +116,7 @@ class LiveProcessor:
         record["map"] = self._map(surface)
         lap("map")
         if objects is not None:
-            ms["objects_alongside"] = objects.result()
+            ms["objects_alongside"], record["detections"] = objects.result()
             lap("objects_wait")
         return record | {"surface_points": len(surface), "fragments": len(self.fragments.frames_per_fragment()),
                          "counts": dict(Counter(t["label"] for t in self._tracks.values())), "stage_ms": ms,
@@ -144,8 +144,8 @@ class LiveProcessor:
                 "length_m": measured.length_m, "width_m": measured.width_m, "highest_m": measured.highest_m,
                 "plane_normal": measured.plane.normal.tolist()}
 
-    def _objects(self, image_path, depth, valid, frame, world_from_camera, keyframe, anchors) -> float:
-        """Detect, place and count on the worker thread; returns its milliseconds."""
+    def _objects(self, image_path, depth, valid, frame, world_from_camera, keyframe, anchors) -> tuple[float, list[dict]]:
+        """Detect, place and count on the worker thread; returns its milliseconds and one log row per detection."""
         started = time.perf_counter()
         detections, _ = self.detector(image_path)
         fx, fy, cx, cy = frame.intrinsics
@@ -161,6 +161,7 @@ class LiveProcessor:
         # Objects follow ARCore's corrections through the anchor of the keyframe they were last seen from.
         for object_id, (anchor_id, relative) in self._track_anchor.items():
             self._tracks[object_id]["last_position_m"] = (anchors[anchor_id][:3, :3] @ relative + anchors[anchor_id][:3, 3]).tolist()
+        nearest = [_nearest_same_class(p, self._tracks) for p in proposals]
         decided, self._tracks, self._next_object = association.associate_frame(
             proposals, self._tracks, self._next_object, self.max_distance_m, self.ambiguity_margin_m)
         inverse = np.linalg.inv(anchors[keyframe])
@@ -168,4 +169,15 @@ class LiveProcessor:
             if row["object_id"] is not None:
                 position = np.asarray(row["world_position_m"])
                 self._track_anchor[row["object_id"]] = (keyframe, inverse[:3, :3] @ position + inverse[:3, 3])
-        return round((time.perf_counter() - started) * 1000, 1)
+        log = [{"label": row["label"], "confidence": round(row["confidence"], 3), "outcome": row["association"],
+                "object_id": row["object_id"], "nearest_same_class_m": distance} for row, distance in zip(decided, nearest)]
+        return round((time.perf_counter() - started) * 1000, 1), log
+
+
+def _nearest_same_class(proposal: dict, tracks: dict[str, dict]) -> float | None:
+    """Distance from a placed detection to the closest object of its class before matching; None if either is missing."""
+    if proposal["world_position_m"] is None:
+        return None
+    distances = [np.linalg.norm(np.subtract(proposal["world_position_m"], t["last_position_m"]))
+                 for t in tracks.values() if t["class_id"] == proposal["class_id"]]
+    return round(float(min(distances)), 3) if distances else None
