@@ -2,6 +2,7 @@ package org.fyld.phonecheck;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -14,6 +15,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.text.InputType;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -97,6 +100,10 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
 
         LinearLayout top = panel();
         top.addView(text("FYLD phone check", 22, Color.WHITE, true));
+        Button notice = new Button(this);
+        notice.setText("ARCore and privacy notice");
+        notice.setOnClickListener(v -> showArCoreNotice());
+        top.addView(notice);
         status = text("Press Run all checks. Keep the phone upright.", 18, Color.WHITE, false);
         live = text("", 15, 0xFFCFCFCF, false);
         top.addView(status);
@@ -136,6 +143,18 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
         root.addView(surface);
         root.addView(overlay);
         setContentView(root);
+    }
+
+    private void showArCoreNotice() {
+        TextView content = new TextView(this);
+        content.setText(Html.fromHtml(getString(R.string.arcore_notice), Html.FROM_HTML_MODE_LEGACY));
+        content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+        content.setMovementMethod(LinkMovementMethod.getInstance());
+        content.setPadding(dp(20), dp(16), dp(20), dp(16));
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(content);
+        new AlertDialog.Builder(this).setTitle("ARCore and privacy notice")
+                .setView(scroll).setPositiveButton("Close", null).show();
     }
 
     private LinearLayout panel() {
