@@ -29,12 +29,11 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.CameraConfig;
 import com.google.ar.core.CameraConfigFilter;
-import com.google.ar.core.CameraIntrinsics;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
-import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
+import com.google.ar.core.exceptions.NotYetAvailableException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -55,7 +54,8 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * One button runs every check in order: ARCore set-up, a 15 s tracking run, a 20 s stream to the host,
- * then the report is saved on the phone and sent to the host. The camera image fills the screen behind.
+ * then the report is saved on the phone and sent to the host. A second button streams phone session v1
+ * to the host until pressed again. The camera image fills the screen behind.
  */
 public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
     private enum Mode { IDLE, TRACKING, STREAM }
@@ -72,15 +72,16 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
     private TextView status, live;
     private LinearLayout results;
     private EditText hostField;
-    private Button runButton;
+    private Button runButton, streamButton;
     private Session session;
-    private boolean installRequested, depthEnabled, running;
-    private volatile boolean textureSet;
-    private int texture = -1, viewWidth, viewHeight, seq;
+    private boolean installRequested, depthEnabled, running, streamOnly;
+    private volatile boolean textureSet, stopRequested;
+    private int texture = -1, viewWidth, viewHeight;
     private volatile Mode mode = Mode.IDLE;
     private long modeStart, lastLive;
     private TrackingStats stats;
     private HostStream stream;
+    private FrameCapture capture;
 
     // ---- Screen ----------------------------------------------------------------------------------
 
@@ -120,6 +121,11 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
         runButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         runButton.setOnClickListener(v -> runAll());
         bottom.addView(runButton, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(64)));
+        streamButton = new Button(this);
+        streamButton.setText("Stream to computer");
+        streamButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        streamButton.setOnClickListener(v -> toggleStream());
+        bottom.addView(streamButton, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(64)));
 
         LinearLayout overlay = new LinearLayout(this);
         overlay.setOrientation(LinearLayout.VERTICAL);
@@ -186,7 +192,9 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
     private void runAll() {
         if (running) return;
         running = true;
+        streamOnly = false;
         runButton.setEnabled(false);
+        streamButton.setEnabled(false);
         prefs().edit().putString("host", hostField.getText().toString().trim()).apply();
         report = new Report();
         results.removeAllViews();
@@ -198,12 +206,37 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
         }
     }
 
+    /** Starts an open-ended stream (setting up ARCore first if needed), or asks a running one to stop. */
+    private void toggleStream() {
+        if (running) {
+            if (streamOnly) stopRequested = true;
+            return;
+        }
+        String host = hostField.getText().toString().trim();
+        if (host.isEmpty()) {
+            setStatus("Type the computer address first (the receiver prints it).");
+            return;
+        }
+        prefs().edit().putString("host", host).apply();
+        running = true;
+        streamOnly = true;
+        runButton.setEnabled(false);
+        streamButton.setText("Stop streaming");
+        if (session != null) {
+            startMode(Mode.STREAM);
+        } else {
+            setUpArCore();
+        }
+    }
+
     private void finishRun(String message) {
         running = false;
         mode = Mode.IDLE;
         runOnUiThread(() -> {
             runButton.setEnabled(true);
             runButton.setText("Run all checks again");
+            streamButton.setEnabled(true);
+            streamButton.setText("Stream to computer");
             live.setText("");
         });
         setStatus(message);
@@ -287,7 +320,7 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
             return;
         }
         textureSet = false;
-        startMode(Mode.TRACKING);
+        startMode(streamOnly ? Mode.STREAM : Mode.TRACKING);
     }
 
     @Override
@@ -306,10 +339,11 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
         if (next == Mode.STREAM) {
             stream = new HostStream();
             stream.start(hostField.getText().toString().trim(), PORT);
+            capture = new FrameCapture(session, depthEnabled);
+            stopRequested = false;
         } else {
             stats = new TrackingStats();
         }
-        seq = 0;
         modeStart = SystemClock.elapsedRealtime();
         mode = next;
     }
@@ -357,14 +391,22 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
                             stats.lastPoints(), 100 * stats.lastDepthValid(), stats.pathMetres(), updateMs));
             if (elapsed >= TRACKING_MS) finishTracking(elapsed / 1000.0);
         } else if (m == Mode.STREAM) {
-            try (Image image = frame.acquireCameraImage()) {
-                stream.offer(header(frame), image);
-            } catch (Exception e) {
-                // the CPU image is not ready on every frame
+            if (capture.isNew(frame) && stream.hasRoom()) {
+                try (Image image = frame.acquireCameraImage()) {
+                    stream.offer(capture.capture(frame), image);
+                } catch (NotYetAvailableException e) {
+                    // the CPU image is not ready on every frame
+                }
             }
-            showLive(frame, "Streaming to the computer: keep moving", STREAM_MS - elapsed,
-                    String.format("%d frames sent, %d received by the computer", stream.offered(), stream.acked()));
-            if (elapsed >= STREAM_MS) finishStream();
+            String numbers = String.format("%d frames sent, %d received, %d with depth, %d keyframes%s", stream.offered(),
+                    stream.acked(), capture.depthFrames(), capture.anchorCount(), stream.error() == null ? "" : "\n" + stream.error());
+            if (streamOnly) {
+                showLive(frame, "Streaming until you press Stop", 0, numbers);
+                if (stopRequested || stream.error() != null) finishStream();
+            } else {
+                showLive(frame, "Streaming to the computer: keep moving", STREAM_MS - elapsed, numbers);
+                if (elapsed >= STREAM_MS) finishStream();
+            }
         }
     }
 
@@ -380,25 +422,6 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
             status.setText(head);
             live.setText(state + "\n" + numbers);
         });
-    }
-
-    private JSONObject header(Frame frame) {
-        Camera camera = frame.getCamera();
-        JSONObject h = new JSONObject();
-        Report.put(h, "type", "frame");
-        Report.put(h, "seq", seq++);
-        Report.put(h, "t_ns", frame.getTimestamp());
-        Report.put(h, "sent_ms", System.currentTimeMillis());
-        Report.put(h, "tracking", camera.getTrackingState().name());
-        if (camera.getTrackingState() == TrackingState.TRACKING) {
-            Pose p = camera.getPose();
-            Report.put(h, "pose", new JSONArray(Arrays.asList((double) p.tx(), (double) p.ty(), (double) p.tz(),
-                    (double) p.qx(), (double) p.qy(), (double) p.qz(), (double) p.qw())));
-        }
-        CameraIntrinsics k = camera.getImageIntrinsics();
-        float[] f = k.getFocalLength(), c = k.getPrincipalPoint();
-        Report.put(h, "intrinsics", new JSONArray(Arrays.asList((double) f[0], (double) f[1], (double) c[0], (double) c[1])));
-        return h;
     }
 
     private void finishTracking(double seconds) {
@@ -423,10 +446,26 @@ public class CheckActivity extends Activity implements GLSurfaceView.Renderer {
         }
     }
 
+    /** Runs on the GL thread, so ARCore's anchors are released there. */
     private void finishStream() {
         mode = Mode.IDLE;
+        capture.close();
         setStatus("Finishing the stream...");
         HostStream finished = stream;
+        if (streamOnly) {
+            int depthFrames = capture.depthFrames();
+            new Thread(() -> {
+                try {
+                    JSONObject summary = finished.stop();
+                    finishRun(String.format("Stream ended: %d frames received, %.1f per second, %d with depth.%s", finished.acked(),
+                            summary.optDouble("acknowledged_per_second"), depthFrames,
+                            finished.error() == null ? "" : " Error: " + finished.error()));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+            return;
+        }
         new Thread(() -> {
             try {
                 JSONObject summary = finished.stop();

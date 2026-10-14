@@ -306,7 +306,7 @@ The owner ruled on 14 October 2026 that the system must be live (or update at le
 
 **Stream A: the ARCore product route.**
 
-1. Extend the Redmi app's stream to carry ARCore's tracked points, raw depth with confidence, every pose correction and the tracking state, under one written "phone session" definition shared by the app and the computer ([experiment 01, "Next: extend the stream"](experiments/01_camera_capture_delivery/README.md)).
+1. Extend the Redmi app's stream to carry ARCore's tracked points, raw depth with confidence, every pose correction and the tracking state, under one written "phone session" definition shared by the app and the computer. **Built 14 October (Task87):** [phone_session_v1.md](experiments/01_camera_capture_delivery/phone_session_v1.md), with one test fixture that both the Java encoder and the Python reader must match; not yet run on the phone.
 2. A live processing entry point on the computer that reads the stream and updates the surface, map and object counts at least once per second (absorbs Tasks 76 and 77).
 3. Measure ARCore against tape-measured distances on real walks, including stairs and outdoors (Task75); show the required ARCore notice; agree field acceptance limits (Task61).
 

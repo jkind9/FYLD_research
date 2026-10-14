@@ -12,6 +12,14 @@ final class Report {
     private final JSONArray checks = new JSONArray();
 
     Report() {
+        put(root, "schema", 1);
+        put(root, "app_version", "0.2");
+        put(root, "created_ms", System.currentTimeMillis());
+        put(root, "device", device());
+        put(root, "checks", checks);
+    }
+
+    static JSONObject device() {
         JSONObject device = new JSONObject();
         put(device, "manufacturer", Build.MANUFACTURER);
         put(device, "model", Build.MODEL);
@@ -19,11 +27,7 @@ final class Report {
         put(device, "android_release", Build.VERSION.RELEASE);
         put(device, "api", Build.VERSION.SDK_INT);
         put(device, "abis", new JSONArray(java.util.Arrays.asList(Build.SUPPORTED_ABIS)));
-        put(root, "schema", 1);
-        put(root, "app_version", "0.1");
-        put(root, "created_ms", System.currentTimeMillis());
-        put(root, "device", device);
-        put(root, "checks", checks);
+        return device;
     }
 
     synchronized void check(String name, String status, String reason, JSONObject detail) {

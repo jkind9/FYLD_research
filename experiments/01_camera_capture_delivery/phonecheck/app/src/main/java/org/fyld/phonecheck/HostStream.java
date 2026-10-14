@@ -23,22 +23,19 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Sends camera frames and their headers to the host receiver and waits for each acknowledgement.
+ * Sends a phone session v1 stream (phone_session_v1.md) to the host receiver and waits for each acknowledgement.
  * Wire format matches host/protocol.py: 4-byte length + JSON header, 4-byte length + payload; ack = 4-byte frame number.
  */
 final class HostStream {
     static final int JPEG_QUALITY = 80;
 
     private static final class Item {
-        final JSONObject header;
+        final SessionFrame frame;
         final byte[] nv21;
-        final int width, height;
 
-        Item(JSONObject header, byte[] nv21, int width, int height) {
-            this.header = header;
+        Item(SessionFrame frame, byte[] nv21) {
+            this.frame = frame;
             this.nv21 = nv21;
-            this.width = width;
-            this.height = height;
         }
     }
 
@@ -57,10 +54,19 @@ final class HostStream {
         worker.start();
     }
 
-    /** Called on the GL thread with a camera image; copies it, so the caller closes the image. Drops when the sender is behind. */
-    void offer(JSONObject header, Image image) {
+    /** False when the sender is behind; the GL thread then skips this camera image (counted as dropped). */
+    boolean hasRoom() {
+        if (queue.remainingCapacity() > 0) return true;
+        dropped++;
+        return false;
+    }
+
+    /** Called on the GL thread after hasRoom(); copies the image, so the caller closes it. */
+    void offer(SessionFrame frame, Image image) {
         offered++;
-        if (!queue.offer(new Item(header, nv21(image), image.getWidth(), image.getHeight()))) dropped++;
+        frame.imageWidth = image.getWidth();
+        frame.imageHeight = image.getHeight();
+        queue.add(new Item(frame, nv21(image)));
     }
 
     JSONObject stop() throws InterruptedException {
@@ -94,16 +100,24 @@ final class HostStream {
             socket.setTcpNoDelay(true);
             DataOutputStream out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+            JSONObject start = new JSONObject();
+            Report.put(start, "type", "session");
+            Report.put(start, "version", SessionFrame.VERSION);
+            Report.put(start, "device", Report.device());
+            Report.put(start, "started_ms", System.currentTimeMillis());
+            send(out, start, new byte[0]);
             while (running || !queue.isEmpty()) {
                 Item item = queue.poll(100, TimeUnit.MILLISECONDS);
                 if (item == null) continue;
                 ByteArrayOutputStream jpeg = new ByteArrayOutputStream();
-                new YuvImage(item.nv21, ImageFormat.NV21, item.width, item.height, null)
-                        .compressToJpeg(new Rect(0, 0, item.width, item.height), JPEG_QUALITY, jpeg);
+                SessionFrame f = item.frame;
+                new YuvImage(item.nv21, ImageFormat.NV21, f.imageWidth, f.imageHeight, null)
+                        .compressToJpeg(new Rect(0, 0, f.imageWidth, f.imageHeight), JPEG_QUALITY, jpeg);
+                f.jpeg = jpeg.toByteArray();
                 long sent = System.nanoTime();
-                bytesSent += send(out, item.header, jpeg.toByteArray());
+                bytesSent += send(out, f.header(), f.payload());
                 int seq = in.readInt();
-                if (seq != item.header.getInt("seq")) throw new IOException("acknowledged frame " + seq + ", expected " + item.header.getInt("seq"));
+                if (seq != f.seq) throw new IOException("acknowledged frame " + seq + ", expected " + f.seq);
                 roundTripMs.add((System.nanoTime() - sent) / 1e6);
                 acked++;
             }

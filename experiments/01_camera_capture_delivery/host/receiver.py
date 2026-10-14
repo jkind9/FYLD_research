@@ -2,8 +2,11 @@
 
     python experiments/01_camera_capture_delivery/host/receiver.py --out experiments/01_camera_capture_delivery/runs/phonecheck
 
-Each connection becomes one session folder: frames/<seq>.jpg, frames.jsonl (each frame's header plus the
-host receive time), report.json if the phone sends one, and summary.json (frames, bytes, frames per second).
+Messages follow phone_session_v1.md: a stream connection starts with a session message, and session_v1.parse_frame
+checks every frame; a bad frame closes the connection. Each connection becomes one session folder: session.json,
+frames/<seq>.jpg, depth/<seq>.bin (raw depth then confidence, for frames with new depth), frames.jsonl (each
+frame's header plus the host receive time), report.json if the phone sends one, and summary.json (frames,
+depth frames, bytes, frames per second).
 Allow the port through the Windows firewall for private networks the first time.
 """
 
@@ -16,6 +19,7 @@ import time
 from pathlib import Path
 
 import protocol
+import session_v1
 
 PORT = 8765
 
@@ -32,21 +36,33 @@ class Receiver:
         connection, (peer, _) = self.listener.accept()
         session = self.root / f"{time.strftime('%Y%m%dT%H%M%S')}_{peer.replace(':', '-')}"
         (session / "frames").mkdir(parents=True)
-        frames, payload_bytes, started = 0, 0, time.perf_counter()
+        (session / "depth").mkdir()
+        frames, depth_frames, payload_bytes, started, session_started = 0, 0, 0, time.perf_counter(), False
         with connection, connection.makefile("rwb") as stream, open(session / "frames.jsonl", "w", encoding="utf-8") as log:
             while (message := protocol.read_message(stream)) is not None:
                 header, payload = message
                 if header.get("type") == "report":
                     (session / "report.json").write_bytes(payload)
                     continue
-                (session / "frames" / f"{int(header['seq']):06d}.jpg").write_bytes(payload)
+                if header.get("type") == "session":
+                    (session / "session.json").write_text(json.dumps(session_v1.check_session(header), indent=2), encoding="utf-8")
+                    session_started = True
+                    continue
+                if not session_started:
+                    raise ValueError("a frame arrived before the session start message")
+                frame = session_v1.parse_frame(header, payload)
+                name = f"{frame.seq:06d}"
+                (session / "frames" / f"{name}.jpg").write_bytes(frame.image_jpeg)
+                if frame.depth is not None:
+                    (session / "depth" / f"{name}.bin").write_bytes(payload[len(frame.image_jpeg):])
+                    depth_frames += 1
                 log.write(json.dumps(header | {"host_received_ms": time.time() * 1000}) + "\n")
-                protocol.write_ack(stream, int(header["seq"]))
+                protocol.write_ack(stream, frame.seq)
                 stream.flush()
                 frames += 1
                 payload_bytes += len(payload)
         seconds = time.perf_counter() - started
-        self.summary = {"peer": peer, "frames": frames, "payload_bytes": payload_bytes, "seconds": seconds,
+        self.summary = {"peer": peer, "frames": frames, "depth_frames": depth_frames, "payload_bytes": payload_bytes, "seconds": seconds,
                         "frames_per_second": frames / seconds if seconds else 0.0,
                         "megabytes_per_second": payload_bytes / 1e6 / seconds if seconds else 0.0}
         (session / "summary.json").write_text(json.dumps(self.summary, indent=2), encoding="utf-8")

@@ -13,6 +13,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "host"))
 import protocol
 import receiver
 import report
+import session_v1
+
+FIXTURE = Path(__file__).resolve().parents[1] / "phonecheck" / "app" / "src" / "test" / "resources" / "session_v1"
 
 
 def test_message_round_trip():
@@ -31,25 +34,65 @@ def test_truncated_message_raises():
         protocol.read_message(cut)
 
 
-def test_receiver_saves_frames_and_acknowledges_in_order(tmp_path):
-    server = receiver.Receiver(tmp_path, port=0)
+def stream_to_receiver(server, messages):
+    """Sends (header, payload) messages over loopback; returns the acknowledgements for frames."""
     worker = threading.Thread(target=server.serve_one, daemon=True)
     worker.start()
     acks = []
     with socket.create_connection(("127.0.0.1", server.port), timeout=5) as client, client.makefile("rwb") as stream:
-        for seq in range(5):
-            protocol.write_message(stream, {"type": "frame", "seq": seq, "pose": [0, 0, 0, 0, 0, 0, 1]}, b"\xff\xd8" + bytes([seq]))
+        for header, payload in messages:
+            protocol.write_message(stream, header, payload)
             stream.flush()
-            acks.append(protocol.read_ack(stream))
-        protocol.write_message(stream, {"type": "report", "schema": 1}, json.dumps({"checks": []}).encode())
-        stream.flush()
+            if header["type"] == "frame":
+                acks.append(protocol.read_ack(stream))
     worker.join(timeout=5)
+    return acks
+
+
+def v1_frames(count):
+    header, payload = json.loads((FIXTURE / "frame_header.json").read_text()), (FIXTURE / "frame_payload.bin").read_bytes()
+    frames = []
+    for seq in range(count):
+        h = json.loads(json.dumps(header)) | {"seq": seq}
+        if seq % 2:  # odd frames carry no new depth
+            del h["depth"]
+            frames.append((h, payload[:4]))
+        else:
+            frames.append((h, payload))
+    return frames
+
+
+SESSION = {"type": "session", "version": 1, "device": {"model": "2201116TG"}, "started_ms": 1}
+
+
+def test_receiver_saves_v1_frames_and_acknowledges_in_order(tmp_path):
+    server = receiver.Receiver(tmp_path, port=0)
+    frames = v1_frames(5)
+    acks = stream_to_receiver(server, [(SESSION, b"")] + frames)
     session = next(tmp_path.iterdir())
     assert acks == [0, 1, 2, 3, 4]
     assert len(list((session / "frames").glob("*.jpg"))) == 5
-    assert len((session / "frames.jsonl").read_text().splitlines()) == 5
-    assert (session / "report.json").is_file()
-    assert server.summary["frames"] == 5
+    assert len(list((session / "depth").glob("*.bin"))) == 3
+    assert json.loads((session / "session.json").read_text())["version"] == 1
+    assert server.summary["frames"] == 5 and server.summary["depth_frames"] == 3
+    saved = list(session_v1.read_session(session))
+    assert [f.seq for f in saved] == [0, 1, 2, 3, 4]
+    assert saved[0].depth.depth_m[0, 1] == 1.0 and saved[1].depth is None
+
+
+def test_receiver_saves_a_report_sent_alone(tmp_path):
+    server = receiver.Receiver(tmp_path, port=0)
+    stream_to_receiver(server, [({"type": "report", "schema": 1}, json.dumps({"checks": []}).encode())])
+    assert (next(tmp_path.iterdir()) / "report.json").is_file()
+
+
+def test_receiver_refuses_frames_before_the_session_start(tmp_path):
+    server = receiver.Receiver(tmp_path, port=0)
+    with pytest.raises(ValueError):
+        with socket.create_connection(("127.0.0.1", server.port), timeout=5) as client, client.makefile("rwb") as stream:
+            protocol.write_message(stream, *v1_frames(1)[0])
+            stream.flush()
+            server.serve_one()
 
 
 def valid_report():

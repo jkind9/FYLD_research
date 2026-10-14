@@ -273,17 +273,21 @@ Redmi Note 11 Pro (`2201116TG`, Android 13), Google Play Services for AR 1.56, p
 
 The first version saved the report before the stream check had finished, so the report lacks the stream's round-trip delay; the receiver's summary above has the throughput. The second version (portrait, camera preview, one "Run all checks" button) saves only after the stream ends. The owner found the first version's screen hard to use; it was rebuilt the same day.
 
-### Next: extend the stream (handover, 14 October 2026)
+### Phone session v1: the extended stream (Task87, 14 October 2026)
 
-The owner will start a new session to extend the app's stream. What the processing side needs per frame, from learning chapter 11 and the walkthrough layers:
+The stream now follows one written definition, [phone_session_v1.md](phone_session_v1.md), shared by the app and the computer. Each frame carries the JPEG image, ARCore's camera timestamp, the image calibration, the camera pose with the tracking state and failure reason, ARCore's tracked points (id, 3D position, pixel, confidence), the raw depth image and its confidence whenever ARCore makes a new one (about 10 per second), and pose corrections. Corrections work through ARCore anchors: the app starts one anchor at the camera pose every second while tracking (a *keyframe*), and resends an anchor's pose whenever ARCore moves it by more than 1 mm or 0.1 degrees. Anything built from a frame is moved with the newest keyframe at or before it.
 
-- ARCore's tracked points with their 3D positions and the pixel where each was seen (`Frame.acquirePointCloud()` gives 3D points and IDs; project them with the frame's pose and intrinsics);
-- raw depth (160 x 90 here) and its confidence image, sent when a new depth image arrives (`Frame.acquireRawDepthImage16Bits()` timestamps), so learned depth can be sized with thousands of confident pixels rather than about 19 points;
-- every pose correction: ARCore may move past poses after a loop closure, so the stream should carry the frame's pose as reported then, and the processing side must accept later corrections;
-- the tracking state and failure reason, and the CPU image at a chosen resolution (640 x 480 now; 1280 x 720 and 1920 x 1080 are offered);
-- one written definition of these messages (the "phone session"), shared by the app and `host/`, with a test fixture.
+| Side | Code | Checked by |
+|---|---|---|
+| Phone | `SessionFrame.java` (encoder, no Android types), `FrameCapture.java` (reads ARCore), `HostStream.java` | `SessionFrameTest.java`, 4 JVM tests run by the build script: the encoder must reproduce the fixture header and payload byte for byte, and project points to the fixture's pixels |
+| Computer | `host/session_v1.py` (reader and checks), `host/receiver.py` (saves `session.json`, `frames/`, `depth/`, `frames.jsonl`) | `tests/test_session_v1.py` and `tests/test_phonecheck_host.py`, 24 tests: the fixture parses to its written values, 9 kinds of bad frame are refused, a loopback session is saved and read back |
+| Both | the fixture `phonecheck/app/src/test/resources/session_v1/` | both test sets read the same two files |
 
-The rebuilt app's run on 14 October showed all checks passing on the phone, but no stream or report reached the receiver; the computer-address box was probably empty on the first run of the new version (it is remembered only after a run). Confirm the stream row before relying on it.
+The receiver checks every frame and closes the connection on a bad one, so a fault in the phone code shows up at once rather than in later processing. Read a saved session with `session_v1.read_session(<session folder>)`; `world_from_camera_cv(pose)` gives the pose in the project's OpenCV camera axes.
+
+**Using it.** The app has a second button, *Stream to computer*, which sets up ARCore if needed and streams until pressed again; the screen shows frames sent and received, frames with depth, keyframes, and any connection error. *Run all checks* is unchanged (its 20 s stream step now sends v1 frames). The app refuses to stream with an empty computer-address box and says so, which was the likely reason the previous version's run never reached the receiver.
+
+**Build of 14 October:** `phonecheck-debug.apk` SHA-256 `29c8240b3090fc2cac5a846997baacea3b453a28511e908a085e5513792064c5`, copied to `mobile deployment/phonecheck_session_v1_20261014/` (ignored by Git) for installing. Not yet run on the Redmi; the frame rate with depth attached, the share of frames with new depth and how often ARCore moves anchors are still to be measured.
 
 ## Current delivery ownership, 6 October 2026
 

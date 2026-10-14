@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the Redmi check app (debug APK) in WSL with the SDK and Gradle already used by build-apk.sh.
+# Run the stream encoder tests, then build the Redmi check app (debug APK) in WSL with the SDK and Gradle already used by build-apk.sh.
 # Gradle downloads the ARCore library from Google's Maven repository on the first build.
 # Run from the repository root: wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-phonecheck.sh
 set -euo pipefail
@@ -12,7 +12,7 @@ WORK="${PHONECHECK_WORK:-$HOME/phonecheck-build}"
 
 rm -rf "$WORK" && mkdir -p "$WORK" && cp -r "$SOURCE"/. "$WORK"/
 echo "sdk.dir=$SDK" > "$WORK/local.properties"
-(cd "$WORK" && "$GRADLE" --no-daemon -q --max-workers=2 assembleDebug)
+(cd "$WORK" && "$GRADLE" --no-daemon -q --max-workers=2 testDebugUnitTest assembleDebug)
 
 APK="$WORK/app/build/outputs/apk/debug/app-debug.apk"
 OUT="$SOURCE/../runs/phonecheck_apk"
