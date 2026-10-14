@@ -22,6 +22,15 @@ The **Frame API's acquireRawDepthImage16Bits section** specifies a single 16-bit
 
 These are API descriptions, not measurements of a chosen phone. Runtime, sustained frame rate, energy and outdoor range accuracy have not been checked here. Device support must be established before capture.
 
+## Facts the phone stream relies on (checked 14 October 2026)
+
+Used by `experiments/01_camera_capture_delivery/phone_session_v1.md` (Task87):
+
+- **Rate and newness.** The Frame reference: "Typically there are about 10 updates to the raw depth data per second"; "The depth images between those updates are a 3D reprojection"; a depth image is new when its `Image.getTimestamp()` differs from the previous one.
+- **Units.** "Each pixel contains the distance in millimeters to the camera plane"; 0 means no depth; confidence 0-255, and "removing depth pixels below a confidence threshold of half confidence (128) tends to work well".
+- **Which camera model.** The official codelab's `DepthData` uses `frame.getCamera().getTextureIntrinsics()` (the GPU texture, not the CPU image), scales x values by `depthWidth / textureWidth` and y values by `depthHeight / textureHeight`, back-projects a pixel as `(d (x - cx) / fx, d (cy - y) / fy, -d)` and places it with `camera.getPose()` of the same frame. On the Redmi the depth image is 160 x 90 (16:9) while the CPU image is 640 x 480 (4:3), so the two fields of view differ and the image intrinsics must not be used for depth.
+- **Camera pose.** `Camera.getPose()` is an OpenGL camera pose: +X right, +Y up, looking along -Z, "at the center of exposure of the center row of the image".
+
 ## Relevance to a site capture
 
 Our proposed test would export raw depth, confidence, poses, calibration and timestamps together. Check whether successive frames represent new depth or reused estimates. Reject invalid values before fusion. Measure repeatability against independent lengths and report observed coverage alongside area.

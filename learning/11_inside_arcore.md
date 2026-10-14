@@ -104,7 +104,7 @@ Published drift for ARCore (on another phone, loop closure switched off): 0.09-0
 ## What this changes in the plan
 
 - **Size each frame's learned depth with ARCore's raw depth where its confidence is high**, not only with the sparse point cloud. Chapter 2 showed 50 good points per frame are enough; raw depth supplies thousands.
-- **Keep every pose update, not just the first.** When ARCore corrects its path, the fused surface and object positions must follow.
+- **Keep every pose update, not just the first.** When ARCore corrects its path, the fused surface and object positions must follow. The phone stream does this with one anchor per second whose later poses are resent when they move, and the live processor keeps its surface in fragments tied to those anchors (chapter 5, "When the camera path changes").
 - **Ask users to move, not just turn**, and to point at textured surfaces, so depth from motion has parallax.
 - **Treat stairs and vehicles as hard cases** to test explicitly in the field.
 

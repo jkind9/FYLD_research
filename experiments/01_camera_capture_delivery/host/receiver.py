@@ -25,10 +25,12 @@ PORT = 8765
 
 
 class Receiver:
-    def __init__(self, root: Path, *, port: int = PORT, host: str = "0.0.0.0"):
+    def __init__(self, root: Path, *, port: int = PORT, host: str = "0.0.0.0", on_frame=None):
+        """on_frame(frame, image_path), if given, is called after each frame is saved (live processing hooks in here)."""
         self.root = Path(root)
         self.listener = socket.create_server((host, port))
         self.port = self.listener.getsockname()[1]
+        self.on_frame = on_frame
         self.summary: dict = {}
 
     def serve_one(self) -> Path:
@@ -57,6 +59,8 @@ class Receiver:
                     (session / "depth" / f"{name}.bin").write_bytes(payload[len(frame.image_jpeg):])
                     depth_frames += 1
                 log.write(json.dumps(header | {"host_received_ms": time.time() * 1000}) + "\n")
+                if self.on_frame is not None:
+                    self.on_frame(frame, session / "frames" / f"{name}.jpg")
                 protocol.write_ack(stream, frame.seq)
                 stream.flush()
                 frames += 1

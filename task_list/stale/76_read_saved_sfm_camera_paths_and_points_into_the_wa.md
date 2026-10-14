@@ -1,7 +1,7 @@
 ---
 id: "76"
 title: Read saved SfM camera paths and points into the walkthrough
-status: open
+status: stale
 priority: MEDIUM
 type: experiment
 approval_status: filed 2026-10-13 after the owner asked how to keep the repo's modular structure while testing the image-only design; not yet approved to start
@@ -23,7 +23,7 @@ baseline_metric:
   baseline_value: "per Task65 and Task70 summaries"
   target: "the same walkthrough report for a run that reads a Task67 camera path and sizes Depth Anything to its points, with every downstream layer unchanged"
 created: 2026-10-13
-last_updated: 2026-10-13
+last_updated: 2026-10-14
 superseded_by: null
 ---
 

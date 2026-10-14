@@ -1,7 +1,7 @@
 ---
 id: "77"
 title: Reorder the walkthrough so camera tracking comes before depth
-status: open
+status: stale
 priority: LOW
 type: experiment
 approval_status: filed 2026-10-13; start only if Tasks 72 and 76 show the image-only design is clearly better; not approved to start
@@ -21,7 +21,7 @@ baseline_metric:
   baseline_value: "two-step runs (SfM experiment, then walkthrough reading its files)"
   target: "one-step run with identical numbers to the Task76 two-step run on the same clip"
 created: 2026-10-13
-last_updated: 2026-10-13
+last_updated: 2026-10-14
 superseded_by: null
 ---
 

@@ -80,6 +80,13 @@ def test_receiver_saves_v1_frames_and_acknowledges_in_order(tmp_path):
     assert saved[0].depth.depth_m[0, 1] == 1.0 and saved[1].depth is None
 
 
+def test_receiver_hands_each_saved_frame_to_the_callback(tmp_path):
+    seen = []
+    server = receiver.Receiver(tmp_path, port=0, on_frame=lambda frame, image: seen.append((frame.seq, image.is_file())))
+    stream_to_receiver(server, [(SESSION, b"")] + v1_frames(3))
+    assert seen == [(0, True), (1, True), (2, True)]
+
+
 def test_receiver_saves_a_report_sent_alone(tmp_path):
     server = receiver.Receiver(tmp_path, port=0)
     stream_to_receiver(server, [({"type": "report", "schema": 1}, json.dumps({"checks": []}).encode())])

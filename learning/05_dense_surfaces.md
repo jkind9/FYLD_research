@@ -38,6 +38,14 @@ For each frame:
 
 Then multiply everything by the SfM world's metric size (chapter 4) and fuse along the SfM path. On a phone, ARCore would supply both the path and the points.
 
+## When the camera path changes
+
+A live tracker such as ARCore sometimes corrects where it thinks the camera has been, for example when it recognises a place it saw earlier. A signed-distance volume cannot take back a frame it has already fused, so a surface fused into one big volume would keep the old, wrong positions.
+
+The fix is to fuse into short pieces of surface, *fragments*, each stored in its own local frame (Choi, Zhou and Koltun, 2015, used 50-frame fragments). Each fragment is placed in the world by a pose that can change later. On the phone that pose comes from an ARCore *anchor*: a fixed point that ARCore keeps consistent with its own corrections. The project's live processor (`src/live`, Task89) starts one anchor per second and gives each group of 10 anchors one fragment. When ARCore moves an anchor, its fragment moves with it, at the cost of one matrix multiply. Counted objects are kept relative to an anchor in the same way.
+
+The price: frames inside one fragment all follow the fragment's first anchor, so a correction that bends the path within 10 s moves the whole fragment rigidly. Where neighbouring fragments overlap, there are two layers of surface until both are placed correctly. Sources: [research/camera_tracking_and_slam/fragments_and_anchors.md](../research/camera_tracking_and_slam/fragments_and_anchors.md).
+
 ## Scoring a surface
 
 Two numbers, always together:
@@ -63,6 +71,8 @@ Mean distance from the reconstructed surface to the reference (lower is better).
 | SfM sparse points alone (best-fit size) | 77 mm, 4% covered | 48 mm, 20% covered | 57 mm, 21% covered |
 
 Sources: Tasks 71, 72, 78, 79 and 80 in `experiments/sfm/README.md`, which also lists Depth Anything 3's other modes.
+
+**Live, 14 October (Task89).** The live processor, fed ICL in the phone stream format with the true path and the rendered depth standing in for ARCore's raw depth, fused 28 frames while the clip played at its recorded speed (about one frame a second). Its surface is 46 mm from the reference on average, with 71% of points within 5 cm, but it covers only 22% of the room. It is not comparable with the table above, which fuses every frame: fewer frames give fewer points to be wrong and less of the room. See `src/live/README.md`.
 
 What this teaches:
 

@@ -12,6 +12,7 @@ Following the camera through a video, live or offline, with a map, refinement an
 | [open3d_rgbd.md](open3d_rgbd.md) | Open3D RGB-D odometry: the project's current tracker |
 | [rtabmap.md](rtabmap.md) | RTAB-Map: tracking and mapping with revisits |
 | [mast3r_slam.md](mast3r_slam.md) | MASt3R-SLAM: dense reconstruction from one-camera video |
+| [fragments_and_anchors.md](fragments_and_anchors.md) | Fragments (Choi et al. 2015) and ARCore anchors: keeping a fused surface consistent when the path is corrected (14 October 2026) |
 
 ## Papers
 
@@ -28,6 +29,7 @@ Saved 13 October 2026 from arXiv or the authors' pages. Paper results are the au
 | uav_vslam_multi_paradigm_deployment_2605.03678.pdf | Five SLAM systems on TUM, EuRoC and four Jetson boards (14 October review) |
 | cuvslam_2506.04359.pdf | cuVSLAM: GPU-accelerated classic SLAM timings |
 | levio_embedded_vio_2602.03294.pdf | LEVIO: VIO on a microcontroller |
+| robust_reconstruction_indoor_choi_cvpr2015.pdf | Robust Reconstruction of Indoor Scenes: fragments of 50 frames, then robust global registration (saved 14 October) |
 | foundationslam_2512.25008.pdf | FoundationSLAM: foundation-model SLAM accuracy claims |
 | glide_slam_gl_embedded_2607.16897.pdf | GLidE-SLAM: OpenGL ES direct tracking for embedded GPUs |
 
