@@ -69,6 +69,8 @@ What this means here:
 - **On recorded data, a live CPU SLAM system replaces the offline SfM stand-in.** ORB-SLAM3 (GPLv3, allowed as a reference) and stella_vslam (BSD-2) both process frames in order on a CPU.
 - **Learned and foundation-model SLAM are the most accurate but need a GPU**, which is not allowed for now.
 
+> **Project result: live SLAM on a CPU is fast and close to the offline path.** Run frame by frame on the recorded clips, ORB-SLAM3 tracks TUM xyz with 12.8 mm error and stella_vslam (BSD-2 licence) with 17.1 mm, against 11.9 mm for offline structure from motion; both take 5-12 ms per frame on a desktop CPU. On the faster desk recording both are about 26-28 mm, but stella_vslam loses 9-12% of frames and ORB-SLAM3 at half frame rate sometimes loses track and starts a second map. (Task84, `experiments/live_slam/README.md`.)
+
 The full review, with sources: [research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md](../research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md).
 
 ## When tracking fails

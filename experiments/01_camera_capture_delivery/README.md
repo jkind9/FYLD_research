@@ -231,6 +231,33 @@ The capabilities file matches its report-declared hash and size. The report hash
 
 For the next check, press **Capture one rear-camera control**, then immediately **Export latest session**. The app starts a new session for each capture action and exports only the latest one, so export each result separately. Return that bundle with its JPEG and sensor metadata for integrity validation. Keep this capability/pair-attempt report. Measured frame timing, original image quality, independent calibration, sustained recording and Samsung checks remain outstanding. ARCore runtime depth, confidence and pose need a separately approved SDK-enabled test.
 
+## Redmi check app: ARCore and host streaming (Task85)
+
+A second, separate app tests the two things the deployment design depends on: whether Google's ARCore tracking works on the Redmi, and whether the phone can stream camera frames to a computer fast enough. It is plain Java built with Gradle (the native route proposed under "Alternative implementation routes"), because ARCore needs a GL context and Google's install flow, which the Python packaging route does not provide. The Camera2 capability app above is unchanged.
+
+| Button | What it checks | Report entries |
+|---|---|---|
+| 1. ARCore check | ARCore availability (installs Google Play Services for AR if needed), session start, depth modes, the camera configurations ARCore offers | `arcore_available`, `arcore_session`, `depth_supported`, `camera_configs` |
+| 2. Tracking run (15 s) | Per frame: tracking state and failure reason, pose, image intrinsics, tracked points, raw depth size, share of valid depth pixels and confidence, and how long `session.update()` took | `arcore_tracking` (pass if tracking on at least half the frames), `tracked_points`, `raw_depth_frames` |
+| 3. Stream to host (20 s) | Each ARCore camera image as JPEG (quality 80) with its pose and intrinsics, over Wi-Fi TCP to the host, which acknowledges every frame | `host_stream`: frames per second acknowledged, MB/s, round-trip delay median and 95th percentile, frames dropped because the sender was busy |
+| 4. Save and send report | Writes the JSON report on the phone and, if a host is set, sends it to the receiver | — |
+
+Every check ends as PASS, FAIL with a reason, or SKIPPED with a reason; `host/report.py` refuses a report that leaves anything unexplained.
+
+**Build** (WSL, the SDK and Gradle from the build route above; the first build downloads ARCore 1.56.0 from Google's Maven repository):
+
+```text
+wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-phonecheck.sh
+```
+
+The APK lands in `runs/phonecheck_apk/` (ignored by Git).
+
+**Install:** copy the APK to the phone and open it (allow installs from this source), or use wireless debugging: on the phone, Developer options > Wireless debugging > Pair device with pairing code, then in WSL `~/Android/Sdk/platform-tools/adb pair <ip>:<pair port>`, `adb connect <ip>:<port>`, `adb install -r runs/phonecheck_apk/phonecheck-debug.apk`.
+
+**Run:** on the computer, `python experiments/01_camera_capture_delivery/host/receiver.py --out experiments/01_camera_capture_delivery/runs/phonecheck` prints the address to type into the app (phone and computer on the same Wi-Fi; allow Python through the Windows firewall on private networks). Press 1 to 4 in order. Each stream and report becomes a session folder with the frames, `frames.jsonl`, `report.json` and `summary.json`. Check a report with `python experiments/01_camera_capture_delivery/host/report.py <report.json>`.
+
+**Tests** (host side, no phone needed): `python -m pytest experiments/01_camera_capture_delivery/tests/test_phonecheck_host.py` covers message framing, a loopback stream with acknowledgements, saved files and the report rules.
+
 ## Current delivery ownership, 6 October 2026
 
 [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.

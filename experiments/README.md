@@ -11,6 +11,7 @@ The project is built as six execution steps, each tested on its own with known i
 | 5. Mapping, dimensions and area | [05_birds_eye_mapping](05_birds_eye_mapping/README.md) | How big is the observed site, and what remains unknown? | Real method unavailable under Task55 |
 | 🟥 6. Object recognition and counting | [06_object_recognition](06_object_recognition/README.md) | Which objects are there, where, and how many distinct ones? | Early trials and a 60-frame replay |
 | Support | [geometry_validation](geometry_validation/README.md), [shared](shared/README.md), [datasets](datasets/README.md) | Coordinate checks, shared records and run export, test data guidance | In use |
+| Standalone | [live_slam](live_slam/README.md) | Live camera tracking from images alone (stella_vslam, ORB-SLAM3) run frame by frame on the CPU and scored against the true paths | xyz 12.8-17.1 mm, desk 26-28 mm live, 5-12 ms per frame; desk tracking drops 3-12% of frames |
 | Standalone | [sfm](sfm/README.md) | Camera path and 3D structure from images alone (COLMAP 4.2.1), scored against true paths and surfaces; outputs are read by later tasks, not wired into the walkthrough | Desk: every frame placed, 24 mm best-fit error with size (walkthrough tracker 112 mm with Kinect depth) |
 
 Each layer README starts with a guide: how the layer works from first principles, hosted and on-phone method options with licences, its top 5 sources and what can be improved. The detailed experiment record follows.

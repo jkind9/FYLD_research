@@ -31,6 +31,8 @@ The project's main findings in the order they were found, with the numbers behin
 
 - **14 October. State-of-the-art review.** The most accurate SLAM systems (learned and foundation-model, about 16-20 mm on TUM) need a GPU; classic CPU systems (ORB-SLAM3, stella_vslam) run live with 1.5-2.5 times the error; on Android the platform's own tracker (ARCore) is the practical choice. Next: a live CPU SLAM run on the recorded data, and an ARCore recorder app for the Redmi (`research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md`).
 
+- **14 October. Live SLAM on the CPU works.** ORB-SLAM3 and stella_vslam, run one frame at a time on the recorded clips: 12.8 and 17.1 mm on TUM xyz (offline SfM 11.9 mm), about 26-28 mm on desk, at 5-12 ms per frame. Their weak point is losing track on fast turns, which ARCore's motion sensors are meant to cover (Task84).
+
 ## What this adds up to
 
 1. **Get the camera path from a live SLAM system with joint refinement**, not from aligning depth maps. On the phone that is ARCore's tracking. SfM was the offline stand-in used to prove the design on recorded data.
