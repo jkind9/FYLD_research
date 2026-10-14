@@ -8,6 +8,7 @@ What ARCore and Apple's frameworks give a phone app: camera pose, depth and thei
 |---|---|
 | [arcore/README.md](arcore/README.md) | ARCore and Android phone telemetry inventory |
 | [arcore_raw_depth.md](arcore_raw_depth.md) | ARCore Raw Depth |
+| [arcore_commercial_terms.md](arcore_commercial_terms.md) | ARCore commercial terms, required user notice and product risks (14 October 2026) |
 | [apple_roomplan.md](apple_roomplan.md) | Apple RoomPlan |
 
 ## Papers

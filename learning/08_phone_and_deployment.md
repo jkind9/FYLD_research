@@ -14,6 +14,10 @@ ARCore is Google's augmented-reality library. On a supported phone it provides, 
 
 Its accuracy depends on the phone and the walk. Published tests range from about 1.5 cm drift on short indoor sessions (RealityCheck) to over 10 cm on harder walks; one study of four commercial trackers measured final drift of 0.07-0.12 m on corridors and campus walks, and much more in a car. ARCore has not been measured on the project's Redmi phone yet (Task75).
 
+**Using ARCore in a product.** It is free for the on-device features used here and allowed commercially. An app must tell users it runs on Google Play Services for AR, governed by Google's Privacy Policy. Google's general API terms forbid uses where failure could cause death or injury, and let Google change or discontinue the service. Only phones on Google's supported list with Google Play can run it. Details: [research/phone_ar_platforms/arcore_commercial_terms.md](../research/phone_ar_platforms/arcore_commercial_terms.md).
+
+> **Project result: ARCore works on the project's Redmi.** A 15 s walk tracked on 100% of 891 frames, 4.9 ms per update; raw depth is 160 x 90 from motion (the phone's depth sensor is not used), and the phone streamed 29 frames per second with their poses to a computer over Wi-Fi (Task85).
+
 ## Hosted against on the phone
 
 - **Hosted**: the phone records; a server with a GPU does the heavy work after upload. Most accurate methods (multi-view stereo, large learned models, offline SfM) live here.

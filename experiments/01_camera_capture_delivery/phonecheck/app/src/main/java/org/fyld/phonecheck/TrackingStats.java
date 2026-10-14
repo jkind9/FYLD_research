@@ -88,6 +88,12 @@ final class TrackingStats {
 
     int frames() { return frames; }
 
+    int lastPoints() { return pointCounts.isEmpty() ? 0 : pointCounts.get(pointCounts.size() - 1); }
+
+    double lastDepthValid() { return depthValid.isEmpty() ? Double.NaN : depthValid.get(depthValid.size() - 1); }
+
+    double pathMetres() { return pathMetres; }
+
     double trackingFraction() { return frames == 0 ? 0 : states.getOrDefault("TRACKING", 0) / (double) frames; }
 
     int depthFrames() { return depthValid.size(); }

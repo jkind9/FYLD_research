@@ -84,6 +84,8 @@ final class HostStream {
 
     int acked() { return acked; }
 
+    int offered() { return offered; }
+
     String error() { return error; }
 
     private void run(String host, int port) {

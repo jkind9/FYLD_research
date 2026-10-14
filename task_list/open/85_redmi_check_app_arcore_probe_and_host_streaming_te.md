@@ -1,7 +1,7 @@
 ---
 id: "85"
 title: "Redmi check app: ARCore probe and host streaming test"
-status: open
+status: in_progress
 priority: MEDIUM
 type: experiment
 approval_status: owner 2026-10-14 - APK development for the Redmi approved; owner asked for tests of host streaming and of the ARCore module. Settings marked proposed by Claude are not owner-ruled.
