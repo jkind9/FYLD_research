@@ -4,6 +4,7 @@ import copy
 import json
 import subprocess
 import sys
+import weakref
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -125,7 +126,28 @@ def test_invalid_trajectory_is_refused(walk, bad):
         accuracy.score(frames, measured)
 
 
-def test_cli_reads_receiver_session_and_preserves_reference_control_label(tmp_path):
+def test_long_walk_does_not_retain_received_images(walk):
+    class ReceivedFrame(SimpleNamespace):
+        pass
+
+    references = []
+
+    def stream():
+        for seq in range(3):
+            received = ReceivedFrame(**vars(frame(seq, (0, 0, 0))))
+            received.image_jpeg = b"image payload"
+            references.append(weakref.ref(received))
+            if seq == 2:
+                assert references[0]() is None
+            yield received
+
+    measured = walk[1]
+    measured["loop"]["end_seq"] = 2
+    assert accuracy.score(stream(), measured)["tracking"]["frames"] == 3
+
+
+@pytest.mark.parametrize("invocation", ["subprocess", "main"])
+def test_cli_reads_receiver_session_and_preserves_reference_control_label(tmp_path, invocation, monkeypatch):
     fixture = HOST.parent / "phonecheck/app/src/test/resources/session_v1"
     header = json.loads((fixture / "frame_header.json").read_text())
     payload = (fixture / "frame_payload.bin").read_bytes()
@@ -146,10 +168,16 @@ def test_cli_reads_receiver_session_and_preserves_reference_control_label(tmp_pa
         "loop": {"start_seq": 0, "end_seq": 2, "tape_length_m": 6},
         "distances": [{"name": "A-B", "from_seq": 0, "to_seq": 1, "tape_m": 3}]}))
     output = tmp_path / "scores.json"
-    run = subprocess.run([sys.executable, str(HOST / "accuracy.py"), "--session", str(session),
-                          "--measurements", str(measured), "--out", str(output)], capture_output=True, text=True)
-    assert run.returncode == 0, run.stderr
+    argv = [str(HOST / "accuracy.py"), "--session", str(session),
+            "--measurements", str(measured), "--out", str(output)]
+    if invocation == "subprocess":
+        run = subprocess.run([sys.executable, *argv], capture_output=True, text=True, check=False)
+        assert run.returncode == 0, run.stderr
+    else:
+        monkeypatch.setattr(sys, "argv", argv)
+        accuracy.main()
     result = json.loads(output.read_text())
     assert result["session"]["control"] == "reference"
+    assert result["measurements"] == json.loads(measured.read_text())
     assert result["loop"]["closure_mm"] == 0
     assert result["distances"][0]["signed_error_mm"] == 0

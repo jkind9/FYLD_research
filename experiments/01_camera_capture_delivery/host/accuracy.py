@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 import json
+from collections import Counter
+from itertools import pairwise
 from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
-
 import session_v1
 
 
@@ -41,8 +41,8 @@ def _tracking(frames):
     return {"frames": len(frames), "tracked_fraction": sum(f.pose is not None for f in frames) / len(frames),
             "lost_events": lost_events, "failure_frames": dict(failures), "sampled_path_m": path,
             "anchor_corrections": corrections,
-            "missing_sequence_numbers": sum(b.seq - a.seq - 1 for a, b in zip(frames, frames[1:])),
-            "longest_received_gap_s": max((b.t_ns - a.t_ns for a, b in zip(frames, frames[1:])), default=0) / 1e9}
+            "missing_sequence_numbers": sum(b.seq - a.seq - 1 for a, b in pairwise(frames)),
+            "longest_received_gap_s": max((b.t_ns - a.t_ns for a, b in pairwise(frames)), default=0) / 1e9}
 
 
 def _distance(frames, measured):
@@ -62,7 +62,7 @@ def score(frames, measured):
                               pose=f.pose, anchor_updates=f.anchor_updates) for f in frames]
     if not frames:
         raise ValueError("session has no frames")
-    if any(b.seq <= a.seq or b.t_ns <= a.t_ns for a, b in zip(frames, frames[1:])):
+    if any(b.seq <= a.seq or b.t_ns <= a.t_ns for a, b in pairwise(frames)):
         raise ValueError("frame sequences and timestamps must be strictly increasing")
     if any(f.pose is not None and not np.isfinite(f.pose).all() for f in frames):
         raise ValueError("poses must be finite")

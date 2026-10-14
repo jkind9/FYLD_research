@@ -289,6 +289,14 @@ The receiver checks every frame and closes the connection on a bad one, so a fau
 
 **Build of 14 October:** `phonecheck-debug.apk` SHA-256 `29c8240b3090fc2cac5a846997baacea3b453a28511e908a085e5513792064c5`, copied to `mobile deployment/phonecheck_session_v1_20261014/` (ignored by Git) for installing. Not yet run on the Redmi; the frame rate with depth attached, the share of frames with new depth and how often ARCore moves anchors are still to be measured.
 
+### Field accuracy preparation (Task92, 14 October 2026)
+
+The [field capture guide](field_accuracy.md) describes repeatable camera placements, independent tape measurements and separate indoor, stair and outdoor sessions. `host/accuracy.py` reads the saved v1 sessions and reports loop closure in mm and percent of measured route length, orientation change, 3D distance errors, tracking loss, received gaps and anchor correction counts. It preserves reference-control labels, fits no scale and applies no later anchor corrections. Tests cover the scoring and a saved-session command-line run; these are synthetic checks, not measured phone accuracy.
+
+The check app now has an **ARCore and privacy notice** button above its status, with the required text and Google privacy/terms links. The new APK is staged at `mobile deployment/phonecheck_accuracy_20261014/fyld-phonecheck-accuracy.apk`; its SHA-256 is `5680c2836c62734fe387cd0317e0b5cd3256bf5f3c84ee5b847ddebcf5d0d751`. The Gradle build and four encoder JVM tests pass. The screen and links still need checking on the Redmi. No ADB device was attached at this check.
+
+Task75 stays open: real tape-measured recordings and the offline COLMAP comparison have not been done. Task61 owns acceptance limits. Live object overcounting remains the issue recorded under Task89.
+
 ## Current delivery ownership, 6 October 2026
 
 [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.
