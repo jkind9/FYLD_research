@@ -40,6 +40,24 @@ Putting chapters 2-5 together:
 
 The small depth model candidates measured so far: ZipDepth's phone build (6.1M parameters, shape AbsRel 0.07, 24 ms per frame on a desktop CPU, exported to ONNX; its TFLite conversion failed) and Depth Anything V2 Small (25M parameters, 218-318 ms per frame on a desktop CPU). Neither has run on the phone yet (Task57).
 
+## Capture first, phone later
+
+On 14 October 2026 the owner set the order of work: first capture on the phone and do everything else on the PC, then move what works onto the phone.
+
+The reason is that the methods are not chosen yet. Six ways of building a 3D model are on the table: ARCore's own path with learned depth, ARCore's raw depth alone, an open visual-inertial tracker (Basalt), an image-only tracker (stella_vslam), offline structure from motion (COLMAP) as a reference, and feed-forward 3D models. To compare them fairly, they must all see the *same* walk. A phone can only run one of them at a time, and a slow one would hold the others back; a PC can replay one recording through all six.
+
+What a recording must therefore hold:
+
+- **Every camera frame, none dropped.** Trackers follow features from one frame to the next; a gap of several frames can lose track. Wi-Fi drops frames when it slows, so the phone writes every frame to its own storage first and sends the files afterwards.
+- **Grey images without compression loss** for the trackers, which follow small image patches that JPEG blurs, and **colour images** for the depth and detection models, which were trained on colour.
+- **The gyroscope and accelerometer**, uncorrected, as fast as the phone allows, on the same clock as the camera (chapter 12 explains why a few milliseconds matter).
+- **Everything ARCore says** about each frame: its pose, whether it is tracking, its tracked points, its raw depth and confidence, and its later corrections. This is the ARCore method's input and everyone else's reference.
+- **The camera's settings per frame** (exposure, readout time, focus), which the trackers need to model a rolling-shutter phone camera.
+
+ARCore's *shared-camera mode* makes this possible on one phone: ARCore tracks as usual and the same camera session also hands every image to the app.
+
+> **Project status (14 October 2026).** Two partial apps exist: the check app (colour, ARCore outputs, no motion sensors, live stream) and the raw recorder (lossless grey, motion sensors, ARCore poses, no depth). Task95 merges them into one capture app. The first test walk goes through a house, down and back up the stairs, which is a known hard case for ARCore (chapter 11).
+
 ## What is still unmeasured
 
 - ARCore's pose, depth and point accuracy on the Redmi (Tasks 52 and 75).

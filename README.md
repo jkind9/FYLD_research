@@ -304,6 +304,22 @@ A reference used for scoring is never fed to the method being scored, unless a r
 
 The owner ruled on 14 October 2026 that the system must be live (or update at least once per second) on the phone or a server, and that development splits into two streams. Both deliver the same per-frame data, so the processing side does not care which one produced it.
 
+**Capture first (owner, evening of 14 October 2026).** Until the methods are chosen, the phone only captures: one app records everything every method needs and delivers it to the PC, which stores it in one session format and runs every method from there. Running on the phone itself comes after, inside the same app. The focus shifts from measured dimensions to comparing the 3D reconstructions the different methods produce. The first test recording is a walk through the owner's house: start upstairs, go down, come back up.
+
+Today there are two phone apps with two formats: the Stream A check app streams colour JPEGs with ARCore's outputs but no motion sensors, and the Stream B recorder saves lossless grey frames and motion sensors with ARCore's poses but no depth or tracked points. Neither alone feeds every method:
+
+| Method (3D path, then surface) | Licence | Reads | Check app (A) | Recorder (B) |
+|---|---|---|---|---|
+| ARCore's path, learned depth sized to ARCore's raw depth, fused ([src/live](src/live/README.md)) | ARCore terms; own code | colour frames, ARCore pose and intrinsics, raw depth with confidence, tracked points, anchor corrections | yes | no depth, points or colour |
+| ARCore's raw depth fused along ARCore's path | ARCore terms | raw depth with confidence, poses, depth intrinsics | yes | no |
+| Open visual-inertial tracking: Basalt, OKVIS2; OpenVINS as reference only ([experiments/open_vio](experiments/open_vio/README.md)) | BSD; GPL | every frame, grey, ideally lossless; uncalibrated gyroscope and accelerometer at the fastest rate on the camera's clock; per-frame exposure and readout; a Kalibr calibration from a target video and about 3 h at rest | no motion sensors; drops frames | yes |
+| Image-only live SLAM: stella_vslam; ORB-SLAM3 as reference only ([experiments/live_slam](experiments/live_slam/README.md)) | BSD-2; GPL | every frame, intrinsics | drops frames | yes |
+| Offline structure from motion, COLMAP, as the reference path ([experiments/sfm](experiments/sfm/README.md)) | BSD | sharp frames, intrinsics | yes | yes (grey) |
+| Learned depth along any of the paths above, fused (chapter 5) | Apache-2.0 | colour frames, the path, points or depth for sizing | yes | grey only |
+| Feed-forward 3D models that output cameras and depth together, such as Depth Anything 3 (Task74) | varies by model | colour frames | yes | grey only |
+
+So the next app (Task95) merges the two: ARCore's shared-camera mode gives every camera frame to the app while ARCore tracks, the motion sensors are read on the same clock, and every frame is written to the phone (lossless grey for the trackers, colour JPEG for depth models) with ARCore's per-frame outputs, then sent to the PC; the live stream of phone session v1 stays as a second mode for `src/live`. Until it exists, the house walk can be streamed with the check app's *Stream to computer* button: that feeds the ARCore rows, image-only SLAM, COLMAP and learned depth, but not the visual-inertial trackers.
+
 **Stream A: the ARCore product route.**
 
 1. Extend the Redmi app's stream to carry ARCore's tracked points, raw depth with confidence, every pose correction and the tracking state, under one written "phone session" definition shared by the app and the computer. **Built 14 October (Task87):** [phone_session_v1.md](experiments/01_camera_capture_delivery/phone_session_v1.md), with one test fixture that both the Java encoder and the Python reader must match; not yet run on the phone.

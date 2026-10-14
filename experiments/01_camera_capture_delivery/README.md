@@ -297,6 +297,10 @@ The check app now has an **ARCore and privacy notice** button above its status, 
 
 Task75 stays open: real tape-measured recordings and the offline COLMAP comparison have not been done. Task61 owns acceptance limits. Live object overcounting remains the issue recorded under Task89.
 
+### Next: one capture app (Task95, planned 14 October 2026)
+
+The owner decided on 14 October that the phone only captures for now and the PC stores and processes. The check app and Stream B's raw recorder (`experiments/open_vio/recorder/`) will merge into one app that records every frame (lossless grey and colour JPEG), the motion sensors on the camera's clock, the camera's per-frame settings and every ARCore output to the phone, then sends the session to the PC in one folder that `src/live`, the open trackers and the offline methods all read. The live phone session v1 stream stays as a second mode. The inputs each method needs are tabled in the root README under "What comes next".
+
 ## Current delivery ownership, 6 October 2026
 
 [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.
