@@ -40,6 +40,7 @@ The project builds and tests each box on its own with known inputs, then connect
 | 9 | [Measuring accuracy](09_evaluation_and_datasets.md) | Benchmarks, reference data, and the scores used everywhere in the project |
 | 10 | [What we have learned so far](10_findings_timeline.md) | The project's main results in the order they were found, with numbers |
 | 11 | [Inside ARCore](11_inside_arcore.md) | How the phone's tracker works: IMU and camera fusion, the MSCKF filter, mapping and loop closure, depth from motion, and what the Redmi measured |
+| 12 | [Rebuilding ARCore from open parts](12_rebuilding_arcore.md) | Replacing ARCore with open-source parts: camera and motion-sensor clocks, exposure and rolling shutter, the project's raw recorder, measuring the time offset, calibration and choosing a tracker |
 
 Chapters 1 to 4 are the core of SLAM. If you only have an hour, read 1, 3, 4 and 10.
 
