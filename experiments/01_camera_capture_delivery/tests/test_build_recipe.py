@@ -11,6 +11,7 @@ import struct
 import sys
 import tarfile
 import zipfile
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -25,6 +26,11 @@ verify = importlib.import_module("verify")
 export = importlib.import_module("export")
 bytecode = importlib.import_module("verify_bytecode")
 warm = importlib.import_module("warm")
+
+
+def deployment_name(app, evidence):
+    day = datetime.now(timezone.utc).strftime("%Y%m%d")
+    return f"{app}_{day}_{evidence['apk_sha256'][:8]}"
 
 SOURCE = b"print(42)\n"
 FILENAME = "/scratch/app/main.py"
@@ -351,7 +357,7 @@ def test_export_complete_bundle_and_refuse_overwrite(verified, tmp_path):
     apk, evidence, _ = verified
     output = tmp_path / "offline"
     published = export.publish_bundle(apk, evidence, output, "fixture-001", verifier_dir(evidence))
-    assert published == output / "smoke_fixture-001"
+    assert published == output / deployment_name("smoke", evidence)
     assert recipe.sha256(published / apk.name) == recipe.sha256(apk)
     assert json.loads((published / "verification.json").read_text())["apk_sha256"] == recipe.sha256(apk)
     assert (published / "README.md").is_file()
@@ -396,7 +402,7 @@ def test_camera_export_revalidates_and_publishes_camera_receipt(verified, tmp_pa
     published = export.publish_bundle(apk, camera, tmp_path / "offline", "redmi-001",
                                       verifier_dir(evidence))
 
-    assert published == tmp_path / "offline" / "camera_redmi-001"
+    assert published == tmp_path / "offline" / deployment_name("camera", camera)
     saved = json.loads((published / "verification.json").read_text(encoding="utf-8"))
     assert saved == camera
     assert "Camera2 capability checks" in (published / "README.md").read_text(encoding="utf-8")
@@ -512,9 +518,10 @@ def test_export_interruption_preserves_prior_bundle(verified, tmp_path, monkeypa
         raise OSError("simulated interruption before publication")
 
     monkeypatch.setattr(export, "_publish", interrupt)
+    monkeypatch.setattr(export, "bundle_name", lambda *_: "smoke_20261015_12345678", raising=False)
     with pytest.raises(OSError, match="simulated interruption"):
         export.publish_bundle(apk, evidence, output, "interrupted", verifier_dir(evidence))
-    assert not (output / "smoke_interrupted").exists()
+    assert not (output / "smoke_20261015_12345678").exists()
     assert (prior / apk.name).read_bytes() == before
     assert not (output / ".publish.lock").exists()
     assert list(output.glob(".staging-*"))
@@ -526,7 +533,7 @@ def test_export_copy_failure_and_changed_bytes(verified, tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="hash"):
         export.publish_bundle(apk, evidence, tmp_path / "offline", "badcopy",
                               verifier_dir(evidence))
-    assert not (tmp_path / "offline" / "smoke_badcopy").exists()
+    assert not list((tmp_path / "offline").glob("smoke_*"))
 
 
 def test_export_stale_legacy_lock_does_not_block_recovery(verified, tmp_path):
@@ -562,7 +569,7 @@ def test_export_same_run_race_has_one_complete_winner(verified, tmp_path, monkey
             except FileExistsError as error:
                 errors.append(error)
     assert len(published) == len(errors) == 1
-    assert (output / "smoke_race/verification.json").is_file()
+    assert (output / deployment_name("smoke", evidence) / "verification.json").is_file()
 
 
 def test_export_cli_reruns_verifiers_before_offline_handoff(verified, tmp_path, monkeypatch, capsys):
@@ -587,7 +594,7 @@ def test_export_cli_reruns_verifiers_before_offline_handoff(verified, tmp_path, 
                                        str(tmp_path / "hostpython"), "--build-tools",
                                        str(tmp_path / "tools")])
     export.main()
-    target = tmp_path / "offline/smoke_cli-run"
+    target = tmp_path / "offline" / deployment_name("smoke", evidence)
     assert len(calls) == 1
     assert calls[0][0][0:3] == (apk, evidence["settings"], source)
     assert calls[0][1] == {"camera_profile": None}
