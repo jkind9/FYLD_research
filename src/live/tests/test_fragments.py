@@ -36,3 +36,19 @@ def test_moving_the_group_anchor_moves_its_surface():
     after = fragments.surface()
     assert len(after) == len(before)
     assert np.allclose(np.median(after, 0) - np.median(before, 0), [0.0, 0.0, 0.5], atol=1e-6)
+
+
+def test_missing_group_start_uses_a_received_anchor_and_keeps_that_binding():
+    fragments = Fragments(voxel_m=0.02, keyframes_per_fragment=10)
+    fragments.set_anchor(1, np.eye(4))
+    wall(fragments, 1, np.eye(4))
+    before = fragments.surface()
+    moved = np.eye(4)
+    moved[:3, 3] = [0.0, 0.0, 0.5]
+    fragments.set_anchor(0, np.eye(4))
+    fragments.set_anchor(1, moved)
+    after = fragments.surface()
+    assert len(after) == len(before) > 0
+    assert np.allclose(np.median(after, 0) - np.median(before, 0), [0.0, 0.0, 0.5], atol=1e-6)
+    wall(fragments, 2, moved)
+    assert fragments.frames_per_fragment() == {0: 2}
