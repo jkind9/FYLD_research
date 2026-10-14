@@ -273,6 +273,18 @@ Redmi Note 11 Pro (`2201116TG`, Android 13), Google Play Services for AR 1.56, p
 
 The first version saved the report before the stream check had finished, so the report lacks the stream's round-trip delay; the receiver's summary above has the throughput. The second version (portrait, camera preview, one "Run all checks" button) saves only after the stream ends. The owner found the first version's screen hard to use; it was rebuilt the same day.
 
+### Next: extend the stream (handover, 14 October 2026)
+
+The owner will start a new session to extend the app's stream. What the processing side needs per frame, from learning chapter 11 and the walkthrough layers:
+
+- ARCore's tracked points with their 3D positions and the pixel where each was seen (`Frame.acquirePointCloud()` gives 3D points and IDs; project them with the frame's pose and intrinsics);
+- raw depth (160 x 90 here) and its confidence image, sent when a new depth image arrives (`Frame.acquireRawDepthImage16Bits()` timestamps), so learned depth can be sized with thousands of confident pixels rather than about 19 points;
+- every pose correction: ARCore may move past poses after a loop closure, so the stream should carry the frame's pose as reported then, and the processing side must accept later corrections;
+- the tracking state and failure reason, and the CPU image at a chosen resolution (640 x 480 now; 1280 x 720 and 1920 x 1080 are offered);
+- one written definition of these messages (the "phone session"), shared by the app and `host/`, with a test fixture.
+
+The rebuilt app's run on 14 October showed all checks passing on the phone, but no stream or report reached the receiver; the computer-address box was probably empty on the first run of the new version (it is remembered only after a run). Confirm the stream row before relying on it.
+
 ## Current delivery ownership, 6 October 2026
 
 [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.

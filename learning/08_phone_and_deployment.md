@@ -18,6 +18,8 @@ Its accuracy depends on the phone and the walk. Published tests range from about
 
 > **Project result: ARCore works on the project's Redmi.** A 15 s walk tracked on 100% of 891 frames, 4.9 ms per update; raw depth is 160 x 90 from motion (the phone's depth sensor is not used), and the phone streamed 29 frames per second with their poses to a computer over Wi-Fi (Task85).
 
+How ARCore works inside is explained in [chapter 11](11_inside_arcore.md).
+
 ## Hosted against on the phone
 
 - **Hosted**: the phone records; a server with a GPU does the heavy work after upload. Most accurate methods (multi-view stereo, large learned models, offline SfM) live here.

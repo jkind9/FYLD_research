@@ -1,7 +1,7 @@
 ---
 id: "85"
 title: "Redmi check app: ARCore probe and host streaming test"
-status: in_progress
+status: done
 priority: MEDIUM
 type: experiment
 approval_status: owner 2026-10-14 - APK development for the Redmi approved; owner asked for tests of host streaming and of the ARCore module. Settings marked proposed by Claude are not owner-ruled.
@@ -104,12 +104,37 @@ ARCore is the planned camera tracker and size source on the phone (SLAM review, 
 
 | field | value |
 |---|---|
-| closing commit | (fill in) |
-| files changed | (fill in) |
-| test | (fill in) |
-| before / after | (fill in) |
-| result | (fill in) |
+| closing commit | pushed with the follow-up commit (owner asked to keep the repo current) |
+| files changed | experiments/01_camera_capture_delivery/phonecheck/ (Android app), host/ (receiver, protocol, report), tests/test_phonecheck_host.py, build/build-phonecheck.sh, README |
+| test | host tests 7 passed; APK builds (aapt checked); device run on the Redmi: report 7 PASS, stream 580 frames in 20 s |
+| before / after | Before: ARCore checks SKIPPED (no SDK in the Camera2 app), no streaming test. After: ARCore installed, session, raw and smoothed depth, 3 camera configs, tracking 100% of 891 frames, 4.9 ms per update, raw depth 160 x 90; stream 29 fps, 0.70 MB/s |
+| result | Target met: the app installs and every check is passed or explained. Rebuilt UI (portrait, preview, one button) confirmed by the owner; its own stream run did not reach the receiver (address box probably empty) |
 
 Notes / caveats / follow-ups:
 
--
+- Install route: MIUI blocks installs over debugging without a SIM ("Install via USB" needs a Mi account and SIM); the owner installed the APK from email.
+- The first UI was hard to use (landscape, no preview); rebuilt the same day. The first version saved the report before the stream check finished, so that report lacks the stream's round-trip delay.
+- The test app does not show the ARCore notice a product must show (research/phone_ar_platforms/arcore_commercial_terms.md).
+- Next (new session, owner): extend the stream with points, raw depth and confidence, pose corrections and a shared phone-session definition (README "Next: extend the stream").
+
+## Files
+
+- experiments/01_camera_capture_delivery/README.md (+12 -0, 296 lines)
+- learning/08_phone_and_deployment.md (+2 -0, 56 lines)
+- learning/11_inside_arcore.md (+114 -0, 114 lines)
+- learning/README.md (+1 -0, 57 lines)
+- research/phone_ar_platforms/README.md (+5 -0, 25 lines)
+- research/phone_ar_platforms/arcore_internals.md (+43 -0, 43 lines)
+
+## Checked
+
+- `.venv-sfm pytest experiments/01_camera_capture_delivery/tests/test_phonecheck_host.py -> 7 passed; device run on the Redmi -> report 7 PASS, 580 frames streamed at 29 fps`
+- cost: 82 min from begin to finish; Claude tokens 39,007,592 (fresh input 118,716, cache read 38,808,936, output 79,940; 1 session)
+- new duplicate blocks: 0
+- complexity share (functions over 10): n/a (no functions) (was n/a (no functions))
+- dead code on added lines: 0
+- prose patterns: 6 in 2239 words: bold-labels "4 items", bold-labels "3 items", bold-labels "6 items", bold-labels "3 items", bold-labels "3 items"
+
+## Left over
+
+Confirm the rebuilt app's stream row (nothing reached the receiver on its run); extend the stream (new session)
