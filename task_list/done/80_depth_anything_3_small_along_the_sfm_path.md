@@ -1,7 +1,7 @@
 ---
 id: "80"
 title: Depth Anything 3 Small along the SfM path
-status: in_progress
+status: done
 priority: HIGH
 type: experiment
 approval_status: filed 2026-10-14 from the owner's handover prompt (step 2b, Task74's Small model); settings marked proposed by Claude are not owner-ruled
@@ -106,12 +106,33 @@ Files: `experiments/sfm/src/posed.py` (windows and sized extrinsics, numpy only)
 
 | field | value |
 |---|---|
-| closing commit | (fill in) |
-| files changed | (fill in) |
-| test | (fill in) |
-| before / after | (fill in) |
-| result | (fill in) |
+| closing commit | not committed at finish; pushed with the follow-up commit the owner asked for (repo kept up to date) |
+| files changed | experiments/sfm/src/posed.py, dump_da3_depth.py, tests/test_posed.py (new); experiments/sfm/README.md; research/depth_estimation/README.md |
+| test | experiments/sfm/tests 40 passed in .venv-sfm; ruff clean |
+| before / after | Mean distance baseline (Depth Anything V2 sized to SfM points, 20 readings) ICL 93.0, desk 155.8, xyz 166.2 mm; best DA3 Small mode per recording: ICL 78.6 mm (posed, sized), desk 237.8 mm (posed stride 10), xyz 298.5 mm (single, sized) |
+| result | Accuracy target not met (only ICL improves, by 15%); TUM much worse. Speed target met: 4.4-5.6 fps on the CPU |
 
 Notes / caveats / follow-ups:
 
--
+- Added during the task (not in the original plan): posed depth also scored after per-frame sizing to SfM points, and a `--stride 10` window variant. Reason: the first posed rows were 546-814 mm on TUM because the model sizes depth from a pose fit that 5 consecutive frames (about 0.3 s) cannot constrain (api.py `_align_to_input_extrinsics_intrinsics`).
+- Not tried: masking by the model's confidence map; the Base model; GPU.
+- Owner ruled on 14 October that deployment must be live; this used the offline SfM path as a stand-in.
+- Plan review: no independent reviewer (the owner has not asked for agents); started with `task.js start 80 --force`.
+
+## Files
+
+- experiments/sfm/README.md (+35 -3, 263 lines)
+- research/depth_estimation/README.md (+1 -0, 32 lines)
+
+## Checked
+
+- `.venv-sfm pytest experiments/sfm/tests -> 40 passed; ruff clean; DA3 Small mean distance ICL 78.6 mm (posed, sized) vs 93.0 baseline; desk 237.8 vs 155.8; xyz 298.5 vs 166.2; 4.4-5.6 fps CPU`
+- cost: 57 min from begin to finish; Claude tokens 23,226,812 (fresh input 400,716, cache read 22,741,106, output 84,990; 1 session)
+- new duplicate blocks: 0
+- complexity share (functions over 10): n/a (no functions) (was n/a (no functions))
+- dead code on added lines: 0
+- prose patterns: 1 in 1135 words: bold-labels "4 items"
+
+## Left over
+
+TUM gap unexplained (confidence masking untried); live SLAM stand-in to replace SfM per owner's live requirement; GPLv3 reference question pending; multi-view stereo needs GPU permission; Task76

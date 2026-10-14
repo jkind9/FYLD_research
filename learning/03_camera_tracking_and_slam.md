@@ -39,7 +39,7 @@ This is *visual-inertial odometry* (VIO). ARCore on Android works this way, live
 
 ## SLAM against structure from motion
 
-They solve the same problem. SLAM is usually live and processes frames in order; structure from motion (chapter 4) is usually offline and can use every frame at once. Offline gives the most accurate path; live gives a path while the person is still on site. Neither builds dense surfaces or recognises objects: those are later stages that use the poses. [How the methods fit together](methods_inputs_and_outputs.md) draws the boundary and lists every method's inputs and outputs.
+They solve the same problem. SLAM is usually live and processes frames in order; structure from motion (chapter 4) is usually offline and can use every frame at once. Offline gives the most accurate path; live gives a path while the person is still on site. The owner ruled on 14 October 2026 that the deployed system must be live (or update at least once per second), so SLAM, in practice ARCore on the phone, is the deployable choice; SfM is used only as an accurate reference on recorded data. Neither builds dense surfaces or recognises objects: those are later stages that use the poses. [How the methods fit together](methods_inputs_and_outputs.md) draws the boundary and lists every method's inputs and outputs.
 
 ## Why the project's first tracker failed
 

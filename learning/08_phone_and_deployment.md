@@ -1,6 +1,6 @@
 # 8. The phone
 
-The owner ruled on 7 October 2026 that the system must be deployed on a phone, and that any method slower than one frame per second is not worth using. This chapter covers what a phone can supply, how that changes the design, and what is still unmeasured.
+The owner ruled on 7 October 2026 that the system must be deployed on a phone, and that any method slower than one frame per second is not worth using. On 14 October 2026 the owner added that processing must be live, or update at least once per second, even on a server: no method may wait for the whole walk to be captured. This chapter covers what a phone can supply, how that changes the design, and what is still unmeasured.
 
 ## What ARCore gives an Android app
 
@@ -19,7 +19,7 @@ Its accuracy depends on the phone and the walk. Published tests range from about
 - **Hosted**: the phone records; a server with a GPU does the heavy work after upload. Most accurate methods (multi-view stereo, large learned models, offline SfM) live here.
 - **On the phone**: runs on the handset with no network, for quick checks on site. Needs small models (a few million to tens of millions of parameters) through a mobile runtime such as LiteRT, ONNX Runtime Mobile or ExecuTorch.
 
-Which parts run where is still an open owner decision (Task61). The 1 frame per second floor applies either way.
+Which parts run where is still an open owner decision (Task61). Either way, results must update live, at least once per second.
 
 ## The design the results point to
 
@@ -30,7 +30,7 @@ Putting chapters 2-5 together:
 | Camera path | ARCore's own tracking, not a depth-based tracker | Image-feature tracking with refinement (SfM) is 3-5 times more accurate than the old depth-based tracker (chapter 3) |
 | Real-world size | ARCore's metric tracking, or about 20 depth readings at tracked points | 20 readings give a path within 1.15 times the best possible (chapter 4) |
 | Dense surfaces | A small learned depth model, resized each frame to ARCore's tracked points | Within 8-27 mm of the true-path ceiling on recorded data (chapter 5) |
-| Better surfaces, if needed | Hosted multi-view stereo or SfM refinement after upload | Not yet run (needs GPU permission) |
+| Better surfaces, if needed | Multi-view stereo on recent frames, on a server that updates at least once per second | Not yet run (needs GPU permission) |
 
 The small depth model candidates measured so far: ZipDepth's phone build (6.1M parameters, shape AbsRel 0.07, 24 ms per frame on a desktop CPU, exported to ONNX; its TFLite conversion failed) and Depth Anything V2 Small (25M parameters, 218-318 ms per frame on a desktop CPU). Neither has run on the phone yet (Task57).
 

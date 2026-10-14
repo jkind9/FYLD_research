@@ -26,11 +26,12 @@ The project's main findings in the order they were found, with the numbers behin
 - **14 October. The image-only design reaches that ceiling.** Depth Anything sized to SfM points and fused along the SfM path: 92, 151 and 199 mm (Task72).
 - **14 October. Twenty depth readings fix the size.** Twenty metric readings at SfM points, anywhere in the walk, give a path within 1.15 times the best possible and the same surface error. More readings, or readings in every frame, add nothing (Task78).
 - **14 October. Prompting depth with sparse points does not help.** Prompt Depth Anything fed with SfM points: no better on xyz, 39% worse on desk, 58% worse on ICL than Depth Anything sized to the same points. It runs at 2.2-2.6 frames per second on the CPU (Task79).
-- **14 October. Depth Anything 3 Small, single image, is worse than V2 here.** Sized the same way: 288 mm (desk) and 299 mm (xyz) against 156 and 166 mm. Its pose-conditioned mode is still being checked (Task80, in progress).
+- **14 October. Depth Anything 3 Small wins on synthetic data only.** Given the camera poses and sized to the points: 79 mm on ICL, 15% better than V2. On the real TUM recordings it is two to three times worse (best 238 mm desk, 299 mm xyz). 4.4-5.6 frames per second on the CPU (Task80).
+- **14 October. The deployed system must be live.** The owner ruled that tracking and mapping must run live, or update at least once per second, on the phone or a server. Whole-clip structure from motion is therefore a scoring reference, not a deployable part. Everything downstream (per-frame sizing, metric readings, fusion) already works one frame at a time.
 
 ## What this adds up to
 
-1. **Get the camera path from image features with joint refinement**, not from aligning depth maps. On the phone that is ARCore's tracking; offline it is SfM.
+1. **Get the camera path from a live SLAM system with joint refinement**, not from aligning depth maps. On the phone that is ARCore's tracking. SfM was the offline stand-in used to prove the design on recorded data.
 2. **Get the real-world size from a few metric readings or the IMU**, never from a learned depth model's own metres.
 3. **Use learned depth only for dense shape**, resized every frame to the tracked points.
 4. **The remaining error is the depth model's shape** (8-16 cm average). The untried next step is multi-view stereo along the SfM path, which needs GPU permission.
@@ -39,6 +40,7 @@ The project's main findings in the order they were found, with the numbers behin
 
 - How accurate is ARCore on the project's phone, for path, points and depth (Tasks 52, 75)?
 - Does any of this hold on a real site walk outdoors?
+- How much accuracy is lost when the SfM stand-in is replaced by a live SLAM system that only sees past frames?
 - How much better is multi-view stereo than resized learned depth?
 - Can objects be counted reliably once positions come from the improved path (Task56)?
 - What runs on the phone, and at what speed, memory and battery cost (Tasks 57, 61)?

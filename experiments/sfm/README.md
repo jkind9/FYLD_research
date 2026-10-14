@@ -216,6 +216,36 @@ What this shows:
 - **Depth Anything resized per frame to the points stays the best learned-depth result here.** The remaining gap to the Task71 ceiling (xyz 8 mm, desk 27 mm, ICL 11 mm) is small compared with the gap to the sensor.
 - Not tried: a denser prompt (for example SfM points plus the sparse points of neighbouring frames reprojected into this frame), fine-tuning the model on sparse prompts, or the Large model (340M parameters, too slow for the floor on a phone).
 
+## Depth Anything 3 Small along the SfM path (Task80)
+
+Depth Anything 3 Small (80M parameters, Apache-2.0 code and checkpoint, commit 3d835ec) can take one image, or several images with their camera poses and intrinsics. Every row uses the SfM path sized from 20 metric readings (Task78), and the same fusion, reference and scoring as above. Modes:
+
+- *single*: one image at a time, then each frame resized to its SfM points (Task72's rule);
+- *posed*: windows of 5 consecutive frames given the sized SfM poses and the camera; the model returns depth in the poses' units;
+- *posed, stride 10*: the 5 frames of each window are 10 frames apart, so the window spans more camera motion;
+- each posed mode is also scored after resizing each frame to its SfM points.
+
+Mean distance to the reference:
+
+| Mode | ICL | TUM desk | TUM xyz |
+|---|---:|---:|---:|
+| Depth Anything V2, sized to SfM points (Task78 baseline) | 93.0 mm | 155.8 mm | 166.2 mm |
+| DA3 single, sized to SfM points | 82.7 mm | 287.5 mm | 298.5 mm |
+| DA3 posed, 5 consecutive frames | 281.7 mm | 545.8 mm | 813.7 mm |
+| DA3 posed, 5 consecutive frames, sized to SfM points | **78.6 mm** | 318.2 mm | 490.0 mm |
+| DA3 posed, stride 10 | 108.5 mm | 237.8 mm | 504.4 mm |
+| DA3 posed, stride 10, sized to SfM points | 85.8 mm | 252.1 mm | 455.8 mm |
+| Task71 ceiling (V2, true poses, exact per-frame size) | 82 mm | 129 mm | 158 mm |
+
+Points within 5 cm on ICL: 58.8% (posed, sized) against 46.6% for the baseline. Speed on the CPU: 4.4-4.7 frames per second single, 5.3-5.6 posed (5 images per call), end to end.
+
+What this shows:
+
+- **On ICL (synthetic) Depth Anything 3 is the best learned depth so far.** Posed and sized to SfM points it is 78.6 mm, 15% below Depth Anything V2 and below V2's true-pose ceiling of 82 mm; single-image is 82.7 mm.
+- **On the real TUM recordings it is much worse**: 238-546 mm on desk and 299-814 mm on xyz, against 156 and 166 mm for V2. The cause is not established. The TUM frames have motion blur and Kinect colour; ICL is clean and rendered. Confidence masking (the model returns a confidence map, unused here) was not tried.
+- **Posed mode does not size depth by itself on short windows.** The model sets its depth size from a fit between its own predicted poses and the given ones (`api.py`, `_align_to_input_extrinsics_intrinsics`), after scaling the given positions by their median distance (clamped at 0.1). Five consecutive frames cover about 0.3 s of motion, too little for that fit: 282-814 mm. Spreading the window (stride 10) helps on all three (109, 238, 504 mm) but does not fix TUM.
+- The Task80 target (20% better than the baseline on two of three recordings) is not met; the speed target (1 frame per second) is.
+
 ## Status and handover, 13 October 2026 (overnight)
 
 - Done (Task67): this folder's code, 11 tests, and SIFT runs on TUM xyz, TUM desk (both calibrations) and ICL living room 2; results above.
@@ -226,6 +256,8 @@ What this shows:
 ## Status and handover, 14 October 2026
 
 - Done (Task78): size from N metric readings; 20 readings are enough.
-- Done (Task79): Prompt Depth Anything fed with SfM points; no gain over Depth Anything resized to the points.
-- Not run: multi-view stereo along the SfM path (COLMAP patch_match_stereo, needs CUDA). The owner's GPU permission line was left blank, so it stays unrun. It is now the main untried route to a better dense surface.
-- Task80 (Depth Anything 3 Small, single and posed modes) is running: `%TEMP%/da3_80_queue.sh`, log `%TEMP%/da3_80_queue.log`. Setup: `git clone https://github.com/ByteDance-Seed/Depth-Anything-3 third_party/depth-anything-3` at commit 3d835ec1a5802d64a8b8b15f817a1ab54809bfe4, and `.venv-yolo/Scripts/python.exe -m pip install --no-deps --target third_party/da3-deps moviepy==1.0.3 trimesh plyfile pillow_heif decorator proglog imageio_ffmpeg pycolmap==4.2.1 evo natsort argcomplete`; run with `PYTHONPATH=<repo>/third_party/depth-anything-3/src;<repo>/third_party/da3-deps`. When it says `QUEUE DONE`: `report.py --dense` over the dense_* folders (rows labelled `DA3 Small <mode>, 20 readings`), add a table here, read each dump's `index.json` for fps, add a research row, `task.js finish 80`. Follow-up queue `%TEMP%/da3_80b_queue.sh` (log `%TEMP%/da3_80b_queue.log`, starts when the first queue ends): posed mode with 5 consecutive frames gave 546-814 mm on TUM because Depth Anything 3 sets its depth size from a pose fit (`api.py` `_align_to_input_extrinsics_intrinsics`), which a window spanning about 0.3 s of motion cannot constrain. The follow-up scores the posed dumps sized to SfM points, and a `--stride 10` variant (window members 10 frames apart) both raw and sized. Then Task76 (walkthrough readers).
+- Done (Task79): Prompt Depth Anything fed with SfM points; no gain.
+- Done (Task80): Depth Anything 3 Small; best on ICL (78.6 mm posed and sized), much worse on TUM.
+- Owner, 14 October: the deployed system must be live (or update at 1 frame per second or faster), on the phone or a server. Whole-clip structure from motion is therefore a scoring reference only. Next: replace the SfM stand-in with a live SLAM run on the same recordings, scored using only past frames, then rerun the Task72/78 surface rows on its output. Waiting on the owner: whether GPLv3 systems (ORB-SLAM3) may be used as an accuracy reference.
+- Not run: multi-view stereo along the path (needs CUDA; GPU permission not given).
+- Task76 (walkthrough readers) waits for the live-SLAM decision, since it was written to read SfM output.

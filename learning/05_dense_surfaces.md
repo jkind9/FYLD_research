@@ -58,10 +58,11 @@ Mean distance from the reconstructed surface to the reference (lower is better).
 | Depth Anything, exact per-frame size, true path (ceiling) | 82 mm | 129 mm | 158 mm |
 | Depth Anything sized to SfM points, SfM path, 20 metric readings | 93 mm | 156 mm | 166 mm |
 | Prompt Depth Anything fed with SfM points, same path | 147 mm | 217 mm | 168 mm |
-| Depth Anything 3 Small, single image, sized to SfM points | not yet scored | 288 mm | 299 mm |
+| Depth Anything 3 Small, single image, sized to SfM points | 83 mm | 288 mm | 299 mm |
+| Depth Anything 3 Small, given the camera poses, sized to SfM points | **79 mm** | 318 mm | 490 mm |
 | SfM sparse points alone (best-fit size) | 77 mm, 4% covered | 48 mm, 20% covered | 57 mm, 21% covered |
 
-Sources: Tasks 71, 72, 78, 79 and 80 in `experiments/sfm/README.md`. Task 80 (Depth Anything 3) was still running when this was written; its posed mode gave implausibly large errors on TUM and is being checked before it is reported.
+Sources: Tasks 71, 72, 78, 79 and 80 in `experiments/sfm/README.md`, which also lists Depth Anything 3's other modes.
 
 What this teaches:
 
@@ -69,7 +70,8 @@ What this teaches:
 - **Sizing per frame matters most.** It cuts Depth Anything's error by 2-3 times.
 - **The image-only path costs almost nothing.** Depth Anything sized to SfM points along the SfM path (the deployable design) is within 8-27 mm of the true-path ceiling.
 - **What remains is the depth model's shape.** Even with perfect size and poses, Depth Anything's surface is 8-16 cm off on average, and only 23-53% of its points are within 5 cm. Better size correction cannot fix that.
-- **Newer models are not automatically better here.** Prompt Depth Anything and Depth Anything 3 Small (single image) were worse than Depth Anything V2 sized to the same points.
+- **Newer models are not automatically better here.** Prompt Depth Anything was worse everywhere. Depth Anything 3 Small, given the camera poses and sized to the points, was the best result on synthetic ICL (79 mm, below V2's ceiling) but two to three times worse on the real TUM recordings; the cause is not established.
+- **A model that takes camera poses still needs the poses to span enough motion.** Depth Anything 3 sets its depth size by fitting its own predicted poses to the given ones; five consecutive frames (about 0.3 s) were too little, giving 282-814 mm until each frame was resized to the points.
 - **The sparse SfM points are the most accurate geometry**, 48-77 mm mean with 64-83% within 5 cm, but they cover a fifth of the scene or less. Multi-view stereo would densify exactly these.
 
 ## Try it

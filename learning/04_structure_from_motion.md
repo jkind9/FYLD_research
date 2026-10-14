@@ -61,7 +61,7 @@ What this teaches:
 - **Learned features are not automatically better.** ALIKED with LightGlue helped only with the incremental mapper on TUM. With the global mapper on TUM the positions collapsed (fitted size near 0) although every frame was registered; on ICL both ALIKED runs were far worse than SIFT. ALIKED kept about 450 points per TUM frame against SIFT's 1,800-2,800.
 - **The sparse points are very accurate but sparse.** 64-83% of them lie within 5 cm of the true surface, but they cover only 4-20% of it (Task72). Dense surfaces need chapter 5.
 
-Speed: 1.2-7.1 frames per second end to end, offline, on a desktop CPU. A phone would not run this; ARCore tracks the same kind of features live with its IMU. SfM's role in the project is the accurate reference path and the evidence for the design.
+Speed: 1.2-7.1 frames per second end to end, offline, on a desktop CPU, but only after every frame has been captured. The deployed system must be live (owner ruling, 14 October 2026), so SfM is not a deployable part: ARCore tracks the same kind of features live with its IMU. SfM's role in the project is the accurate reference path on recorded data, and the evidence for the design. Its per-frame points were refined using later frames too, so results built on them are somewhat better than a live system would get.
 
 ## Newer alternatives
 
