@@ -62,7 +62,7 @@ Use the `.venv-sfm` environment (numpy, scipy, OpenCV and Pillow). The receiver 
 
 ### Build, install, record
 
-1. Build in WSL: `wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh`. This runs the JVM tests, builds the APK and stages `.apk` and `.apk.bin` in `mobile deployment/capture_<date>/`. The rawrecorder and phonecheck build scripts are retired.
+1. Build in WSL: `wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh`. This runs the JVM tests, builds the APK and stages `.apk` and `.apk.bin` in `mobile_deployments/capture_<YYYYMMDD>_<hash8>/`. See the [deployment index](../../mobile_deployments/README.md) for the current version. The rawrecorder and phonecheck build scripts are retired.
 2. Install from email on the Redmi (MIUI blocks adb installs). Start `capture_receiver.py` on the PC; enter `192.168.68.123` and port `8766` in the app. Allow Python through the Windows firewall on private networks.
 3. Run all checks: ARCore setup and tracking, a 50 MiB link-speed test and a timed compression check. The ARCore notice remains in the app.
 4. First walk: start upstairs, go downstairs, return upstairs, Stop. Leave the app open while the queue drains; sending continues after Stop.

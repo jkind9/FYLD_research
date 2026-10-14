@@ -41,7 +41,8 @@ data/*
 !data/README.md
 checkpoints/
 outputs/
-mobile deployment/
+mobile_deployments/*
+!mobile_deployments/README.md
 build/
 !experiments/01_camera_capture_delivery/build/
 !experiments/01_camera_capture_delivery/build/*.py

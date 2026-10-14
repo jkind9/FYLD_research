@@ -175,13 +175,15 @@ Promote the observation format and reader when another experiment consumes them 
 
 ## Android package build and offline handoff
 
+Current installable APKs are listed in [mobile_deployments/README.md](../../mobile_deployments/README.md). Task98 consolidated the handoffs there, retaining FYLD capture and the latest Camera2 diagnostic. Older smoke, phonecheck and raw-recorder APKs were removed. Historical build results below describe those earlier binaries.
+
 [Task24](../../task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md) owns the first-party p4a build and export helpers in `build/`, the package-only app in `app/main.py`, the native compile control in `native/smoke.c`, and build checks in `tests/`. Its cached WSL packaging route passed; clean dependency and container builds remain follow-ups. The app only prints `42`. It requests no camera permission and does not inspect camera or depth APIs. Task08 owns the separate capability and capture app.
 
 The reproduced route reused Android libraries already built on this workstation (a warm build). It uses Ubuntu 24.04.4, host Python 3.12.3, Java 17.0.20.1, python-for-android (p4a) `2026.05.09`, Android SDK API 36, build tools 35.0.0, NDK `28.2.13676358` and Gradle 8.14.3. The APK verifies as package `org.fyld.toolchainsmoke`, version `0.1` (10241), minimum Android API 24, target API 36, and 64-bit ARM (`arm64`) only. The final run took 27.34 seconds. Its SHA-256 is `2a1f1f821408d637cbb8416e465b273245c5813013a73684f7f70dab45fc26e5`; the packaged source matches `app/main.py` SHA-256 `58a44735ffdfa6b14977516ad6e6e642d477999cd361537028f2d6b99e07ad68`; the debug certificate SHA-256 is `45e634374292b269842a381e50dc1bb08d6b30db388ed4572a880d9b1670e1c3`. Signature, package metadata, arm64 native libraries and the 68-entry compressed Python bundle passed verification.
 
-This workstation's inputs are `/home/jkind/.venvs/p4a-2026.05.09` (p4a environment), `/home/jkind/Android/Sdk` (SDK and NDK), `/home/jkind/android-prep` (read-only predecessor source/distribution), and `/home/jkind/.gradle` (read-only Gradle cache copied into scratch). The successful run used `/tmp/fyld-task24-20261004-reviewed` for scratch and wrote its local handoff to `/mnt/c/Users/jkind/Documents/02_Work/01_fyld/mobile_depth_estimation_tracking/mobile deployment/smoke_20261004_reviewed/`.
+This workstation's inputs are `/home/jkind/.venvs/p4a-2026.05.09` (p4a environment), `/home/jkind/Android/Sdk` (SDK and NDK), `/home/jkind/android-prep` (read-only predecessor source/distribution), and `/home/jkind/.gradle` (read-only Gradle cache copied into scratch). The successful run used `/tmp/fyld-task24-20261004-reviewed` for scratch. Its smoke handoff was removed during Task98.
 
-The command for that run was:
+To repeat that build with the current handoff destination:
 
 ```sh
 wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-apk.sh \
@@ -190,21 +192,21 @@ wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-apk.sh 
   --predecessor-root /home/jkind/android-prep \
   --gradle-cache /home/jkind/.gradle \
   --scratch /tmp/fyld-task24-20261004-reviewed \
-  --output-root '/mnt/c/Users/jkind/Documents/02_Work/01_fyld/mobile_depth_estimation_tracking/mobile deployment' \
+  --output-root '/mnt/c/Users/jkind/Documents/02_Work/01_fyld/mobile_depth_estimation_tracking/mobile_deployments' \
   --run-id 20261004_reviewed --mode warm
 ```
 
-The exact verifier commands and their outputs are preserved in the handoff's `verification.json`. The debug APK is signed for testing, not for release.
+The publisher records verifier commands and outputs in `verification.json`. The debug APK is signed for testing, not for release.
 
-The local offline handoff is in `mobile deployment/smoke_20261004_reviewed/`. It contains the APK, `verification.json` and installation notes. The directory is ignored by Git so generated APKs and signing material are not committed. Transfer the APK to the handset, install it, and open it to check the package launch; this is only a packaging smoke test, not a camera test.
+New handoffs use `mobile_deployments/<app>_<YYYYMMDD>_<hash8>/`. APK bundles are ignored by Git; the deployment index is tracked. A smoke app checks packaging only, so it is no longer kept among the current handoffs.
 
 The separate fresh dependency build, limited to already-cached downloads, stopped because the `sdl2_image` recipe lacks its JPEG source archive and attempted a network clone. The build blocked network access, so no source was downloaded. Docker was available, but no local image matched Ubuntu 24.04.4, Python 3.12.3 and Java 17.0.20.1; no image was downloaded and no container build was claimed. Task24 remains in review with the container route as an explicit follow-up. Task08 can use the verified cached route meanwhile.
 
-Task08's native Camera2 APK was built from the pinned Java source with that cached WSL toolchain. The offline bundle is `mobile deployment/camera_20261004_camera_redmi_run6/`. Its APK is `unnamed_dist_1-debug.apk`, SHA-256 `35e2c420e38d3b857747ac255a1fd7f81791959c3e44d0a99911913af149c29a`; the receipt verifies package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, the CAMERA permission and launcher `org.fyld.capture.CameraActivity`. This is a warm cached build, not a clean dependency or container build. The Redmi was not connected during packaging. Its later on-device capability export is recorded below; the report does not attest the installed APK's version or binary hash.
+Task08's native Camera2 APK was built from the pinned Java source with that cached WSL toolchain. Its older 4 October bundle was removed during Task98. Its APK was `unnamed_dist_1-debug.apk`, SHA-256 `35e2c420e38d3b857747ac255a1fd7f81791959c3e44d0a99911913af149c29a`; the receipt verified package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, the CAMERA permission and launcher `org.fyld.capture.CameraActivity`. This was a warm cached build, not a clean dependency or container build. The Redmi was not connected during packaging. Its later on-device capability export is recorded below; the report does not attest the installed APK's version or binary hash.
 
 ### Task52 camera-source build, 6 October 2026
 
-The first warm build stopped at Java compilation because `CameraReport.java` declared `rect(Rect)` twice. The duplicate was removed and that source's profile hash was updated. The second warm build passed in WSL in 29.00 seconds. Its bundle is `mobile deployment/camera_task52_camera_java_review_20261006_02/`. The APK SHA-256 is `d7b2242e5e601ce73d82205f99c5884a75addbc167fdf2a2ed4135bdbe308545`. `verification.json` reports a verified build, package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, and the CAMERA permission. It confirms the Java source hashes match `build/camera-profile.json`. This verifies packaging only; installation, capture, report recovery and physical image export remain unverified.
+The first warm build stopped at Java compilation because `CameraReport.java` declared `rect(Rect)` twice. The duplicate was removed and that source's profile hash was updated. The second warm build passed in WSL in 29.00 seconds. Its retained bundle is `mobile_deployments/camera_20261006_d7b2242e/`, with APK `fyld-camera-diagnostic.apk` and an identical email copy. The APK SHA-256 is `d7b2242e5e601ce73d82205f99c5884a75addbc167fdf2a2ed4135bdbe308545`. Its original `verification.json` reports a verified build, package `org.fyld.capturecheck`, version `0.1` (10242), minimum API 24, target API 36, arm64 only, and the CAMERA permission. It confirms the Java source hashes match `build/camera-profile.json`. This verifies packaging only; installation, capture, report recovery and physical image export remain unverified.
 
 All 110 Task24 tests passed in WSL. Branch coverage across the five build modules was 82%, and Ruff passed. Run project tests through `python -B tools/check.py ...`; it checks that `task_list/` contains only task records before starting pytest, then removes its temporary test directory on exit. All test paths in `pytest.ini` are included. `.gitignore` also catches accidental pytest scratch folders. The separate Task13 scratch directory is retained as historical evidence.
 
@@ -249,12 +251,12 @@ Every check ends as PASS, FAIL with a reason, or SKIPPED with a reason; `host/re
 **Build** (WSL, the SDK and Gradle from the build route above; the first build downloads ARCore 1.56.0 from Google's Maven repository):
 
 ```text
-wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-phonecheck.sh
+wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh
 ```
 
-The APK lands in `runs/phonecheck_apk/` (ignored by Git).
+The check app was merged into FYLD capture. Its build and installation handoff now use `mobile_deployments/capture_<YYYYMMDD>_<hash8>/`; see the deployment index for the current APK. The v1 commands below describe the retired app and older recordings.
 
-**Install:** copy the APK to the phone and open it (allow installs from this source), or use wireless debugging: on the phone, Developer options > Wireless debugging > Pair device with pairing code, then in WSL `~/Android/Sdk/platform-tools/adb pair <ip>:<pair port>`, `adb connect <ip>:<port>`, `adb install -r runs/phonecheck_apk/phonecheck-debug.apk`.
+**Install:** copy the current capture APK to the phone and open it, allowing installs from the transfer app. The owner installs from email because MIUI blocks adb installs.
 
 **Run:** on the computer, `python experiments/01_camera_capture_delivery/host/receiver.py --out experiments/01_camera_capture_delivery/runs/phonecheck` prints the address to type into the app (phone and computer on the same Wi-Fi; allow Python through the Windows firewall on private networks). Press 1 to 4 in order. Each stream and report becomes a session folder with the frames, `frames.jsonl`, `report.json` and `summary.json`. Check a report with `python experiments/01_camera_capture_delivery/host/report.py <report.json>`.
 
@@ -289,13 +291,13 @@ The receiver checks every frame and closes the connection on a bad one, so a fau
 
 **Using it.** The app has a second button, *Stream to computer*, which sets up ARCore if needed and streams until pressed again; the screen shows frames sent and received, frames with depth, keyframes, and any connection error. *Run all checks* is unchanged (its 20 s stream step now sends v1 frames). The app refuses to stream with an empty computer-address box and says so, which was the likely reason the previous version's run never reached the receiver.
 
-**Build of 14 October:** `phonecheck-debug.apk` SHA-256 `29c8240b3090fc2cac5a846997baacea3b453a28511e908a085e5513792064c5`, copied to `mobile deployment/phonecheck_session_v1_20261014/` (ignored by Git) for installing. Not yet run on the Redmi; the frame rate with depth attached, the share of frames with new depth and how often ARCore moves anchors are still to be measured.
+**Historical build of 14 October:** `phonecheck-debug.apk` SHA-256 `29c8240b3090fc2cac5a846997baacea3b453a28511e908a085e5513792064c5`. FYLD capture superseded this APK and Task98 removed its handoff. It had not been run on the Redmi before replacement; sustained capture and anchor corrections still need measurement in the unified app.
 
 ### Field accuracy preparation (Task92, 14 October 2026)
 
 The [field capture guide](field_accuracy.md) describes repeatable camera placements, independent tape measurements and separate indoor, stair and outdoor sessions. `host/accuracy.py` reads the saved v1 sessions and reports loop closure in mm and percent of measured route length, orientation change, 3D distance errors, tracking loss, received gaps and anchor correction counts. It preserves reference-control labels, fits no scale and applies no later anchor corrections. Tests cover the scoring and a saved-session command-line run; these are synthetic checks, not measured phone accuracy.
 
-The check app now has an **ARCore and privacy notice** button above its status, with the required text and Google privacy/terms links. The new APK is staged at `mobile deployment/phonecheck_accuracy_20261014/fyld-phonecheck-accuracy.apk`; its SHA-256 is `5680c2836c62734fe387cd0317e0b5cd3256bf5f3c84ee5b847ddebcf5d0d751`. The Gradle build and four encoder JVM tests pass. The screen and links still need checking on the Redmi. No ADB device was attached at this check.
+The check app gained an **ARCore and privacy notice** button above its status, with the required text and Google privacy/terms links. That historical APK's SHA-256 was `5680c2836c62734fe387cd0317e0b5cd3256bf5f3c84ee5b847ddebcf5d0d751`. Its Gradle build and four encoder JVM tests passed. FYLD capture retains the notice and supersedes that handoff, which Task98 removed. The screen and links still need checking on the Redmi.
 
 Task75 stays open: real tape-measured recordings and the offline COLMAP comparison have not been done. Task61 owns acceptance limits. Live object overcounting remains the issue recorded under Task89.
 
@@ -334,7 +336,7 @@ It prints this PC's address (192.168.68.123 on the owner's network) to type into
 | PC | `tests/test_session_v2.py` (22), `tests/test_capture_receiver.py` (23) | the fixture parses to its written values; deflated grey reads back; 13 kinds of bad frame, 3 bad IMU batches and bad telemetry, end and hello are refused; a fake phone (`tests/fake_phone.py`) streams 40 frames with a window of 8, is cut off after message 25 and resumes: 40 frames, none missing or repeated, 2 connections; resends are acknowledged and not stored twice; a gap and a bad frame are refused; the speed check and report connections; the summary's IMU rates, clock base, MB/s and sending time after Stop |
 | Readers | `src/live/tests/test_stream.py`, `experiments/open_vio/tests` | a synthetic v2 folder written through the receiver's store is read by `session_v2.read_session`, replayed by `src/live`, and converted by `recording.py --euroc` |
 
-**Initial capture 1.0 build, 14 October:** `wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh` runs the 20 JVM tests (all pass) and builds `runs/capture_apk/capture-debug.apk`, SHA-256 `d260cda55fa5cfe80f5f92b87bee55c1a1afb09b5c77f917c481961413c18f5d`, 914 KB. It is staged for installing from email as `mobile deployment/capture_20261014/fyld-capture.apk` and `.apk.bin` (ignored by Git), because MIUI blocks installs over USB.
+**Initial capture 1.0 build, 14 October:** the WSL build passed 20 JVM tests and produced a 914 KB APK, SHA-256 `d260cda55fa5cfe80f5f92b87bee55c1a1afb09b5c77f917c481961413c18f5d`. Version 1.1 supersedes it. The build script now publishes only into `mobile_deployments/capture_<YYYYMMDD>_<hash8>/`, with `.apk` and `.apk.bin` for email installation.
 
 **Interruption checks.** Regression tests cover saving the phone numbering checkpoint before deletion, recovering an end message whose marker was interrupted, and the first anchor timestamp. PC tests interrupt frame, IMU and telemetry commits, preserve earlier committed rows, recover end metadata and notify completion after the final acknowledgement. A temporary storage error also rolls back without restarting the receiver. Missing camera settings remain null in the clock report, and an unavailable link measurement no longer aborts the checks.
 
@@ -350,7 +352,7 @@ Capture 1.1 (version code 2, Task97) adds `CrashReport.java` and `CrashDiagnosti
 
 The seven new JVM tests cover saving the thread and cause chain before delegation, delegation after a file-write error, report framing with Java or system-only diagnostics, no connection for empty history, repeated handler installation, malformed Java JSON with a valid system exit, and binary trace preservation. All 27 JVM tests pass. The existing PC report-connection test also passes. The new Android integration calls and system trace availability still need the owner's device run.
 
-Diagnostic APK: `mobile deployment/capture_20261014_diagnostics/fyld-capture-1.1.apk` and `.apk.bin`, SHA-256 `bb4def77d56b59824f90a3fcc87b450d9e29fa43951e82878c8b7ae96cb014db`. The build script's default `capture_20261014/` folder now holds this newer build as well; the hash above for 1.0 is historical. Install 1.1 as an update from email without uninstalling, preserving the computer address and any queued data. Open it on the home Wi-Fi and leave it open to send diagnostics. Historical native traces may identify an earlier failure already. If another reproduction is needed, press Record walk once, then reopen after the crash and wait for its report. Do not start the house walk until the cause is identified and the short trial completes.
+Diagnostic APK: `mobile_deployments/capture_20261014_bb4def77/fyld-capture.apk` and `.apk.bin`, SHA-256 `bb4def77d56b59824f90a3fcc87b450d9e29fa43951e82878c8b7ae96cb014db`. Task98 rebuilt it with all 27 JVM tests passing, confirmed the same hash and removed duplicate handoffs. Install 1.1 as an update from email without uninstalling, preserving the computer address and any queued data. Open it on home Wi-Fi and leave it open to send diagnostics. The owner reproduced another crash about 1-2 seconds into capture; the latest received diagnostic contains older system exits but no Java stack yet. Reopen after the crash to upload the new report. Do not start the house walk until the cause is identified and the short trial completes.
 
 Android Studio/AVD is proposed for Android runtime, permission, lifecycle and network tests, starting with Android 13/API 33. It has not been installed. Shared camera and raw depth on an AVD are not yet verified; sensor timing, sustained capture, Wi-Fi, heat and tracking still need the Redmi. Sources and limits: [Android testing and crash reports](../../research/phone_ar_platforms/android_testing_and_crash_reports.md).
 

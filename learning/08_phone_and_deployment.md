@@ -74,6 +74,8 @@ The same ideas run inside TCP itself and most file-transfer tools; the app repea
 
 ### Testing the Android app
 
+Current APKs live only in [mobile_deployments](../mobile_deployments/README.md), with one folder per app, UTC publication date and APK hash. The owner chose to retain FYLD capture and the latest Camera2 diagnostic. Old smoke, phonecheck and raw-recorder handoffs were removed; recordings stay in the experiment run folders.
+
 JVM tests check the message encoder, queue and sender, but they do not execute Android's camera driver or app lifecycle. An Android Virtual Device (AVD) runs Android itself and can test controls, permissions, pauses and network handling. Google documents ARCore with an x86/x86_64 emulator and a VirtualScene camera. This app's shared-camera and raw-depth combination still needs checking on an emulator; Redmi timing, heat and sensor rates need the actual phone. Proposed by Claude, not owner-ruled: start with an Android 13 AVD matching the Redmi, then test API 36. No AVD has been installed yet.
 
 With USB debugging unavailable, the diagnostic app saves Java exceptions before Android handles the crash, then sends the saved stack after the app is reopened. It also asks Android for recent exits and any available native crash traces. A native crash does not pass through the Java handler, and Android may no longer hold its trace, so the two sources complement each other. Sources and limits: [Android testing and crash reports](../research/phone_ar_platforms/android_testing_and_crash_reports.md).

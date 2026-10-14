@@ -1,10 +1,10 @@
 # Stream A: measure the Redmi on real walks
 
-Task92 prepares the capture and scoring for Task75. There are no tape-measured phone results yet. The app includes a notice screen; its appearance on the Redmi still needs checking. Task61 owns the acceptance limits, so these scores do not label a walk as passing or failing.
+Task92 prepared the v1 capture and scoring for Task75. There are no tape-measured phone results yet. The phonecheck APK is retired; current APKs are listed in the [deployment index](../../mobile_deployments/README.md). FYLD capture uses v2; the receiver commands and scoring steps below describe historical v1 sessions. The accuracy scorer still needs v2 support before applying this procedure to a new capture. Task61 owns the acceptance limits, so these scores do not label a walk as passing or failing.
 
 ## Install and receive
 
-Install `mobile deployment/phonecheck_accuracy_20261014/fyld-phonecheck-accuracy.apk`. This keeps the Task87 stream format and adds an **ARCore and privacy notice** button at the top of the screen. Open it to check that the text scrolls and that the Google Privacy Policy link opens.
+For a new recording, install FYLD capture from the deployment index and follow the [v2 capture instructions](README.md#the-capture-app-and-pc-receiver-task96-14-october-2026). It retains the **ARCore and privacy notice** button. Open it to check that the text scrolls and that the Google Privacy Policy link opens.
 
 Start the host in the repository root:
 

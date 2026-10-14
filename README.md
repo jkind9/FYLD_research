@@ -368,7 +368,7 @@ experiments/
 research/                       literature, source summaries and licences
 data/                           where each dataset came from and how it was checked
 archive/                        the earlier prototype, kept for reference
-mobile deployment/              Android test packages handed over for installing on the phones
+mobile_deployments/              Current phone APKs; see its README for versions and installation
 tools/check.py                  runs the test suite
 ```
 

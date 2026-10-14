@@ -16,10 +16,6 @@ echo "sdk.dir=$SDK" > "$WORK/local.properties"
 (cd "$WORK" && "$GRADLE" --no-daemon -q --max-workers=2 testDebugUnitTest assembleDebug)
 
 APK="$WORK/app/build/outputs/apk/debug/app-debug.apk"
-OUT="$SOURCE/../runs/capture_apk"
-mkdir -p "$OUT" && cp "$APK" "$OUT/capture-debug.apk"
-# MIUI blocks installs over USB, so the owner installs from email: staged as .apk and as .apk.bin, as earlier builds were.
-DEPLOY="$SOURCE/../../../mobile deployment/capture_$(date +%Y%m%d)"
-mkdir -p "$DEPLOY" && cp "$APK" "$DEPLOY/fyld-capture.apk" && cp "$APK" "$DEPLOY/fyld-capture.apk.bin"
-sha256sum "$OUT/capture-debug.apk"
-echo "BUILD DONE $OUT/capture-debug.apk and $DEPLOY"
+DEPLOY="$(python3 "$SOURCE/../build/deployment.py" "$APK")"
+sha256sum "$DEPLOY/fyld-capture.apk"
+echo "BUILD DONE $DEPLOY"

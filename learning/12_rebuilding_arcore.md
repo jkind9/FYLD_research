@@ -84,6 +84,8 @@ Two lessons carry over to the phone. The noise settings matter as much as the me
 
 ## Try it
 
+Install the current FYLD capture APK from the [deployment index](../mobile_deployments/README.md). It replaces the standalone raw recorder and check app. Capture 1.1 still crashes during Record walk on the Redmi; complete recording and clock measurements wait for the diagnosis.
+
 ```text
 python -m pytest experiments/open_vio/tests
 python experiments/open_vio/host/clock_check.py <recording folder>

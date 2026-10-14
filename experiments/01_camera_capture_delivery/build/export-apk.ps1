@@ -25,7 +25,7 @@ $sourcePath = Join-Path $buildDirectory '..\app\main.py'
 $apkLinux = (& wsl.exe -d $Distribution -- wslpath -u (Resolve-Path -LiteralPath $ApkPath).Path).Trim()
 $receiptLinux = (& wsl.exe -d $Distribution -- wslpath -u (Resolve-Path -LiteralPath $ReceiptPath).Path).Trim()
 $sourceLinux = (& wsl.exe -d $Distribution -- wslpath -u (Resolve-Path -LiteralPath $sourcePath).Path).Trim()
-$outputRoot = (Join-Path (Resolve-Path (Join-Path $buildDirectory '..\..\..')).Path 'mobile deployment')
+$outputRoot = (Join-Path (Resolve-Path (Join-Path $buildDirectory '..\..\..')).Path 'mobile_deployments')
 $outputLinux = (& wsl.exe -d $Distribution -- wslpath -u $outputRoot).Trim()
 $arguments = @($exporter, $apkLinux, $receiptLinux, $sourceLinux, $outputLinux, $RunId,
     '--hostpython', $HostPython, '--build-tools', $BuildToolsPath)
