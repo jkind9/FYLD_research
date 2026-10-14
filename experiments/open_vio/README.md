@@ -8,7 +8,7 @@ Visual-inertial odometry (VIO) is the core part: it fuses camera images with gyr
 |---|---|---|
 | 1. Raw recorder (Task88) | Phone app records camera frames, gyroscope, accelerometer and ARCore's poses on one clock; the computer receives, checks and converts the recording | App and host tools built and tested on synthetic recordings; first Redmi recording waits for the owner to install the app |
 | 2. Calibration (Task90) | Kalibr: camera intrinsics, camera-to-IMU rotation, offset and time shift (printed target); IMU noise from a long recording at rest | Pipeline built; reproduces TUM-VI's published calibration (0.014 degrees, 1.0 mm, 0.13 ms); A4 target ready; Redmi calibration waits for its recordings |
-| 3. Offline comparison | Basalt (BSD-3), Kimera-VIO (BSD-2), OKVIS2 (BSD-style), with OpenVINS (GPL-3.0, reference only), run in WSL on the recordings and scored against ARCore's poses and tape-measured distances, with time per frame | Not started |
+| 3. Offline comparison (Task91) | Basalt (BSD-3), Kimera-VIO (BSD-2), OKVIS2 (BSD-style), with OpenVINS (GPL-3.0, reference only), run in WSL on the recordings and scored against ARCore's poses and tape-measured distances, with time per frame | All four built and run on TUM-VI room1 with one camera: Basalt 0.146 m, OKVIS2 0.505 m (own noise settings), Kimera lost track, OpenVINS 0.064 m (reference); Redmi runs wait for recordings |
 | 4. Port to the phone | Best system built for Android (NDK); learned depth resized to its tracked points replaces ARCore's depth | Not started |
 
 Rules for this stream: build only from published methods (never take ARCore apart); note any design that might touch Google's patents US 10,802,147 or US 11,145,075 for a later patent check; CPU only; live or at least one update per second for anything deployable; permissive licences for anything that ships, GPL only as reference.
@@ -117,3 +117,40 @@ This shows the tools and conversion work on a hardware-synchronised, global-shut
 1. **Camera and camera-IMU (one walk recording, about 60-90 s).** Target flat on a wall, well lit. Start "Record walk", hold the phone 30-60 cm from the target, then move slowly: tilt up and down, left and right, roll the phone, move it sideways, up and down, closer and further, keeping the whole grid in view most of the time. Avoid knocks at the start and end. Stop, Send.
 2. **Noise (rest recording, about 3 hours).** Phone flat on a table, plugged in, nothing touching the table. "Record motion sensors only", leave it, Stop, Send.
 3. On the computer: `prepare.py --recording <walk> --rest <rest> --tag-size <measured> --out experiments/open_vio/runs/kalibr_redmi`, then `run_kalibr.sh cameras ... pinhole-radtan` and `run_kalibr.sh imu ... 0.1` (a 100 ms offset search, since Camera2 stamps the start of exposure), then `compare.py ... --recording <walk>` for the ARCore cross-check.
+
+## Step 3: offline comparison of open trackers (Task91)
+
+Each system runs in its own Docker image under WSL, on one camera plus IMU (the phone's sensors), from a EuRoC/ASL folder. Its config is the project's own shipped TUM-VI (or EuRoC) config with the camera model, camera-to-IMU transform, time shift and IMU noise swapped in from one Kalibr calibration, so a Redmi calibration from step 2 plugs in unchanged. Sources, licences and method summaries: [research/visual_inertial_odometry/vio_systems.md](../../research/visual_inertial_odometry/vio_systems.md).
+
+### Tools
+
+| Command | What it does |
+|---|---|
+| `wsl -- bash experiments/open_vio/vio/build_all.sh` | Builds the four images one after another from sources cloned under `~/open_vio/src` (commits in the research note): Basalt from its Ubuntu 22.04 binary release; OKVIS2 without RealSense, the neural sky mask or ROS 2; Kimera on its own dependency Dockerfile (GTSAM 4.2 and others); OpenVINS in ROS 1 Noetic with `ov_eval`. Compiles are capped at 8 jobs: parallel full-core builds filled the 32 GB WSL machine and stopped Docker Desktop on 14 October |
+| `python experiments/open_vio/vio/run.py --system <basalt, okvis2, kimera or openvins> --dataset <folder with mav0> --camchain <Kalibr camchain> --imu <Kalibr imu.yaml> --camera-rate <Hz> --reference <file> --reference-format <euroc or tum> --reference-frame <imu or camera> --profile <tumvi or phone> --run <folder> [--template-noise]` | Writes the configs, runs the system (12 GB memory and 30 min limits), reads its trajectory and scores it with experiment 03's evaluation; `--reference-frame camera` moves the IMU poses onto the camera with `T_cam_imu` for ARCore's path; `--template-noise` keeps OKVIS2's or Kimera's own IMU noise values |
+| `bash experiments/open_vio/vio/run_tumvi.sh <systems>` | The TUM-VI room1 runs below (`REPO` points at the checkout holding `data/`) |
+| `python experiments/open_vio/vio/vio_report.py <runs folder>` | A table from each run's `scores.json` |
+
+Details that cost time: Basalt's binary needs `LD_LIBRARY_PATH=/root/.local/lib`. OKVIS2 finds its vocabulary beside the program, so it is called by full path, and it writes trajectories next to the images, so it reads a linked copy of the dataset. OpenVINS reads ROS bags (made with Kalibr's bag creator), and its launch file resolves the `ov_data` package even when `path_gt` is given, so an empty stand-in package is created. Kimera's monocular EuRoC settings start from the ground-truth pose (`autoInitialize: 0`), which would hand it the answer, so runs set `autoInitialize: 1` (start from the IMU); its reader refuses to run without a ground-truth folder, so it gets one with two placeholder rows (identity pose at the first IMU times) that it reads no state from.
+
+### Results on TUM-VI room1, 14 October 2026
+
+One camera (cam0, 512 x 512, 20 Hz) plus the BMI160 IMU at 200 Hz: 2,821 frames over 141 s and a 146 m walk inside the motion-capture room. TUM-VI's published calibration and inflated IMU noise for every system. Errors are against motion capture in the IMU frame; rigid ATE has no scale fit, because these systems report metres. Time per frame is the whole container run (including loading) divided by frames, on the workstation CPU in Docker under WSL.
+
+| Run | Licence | Rigid ATE (m) | Scaled ATE (m) | RPE 1 s (m) | Frames placed | ms per frame |
+|---|---|---|---|---|---|---|
+| Basalt | BSD-3 | **0.146** | 0.146 (scale 0.993) | 0.024 | 100% | 44 |
+| OKVIS2, its own TUM-VI noise values | BSD-3 | 0.505 | 0.444 | 0.078 | 100% | 30 |
+| OKVIS2, TUM-VI's noise values | BSD-3 | diverged after 47.7 s (positions to 868 km) | | | 100% | 23 |
+| Kimera-VIO, either noise setting | BSD-2 | diverged: optimiser failed after about 23% of frames | | | 23% | 20 |
+| OpenVINS (reference only) | GPL-3.0 | 0.064 | 0.064 | 0.013 | 95% | 12 |
+
+Published on the same recording with **two** cameras (TUM-VI paper, Table IV): OKVIS 0.06 m, VINS-Mono 0.07 m, Basalt 0.09 m. One camera is expected to do worse, because depth for new points comes from motion alone.
+
+What this says:
+
+- **Basalt is the strongest permissive candidate on this recording.** Every frame was tracked, its own metric scale is within 0.7%, the error is 0.146 m over 146 m, and it takes 44 ms per frame including start-up, well inside the 1-update-per-second floor. It is the first candidate for the phone port, pending Redmi recordings.
+- **OKVIS2 is sensitive to the IMU noise setting.** It diverged with TUM-VI's values (3 to 10 times smaller than its own) and tracked with its own, at 3.5 times Basalt's error.
+- **Kimera-VIO's monocular mode did not work here.** Its IMU start-up assumes the device starts at rest, and its optimiser failed about a quarter of the way through. Its stereo mode was not tried, since the phone has one usable camera.
+- **OpenVINS (GPL) sets the accuracy target** at 0.064 m with one camera. It cannot ship under the project's licence rule; its MSCKF method is published (2007), so a permissive re-implementation is possible.
+- This is one recording from a rig with a global-shutter camera and a hardware-synchronised IMU. The Redmi adds a rolling shutter, software timestamps and a noisier IMU, so the ranking must be repeated on Redmi recordings with ARCore's path as the reference.

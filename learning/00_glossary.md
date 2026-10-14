@@ -17,6 +17,7 @@ Terms used across the learning chapters, in alphabetical order. Each entry says 
 | **Depth Anything** | A family of learned depth models. V2 Metric Small (25M parameters) is the project's main single-image depth model; Depth Anything 3 takes several images and optional camera poses. |
 | **Disparity** | How far a point shifts sideways, in pixels, between two views. Depth = focal length × baseline ÷ disparity. |
 | **Drift** | Slowly growing error in a camera path, because each small step's error adds to the last. |
+| **Factor graph** | A network whose nodes are unknowns (poses, 3D points, sensor biases) and whose links are measurements between them; solving it finds the values that best fit every measurement. Kimera-VIO and GTSAM work this way. |
 | **Feature (keypoint)** | A distinctive, findable spot in an image, such as a corner, with a descriptor that lets it be recognised in another image. SIFT and ORB are classic types; ALIKED is learned. |
 | **Frame** | One image from a video. Also used for a coordinate system ("camera frame", "world frame"); the meaning is clear from context. |
 | **Fusion (TSDF)** | Combining many depth images into one surface. A truncated signed distance function (TSDF) stores, in each small cube of space (voxel), the averaged distance to the nearest surface. |
@@ -26,6 +27,7 @@ Terms used across the learning chapters, in alphabetical order. Each entry says 
 | **Incremental mapper** | A structure-from-motion method that adds one image at a time and refines often. COLMAP's classic mapper. |
 | **Loop closure** | Recognising that the camera has returned to a place it saw before, and correcting the whole path so both visits agree. Removes accumulated drift. |
 | **Metric depth** | Depth in real metres. *Relative depth* has the right shape but an unknown size (and sometimes an unknown offset). |
+| **MSCKF (multi-state constraint Kalman filter)** | A filter for visual-inertial tracking that keeps a window of recent camera poses, but not the 3D points, in its state; a point seen from several poses constrains those poses and is then dropped. Published 2007; ARCore is described as building on it; OpenVINS implements it. |
 | **Multi-view stereo (MVS)** | Computing dense depth for each frame by matching it against neighbouring frames whose poses are known. The step after structure from motion. |
 | **Odometry (visual odometry)** | Working out how the camera moved between consecutive frames, frame by frame. Has no map and no loop closure, so it drifts. |
 | **Point cloud** | A set of 3D points. *Sparse* (a few thousand tracked features) or *dense* (every pixel). |
@@ -36,6 +38,7 @@ Terms used across the learning chapters, in alphabetical order. Each entry says 
 | **Scale ambiguity** | From images alone, a scene and every camera position can be made twice as large and still match the photos. Real size must come from somewhere else: a depth sensor, a known distance, or the IMU. |
 | **Shared camera (ARCore)** | An ARCore mode in which ARCore tracks as usual while the app receives its own copy of every camera image from the same capture session. The project's raw recorder uses it to save images and ARCore's poses together. |
 | **SfM (structure from motion)** | Recovering camera poses and 3D points together from overlapping images. Usually offline over all images at once. COLMAP is the standard tool. |
+| **Sliding-window optimiser** | A tracker that keeps only the last few keyframes and re-solves all their poses together at each step, folding older information into a summary (marginalisation). Basalt and OKVIS2 work this way. |
 | **SLAM** | Simultaneous localisation and mapping: tracking the camera while building a map, usually live, with loop closure. |
 | **TUM RGB-D** | A benchmark of Kinect colour-and-depth recordings with motion-capture camera paths. The project uses its `freiburg1_xyz` and `freiburg1_desk` recordings. |
 | **ICL-NUIM** | A synthetic benchmark (rendered images) of a living room with exact camera paths and an exact 3D surface model. The project uses living room trajectory 2. |
