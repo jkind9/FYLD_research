@@ -32,15 +32,19 @@ def capture(tmp_path):
     return surface, session
 
 
-def test_cli_writes_a_single_offline_html_with_real_scene_counts(capture, tmp_path):
+def export_capture(capture, out):
     surface, session = capture
+    return subprocess.run([sys.executable, "-B", "-m", "tools.demos.capture_scene",
+                           "--surface", str(surface), "--session", str(session), "--out", str(out)],
+                          check=False, capture_output=True, text=True)
+
+
+def test_cli_writes_a_single_offline_html_with_real_scene_counts(capture, tmp_path):
     out = tmp_path / "viewer.html"
-    result = subprocess.run([sys.executable, "-B", "-m", "tools.demos.capture_scene",
-                             "--surface", str(surface), "--session", str(session), "--out", str(out)],
-                            capture_output=True, text=True)
+    result = export_capture(capture, out)
     assert result.returncode == 0, result.stderr
     doc = out.read_text()
-    data = json.loads(re.search(r'<script type="application/json" id="demo-data">(.*?)</script>', doc, re.S)[1])
+    data = json.loads(re.search(r'<script type="application/json" id="demo-data">(.*?)</script>', doc, re.DOTALL)[1])
     assert data["splat"]["positions"]["count"] == 9
     assert data["source"]["points"] == 9 and data["source"]["frames"] == 3
     assert data["up"] == [0, 1, 0]
@@ -79,3 +83,35 @@ def test_session_without_posed_images_is_rejected(capture):
     (session / "frames.jsonl").write_text(json.dumps({"seq": 0, "camera_t_ns": 0, "arcore": None}))
     with pytest.raises(ValueError, match="posed"):
         importlib.import_module("tools.demos.capture_scene").load_scene(surface, session, 0.06)
+
+
+def test_other_session_version_is_rejected(capture):
+    surface, session = capture
+    (session / "session.json").write_text(json.dumps({"version": 1}))
+    with pytest.raises(ValueError, match="v2"):
+        importlib.import_module("tools.demos.capture_scene").load_scene(surface, session, 0.06)
+
+
+@pytest.mark.parametrize("field", ["pose", "intrinsics", "camera_t_ns"])
+def test_non_finite_bookmarks_do_not_produce_broken_html(capture, tmp_path, field):
+    _, session = capture
+    rows = [json.loads(line) for line in (session / "frames.jsonl").read_text().splitlines()]
+    if field == "camera_t_ns":
+        rows[0][field] = float("nan")
+    else:
+        rows[1]["arcore"][field][0] = float("inf")
+    (session / "frames.jsonl").write_text("\n".join(json.dumps(row) for row in rows))
+    out = tmp_path / "invalid.html"
+    result = export_capture(capture, out)
+    assert result.returncode != 0
+    assert "finite" in result.stderr
+    assert not out.exists()
+
+
+def test_interrupted_capture_is_not_labelled_completed(capture):
+    surface, session = capture
+    (session / "session.json").write_text(json.dumps({"version": 2, "end_reason": "interrupted"}))
+    exporter = importlib.import_module("tools.demos.capture_scene")
+    doc = exporter.scene_page(exporter.load_scene(surface, session, 0.06))
+    assert "completed walk" not in doc
+    assert "recorded span" in doc
