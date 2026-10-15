@@ -58,7 +58,7 @@ ARCore's *shared-camera mode* makes this possible on one phone: ARCore tracks as
 
 ### Getting every frame to the PC
 
-The camera produces more data than the link has carried so far. Lossless 640 x 480 grey at 30 frames a second is 9.2 MB/s, and the colour JPEG adds about 2 MB/s. The only phone-to-PC measurement, 0.70 MB/s, waited for the PC to confirm each frame before sending the next (*stop-and-wait*), so most of the time the link sat idle waiting for an answer. At 0.70 MB/s a 2-minute walk (about 1.3 GB) would take about 32 minutes to send.
+Lossless 640 x 480 grey at 30 frames a second is 9.2 MB/s, and the colour JPEG adds roughly 2 MB/s. The older 0.70 MB/s phone-to-PC measurement waited for the PC to confirm each frame before sending the next (*stop-and-wait*), leaving the link idle between answers. At that rate a 2-minute walk of about 1.3 GB would take about 32 minutes to send. With windowed sending, the later link-only check measured 33.4 MB/s and the completed capture 1.2 session received 10.22 MB/s while recording, finishing its queue just after Stop.
 
 The capture app therefore separates capturing from sending:
 
@@ -70,15 +70,17 @@ The capture app therefore separates capturing from sending:
 
 The same ideas run inside TCP itself and most file-transfer tools; the app repeats them one level up because a TCP connection does not survive the phone dropping off Wi-Fi.
 
-> **Project status (14 October 2026).** The capture app (Task96, continuing Task95) merges the check app and the raw recorder ([experiment 01](../experiments/01_camera_capture_delivery/README.md#the-capture-app-and-pc-receiver-task96-14-october-2026)). Its Redmi checks passed: 100% tracking during 15 s and Wi-Fi at 33.4 MB/s. JPEG took a median 2.50 ms, grey deflate 13.3 ms and halved the grey bytes; the app chose raw grey because the measured link was fast enough. Record walk crashes, however. The PC retained incomplete attempts with 0 and 100 frames, rather than a complete house walk. Task97 adds crash reports without USB; its diagnostic build passes 27 JVM tests. Zero dropped frames remains unverified: overflow of the 30-frame writer buffer is counted as dropped. The first full walk will go downstairs and back upstairs, a hard case for ARCore (chapter 11).
+> **Project status (15 October 2026).** Capture 1.2 (Task99) completed the Redmi recording `20261014_220756_walk`: 1,194 frames over 39.88 s at 29.92 fps, zero reported drops or missing frame numbers, motion sensors at 423.54 Hz, and 10.22 MB/s received. Sending finished 0.058 s after Stop; lossless PNGs and other session files occupy 225 MB on the PC. All images parsed and CPU replay produced 1.58 updates/s with no gap over one second. The earlier link-only check measured 33.4 MB/s and chose raw grey. The recording has 17 frames without ARCore records, one final frame without camera settings and 44 new depth maps. These limits remain visible in the checks; the 60 s rest and calibration recordings are still needed. [Measured result](../experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99).
 
 ### Testing the Android app
 
-Current APKs live only in [mobile_deployments](../mobile_deployments/README.md), with one folder per app, UTC publication date and APK hash. The owner chose to retain FYLD capture and the latest Camera2 diagnostic. Old smoke, phonecheck and raw-recorder handoffs were removed; recordings stay in the experiment run folders.
+Current APKs live only in [mobile_deployments](../mobile_deployments/README.md), with app version, full UTC timestamp and APK hash in new folder names. APK filenames also include the version and time. The owner chose to retain FYLD capture and the latest Camera2 diagnostic. Old smoke, phonecheck and raw-recorder handoffs were removed; recordings stay in the experiment run folders.
 
 JVM tests check the message encoder, queue and sender, but they do not execute Android's camera driver or app lifecycle. An Android Virtual Device (AVD) runs Android itself and can test controls, permissions, pauses and network handling. Google documents ARCore with an x86/x86_64 emulator and a VirtualScene camera. This app's shared-camera and raw-depth combination still needs checking on an emulator; Redmi timing, heat and sensor rates need the actual phone. Proposed by Claude, not owner-ruled: start with an Android 13 AVD matching the Redmi, then test API 36. No AVD has been installed yet.
 
 With USB debugging unavailable, the diagnostic app saves Java exceptions before Android handles the crash, then sends the saved stack after the app is reopened. It also asks Android for recent exits and any available native crash traces. A native crash does not pass through the Java handler, and Android may no longer hold its trace, so the two sources complement each other. Sources and limits: [Android testing and crash reports](../research/phone_ar_platforms/android_testing_and_crash_reports.md).
+
+That report exposed a frame-encoding exception. Android's JSON serializer can return null for invalid numeric values; synthetic tests reproduced non-finite point projections and overflow. Capture 1.2 filters those points and routes serialization errors through the existing recording-error message. It passes 30 JVM tests and completed the Redmi walk without a crash. The received stack did not identify which individual value caused the earlier failure.
 
 ## What is still unmeasured
 

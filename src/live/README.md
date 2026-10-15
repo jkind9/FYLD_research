@@ -1,6 +1,6 @@
 # Live processing of the phone stream
 
-This package turns the phone's stream into a surface, a top-down map and object counts while the stream runs, updating at least once per second on the CPU (the owner's floor, 14 October 2026). It reads the per-frame format in [phone_session_v1.md](../../experiments/01_camera_capture_delivery/phone_session_v1.md): image, ARCore pose, tracked points, raw depth when new, and pose corrections. Task89.
+This package turns the phone's stream into a surface, a top-down map and object counts while the stream runs, updating at least once per second on the CPU (the owner's floor, 14 October 2026). It reads [phone session v2](../../experiments/01_camera_capture_delivery/phone_session_v2.md) from FYLD capture and retains replay support for v1: image, ARCore pose, tracked points, raw depth when new, and pose corrections. Tasks89, 96 and 99.
 
 ## How one update works
 
@@ -10,7 +10,7 @@ Frames arrive about 30 times a second. `LiveProcessor.add()` only records each o
 |---|---|---|
 | Depth | Depth Anything V2 Metric Small on the CPU | `src/walkthrough/steps/depth.py` |
 | Size | Multiply the learned depth by median(ARCore depth / learned depth) over raw-depth pixels with confidence at least 128 (at least 50 pixels), else over tracked points (at least 20), else keep the last size | `experiments/sfm/src/dense.fit_size` (Task72's rule) |
-| Fuse | Add the sized depth to the current *fragment*: an Open3D signed-distance volume for a group of 10 keyframes, stored relative to the group's first anchor | `fragments.py` |
+| Fuse | Add the sized depth to the current *fragment*: an Open3D signed-distance volume for a group of 10 keyframes, stored relative to a received anchor in that group | `fragments.py` |
 | Surface | Every fragment's points, placed with its anchor's latest pose | `fragments.py` |
 | Map | Dominant plane and grid footprint (Task55 settings) on the surface thinned to 2.5 cm | `experiments/05_birds_eye_mapping/measure.py` |
 | Objects | YOLO26x on the frame, placed in 3D from the sized depth, counted by same-class matching within 0.35 m (ambiguity margin 0.05 m); runs on a second thread beside fusion and mapping | `experiments/06_object_recognition/pilot/` |
@@ -32,7 +32,15 @@ This replaces Tasks 76 and 77. The camera path now comes first (from ARCore, bef
 
 Each run writes `updates.jsonl` (one line per update: frame used, delay, stage times, size and its source, map measurements, counts), `surface.ply` and `summary.json` (updates per second, longest gap between updates, median stage times). `--voxel` sets the fusion voxel (default 0.02 m), `--threads` the CPU threads for the models (default 16), `--no-objects` skips detection.
 
-**Until ARCore recordings exist**, `python -m src.live.stand_in --recording tum:<folder> --out <session>` writes a recorded clip in the same format. It uses the clip's ground-truth poses and its depth sensor subsampled to ARCore's size, sends new depth on every 3rd frame and 20 points per frame, and starts one anchor per second. Its `session.json` says `control: reference`, so results from it are a check of the pipeline and its speed, not of ARCore.
+For a reference control, `python -m src.live.stand_in --recording tum:<folder> --out <session>` writes a recorded clip in the same format. It uses the clip's ground-truth poses and its depth sensor subsampled to ARCore's size, sends new depth on every 3rd frame and 20 points per frame, and starts one anchor per second. Its `session.json` says `control: reference`, so results from it are a check of the pipeline and its speed, not of ARCore.
+
+## Redmi capture 1.2 result, Task99
+
+The real session `20261014_220756_walk` contains 1,194 frames over 39.88 s. Its saved anchors begin at 1, so the old assumption that each group starts at anchor 0 caused `KeyError: 0`. Each fragment now binds to a received anchor and keeps that binding if an earlier anchor arrives later. The regression test verifies that corrections still move its surface.
+
+CPU replay at recorded speed, with both cached models on 16 threads and a 2 cm voxel, received all 1,194 frames and produced 63 updates: 1.58 updates/s, longest gap 0.856 s, no gaps over 1 s, median update 619.4 ms, median latency 672.5 ms. The saved surface has 845,428 points. There were 83 anchor corrections; sizing used tracked points for 33 updates and the previous estimate for 30. Object counts remain provisional and geometry has no independent accuracy score.
+
+Local outputs are `outputs/capture_task99_220756/live_verified/{updates.jsonl,summary.json,surface.ply}`. The first failed replay is retained separately under `live/`. [Capture metrics and limits](../../experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99).
 
 `python -m src.live.score --run <run> --icl data/icl_nuim` scores an ICL run's surface against the published model, as `experiments/sfm/run_dense.py` does.
 

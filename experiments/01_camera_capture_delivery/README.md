@@ -2,7 +2,7 @@
 
 This folder (experiment 01) is layer 1 of the five-layer pipeline described in the [root README](../../README.md). It answers: **can a phone record what the other layers need, and get it to wherever those layers run?** It does not compute depth, camera position or objects. It supplies the raw material for all of them, so its mistakes, such as wrong timestamps or missing calibration, show up as errors in every later layer.
 
-**Status:** the WSL Android build route produced a verified arm64 print-only smoke APK and a separate native Camera2 APK handoff. The Redmi app has now run and returned a valid capability report. It exposes one rear camera and one front camera, with no advertised simultaneous-camera sets. The received session has no image captures; a separate rear-camera control export is still needed. Other layers use public benchmark recordings as a stand-in.
+**Status:** FYLD capture 1.2 completed Redmi session `20261014_220756_walk`: 1,194 frames over 39.88 s, zero reported drops, all images verified, EuRoC files exported and CPU replay at 1.58 updates/s. The checker flags one final image without camera settings; 17 frames have no matching ARCore record. The [completed-session result](#completed-redmi-session-task99) records the metrics and limits. [Current APKs](../../mobile_deployments/README.md) are kept in one folder.
 
 ## How capture works
 
@@ -254,7 +254,7 @@ Every check ends as PASS, FAIL with a reason, or SKIPPED with a reason; `host/re
 wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh
 ```
 
-The check app was merged into FYLD capture. Its build and installation handoff now use `mobile_deployments/capture_<YYYYMMDD>_<hash8>/`; see the deployment index for the current APK. The v1 commands below describe the retired app and older recordings.
+The check app was merged into FYLD capture. Its build and installation handoff now use `mobile_deployments/capture_v<version>_<YYYYMMDDTHHMMSSZ>_<hash8>/`; see the deployment index for the current APK. The v1 commands below describe the retired app and older recordings.
 
 **Install:** copy the current capture APK to the phone and open it, allowing installs from the transfer app. The owner installs from email because MIUI blocks adb installs.
 
@@ -336,27 +336,60 @@ It prints this PC's address (192.168.68.123 on the owner's network) to type into
 | PC | `tests/test_session_v2.py` (22), `tests/test_capture_receiver.py` (23) | the fixture parses to its written values; deflated grey reads back; 13 kinds of bad frame, 3 bad IMU batches and bad telemetry, end and hello are refused; a fake phone (`tests/fake_phone.py`) streams 40 frames with a window of 8, is cut off after message 25 and resumes: 40 frames, none missing or repeated, 2 connections; resends are acknowledged and not stored twice; a gap and a bad frame are refused; the speed check and report connections; the summary's IMU rates, clock base, MB/s and sending time after Stop |
 | Readers | `src/live/tests/test_stream.py`, `experiments/open_vio/tests` | a synthetic v2 folder written through the receiver's store is read by `session_v2.read_session`, replayed by `src/live`, and converted by `recording.py --euroc` |
 
-**Initial capture 1.0 build, 14 October:** the WSL build passed 20 JVM tests and produced a 914 KB APK, SHA-256 `d260cda55fa5cfe80f5f92b87bee55c1a1afb09b5c77f917c481961413c18f5d`. Version 1.1 supersedes it. The build script now publishes only into `mobile_deployments/capture_<YYYYMMDD>_<hash8>/`, with `.apk` and `.apk.bin` for email installation.
+**Initial capture 1.0 build, 14 October:** the WSL build passed 20 JVM tests and produced a 914 KB APK, SHA-256 `d260cda55fa5cfe80f5f92b87bee55c1a1afb09b5c77f917c481961413c18f5d`. Version 1.2 supersedes it. The build script now publishes only into `mobile_deployments/capture_v<version>_<YYYYMMDDTHHMMSSZ>_<hash8>/`, with `.apk` and `.apk.bin` for email installation.
 
 **Interruption checks.** Regression tests cover saving the phone numbering checkpoint before deletion, recovering an end message whose marker was interrupted, and the first anchor timestamp. PC tests interrupt frame, IMU and telemetry commits, preserve earlier committed rows, recover end metadata and notify completion after the final acknowledgement. A temporary storage error also rolls back without restarting the receiver. Missing camera settings remain null in the clock report, and an unavailable link measurement no longer aborts the checks.
 
-**Full recording still needed.** The Redmi checks and failed trials are described below; there is no complete house walk or 60 s rest yet. Zero dropped frames remains unverified: if the writer falls behind its 30-frame memory buffer, overflow is counted as dropped. The owner run is: start the receiver; install; *Run all checks* (gives the link speed and the compression choice); the house walk (start upstairs, go down, come back up, press Stop); then a 60 s rest with *Record motion sensors only*. For each session the report will give capture fps and dropped frames, IMU rates, Wi-Fi MB/s and the time sending ran after Stop (all in `summary.json`), storage used (telemetry), and the clock check (`python experiments/open_vio/host/clock_check.py <session>`); then `python -m src.live.run --replay <session> --out outputs/live/<name>` and `python experiments/open_vio/host/recording.py <session> --euroc <out>`. One geometric assumption remains: the app's 640 x 480 Camera2 image has the same field of view as ARCore's CPU image (both are 640 x 480 4:3 from the same sensor), so ARCore's image intrinsics apply to it. Raw depth with confidence was received during the partial shared-camera recording; sustained capture still needs checking.
+**Completed recording and remaining checks.** The 39.88 s Redmi session below ended normally and was fully received. The 60 s motion-only rest and later calibration recordings remain outstanding. One final frame lacks camera settings, 17 frames lack ARCore records, and the recorded anchors begin at 1. These limits remain visible rather than being filled with guessed measurements. Longer capture and geometric accuracy still need evidence. The Camera2 and ARCore CPU images are both 640 x 480; equal field of view remains an assumption to verify.
 
 ## Redmi trial and crash diagnostics (Task97)
 
 On 14 October the PC received the capture 1.0 check report from Redmi 2201116TG, Android 13. All eight checks passed. Tracking was 100% during 15.002 s; the 50 MiB link check measured 33.432 MB/s. JPEG took a median 2.495 ms, grey deflate 13.303 ms and reduced grey to 50.45% of raw. The app chose raw grey because the measured link was fast enough. The report's 889 frames are screen-update observations, not a count of unique Camera2 images or new depth maps.
 
-Record walk then terminated the app. Under the local `runs/capture_redmi_20261014/`, attempt `20261014_212255_walk` contains no saved camera frames and was ended as interrupted on reopening. Attempt `20261014_212303_walk` contains 100 frames with ARCore data, including anchors and raw depth with confidence, before stopping. The receiver has no reported error. These are incomplete diagnostics, not recordings to use for method comparison. The exact phone exception is still unknown; USB debugging is unavailable to the owner.
+Record walk then terminated the app. Under the local `runs/capture_redmi_20261014/`, attempt `20261014_212255_walk` contains no saved camera frames and was ended as interrupted on reopening. Attempt `20261014_212303_walk` contains 100 frames with ARCore data, including anchors and raw depth with confidence, before stopping. The receiver has no reported error. These are incomplete diagnostics, not recordings to use for method comparison. A later capture 1.1 attempt stopped after 73 frames. Task99 received its saved exception after reopening; USB debugging remains unavailable.
 
 Capture 1.1 (version code 2, Task97) adds `CrashReport.java` and `CrashDiagnostics.java`. It saves uncaught Java exceptions to private app storage before delegating to Android's original handler. On starting the sender it sends that saved stack and Android's five most recent process exits to the existing receiver's `reports/` folder. Available ANR/native trace bytes are preserved as base64. A malformed saved Java report is sent as text with an error, alongside independent system exit records. Run all checks retries diagnostics if the first connection failed. Saved Java traces remain on the phone after sending. Native crashes bypass the Java handler, and Android may not retain every historical trace.
 
-The seven new JVM tests cover saving the thread and cause chain before delegation, delegation after a file-write error, report framing with Java or system-only diagnostics, no connection for empty history, repeated handler installation, malformed Java JSON with a valid system exit, and binary trace preservation. All 27 JVM tests pass. The existing PC report-connection test also passes. The new Android integration calls and system trace availability still need the owner's device run.
+The seven Task97 JVM tests cover saving the thread and cause chain before delegation, delegation after a file-write error, report framing with Java or system-only diagnostics, no connection for empty history, repeated handler installation, malformed Java JSON with a valid system exit, and binary trace preservation. That build passed 27 JVM tests. Task99 adds three frame-encoding regressions, bringing the total to 30. The Redmi returned both system exit details and its saved Java exception; availability of native traces remains unverified.
 
-Diagnostic APK: `mobile_deployments/capture_20261014_bb4def77/fyld-capture.apk` and `.apk.bin`, SHA-256 `bb4def77d56b59824f90a3fcc87b450d9e29fa43951e82878c8b7ae96cb014db`. Task98 rebuilt it with all 27 JVM tests passing, confirmed the same hash and removed duplicate handoffs. Install 1.1 as an update from email without uninstalling, preserving the computer address and any queued data. Open it on home Wi-Fi and leave it open to send diagnostics. The owner reproduced another crash about 1-2 seconds into capture; the latest received diagnostic contains older system exits but no Java stack yet. Reopen after the crash to upload the new report. Do not start the house walk until the cause is identified and the short trial completes.
+Capture 1.1 was the diagnostic build, SHA-256 `bb4def77d56b59824f90a3fcc87b450d9e29fa43951e82878c8b7ae96cb014db`. Its saved exception arrived in `reports/20261014T215846_901_2201116TG.json` after reopening: `SessionMessages.encode` tried to call `getBytes` on a null JSON string in the frame-writer thread. The report does not identify the offending numeric field. Task99 tests invalid point projections and overflow, filters them before JSON encoding, and turns serialization failures into queue write errors. Capture 1.2 supersedes that handoff; install links are in the deployment index. Another reproduction of the old crash is not needed.
 
 Android Studio/AVD is proposed for Android runtime, permission, lifecycle and network tests, starting with Android 13/API 33. It has not been installed. Shared camera and raw depth on an AVD are not yet verified; sensor timing, sustained capture, Wi-Fi, heat and tracking still need the Redmi. Sources and limits: [Android testing and crash reports](../../research/phone_ar_platforms/android_testing_and_crash_reports.md).
 
-## Current delivery ownership, 6 October 2026
+## Completed Redmi session (Task99)
+
+Checked 15 October 2026. The owner completed `20261014_220756_walk` with capture 1.2 on Redmi 2201116TG, Android 13, ARCore 1.56. The receiver recorded `end_reason: stop`, one connection and an acknowledged end. Its files remain local under `runs/capture_redmi_20261014/`; household images are not committed.
+
+| Measurement | Result | Local evidence |
+|---|---:|---|
+| Camera | 1,194 frames in 39.8755 s; 29.918 fps | session `summary.json`, `frames.jsonl` |
+| Loss | 0 reported dropped, missing or repeated frames; no camera gaps over 1.5 times the median interval | `summary.json`, session end counts |
+| Gyroscope / accelerometer | 16,899 / 16,901 samples; 423.536 Hz each; no measured gaps | `imu.csv`, `summary.json` |
+| Received transfer | 407.00 MB; 10.216 MB/s; 0.058 s sending after Stop | `summary.json` |
+| PC storage | 225.04 MB, including lossless PNGs | `outputs/capture_task99_220756/validation.json` |
+| Phone queue, sampled once a second | peak 5 frames / 1.67 MB | `telemetry.jsonl`; peaks between samples are not measured |
+| ARCore | 1,177 matching records, all tracking; 17 camera frames without an ARCore record | `frames.jsonl` |
+| Raw depth | 44 new maps with confidence over the recording | `depth/`, `frames.jsonl`; distinct depth rate is about 1.10/s for this walk |
+| Clock base | camera and both motion sensors agree with elapsedRealtime | `clock_check.json` |
+| Estimated camera-to-IMU offset | -2.668 ms; peak correlation 0.618 | `clock_check.json`, after subtracting 25.392 ms for exposure/readout |
+
+The v2 reader and `src.live.stream.replay` read all 1,194 frames in order. Every stored grey PNG and colour JPEG decoded with the expected 640 x 480 dimensions. EuRoC export contains 1,194 PNGs and 16,899 IMU rows; `arcore_camera_tum.txt` has 1,177 poses. The checker and exporter return status 1 because final image 1193 has no Camera2 settings; export files were still written. The 17 missing ARCore records are at sequences 360-363, 600-603, 840-845, 960 and 1192-1193. No values were invented to fill these gaps.
+
+The first recorded anchor id is 1, although the phone created 40 anchors. Initial replay failed because fusion assumed anchor 0 existed. Task99 binds each fragment to an available received anchor and keeps that binding for all later corrections. The regression test verifies the surface still moves with its anchor. CPU replay now completes with both cached models on 16 threads and 2 cm voxels: 63 updates at 1.580 updates/s, longest gap 0.856 s, no gaps over one second, median update 619.4 ms and latency 672.5 ms. It saved 845,428 surface points and applied 83 anchor corrections. Object counts and geometric accuracy remain unvalidated.
+
+Local outputs are `outputs/capture_task99_220756/{validation.json,euroc/,live_verified/}`. Reproduce with:
+
+```text
+.venv-yolo\Scripts\python -B experiments/open_vio/host/clock_check.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk
+.venv-yolo\Scripts\python -B experiments/open_vio/host/recording.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --euroc <new output folder>
+.venv-yolo\Scripts\python -B -m src.live.run --replay experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --out <new output folder> --threads 16
+```
+
+Capture 1.2's APK and identical email copy are in the [deployment index](../../mobile_deployments/README.md), with version and full UTC timestamp in their names. All 30 JVM tests pass. The combined capture, open_vio, live, shared-phone and hygiene suite passes 317 tests with 1 skipped. The 60 s rest, later calibration recordings, full frame/ARCore metadata coverage and independent accuracy remain open.
+
+Task99 also fixed repository hygiene. `tools/check.py` now accepts `task_list/done`, uses OS scratch and removes it after testing. A shared phone fixture now uses pytest's temporary folder instead of creating `.pytest-temp` beside its source. Ruff's cache is configured outside the repo. Old `.test_*`, pytest scratch and `.ruff_cache` folders were removed; do not recreate them with repo-local `--basetemp` arguments.
+
+## Historical delivery ownership, 6 October 2026
 
 [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.
 

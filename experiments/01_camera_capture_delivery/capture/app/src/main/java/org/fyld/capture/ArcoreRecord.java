@@ -38,7 +38,7 @@ final class ArcoreRecord {
         for (int i = 0; pose != null && i < pointIds.length; i++) {
             float x = pointXyzc[4 * i], y = pointXyzc[4 * i + 1], z = pointXyzc[4 * i + 2];
             float[] pixel = project(pose, intrinsics, x, y, z);
-            if (pixel == null) continue;
+            if (pixel == null || !Float.isFinite(pointXyzc[4 * i + 3])) continue;
             points.put(withId(pointIds[i], x, y, z, pixel[0], pixel[1], pointXyzc[4 * i + 3]));
         }
         Report.put(a, "points", points);
@@ -78,8 +78,10 @@ final class ArcoreRecord {
     /** Pixel (u, v) of a world point seen from an ARCore pose (camera looks along -z, y up); null when behind the camera. */
     static float[] project(float[] pose, float[] k, float x, float y, float z) {
         float[] c = rotate(-pose[3], -pose[4], -pose[5], pose[6], x - pose[0], y - pose[1], z - pose[2]);
-        if (c[2] >= 0) return null;
-        return new float[]{k[2] + k[0] * c[0] / -c[2], k[3] - k[1] * c[1] / -c[2]};
+        if (!(c[2] < 0) || !Float.isFinite(c[2])) return null;
+        float u = k[2] + k[0] * c[0] / -c[2], v = k[3] - k[1] * c[1] / -c[2];
+        // One non-finite point makes Android's JSON serialization fail for the entire frame.
+        return Float.isFinite(u) && Float.isFinite(v) ? new float[]{u, v} : null;
     }
 
     /** True when an anchor pose has moved more than MOVE_METRES or turned more than TURN_DEGREES. */

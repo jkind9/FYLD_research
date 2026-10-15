@@ -11,12 +11,17 @@ import shutil
 import subprocess
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from recipe import sha256, unique_object, validate_settings
-from verify import (inspect_archive, parse_badging, parse_camera_declarations,
-                    parse_signature, verify_apk)
+from verify import (
+    inspect_archive,
+    parse_badging,
+    parse_camera_declarations,
+    parse_signature,
+    verify_apk,
+)
 
 
 def _digest(value: object) -> bool:
@@ -160,11 +165,13 @@ def _write_synced(path: Path, content: str) -> None:
         os.fsync(stream.fileno())
 
 
-def bundle_name(app: str, digest: str) -> str:
-    return f"{app}_{datetime.now(timezone.utc):%Y%m%d}_{digest[:8]}"
+def bundle_name(app: str, digest: str, version: str) -> str:
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]*", version):
+        raise ValueError("Unsafe or empty APK version")
+    return f"{app}_v{version}_{datetime.now(UTC):%Y%m%dT%H%M%SZ}_{digest[:8]}"
 
 
-def publish_capture(apk: Path, output_root: Path) -> Path:
+def publish_capture(apk: Path, output_root: Path, version: str) -> Path:
     apk, root = Path(apk), Path(output_root).absolute()
     if apk.is_symlink() or not apk.is_file() or apk.suffix.lower() != ".apk":
         raise ValueError("Export requires a regular non-symlink APK")
@@ -172,20 +179,21 @@ def publish_capture(apk: Path, output_root: Path) -> Path:
         raise ValueError("Export root cannot contain escaping symlinks")
     digest = sha256(apk)
     root.mkdir(parents=True, exist_ok=True)
-    destination = root / bundle_name("capture", digest)
+    destination = root / bundle_name("capture", digest, version)
     if destination.exists() or destination.is_symlink():
         raise FileExistsError(f"Bundle already exists: {destination}")
     staging = root / f".staging-capture-{uuid.uuid4().hex}"
     staging.mkdir()
-    for name in ("fyld-capture.apk", "fyld-capture.apk.bin"):
+    filename = f"fyld-{destination.name.rsplit('_', 1)[0]}.apk"
+    for name in (filename, f"{filename}.bin"):
         copied = staging / name
         shutil.copyfile(apk, copied)
         if sha256(copied) != digest:
             raise ValueError("Copied APK hash mismatch")
     _write_synced(staging / "README.md", "# FYLD capture\n\n"
                   f"SHA-256 (both files): `{digest}`.\n\n"
-                  "Install fyld-capture.apk as an update, keeping queued data. "
-                  "For email transfer, rename fyld-capture.apk.bin to .apk on the phone. "
+                  f"Install {filename} as an update, keeping queued data. "
+                  "For email transfer, remove the .bin suffix on the phone. "
                   "Build and JVM test results are separate from Redmi verification.\n")
     _publish(staging, destination)
     return destination
@@ -206,25 +214,26 @@ def publish_bundle(apk: Path, evidence: dict, output_root: Path, run_id: str,
     validate_evidence(apk, evidence, verifier_dir)
     root.mkdir(parents=True, exist_ok=True)
     is_camera = evidence.get("camera_profile") is not None
-    destination = root / bundle_name("camera" if is_camera else "smoke", evidence["apk_sha256"])
+    destination = root / bundle_name("camera" if is_camera else "smoke", evidence["apk_sha256"], evidence["manifest"]["version"])
     if destination.exists() or destination.is_symlink():
         raise FileExistsError(f"Bundle already exists: {destination}")
     staging = root / f".staging-{run_id}-{uuid.uuid4().hex}"
     staging.mkdir()
-    copied = staging / apk.name
-    for target in (copied, staging / f"{apk.name}.bin"):
+    filename = f"fyld-{destination.name.rsplit('_', 1)[0]}.apk"
+    copied = staging / filename
+    for target in (copied, staging / f"{filename}.bin"):
         shutil.copyfile(apk, target)
         if sha256(target) != evidence["apk_sha256"]:
             raise ValueError("Copied APK hash mismatch")
     _write_synced(staging / "verification.json", json.dumps(evidence, indent=2, sort_keys=True) + "\n")
     if is_camera:
         readme = ("# Camera capture test app\n\n"
-                  f"APK: `{apk.name}`. SHA-256: `{evidence['apk_sha256']}`.\n\n"
+                  f"APK: `{filename}`. SHA-256: `{evidence['apk_sha256']}`.\n\n"
                   "This app records Camera2 capability checks and capture results. The verification "
                   "record describes its source, signature, package identity and permissions.\n\n")
     else:
         readme = ("# Offline smoke app\n\n"
-                  f"APK: `{apk.name}`. SHA-256: `{evidence['apk_sha256']}`.\n\n"
+                  f"APK: `{filename}`. SHA-256: `{evidence['apk_sha256']}`.\n\n"
                   "This app checks packaging. It does not test phone cameras. The verification "
                   "record describes its source, signature and Android settings.\n\n")
     _write_synced(staging / "README.md", readme +

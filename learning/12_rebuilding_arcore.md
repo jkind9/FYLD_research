@@ -51,7 +51,7 @@ The gyroscope measures how fast the phone turns. ARCore's poses also show how fa
 
 Because ARCore's pose already depends on ARCore's own internal calibration, this measurement is a check, not the final number. Kalibr (next section) measures the offset independently, from the camera images and the gyroscope alone.
 
-> **Project result (14 October 2026).** The capture app builds (Task96); Task97's diagnostic build passes 27 JVM tests. The converter and clock check read its session folders and pass their tests on synthetic sessions. The Redmi's checks passed with a 33.4 MB/s Wi-Fi link, but Record walk crashes. The PC retained incomplete trials with 0 and 100 frames; a complete recording and measured clock offset still wait for the crash diagnosis and owner retry.
+> **Project result (15 October 2026).** Capture 1.2 completed a 39.88 s Redmi walk with 1,194 frames at 29.92 fps and no reported drops. Both motion sensors ran at 423.54 Hz without gaps. The reader verified all images and the EuRoC converter wrote the camera and IMU files. The estimated camera-to-IMU clock offset is -2.67 ms after correcting for exposure/readout, with peak correlation 0.62; calibration must verify it independently. The final image has no camera settings and 17 frames have no ARCore record, so the check still flags incomplete metadata. [Evidence and limits](../experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99).
 
 ## Calibration
 
@@ -84,10 +84,10 @@ Two lessons carry over to the phone. The noise settings matter as much as the me
 
 ## Try it
 
-Install the current FYLD capture APK from the [deployment index](../mobile_deployments/README.md). It replaces the standalone raw recorder and check app. Capture 1.1 still crashes during Record walk on the Redmi; complete recording and clock measurements wait for the diagnosis.
+Install the current FYLD capture APK from the [deployment index](../mobile_deployments/README.md). It replaces the standalone raw recorder and check app. Capture 1.2 completed the Redmi walk; the 60 s rest and calibration recordings remain to be collected.
 
 ```text
-python -m pytest experiments/open_vio/tests
+python -B tools/check.py experiments/open_vio/tests
 python experiments/open_vio/host/clock_check.py <recording folder>
 python experiments/open_vio/host/recording.py <recording folder> --euroc <output folder>
 ```

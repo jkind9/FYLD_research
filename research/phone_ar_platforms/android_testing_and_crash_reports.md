@@ -21,3 +21,11 @@ Proposed by Claude, not owner-ruled: add an Android 13/API 33 AVD first to match
 The diagnostic app reports its own recent exit timestamps (wall-clock milliseconds), reason codes, status and descriptions. Available trace bytes are encoded as base64 without treating a binary tombstone as text. Its saved Java exception includes the crashing version, thread, timestamp and full cause chain. On reopening, these diagnostics use the existing LAN report connection to the capture receiver. A local Java trace is retained after sending. The receiver saves reports under its output folder's `reports/` directory.
 
 Task97 adds evidence collection. It does not claim the Record walk crash is fixed. The owner must install the diagnostic APK as an update, reproduce the failure and reopen the app to send its report. Existing Java crashes cannot acquire a retroactive Java stack from the new handler; historical system exit details may still exist.
+
+## Received exception and Task99 fix
+
+The local report `20261014T215846_901_2201116TG.json` contains the saved capture 1.1 exception: a `NullPointerException` in `SessionMessages.encode`, called by `DiskQueue.add` and `FrameWriter.write`. The crashing thread is `frame-writer`. Reopening uploaded the report; another reproduction was not needed.
+
+Android's [AOSP JSONObject implementation](https://android.googlesource.com/platform/libcore/+/refs/heads/main/json/src/main/java/org/json/JSONObject.java) catches a serialization `JSONException` in the no-argument `toString()` and returns null. Its `toString(int)` overload propagates the exception. JSON number serialization rejects NaN and infinity. The received stack establishes the null serialization result; it does not identify the offending numeric field. Synthetic tests reproduce invalid point projections and overflowing pixel coordinates as a route to that failure.
+
+Capture 1.2 filters unprojectable points and non-finite confidence values, and converts serialization exceptions into the existing queue write-error path. All 30 JVM tests pass, including the three regressions. The Redmi subsequently completed 1,194 frames over 39.88 s without a crash or reported dropped frame. This is device evidence for that recording, not a guarantee for every future session.

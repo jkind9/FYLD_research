@@ -4,9 +4,9 @@ This experiment rebuilds what ARCore gives the project (the camera's path in met
 
 Visual-inertial odometry (VIO) is the core part: it fuses camera images with gyroscope and accelerometer readings, which give scale in metres and the direction of gravity. Every open VIO system needs camera frames and motion-sensor readings stamped on one clock, plus a calibration of the phone. ARCore keeps all of this inside. The steps, in order:
 
-| Step | What | Status (14 October 2026) |
+| Step | What | Status (15 October 2026) |
 |---|---|---|
-| 1. Capture app (Task96, continuing Task95 and Task88) | One phone app records the inputs for every reconstruction method; the PC receives one v2 session folder, checks it and converts it for the open trackers | Redmi checks passed at 33.4 MB/s; Record walk crashes; Task97 adds a diagnostic APK; a complete walk and rest are still needed |
+| 1. Capture app (Tasks96 and 99, continuing Task95 and Task88) | One phone app records the inputs for every reconstruction method; the PC receives one v2 session folder, checks it and converts it for the open trackers | Capture 1.2 completed 1,194 frames with zero reported drops; reader, replay and EuRoC export checked; one image lacks settings, 17 lack ARCore; rest and calibration still needed |
 | 2. Calibration (Task90) | Kalibr: camera intrinsics, camera-to-IMU rotation, offset and time shift (printed target); IMU noise from a long recording at rest | Pipeline built; reproduces TUM-VI's published calibration (0.014 degrees, 1.0 mm, 0.13 ms); A4 target ready; Redmi calibration waits for its recordings |
 | 3. Offline comparison (Task91) | Basalt (BSD-3), Kimera-VIO (BSD-2), OKVIS2 (BSD-style), with OpenVINS (GPL-3.0, reference only), run in WSL on the recordings and scored against ARCore's poses and tape-measured distances, with time per frame | All four built and run on TUM-VI room1 with one camera: Basalt 0.146 m, OKVIS2 0.505 m (own noise settings), Kimera lost track, OpenVINS 0.064 m (reference); Redmi runs wait for recordings |
 | 4. Port to the phone | Best system built for Android (NDK); learned depth resized to its tracked points replaces ARCore's depth | Not started |
@@ -62,7 +62,7 @@ Use the `.venv-sfm` environment (numpy, scipy, OpenCV and Pillow). The receiver 
 
 ### Build, install, record
 
-1. Build in WSL: `wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh`. This runs the JVM tests, builds the APK and stages `.apk` and `.apk.bin` in `mobile_deployments/capture_<YYYYMMDD>_<hash8>/`. See the [deployment index](../../mobile_deployments/README.md) for the current version. The rawrecorder and phonecheck build scripts are retired.
+1. Build in WSL: `wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh`. This runs the JVM tests, builds the APK and stages `.apk` and `.apk.bin` in `mobile_deployments/capture_v<version>_<YYYYMMDDTHHMMSSZ>_<hash8>/`. APK filenames include the version and UTC time too. See the [deployment index](../../mobile_deployments/README.md) for the current version. The rawrecorder and phonecheck build scripts are retired.
 2. Install from email on the Redmi (MIUI blocks adb installs). Start `capture_receiver.py` on the PC; enter `192.168.68.123` and port `8766` in the app. Allow Python through the Windows firewall on private networks.
 3. Run all checks: ARCore setup and tracking, a 50 MiB link-speed test and a timed compression check. The ARCore notice remains in the app.
 4. First walk: start upstairs, go downstairs, return upstairs, Stop. Leave the app open while the queue drains; sending continues after Stop.
@@ -71,11 +71,13 @@ Use the `.venv-sfm` environment (numpy, scipy, OpenCV and Pillow). The receiver 
 
 ### Tests
 
-`python -m pytest experiments/open_vio/tests` needs no phone. Synthetic v2 sessions exercise validation, EuRoC images and IMU rows, ARCore reference paths, coordinate conversion and the clock-offset search. The offset search recovers synthetic shifts of +12 ms and -20 ms within 1 ms and reports no peak for a motionless signal. Experiment 01 tests the shared JVM/Python fixture and a fake phone disconnecting and resuming without missing or duplicate frames. `src/live/tests/test_stream.py` checks v2 replay.
+`python -B tools/check.py experiments/open_vio/tests` needs no phone and keeps scratch outside the repo. Synthetic v2 sessions exercise validation, EuRoC images and IMU rows, ARCore reference paths, coordinate conversion and the clock-offset search. The offset search recovers synthetic shifts of +12 ms and -20 ms within 1 ms and reports no peak for a motionless signal. Experiment 01 tests the shared JVM/Python fixture and a fake phone disconnecting and resuming without missing or duplicate frames. `src/live/tests/test_stream.py` checks v2 replay.
 
 ### Results
 
-The capture app builds (debug APK, package `org.fyld.capture`, minimum Android 8.0, ARCore 1.56.0). The v2 readers and reconnect path pass synthetic tests. The Redmi's capture checks passed with 100% tracking over 15 s and a 33.4 MB/s link-speed check, but Record walk crashes: the PC retained incomplete attempts with 0 and 100 frames. Task97's diagnostic APK collects crash information without USB ([experiment 01](../01_camera_capture_delivery/README.md#redmi-trial-and-crash-diagnostics-task97)). A complete walk and rest, zero-drop capture, sustained transfer, storage use, sending time after Stop and the measured clock offset remain unverified.
+Capture 1.2 completed Redmi session `20261014_220756_walk`: 1,194 frames over 39.88 s at 29.92 fps, zero reported dropped/missing/repeated frames, gyroscope and accelerometer at 423.54 Hz without gaps, 10.22 MB/s received, 0.058 s sending after Stop, and 225 MB stored on the PC. The v2 reader verified all images; EuRoC export wrote all 1,194 PNGs and the interpolated IMU stream. The earlier 33.4 MB/s figure is a separate link-speed check.
+
+The clock check confirms one clock base and estimates `camera_imu_clock_offset_ms = -2.67`, after removing 25.39 ms for exposure/readout; the peak correlation is 0.62. This is an estimate from one short walk, not an independent calibration. The checker and exporter return status 1 because final image 1193 has no Camera2 settings, even though the export files were written. There are 17 frames without ARCore records and 44 new depth maps. The first recorded anchor is 1; Task99 fixes replay's assumption that anchor 0 must exist. CPU replay now completes at 1.58 updates/s with no gap over one second. Local evidence and commands: [completed session](../01_camera_capture_delivery/README.md#completed-redmi-session-task99). The 60 s rest and calibration recordings remain outstanding.
 
 ## Step 2: calibration (Task90)
 

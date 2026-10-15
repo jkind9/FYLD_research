@@ -452,8 +452,8 @@ def test_export_does_not_run_receipt_supplied_verifier(verified, tmp_path, monke
 
 @pytest.mark.parametrize(("old", "new", "message"), [
     ("uses-permission: name='android.permission.CAMERA'",
-     "uses-permission: name='android.permission.CAMERA'\n"
-     "uses-permission: name='android.permission.RECORD_AUDIO'", "(?i)manifest"),
+     ("uses-permission: name='android.permission.CAMERA'\n"
+      "uses-permission: name='android.permission.RECORD_AUDIO'"), "(?i)manifest"),
     ("org.fyld.capture.CameraActivity", "org.kivy.android.PythonActivity", "(?i)manifest"),
 ])
 def test_camera_export_rejects_tampered_permission_or_activity(

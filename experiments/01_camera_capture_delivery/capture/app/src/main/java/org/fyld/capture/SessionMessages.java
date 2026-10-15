@@ -93,18 +93,20 @@ final class SessionMessages {
         return s;
     }
 
-    static byte[] encode(JSONObject header, byte[] payload) {
-        byte[] encoded = header.toString().getBytes(StandardCharsets.UTF_8);
+    static byte[] encode(JSONObject header, byte[] payload) throws IOException {
+        byte[] encoded;
+        try {
+            // Android's no-argument toString hides serialization errors by returning null.
+            encoded = header.toString(0).getBytes(StandardCharsets.UTF_8);
+        } catch (JSONException e) {
+            throw new IOException("invalid message JSON: " + e.getMessage(), e);
+        }
         ByteArrayOutputStream bytes = new ByteArrayOutputStream(8 + encoded.length + payload.length);
         DataOutputStream out = new DataOutputStream(bytes);
-        try {
-            out.writeInt(encoded.length);
-            out.write(encoded);
-            out.writeInt(payload.length);
-            out.write(payload);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);  // a ByteArrayOutputStream does not fail
-        }
+        out.writeInt(encoded.length);
+        out.write(encoded);
+        out.writeInt(payload.length);
+        out.write(payload);
         return bytes.toByteArray();
     }
 

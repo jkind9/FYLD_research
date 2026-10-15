@@ -68,7 +68,7 @@ import javax.microedition.khronos.opengles.GL10;
  * deflating the grey frames pays; the report is saved and sent to the PC. The camera image fills the screen.
  */
 public class CaptureActivity extends Activity implements GLSurfaceView.Renderer, SharedCameraRig.Listener {
-    static final String VERSION = "1.1";
+    static final String VERSION = "1.2";
     static final long TRACKING_MS = 15000;
     static final int SAMPLE_EVERY = 15, SAMPLES = 20;
     private static final int GREEN = 0xFF2E9E4F, RED = 0xFFD64545, GREY = 0xFF8A8A8A;

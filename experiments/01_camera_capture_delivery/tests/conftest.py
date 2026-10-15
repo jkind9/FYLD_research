@@ -1,6 +1,6 @@
-import sys
 import importlib
-from datetime import datetime, timezone
+import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -13,5 +13,5 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 @pytest.fixture
 def publication_time(monkeypatch):
-    instant = datetime(2026, 10, 14, 22, 0, 0, tzinfo=timezone.utc)
+    instant = datetime(2026, 10, 14, 22, 0, 0, tzinfo=UTC)
     monkeypatch.setattr(importlib.import_module("export"), "datetime", SimpleNamespace(now=lambda _: instant))

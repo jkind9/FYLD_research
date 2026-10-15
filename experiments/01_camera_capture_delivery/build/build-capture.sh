@@ -16,6 +16,6 @@ echo "sdk.dir=$SDK" > "$WORK/local.properties"
 (cd "$WORK" && "$GRADLE" --no-daemon -q --max-workers=2 testDebugUnitTest assembleDebug)
 
 APK="$WORK/app/build/outputs/apk/debug/app-debug.apk"
-DEPLOY="$(python3 "$SOURCE/../build/deployment.py" "$APK")"
-sha256sum "$DEPLOY/fyld-capture.apk"
+DEPLOY="$(python3 "$SOURCE/../build/deployment.py" "$APK" --aapt "$SDK/build-tools/35.0.0/aapt")"
+sha256sum "$DEPLOY"/*.apk
 echo "BUILD DONE $DEPLOY"

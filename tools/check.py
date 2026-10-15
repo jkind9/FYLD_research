@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TASK_ROOT = ROOT / "task_list"
 TASK_ROOT_FILES = {".journal.log", "CONSTITUTION.md", "README.md"}
-TASK_GROUPS = {"archive", "closed", "open", "pending_review", "stale"}
+TASK_GROUPS = {"archive", "closed", "done", "open", "pending_review", "stale"}
 
 
 def _find_task_list_leaks(

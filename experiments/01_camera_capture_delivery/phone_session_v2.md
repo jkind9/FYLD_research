@@ -11,7 +11,7 @@ This is the one written definition of what the capture app (`capture/`, package 
 1. Every message the app records (frames, motion-sensor batches, telemetry, the end message) gets a **message number** `n`, counting from 0 per session with no gaps. The app writes each message to the phone's own storage at once, as the exact bytes it will send (the *queue*: one file per message).
 2. A sender thread reads the queue in message-number order and sends it over TCP. Capture never waits for the network: a slow link only makes the queue longer.
 3. The PC stores each message, then acknowledges it. An acknowledgement is *cumulative*: it names the highest message number the PC holds with no gap below it. The phone deletes a message's file only once an acknowledgement covers it.
-4. The phone keeps up to **64 messages** sent but not yet acknowledged (the *window*), so it does not wait one round trip per frame. The only phone measurement so far, 0.70 MB/s, waited for each frame's acknowledgement before sending the next (stop-and-wait).
+4. The phone keeps up to **64 messages** sent but not yet acknowledged (the *window*), so it does not wait one round trip per frame. The older stop-and-wait measurement was 0.70 MB/s. Capture 1.2's completed Redmi session received 10.22 MB/s; the separate link-speed check measured 33.4 MB/s.
 5. After Stop, the app queues the end message and keeps sending until the queue is empty. The screen shows frames and MB left and an estimated time; the screen stays on.
 6. After a dropped connection, or one with no write, acknowledgement or idle moment for 20 s, the phone reconnects and sends `hello` again. The PC answers with the highest message number it holds with no gap, and the phone resends everything after it. A session left on the phone when the app closed is sent the next time the app runs with a computer address.
 
@@ -106,6 +106,8 @@ Missing capture-result values (a phone that does not report one) are `null`. Wid
 | `anchors` | list | anchor corrections `[id, tx, ty, tz, qx, qy, qz, qw]`, as in v1 |
 
 Coordinates, the projection of points to `u, v`, raw depth, keyframe anchors and corrections follow [phone_session_v1.md](phone_session_v1.md) word for word: world +Y up, ARCore camera +X right, +Y up, looking along -Z; a new anchor once every 1.0 s while tracking; a correction when an anchor moves more than 1 mm or 0.1 degrees. Anchor ids count from 0 per session.
+
+Capture 1.2 omits points whose projection or confidence is non-finite, as well as points behind the camera; it retains the image. JSON does not represent NaN or infinity. If another header value cannot serialize, recording stops through the existing `write_error` path. No fields or wire version changed. A saved session can miss an anchor-creation record when the associated ARCore image has no delivered Camera2 image; readers must not assume anchor 0 is present. The completed Redmi session's first recorded anchor is 1, so live fusion binds each fragment to a received anchor and keeps that binding for later corrections.
 
 ### Payload
 

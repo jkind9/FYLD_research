@@ -2,9 +2,7 @@
 
 import hashlib
 import importlib.util
-import shutil
 import sys
-import uuid
 from pathlib import Path
 
 import pytest
@@ -17,13 +15,12 @@ sys.path.insert(0, str(APP))
 spec = importlib.util.spec_from_file_location("capture_report", APP / "capture_report.py")
 capture_report = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(capture_report)
-TEST_ROOT = Path(__file__).resolve().parent
 PAYLOAD_NAME = "images/frame_0001.jpg"
 
 
 @pytest.fixture
-def phone_bundle():
-    root = TEST_ROOT / ".pytest-temp" / f"phone_session_{uuid.uuid4().hex}"
+def phone_bundle(tmp_path):
+    root = tmp_path / "phone_session"
     image_path = root / PAYLOAD_NAME
     image_path.parent.mkdir(parents=True)
     Image.new("RGB", (640, 480), (10, 20, 30)).save(image_path, format="JPEG")
@@ -77,10 +74,7 @@ def phone_bundle():
         "captures": [capture],
         "files": {PAYLOAD_NAME: record},
     }
-    try:
-        yield report, root
-    finally:
-        shutil.rmtree(root, ignore_errors=False)
+    return report, root
 
 
 def test_legacy_export_still_accepts_empty_camera_capability_report(phone_bundle):
