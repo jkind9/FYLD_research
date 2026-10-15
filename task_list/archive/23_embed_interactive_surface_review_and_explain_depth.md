@@ -1,7 +1,7 @@
 ---
 id: "23"
 title: Embed interactive surface review and explain depth validity masks
-status: stale
+status: archived
 approval_status: approved
 priority: MED
 type: infra
@@ -28,11 +28,17 @@ baseline_metric:
   baseline_value: "0 embedded interactive surface reviews"
   target: "1 verified embedded review with rotation/pan/zoom and explicit mask counts"
 created: 2026-10-03
-last_updated: 2026-10-07
-superseded_by: null
+last_updated: 2026-10-15
+superseded_by: 100
 ---
 
 # Task 23: Embed interactive surface review and explain depth validity masks
+
+## Board review, 15 October 2026
+
+Superseded viewer controls. Tasks64 and 100 now provide per-stage offline reports and the interactive scene orbit/pan/zoom, point/splat switch and camera/photo bookmarks. Any remaining embedded stage-mask feature is optional and belongs to a demonstrated future review need under Task36. Archive this plan as superseded by Task100 without claiming its old exact design was implemented.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

@@ -1,7 +1,7 @@
 ---
 id: "63"
 title: Add scaled ZipDepth and GPU detector choices to the walkthrough
-status: open
+status: stale
 priority: HIGH
 type: infra
 approval_status: owner asked on 2026-10-07 to progress the swappable pipeline as far as possible; settings chosen under that delegation
@@ -20,11 +20,17 @@ baseline_metric:
   baseline_value: "0 ZipDepth depth choices; 0.62 fps end to end (Depth Anything, all CPU)"
   target: "1 ZipDepth choice with a labelled scale source; a measured end-to-end fps with GPU depth and detection, compared with the owner's 1 fps floor"
 created: 2026-10-07
-last_updated: 2026-10-08
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task 63 — Add scaled ZipDepth and GPU detector choices to the walkthrough
+
+## Board review, 15 October 2026
+
+Deferred GPU extension. The CPU adapter already ran: 1.13 processing fps, 0.77 end-to-end fps including loading/rendering/scoring on the 30-frame control; exact Kinect scale points were optimistic. The remaining GPU run is outside the current CPU-only scope. Preserve that unperformed work, but do not leave it in the immediate queue or request GPU permission automatically. A future protocol must distinguish processing from complete latency and obtain any still-needed review.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

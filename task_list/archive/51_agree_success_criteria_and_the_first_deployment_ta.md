@@ -1,12 +1,12 @@
 ---
 id: "51"
 title: Define and build the first prerecorded walkthrough pipeline
-status: open
+status: archived
 priority: HIGH
 type: infra
 approval_status: first prerecorded-pipeline scope confirmed by owner 2026-10-06; field acceptance limits remain pending
 blocked_by: []
-blocks: [53, 54, 55, 57]
+blocks: []
 verification_test: "src/walkthrough/tests/test_pipeline.py"
 plan_reviewed: 2026-10-06 PASS
 files:
@@ -14,7 +14,7 @@ files:
   - pytest.ini
   - data/README.md
   - experiments/01_camera_capture_delivery/README.md
-  - task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md
+  - task_list/archive/51_agree_success_criteria_and_the_first_deployment_ta.md
   - task_list/open/52_build_and_verify_a_usable_phone_recording.md
   - task_list/open/53_collect_independent_scene_measurements_and_object_.md
   - src/walkthrough/**
@@ -34,11 +34,17 @@ baseline_metric:
   baseline_value: "0 prerecorded-video input adapters in src/walkthrough"
   target: "1 prerecorded input adapter with preserved frame identity and explicit missing metadata"
 created: 2026-10-06
-last_updated: 2026-10-07
-superseded_by: null
+last_updated: 2026-10-15
+superseded_by: 59
 ---
 
 # Task51: Define and build the first prerecorded walkthrough pipeline
+
+## Board review, 15 October 2026
+
+Superseded integration umbrella. Tasks55, 58, 59 and 64 implemented mapping, orchestration, swappable layers and reports; Tasks89/96/99 added actual capture/replay. The original software integration is no longer pending because field acceptance moved to Task61. This record is archived as superseded by Task59, without turning the historical receipt into a new completed accuracy claim.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## Clarifications
 

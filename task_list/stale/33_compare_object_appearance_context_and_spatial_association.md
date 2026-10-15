@@ -5,7 +5,7 @@ status: stale
 priority: MED
 type: experiment
 approval_status: proposed; no execution authorised by Task30
-blocked_by: [31, 32, 40, 16, 56]
+blocked_by: [53, 56]
 blocks: []
 verification_test: ""
 plan_reviewed: null
@@ -19,11 +19,17 @@ baseline_metric:
   baseline_value: "1 incorrect YOLO monitor ranking; 0 ResNet50/context comparisons"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-07
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task33: Compare object appearance, context and spatial association
+
+## Board review, 15 October 2026
+
+Remains deferred. Appearance/context matching is not yet justified by a scored handset identity failure. Task93 is diagnosis on benchmark data, not independent count truth. Reopen only after geometry controls and Task53 references isolate an association failure; refresh the historical plan and dependencies then.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

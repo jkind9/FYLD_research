@@ -217,7 +217,7 @@ Git retains committed task-file changes, so the project does have history. The f
 
 ### F9. MEDIUM: prose state and machine state drift apart
 
-[Task51](task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md), line 168, still says mapping has no method and no run completes all six layers. The current board and Task55 describe completed mapping and six-layer runs. Task53's continuation note still points to Task51 decisions, although Task60 moved field decisions to Task61.
+[Task51](task_list/archive/51_agree_success_criteria_and_the_first_deployment_ta.md), line 168, still says mapping has no method and no run completes all six layers. The current board and Task55 describe completed mapping and six-layer runs. Task53's continuation note still points to Task51 decisions, although Task60 moved field decisions to Task61.
 
 The root README also labels mapping planned while the current working tree and feature documentation describe an implemented method. Some of this reflects uncommitted recent work, but a reader loading different files receives different answers.
 

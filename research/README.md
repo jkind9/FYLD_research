@@ -149,7 +149,7 @@ Compare individual measurements with last-view, equal-weight and robust estimate
 
 ### F. Surface visualization and realistic environments
 
-[Task36](../task_list/open/36_compare_surface_representations_and_visual_realism.md) separates geometry measurement from appearance and navigability.
+[Task36](../task_list/stale/36_compare_surface_representations_and_visual_realism.md) separates geometry measurement from appearance and navigability.
 
 | Representation and primary source | Capture/coverage requirement and limitation | Cost and export questions |
 |---|---|---|

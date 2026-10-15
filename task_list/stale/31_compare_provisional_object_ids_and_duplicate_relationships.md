@@ -5,7 +5,7 @@ status: stale
 priority: HIGH
 type: experiment
 approval_status: proposed; no execution authorised by Task30
-blocked_by: [21, 22, 40, 56]
+blocked_by: [53, 56]
 blocks: []
 verification_test: experiments/06_object_recognition/experiments/06_identity_policy/tests/test_identity_policy.py
 plan_reviewed: 2026-10-04 PASS
@@ -21,11 +21,17 @@ baseline_metric:
   baseline_value: "90 book proposals unresolved outside gate; 0 evaluated provisional-birth comparisons"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-07
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task31: Compare provisional object IDs and duplicate relationships
+
+## Board review, 15 October 2026
+
+Remains deferred. Task46 fixed the original unresolved-book defect; Task93 later logged live overcounts but supplied no independent inventory. Task102 first checks geometric scatter. Reopen identity-schema work only for a residual, independently scored failure using Task53 references; old pending-review statements below are historical, not live blockers.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

@@ -201,7 +201,7 @@ The viewer is a point surface, with no triangles, hole filling or duplicate fusi
 
 ## Reconciled research boundary, 4 October 2026
 
-The measured ICL control above remains a point-surface reconstruction with supplied depth/poses. The [desk replay](../06_object_recognition/experiments/05_replay/README.md) also accumulates measured points using supplied TUM poses, but has no acquired independent dense reference surface. Its visual coverage cannot inherit ICL's accuracy score. [Task36](../../task_list/open/36_compare_surface_representations_and_visual_realism.md) owns new points/patches/mesh/texture/photogrammetry/splat/NeRF comparisons. [Task35](../../task_list/stale/35_measure_error_propagation_and_sequential_fusion.md) owns error/fusion/correction assessment; Task25 owns later camera corrections. Task23's partial viewer work remains unfinished and is preserved.
+The measured ICL control above remains a point-surface reconstruction with supplied depth/poses. The [desk replay](../06_object_recognition/experiments/05_replay/README.md) also accumulates measured points using supplied TUM poses, but has no acquired independent dense reference surface. Its visual coverage cannot inherit ICL's accuracy score. Following the 15 October board review, Task102 owns the immediate Redmi orientation/depth/pose/fusion diagnosis. [Task36](../../task_list/stale/36_compare_surface_representations_and_visual_realism.md) remains deferred for representation comparisons; Task35's broader error study and Task25's separate camera corrections also remain deferred. Task100 supplies interactive display splats and supersedes Task23's viewer plan; photographic training is unperformed.
 
 ```mermaid
 flowchart TD

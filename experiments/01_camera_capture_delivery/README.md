@@ -1,10 +1,12 @@
 # Layer 1: camera capture and delivery
 
-This folder (experiment 01) is layer 1 of the five-layer pipeline described in the [root README](../../README.md). It answers: **can a phone record what the other layers need, and get it to wherever those layers run?** It does not compute depth, camera position or objects. It supplies the raw material for all of them, so its mistakes, such as wrong timestamps or missing calibration, show up as errors in every later layer.
+This folder (experiment 01) is capture, step 1 of the six-step pipeline described in the [root README](../../README.md). It answers: **can a phone record what the other layers need, and get it to wherever those layers run?** It supplies raw images/sensors and records ARCore's available tracking/depth outputs for the processing methods.
 
 **Status:** FYLD capture 1.2 completed Redmi session `20261014_220756_walk`: 1,194 frames over 39.88 s, zero reported drops, all images verified, EuRoC files exported and CPU replay at 1.58 updates/s. The checker flags one final image without camera settings; 17 frames have no matching ARCore record. The [completed-session result](#completed-redmi-session-task99) records the metrics and limits. [Current APKs](../../mobile_deployments/README.md) are kept in one folder.
 
 ## How capture works
+
+**Remaining work, reviewed 15 October.** [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) now owns metadata coverage, Stop flushing, sustained queue checks and the 60 s rest. [Task102](../../task_list/open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) checks poor reconstruction, starting with the owner's sideways-photo observation and native-versus-upright depth control. [Task75](../../task_list/open/75_measure_arcore_camera_path_accuracy_on_the_redmi.md) owns physical accuracy trials; [Task103](../../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) owns actual handset calibration. See the [board](../../task_list/README.md) for order and dependencies. Historical instructions below are not directions to install retired apps.
 
 A useful capture is more than a video file. Each frame needs:
 
@@ -395,7 +397,7 @@ Task99 also fixed repository hygiene. `tools/check.py` now accepts `task_list/do
 
 ## Historical delivery ownership, 6 October 2026
 
-[Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.
+[Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/stale/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/archive/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.
 
 Xiaomi's official guide identifies model `2201116TG` as Redmi Note 11 Pro, and Google's current ARCore supported-device list marks Redmi Note 11 Pro as supporting the Depth API. Together these sources make ARCore depth worth testing on the reported phone, but they do not prove that ARCore installs, starts or returns usable depth on its current software. The existing Camera2 APK does not include ARCore. A read-only WSL check found no cached `com.google.ar` dependency, attached ADB device, emulator or AVD; USB passthrough also showed no Android phone. The absence of a Camera2 `DEPTH16` stream does not test ARCore's motion-based depth path.
 

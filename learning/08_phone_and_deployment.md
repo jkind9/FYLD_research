@@ -22,10 +22,12 @@ How ARCore works inside is explained in [chapter 11](11_inside_arcore.md).
 
 ## Hosted against on the phone
 
-- **Hosted**: the phone records; a server with a GPU does the heavy work after upload. Most accurate methods (multi-view stereo, large learned models, offline SfM) live here.
-- **On the phone**: runs on the handset with no network, for quick checks on site. Needs small models (a few million to tens of millions of parameters) through a mobile runtime such as LiteRT, ONNX Runtime Mobile or ExecuTorch.
+- **Hosted, current route**: the phone captures; the PC stores and processes. Current runs are CPU only. Offline SfM and batch models are comparison references; their results do not establish live performance.
+- **On the phone, later**: selected processing may run inside the same capture app, with no network, for quick checks on site. Handset inference remains untested.
 
-Which parts run where is still an open owner decision (Task61). Either way, results must update live, at least once per second.
+The owner decided this split on 14 October: capture first, PC processing now, phone processing later. Task61 retains the unresolved field acceptance and reference choices. Deployable processing must update live, at least once per second.
+
+The [15 October board review](../task_list/README.md) assigns the remaining work: Task52 capture fidelity and sustained checks, Task103 actual Redmi calibration, and Task104 calibrated open-tracker comparison. Task102 first diagnoses poor geometry, including the owner's report of sideways photos. Sensor-grid images reach both the viewer and depth model without display rotation. Its planned control compares depth from native and upright pixels, then rotates predictions back to the source grid before fusion. Changing pixels without matching calibration and axes would confound model orientation sensitivity with a geometry bug. No orientation result has been measured yet.
 
 ## The design the results point to
 

@@ -1,11 +1,11 @@
 ---
 id: "36"
 title: Compare surface representations and visual realism
-status: open
+status: stale
 priority: LOW
 type: experiment
 approval_status: proposed; no execution authorised by Task30
-blocked_by: [56]
+blocked_by: [102]
 blocks: []
 verification_test: ""
 plan_reviewed: null
@@ -19,11 +19,17 @@ baseline_metric:
   baseline_value: "20000 desk display points; 0 local mesh/splat/NeRF comparisons"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-07
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task36: Compare surface representations and visual realism
+
+## Board review, 15 October 2026
+
+Deferred representation comparison. Task100 already provides surface-derived Gaussian HTML, height colours and photo bookmarks. Photographic training, textured meshes and geometric representation comparisons remain unperformed. Reopen after Task102 identifies a specific representation or visual-review question; realistic rendering does not repair wrong geometry.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

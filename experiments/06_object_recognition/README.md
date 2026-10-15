@@ -174,7 +174,7 @@ Uncertainty about an anchor, geometry of its visible surface and hypotheses abou
 
 ## Scoped next investigations
 
-The [task board](../../task_list/README.md#next-order) owns priorities and dependencies. On 7 October 2026 Task60 moved Tasks31, 33, 34 and 35 to `stale/` and archived the Task09 umbrella; Task56's complete walkthrough benchmark now owns proving distinct counts, and a parked comparison returns only when that benchmark shows a failure it would fix. The table below is the 4 October plan, kept for reference. [Research coverage](../../research/README.md#research-agenda-4-october-2026) provides sources and platform distinctions.
+The [task board](../../task_list/README.md#next-execution-sequence) owns priorities and dependencies. The 15 October review keeps Tasks31, 33, 34 and 35 deferred; Task102 first checks geometric scatter, and Tasks53/56 own independent references and complete scoring. The table below is the 4 October plan, kept for reference. [Research coverage](../../research/README.md#research-agenda-4-october-2026) provides sources and platform distinctions.
 
 | Workstream | Owner | Isolated comparison and decision |
 |---|---|---|
@@ -227,9 +227,9 @@ Retain original observations/pose revisions. Corrected poses must recompute or i
 
 Phone capture/energy/thermal behaviour, construction-site accuracy and longer-range operation remain untested. No packages, weights, inference, training, full Task13 sequence or experiment-code changes are part of Task30.
 
-## Current goal and ownership, 6 October 2026
+## Current goal and ownership, 15 October 2026
 
-[Task09](../../task_list/archive/09_evaluate_scene_object_recognition_and_persistent_counting.md) retains distinct-object counting and the existing identity store. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) collects independent physical identities and measurements. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns the first complete benchmark, using a simple existing counting baseline before optional Tasks31-35 refinements. [Task51](../../task_list/open/51_agree_success_criteria_and_the_first_deployment_ta.md) defines accuracy/time/device limits; [Task57](../../task_list/open/57_deploy_and_measure_the_useful_edge_workload.md) measures the useful deployed workload. Earlier next-method proposals are superseded by this evidence-first order; historical trials and their limitations stay unchanged.
+The existing identity store and Task46 counting baseline remain in use. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) collects independent physical identities and measurements. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns complete count/measurement scoring. Task93 logged live overcounts; Task102 first checks orientation and geometric scatter before changing matching rules. Task61 owns remaining acceptance limits. Task51's integration umbrella and Task09's count umbrella are archived; [Task57](../../task_list/stale/57_deploy_and_measure_the_useful_edge_workload.md) phone processing and optional Tasks31-35 refinements are deferred. No independent Redmi inventory has been received.
 
 ## Walkthrough counting boundary
 

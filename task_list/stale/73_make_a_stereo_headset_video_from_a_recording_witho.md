@@ -1,7 +1,7 @@
 ---
 id: "73"
 title: Make a stereo headset video from a recording without reconstruction
-status: open
+status: stale
 priority: MEDIUM
 type: experiment
 approval_status: filed 2026-10-13 from the owner's request to research the tracking problem and file tasks for the best path; not yet planned in detail or approved to start
@@ -21,11 +21,17 @@ baseline_metric:
   baseline_value: "0 headset videos"
   target: "1 side-by-side video of a TUM recording, viewed by the owner in the phone headset, with its speed and flicker reported"
 created: 2026-10-13
-last_updated: 2026-10-13
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task 73 — Stereo headset video without reconstruction
+
+## Board review, 15 October 2026
+
+Deferred headset output. Side-by-side headset video is not the current capture/reconstruction diagnosis. Task100 is an interactive 3D scene viewer, not stereo video and not completion of this task. Reopen only for a separate owner request or a justified review deliverable; keep the H.264 codec rule and check then-current runtime/licences.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

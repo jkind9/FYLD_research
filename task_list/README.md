@@ -1,129 +1,95 @@
 # Task board
 
-## Objectives and current position, 7 October 2026
+## Current position, 15 October 2026
 
-A phone walkthrough should give useful site measurements and count each physical object once, including after a revisit. Three goals govern the work, and the code should stay modular and easy to follow while we get there.
+The phone captures; this PC receives, stores and processes. Running inference on the phone comes later inside the same app (owner, 14 October). The immediate goal is to compare reconstructions on the **same walk**, before scoring dimensions or choosing a more realistic display. CPU only. Deployable methods must be live or update at least once per second; offline methods remain labelled references.
 
-| Goal | What we must prove | Current evidence |
-|---|---|---|
-| Accuracy | Dimensions, defined area and object counts agree with independent measurements on separate test recordings. Missing coverage and uncertain answers stay visible. | A six-layer walkthrough runs end to end on real methods (30 TUM frames, 7 October): with Kinect depth the camera path is within 0.021 m RMSE; with Depth Anything 0.218 m, and measured areas grow three to four times. A grid-footprint area method exists with known-shape tests. No complete phone/worksite test, no surveyed area and no independently scored count. |
-| Latency | A representative walkthrough produces usable outputs within an agreed wait; live checks update at an agreed rate. | Desktop component timings exist. No measured complete-process time and no agreed maximum wait. |
-| Phone deployment | The useful workload runs on the phone with acceptable sustained resource use and offline behaviour. | Redmi camera inventory was exported, with 0 captured images. No measurement or counting workload has run on the phone. |
+FYLD capture 1.2 replaces phonecheck and rawrecorder. The Redmi completed `20261014_220756_walk`: 1,194 frames over 39.88 s, 29.92 fps, zero reported drops or missing/duplicated frame numbers, motion sensors at 423.54 Hz, 10.22 MB/s received and 225 MB stored. CPU replay produced 63 updates at 1.58/s, with no gap over one second. These are Task99 results, not independently measured geometric accuracy or a sustained device test.
 
-The owner ruled on 7 October 2026 that deployment must be on a phone, and that anything slower than 1 frame per second is not worth using (a floor for every method and for the whole pipeline; Marigold V2, at 15–135 s per frame, was dropped on this basis). Development and accuracy checks stay on existing recorded data (TUM and similar) until phone work resumes. Calibration is only trustworthy when this project's own app records it per frame; a plain video from an unknown phone does not carry it. Whether the phone only records (with processing hosted) or also processes is still open and owned by [Task61](open/61_agree_field_acceptance_limits_and_the_phone_proces.md).
+The owner judged the reconstructed geometry poor. Task100's interactive Gaussian viewer displays that surface with height colours; it is not photographic Gaussian training. The owner also reported sideways reference photos. The sensor mounting angle is recorded as 90 degrees, and the native JPEG reaches both the viewer and depth model without a display rotation. Whether this harms depth is **untested**. Task102 checks it first, with geometric conventions kept consistent.
 
-[Task51](open/51_agree_success_criteria_and_the_first_deployment_ta.md) owns the first software run: existing layers on prerecorded footage with its available references, current model classes, processed on MasterPC. It is pipeline integration, not deployment or accuracy. Field decisions that Task51 held before its 6 October rescope (site, objects, survey, storage, numeric limits, phone processing split) now belong to Task61.
+Known input gaps: 17 images without matched ARCore records, one final image without Camera2 settings, and no anchor-0 creation record. There are 44 new raw-depth maps, but the 63 replay updates used tracked-point scale 33 times and previous scale 30 times, never raw-depth scale. Export and clock checks wrote outputs but returned status 1 for missing settings. The estimated -2.67 ms clock offset is not independent calibration. No 60 s rest, target video or approximately 3-hour calibration rest has arrived.
 
-## Board pruning, 7 October 2026
+Evidence: [capture results](../experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99), [live processing](../src/live/README.md), [open tracker/calibration results](../experiments/open_vio/README.md), [deployment index](../mobile_deployments/README.md), [Task99](done/99_fix_redmi_frame_json_crash_and_publish_a_timestamp.md), [Task100](done/100_build_offline_gaussian_splat_html_viewer_for_the_r.md).
 
-[Task60](closed/60_prune_task_board_to_the_accuracy_latency_and_mobil.md) cut the board from 32 live tasks to 11 open ones. Finished pending-review work was closed with its commit receipts. The fixed-snapshot external validation those tasks were waiting for was waived, because those review sessions are not relaunched automatically; a source claim is rechecked by whichever task uses it. Optional object-identity and review refinements moved to `stale/` and return only when Task56 shows a measured failure they would fix.
+## Next execution sequence
 
-## Next order
-
-One task may be active. `task.js ready --next` follows the bold numbers below.
+This is the proposed technical order from the 15 October review, not an owner-ratified set of experimental settings or product limits. One task may be in progress. Missing physical runs stay explicit; a software handover cannot claim they happened. Move to the next unblocked task after finishing bounded work rather than holding the active slot indefinitely.
 
 | Order | Task | Direct output | Start condition / completion boundary |
 |---|---|---|---|
-| 1 | **51** — [Build the first prerecorded walkthrough pipeline](open/51_agree_success_criteria_and_the_first_deployment_ta.md) | Six-layer run on a TUM recording with an offline visual index; method and source recorded for every view. | On 7 October all six layers ran on real methods from the command line (`--depth`, `--mapping`), with a per-layer input contract test. A handoff bug (depth beyond 4 m broke tracking) was found and fixed. Open for field acceptance limits (Task61). Not deployment or accuracy evidence. |
-| 2 | **54** — [Compare three depth methods](closed/54_implement_and_validate_real_metric_depth.md) | Depth Anything V2 and ZipDepth completed CPU/GPU scores on 138 TUM frames. ZipDepth ONNX matches PyTorch; TFLite files fail LiteRT tensor allocation. Depth Anything's raw metres are 34–45% off. | Local comparison and model wiring are complete; review gaps closed by Task62. Task57 owns phone timing and device compatibility. |
-| 2a | **62** — [Close Task54 review gaps](closed/62_close_task_54_review_gaps_phone_build_score_memory.md) | Phone build of ZipDepth scored (AbsRel 0.068–0.070, 42 fps CPU); memory on every run; Marigold V2 best shape (0.036) but 16.6 s per frame, dropped under the 1 fps rule; 50 known points per frame reach the every-pixel score. | Done 7 October. A scale source from real phone points needs Task52. |
-| 3a | **64** — [Interactive run report](closed/64_interactive_walkthrough_run_report_with_ground_tru.md) | Six offline pages per run in the `demo_outputs` style, with per-frame camera-position and depth error graphs against the recording's own answers; new depth scorer. | Done 8 October. Surface, map and object error graphs wait for references (Task53). |
-| 3b | **63** — [Scaled ZipDepth and GPU detector](open/63_add_scaled_zipdepth_and_gpu_detector_choices_to_th.md) | `--depth zipdepth-scaled`, `--detector-device`; code and tests done. | Parked 8 October: GPU runs need the owner's permission; 1 fps check and blind review remain. |
-| 3c | **65** — [Fix depth whose size changes from frame to frame](done/65_diagnose_and_fix_frame_to_frame_depth_scale_drift.md) | Per-frame scale scoring and corrections; TUM camera-path comparison of raw Depth Anything against the RGB-only overlap chain on the 30-frame, xyz and desk clips; research review of temporal depth methods and the ZNCC idea. | Done 13 October: camera RMSE fell 48% on the short xyz clip, 73% on full xyz, and 41% on desk. Full paths still have 0.37 m and 1.01 m RMSE; a phone-motion run and a graph-wide scale fit remain untested. |
-| 3d | **70** — [Score camera paths the standard way](done/70_score_camera_paths_with_the_standard_best_fit_traj.md) | Best-fit rigid and best-fit scaled path error and 1 s relative error beside the first-frame score; Task65 runs rescored. | Done 13 October. Kinect-depth tracker: xyz 34 mm, desk 112 mm best fit; raw Depth Anything paths 2 to 16 times too long. |
-| 3e | **67** — [Camera path from images alone](done/67_track_the_camera_without_depth_so_depth_scale_erro.md) | Standalone `experiments/sfm/` with COLMAP 4.2.1 on TUM xyz, desk and ICL. | Done 13 October for SIFT: 11.9 mm xyz and 24 mm desk best fit with size, every frame placed; 3-5 times better than the tracker with Kinect depth. ALIKED runs queued. |
-| 3f | **71** — [Surfaces from the true camera poses](open/71_rebuild_surfaces_from_the_recorded_camera_poses_to.md) | Each depth choice fused with the motion-capture poses and scored against the Kinect surface, so depth error is measured without tracking error. | Filed 13 October. Independent of Task67; CPU only. |
-| 3g | **72** — [Size learned depth to the tracker's points](open/72_scale_learned_depth_to_the_image_only_tracker_s_3d.md) | Depth resized per frame to the tracker's 3D points and placed on the tracker's path: the design intended for the phone. | After Tasks 67 and 71. |
-| 3h | **68** — [Add depth and area tests to the default run](open/68_add_the_depth_and_area_tests_to_the_default_test_r.md) | `pytest.ini` and `tools/check.py` include the depth and area test folders; an inventory test fails if a maintained test folder is left out. | From the harness audit, 8 October: 77 tests sit outside the default run of 907. Small; after Task65 or in its own worktree. |
-| 3 | **55** — [Implement dimensions and area](closed/55_implement_site_dimensions_and_area_measurement.md) | Grid footprint over the dominant plane: seen area, plane area, region size, unseen area, height range; top-down map in every run; 20 known-shape tests. | Done 7 October. The field region and floor definition still come from Task61; physical comparison is Task56 with Task53's survey. |
-| 4 | **61** — [Agree field acceptance limits and the phone processing split](open/61_agree_field_acceptance_limits_and_the_phone_proces.md) | Owner record of site, objects, survey, storage, numeric limits and what runs on the phone. | Owner decision; unanswered items stay pending and name the task they block. |
-| 5 | **52** — [Build a usable phone recording](open/52_build_and_verify_a_usable_phone_recording.md) | Original images, calibration, clocks, hashes and explicit available/missing depth and motion data. | Reader/export software passes on fixtures and the APK builds. Physical capture waits until phone work resumes and needs handset access. |
-| 6 | **53** — [Collect independent measurements and identities](open/53_collect_independent_scene_measurements_and_object_.md) | Surveyed dimensions/area, human inventory, uncertainty and separate test-session roles. | After Task61. Survey before predictions; capture with Task52's verified recorder. |
-| 7 | **57** — [Check the phone workload early](open/57_deploy_and_measure_the_useful_edge_workload.md) | On-phone compatibility, offline start-up and memory evidence. | After Task61; does not wait for the desktop benchmark. Also owns the pinned-container APK rebuild moved from Task24. |
-| 8 | **56** — [Benchmark the complete walkthrough](open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) | Same-recording measurement and count errors, complete time, peak memory and a verdict against each goal. | Needs Tasks52-55. Starts with the existing simple counting method. References enter scoring only. Now also the place where distinct counts are proven (Task09 archived). |
-| 9 | **57** — [Complete sustained phone deployment](open/57_deploy_and_measure_the_useful_edge_workload.md) | Deployed workload, comparable answers, sustained delay, memory, heat, battery, offline use and restart behaviour. | Uses Task56's frozen baseline and Task52's capture contract. |
+| 1 | **102** — [Diagnose the Redmi reconstruction](open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) | Orientation control first; then raw-depth versus learned-depth, scale, pose and anchor/fusion controls on identical frames | Existing walk available. Tighten frames/settings and tests before code. Report causes supported by controls, not a promised visual improvement. |
+| 2 | **68** — [Include all maintained tests](open/68_add_the_depth_and_area_tests_to_the_default_test_r.md) | Matching default test lists and an omission regression check | Verified: 28 maintained test folders; pytest omits 10 and the runner 11. Close this before broad capture/tracker changes rely on the default check. |
+| 3 | **52** — [Finish capture metadata and sustained checks](open/52_build_and_verify_a_usable_phone_recording.md) | Stop/result and anchor completeness, explicit missing ARCore matches, new walk/rest and queue/resource report | Reuse capture 1.2 and v2; tests first. New handset evidence needs owner coordination, not USB. The 60 s rest is not the calibration noise run. |
+| 4 | **74** — [Compare remaining CPU 3D models](open/74_compare_feed_forward_3d_models_that_output_camera_.md) | Same-walk candidate depth/camera comparison against the corrected baseline | After Task102. Task80 already tested DA3 Small on TUM/ICL. Future-frame batches are offline diagnostics. |
+| 5 | **103** — [Measure Redmi calibration](open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) | Camera/IMU transform, time offset and noise with convergence evidence | Task52 plus owner target video, measured tag and approximately 3-hour rest. Reuse Task90 tools. |
+| 6 | **104** — [Compare open trackers on the same walk](open/104_compare_open_trackers_and_surfaces_on_the_same_red.md) | Calibrated VIO/image-only path and fixed-depth surface comparison, failures and CPU cost | After Tasks52, 102 and 103. Reuse Tasks84/91 runners. ARCore/COLMAP disagreement is not independent accuracy. |
+| 7 | **75** — [Measure physical ARCore error](open/75_measure_arcore_camera_path_accuracy_on_the_redmi.md) | Three marked loops with tape-distance errors, tracking loss and same-frame offline comparison | Task52 and owner access to measured routes. Task92 built the guide/scorer; capture already has ARCore and the notice. |
+| 8 | **61** — [Resolve remaining acceptance/reference choices](open/61_agree_field_acceptance_limits_and_the_phone_proces.md) | Dated owner decisions or explicit pending items, with consumers named | Resolve relevant choices when needed; this is not a gate on Task102. Capture-first, PC processing and CPU-only are already decided. |
+| 9 | **53** — [Collect independent references](open/53_collect_independent_scene_measurements_and_object_.md) | Sealed survey/inventory bank, private recovery and whole-session roles | Tasks52 and 61. The inspected house walk is development data, not a blind held-out test after tuning. |
+| 10 | **56** — [Benchmark the complete walkthrough](open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) | Same-session measurement/count errors, complete timing and peak memory | Tasks52, 53 and 61, with frozen methods from comparison work. Reuse existing runners. |
 
-A completed baseline may fail a product target. Publish that result and the failing condition. Missing required input or reference evidence is a blocker, not a zero error.
+Tasks103/75 need physical input; their position does not prevent other unblocked work. Task61 decisions may be resolved earlier whenever a consumer needs them. Product accuracy remains unproven until independent references exist.
 
-Completed foundations: [Task13](closed/13_validate_frozen_tracking_settings_on_full_developm.md) froze the camera tracking baseline on full TUM xyz and desk runs. [Task58](closed/58_organise_six_step_walkthrough_orchestration.md) built the six-step runner in `src/walkthrough`, and [Task59](closed/59_make_walkthrough_layers_swappable.md) gave each layer one method choice and a written contract (805 full-suite tests passed). Task56 consumes that runner; it must not combine unrelated stage trials or add another orchestrator.
+## Review of every previously open task
 
-Keep `task_list/` for task records, its README, constitution and journal only. Root pytest discovery skips this folder. `.gitignore` ignores every Python file, pytest cache, pytest folder and job-allocation probe there. `tools/check.py` stops before pytest when it finds any unexpected file or folder in the task board. Put one-off diagnostic files in a temporary system folder. Before handing off, check `git status --short --untracked-files=all` and scan `task_list/` for unexpected files.
-
-## Later or side tasks (each row gives its own start condition)
-
-| Task | Purpose | State |
+| Task | Disposition | Evidence and amendment |
 |---|---|---|
-| [73: stereo headset video](open/73_make_a_stereo_headset_video_from_a_recording_witho.md) | Turn a recording into side-by-side 3D video for the phone headset with per-frame depth and no camera path (iw3 first). No measurements. | Open, MEDIUM, filed 13 October |
-| [74: feed-forward 3D models](open/74_compare_feed_forward_3d_models_that_output_camera_.md) | MapAnything, VGGT and similar models that output poses and dense points together. | Open, LOW, after Task67; needs GPU permission |
-| [75: ARCore accuracy on the Redmi](open/75_measure_arcore_camera_path_accuracy_on_the_redmi.md) | Closed-loop drift and tape-measured marker distances from ARCore poses. | Open, MEDIUM, blocked by Task52 |
-| [25: camera drift correction](open/25_compare_feature_seeded_odometry_and_verified_camer.md) | Correct camera drift on revisits. Compare against ARCore's own tracking first if the phone route uses it. | Open, LOW, blocked by Task56 |
-| [36: surface display and realism](open/36_compare_surface_representations_and_visual_realism.md) | Better 3D surfaces for the later 3D/VR review goal. A nicer display is not an accuracy result. | Open, LOW, blocked by Task56 |
-| [23: viewer controls](stale/23_embed_interactive_surface_review_and_explain_depth.md) | Embedded surface viewer with pan/zoom and depth-mask counts. Partial work is committed; Task51's visual index covers per-stage review. | Stale |
-| [31: provisional IDs and duplicates](stale/31_compare_provisional_object_ids_and_duplicate_relationships.md) | Identity history schema. Its motivating defect was fixed by Task46 (unresolved books 90 to 5). | Stale |
-| [33: appearance and context matching](stale/33_compare_object_appearance_context_and_spatial_association.md) | Add appearance cues if geometry-only identity makes measured mistakes. | Stale |
-| [34: classical masks](stale/34_evaluate_segmentation_for_position_and_observed_dimensions.md) | Rectangle, GrabCut and Canny masks on COCO with answer-key boxes. Cannot show site accuracy, and the methods are not phone candidates. | Stale |
-| [35: error accumulation](stale/35_measure_error_propagation_and_sequential_fusion.md) | Explain how errors build up across stages and views. Task56's per-stage report already separates inherited error. | Stale |
+| 25 | [Stale](stale/25_compare_feature_seeded_odometry_and_verified_camer.md) | Reopen only for a residual path/revisit failure after Tasks102/75; compare existing ARCore corrections and live trackers first. |
+| 36 | [Stale](stale/36_compare_surface_representations_and_visual_realism.md) | Task100 supplies display splats. Photographic training and representation comparisons follow a specific question from Task102. |
+| 51 | [Archived, superseded](archive/51_agree_success_criteria_and_the_first_deployment_ta.md) | Mapping and six-stage integration/reporting exist in Tasks55/58/59/64, with later capture/replay. Pending field decisions belong to Task61. No new accuracy completion claimed. |
+| 52 | Open, narrowed | Recorder/receiver built. Own fidelity gaps, sustained checks and short rest; remove the claim that no images or ARCore exist. |
+| 53 | Open, blocked | Keep independent survey/identity separation. Task61 owns decisions; require fresh held-out sessions. |
+| 56 | Open, blocked | Keep complete-system scoring. Recognise real replay and mapping; the current walk is not an accuracy test. |
+| 57 | [Stale](stale/57_deploy_and_measure_the_useful_edge_workload.md) | On-phone processing deferred by the owner. Capture resource checks move to Task52. Future port and pinned-container rebuild remain documented. |
+| 61 | Open, narrowed | Record settled capture/processing choices; retain unresolved survey, reference, retention and numeric acceptance decisions. |
+| 63 | [Stale](stale/63_add_scaled_zipdepth_and_gpu_detector_choices_to_th.md) | CPU adapter exists; GPU extension outside scope. Preserve 1.13 processing fps and 0.77 complete fps separately. |
+| 68 | Open, expanded, HIGH | Ten/eleven missing test folders, not just two. `src/live` appears only in pytest's default list. |
+| 73 | [Stale](stale/73_make_a_stereo_headset_video_from_a_recording_witho.md) | Headset video is a separate later output. Task100 is not stereo-video completion; retain H.264 rule. |
+| 74 | Open, rescoped | Task80 already tested DA3 Small. Compare remaining CPU modes on the Redmi; remove completed Task67 blocker. |
+| 75 | Open, updated | ARCore recording and scorer exist. Retain physical trials and same-frame comparison; remove alternative logger/app work. |
 
-## Closed or archived on 7 October 2026
+Thirteen previously open tasks were reviewed. Six leave the active backlog (five deferred, one superseded); seven remain amended. Three missing follow-ups were filed as Tasks102-104. After Task101 closes, ten tasks remain open. No task was marked done merely because its plan was old.
 
-| Task(s) | Outcome |
+## Review of previously stale tasks
+
+| Task | Disposition and re-entry condition |
 |---|---|
-| [32](closed/32_investigate_spatial_support_and_position_uncertainty.md), [47](closed/47_fix_task32_association_lint_findings.md), [48](closed/48_paired_validation_of_median_point_and_task32_suppo.md), [49](closed/49_reduce_spatial_support_association_latency.md) | Matching objects by their whole depth-point region instead of one centre point, its fixes, a paired comparison and a speed-up. Code in `14957e6`. Far slower than centre-point matching; Task49 kept all 457 decisions and cut time by 1.83%. No independent position truth, so no accuracy claim. |
-| [44](closed/44_build_a_per_stage_accuracy_log_for_end_to_end_runs.md), [45](closed/45_measure_detection_position_error_in_cluttered_scen.md) | Per-stage report (`c3bd9ef`) and detector placement error (`cf68ccc`). Remaining measures belong to Task56. |
-| [21](closed/21_associate_object_identities_with_geometry_and_appe.md), [22](closed/22_build_recorded_video_camera_surface_and_inventory_.md) | Exploratory identity and replay trials on supplied camera poses (`8140ba0`). Historical evidence; no physical count. |
-| [24](closed/24_recover_and_reproduce_android_apk_build_inside_cap.md) | APK warm build verified and reused by Task52. Container rebuild moved to Task57. |
-| [16](closed/16_research_segmentation_recognition_and_camera_corre.md), [37](closed/37_research_arcore_arkit_and_roomplan_mapping.md), [38](closed/38_research_long_range_fusion_and_driving_evaluation.md), [39](closed/39_record_future_3d_review_and_measurement_requirements.md), [40](closed/40_plan_independent_references_and_hard_case_acquisition.md), [41](closed/41_investigate_candidate_test_datasets_and_trial_exis.md), [42](closed/42_examine_the_arcore_toolkit_for_capture_depth_and_t.md) | Research and plans kept as reference. Task53 executes Task40's reference design; Tasks52/54/57 own real phone checks. |
-| [08](archive/08_check_phone_capture_feasibility_alongside_reconstr.md), [09](archive/09_evaluate_scene_object_recognition_and_persistent_counting.md) | Archived: superseded by Task52 (phone recording) and Task56 (proven counts). |
+| [23](archive/23_embed_interactive_surface_review_and_explain_depth.md) | Archive as superseded by Tasks100/64 controls and reports. Remaining embedded stage-mask details need a specific review use case. |
+| [31](stale/31_compare_provisional_object_ids_and_duplicate_relationships.md) | Keep stale. Task46 fixed the original defect; Task93's overcounts need geometry controls and independent references before an identity-schema change. |
+| [33](stale/33_compare_object_appearance_context_and_spatial_association.md) | Keep stale. Reopen appearance/context matching only for a residual independently scored failure. |
+| [34](stale/34_evaluate_segmentation_for_position_and_observed_dimensions.md) | Keep stale. Oracle-box COCO/classical-mask work does not establish site geometry or phone suitability. |
+| [35](stale/35_measure_error_propagation_and_sequential_fusion.md) | Keep stale. Task102 owns immediate causal diagnosis; Task56 owns inherited-error reporting. |
+| [76](archive/76_read_saved_sfm_camera_paths_and_points_into_the_wa.md), [77](archive/77_reorder_the_walkthrough_so_camera_tracking_comes_b.md) | Archive as absorbed by Task89, with v2 replay in Tasks96/99. New v2 COLMAP adaptation belongs to Task102/74. |
 
-## Historical completed work
+Earlier plans/receipts remain labelled historical. Re-entry requires fresh scope/evidence, not automatic execution of old pending-review or approval wording.
 
-Closed tasks prove their bounded work, not completion of the three goals. Preserve their settings and receipts. The tracking baseline used 30 Freiburg1 xyz frames spanning 1.136 seconds; object demonstrations used supplied benchmark camera positions.
+## Completed results and follow-up ownership
 
-| Task | Historical state | Evidence and limits |
+| Records | Bounded result | Remaining owner |
 |---|---|---|
-| [00: first prototype](archive/00_finish_and_validate_the_phase_1_scene_mapping_prot.md) | Superseded | Preliminary research/runs preserved; integrated validation unfinished |
-| [01: experiment organisation](closed/01_organise_independent_scene_mapping_experiments.md) | Closed | Six independent boundaries and preserved prototype evidence |
-| [02: standard references](closed/02_verify_standard_tracking_and_reconstruction_refere.md) | Closed | Acquired ICL depth/poses and independent surface; selected TUM desk |
-| [03: geometry contracts](closed/03_define_observation_and_pose_contracts_with_known_g.md) | Closed | Known-coordinate control and source/stage exports |
-| [04: supplied-input surface](closed/04_evaluate_reconstruction_with_supplied_depth_and_po.md) | Closed | Nine ICL views; 7.85 mm mean reference distance and 22.29% coverage within 5 cm |
-| [05: tracking baseline](closed/05_evaluate_tracking_with_supplied_benchmark_depth.md) | Closed baseline | Thirty TUM observations; 6.93 mm camera-position error and 2.14 image pairs/s |
-| [06: recovered research](closed/06_recover_interrupted_research_and_review_current_or.md) | Closed | Original research and source corrections preserved |
-| [07: mobile mapping products](closed/07_review_mobile_stereo_mapping_products_against_the_.md) | Closed | Product evidence and map-rate/depth-rate limits separated |
-| [10: repository publication](closed/10_prepare_research_repository_and_publish_initial_main.md) | Closed | Initial main snapshot and publication exclusions recorded |
-| [11: geometry review](closed/11_explain_geometry_control_outputs_and_show_supplied.md) | Closed | Explained supplied-input/source-coordinate views |
-| [12: folder separation](closed/12_separate_geometry_validation_from_camera_pose_esti.md) | Closed | Supplied-pose control separated from camera estimation |
-| [13: frozen tracking baseline](closed/13_validate_frozen_tracking_settings_on_full_developm.md) | Closed | Full xyz and desk runs verified; desk is held out by sequence but from the same indoor sensor/site |
-| [14: labelled 3D inspection](closed/14_add_labelled_3d_stage_inspection_and_camera_motion.md) | Closed | Camera/surface viewers with explicit observed/reference/result labels |
-| [15: owner plan review](closed/15_prepare_recorded_video_recognition_plan_for_owner_.md) | Closed | Outline approved 3 October; later task-specific authorisations remain distinct |
-| [17: provisional reference](closed/17_prepare_labelled_revisit_inputs_and_object_observa.md) | Closed | Six agent-reviewed desk frames; complete selected cup coverage, monitor positive subset; no human gold |
-| [18: cached detection check](closed/18_evaluate_object_detection_on_frozen_labelled_obser.md) | Closed | Four of five cup references matched; monitor accuracy unscorable as full inventory |
-| [19: classical mask control](closed/19_evaluate_classical_and_edge_device_object_segmenta.md) | Closed | 45 masks across 15 prompts; coordinate changes/costs, no demonstrated accuracy improvement |
-| [20: appearance control](closed/20_compare_object_appearance_matching_across_viewpoin.md) | Closed | ZNCC and existing YOLO features tested; one wrong monitor ranking; ResNet50 untested |
-| [26: standalone camera/surface](closed/26_export_self_contained_shareable_offline_viewers.md) | Closed | Portable offline viewers preserve supplied-input evidence |
-| [27: xyz cup localisation](closed/27_localise_yolo_cup_detections_in_recorded_rgbd.md) | Closed | One YOLO26x detection projected with measured depth and supplied poses; separate from desk cup |
-| [28: desk cup replay](closed/28_replay_cup_revisits_with_persistent_object_ids.md) | Closed | Sixty sampled desk frames; persistent cup ID across detector gap/return, not continuous physical absence |
-| [29: portable replay and spread](closed/29_export_replay_and_review_reconstruction_and_identi.md) | Closed | All nineteen cup proposals exported; sixteen assigned box RMS 72.8 mm / centre RMS 82.3 mm; surface repeatability only |
-| [30: documentation reconciliation](closed/30_reconcile_experimental_evidence_and_research_backl.md) | Closed | Evidence/source review complete; 226 local links/anchors checked and ten proposed follow-ups; no experiment started |
-| [43: Shareable demo visualisations](closed/43_build_shareable_demo_visualisations_from_exported_.md) | Closed | Existing run assets; Seven offline pages; Task46 owns the corrected identity publication and rebuild. |
-| [46: Fix late object births and regenerate the object demo](closed/46_fix_late_object_births_and_regenerate_the_object_d.md) | Closed | Same frozen 60-frame baseline; no independent accuracy claim; New same-class objects can start provisional IDs at any frame. Books: 90 to 5 unresolved, 1 to 6 IDs. All classes: 226 to 56 unresolved, 18 to 55 provisional IDs; seven pages rebuilt. Commit f16e8eb. |
-| [50: board alignment](closed/50_align_task_board_with_accuracy_latency_and_edge_de.md) | Closed | Documentation-only restructuring around accuracy, latency and edge deployment; no experiment executed |
-| [58: six-step runner](closed/58_organise_six_step_walkthrough_orchestration.md) | Closed | One root runner, small importable components and independent validation imports |
-| [59: swappable layers](closed/59_make_walkthrough_layers_swappable.md) | Closed | One method choice and written contract per layer; 805 full-suite tests passed |
+| Tasks54/62/65/70 | Depth comparisons, temporal scale diagnosis, standard trajectory scores | Tasks102/74 Redmi comparisons; Task57 eventual phone timing |
+| Tasks55/58/59/64 | Mapping, six-step runner, replaceable contracts, visual reports | Task56 complete independent scoring |
+| Tasks67/71/72/78/79/80 | SfM and supplied-pose/depth/scale controls; Prompt/DA3 results | Tasks102/74; negative results remain results |
+| Tasks81/82/83/86 | Learning, SLAM research and ARCore/open-source terms notes | Consumer rechecks sources; no new research run here |
+| Task84 | Live CPU image-only tracker trials on public data | Task104 Redmi comparison and conditional tracked-point export |
+| Tasks85/87/88/94/95/96 | Phone probes, v1, raw recorder, capture-first handovers and unified v2 app | Task52 remaining checks; old install instructions are historical |
+| Tasks89/93 | Live/replay processing and overcount logging | Task102 scatter diagnosis; Tasks53/56 independent inventory and justified matching correction |
+| Task90 | Calibration tooling verified on TUM-VI | Task103 actual Redmi calibration |
+| Task91 | Four VIO runners tested on TUM-VI | Task104 Redmi runs; Task57 later port |
+| Task92 | Field guide/scorer and ARCore notice | Task75 measured walks; Task61 acceptance choices |
+| Tasks97/98/99 | Crash diagnostics, deployment consolidation, capture 1.2 fix and completed session checks | Task52 fidelity/sustained checks; Task103 calibration; AVD remains proposed, uninstalled |
+| Task100 | Offline surface-derived Gaussian HTML | Task102 geometry diagnosis; Task36 later photographic/representation work |
 
-## Task workflow
+Older [closed records](closed/) and [archived records](archive/) remain history, including Task60's 7 October pruning. Completion proves bounded work, not all product goals. The old order and its zero-image/undecided-host assumptions are superseded.
 
-- Task frontmatter and folder define state; at most one task is in progress.
-- `open/` holds planned, blocked and active work. `pending_review/` holds completed scoped work with a named, actionable handoff; do not park work there waiting for a review nobody will run. `stale/` holds plans that are neither done nor wrong but not currently justified.
-- `closed/` requires filled receipts and resolved or explicitly waived follow-ups. Do not rewrite old results when priorities change.
-- Before HIGH/stateful code work: tighten scope, lint the plan, freeze settings, obtain fresh plan review and record its verdict.
-- Before closing HIGH/stateful code: obtain the required independent finished-diff review. Tests check behaviour, boundaries and failures.
-- Documentation belongs in README files; task files hold engineering traceability. The constitution remains an unratified draft.
+## Workflow and validation
 
-```powershell
-node C:/Users/jkind/.claude/task-system/task.js ready --next
-node C:/Users/jkind/.claude/task-system/task.js list
-node C:/Users/jkind/.claude/task-system/task.js lint
-node C:/Users/jkind/.claude/task-system/task.js audit
-```
+- `open/` holds actionable plans and named dependencies; only one may be `in_progress`. `done/` holds current CLI completions; `closed/` historical receipts; `stale/` deferred plans; `archive/` superseded plans.
+- Use `task.js begin`, `files add` and `finish` for current work; the CLI writes its active record. Board migration uses the move command. This review amends older plans at the owner's request, not its own completion record.
+- Legacy `task.js lint` and `ready --next` omit `done/`. Their success is partial validation and can falsely warn about superseding IDs in that folder. This review additionally checks every folder, unique IDs, states, dependency targets/cycles, queue coverage, links and the active slot. Historical records use the CLI's line-based frontmatter parser; seven have unquoted colon-bearing values that a strict YAML loader rejects. Amended open plans are checked as YAML; historical receipts are preserved. Harness changes are outside scope.
+- Tighten files/settings and write tests before implementation. Historical review PASS is not current validation after rescoping. Settings are proposed by Claude, not owner-ruled. CPU only; long runs use one background START/END queue and completion notification.
+- Use `python -B tools/check.py <explicit suites>` until Task68 fixes the default lists. Scratch belongs in OS temporary storage; no `.test_*`, `.pytest-tmp` or `.ruff_cache` in the repo. Task-board records/metadata only, no scripts or payloads.
+- Household recordings, photos, APK binaries and derived outputs stay local and ignored. Identify the APK through [mobile_deployments](../mobile_deployments/README.md). Port 8766 is LAN only, without authentication/encryption; internet access needs a tunnel and authentication and is outside scope. Port 8765 stays reserved for v1.
 
-Next-task selection follows the bold numbers in the "Next order" table. Start only when inputs and review requirements are met. Passing software tests alone do not prove research success.
+Review record: [Task101](done/101_reconcile_the_task_board_with_capture_and_reconstr.md). Planned tasks are checked for consistency with evidence, not executed or scientifically accepted by this review.

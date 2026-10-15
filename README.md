@@ -46,12 +46,12 @@ Each coloured block is one layer. Boxes with a solid border work today; dashed b
 flowchart TD
     subgraph L1["1 · CAMERA CAPTURE"]
         direction LR
-        c1["Phone walkthrough<br/><i>planned</i>"] ~~~ c2["Benchmark recordings<br/><b>stand-in</b>"] ~~~ c3["Delivery to edge or cloud<br/><i>planned</i>"]
+        c1["Phone walkthrough<br/><b>early trial</b>"] ~~~ c2["Benchmark recordings<br/><b>stand-in</b>"] ~~~ c3["Delivery to PC<br/><b>early trial</b>"]
     end
 
     subgraph L2["2 · DEPTH ESTIMATION"]
         direction LR
-        d1["Stereo from two lenses<br/><i>planned</i>"] ~~~ d2["Phone depth API<br/><i>planned</i>"] ~~~ d3["Recorded sensor depth<br/><b>stand-in</b>"]
+        d1["Stereo from two lenses<br/><i>planned</i>"] ~~~ d2["Phone depth API<br/><b>early trial</b>"] ~~~ d3["Recorded sensor depth<br/><b>stand-in</b>"]
     end
 
     subgraph L3["3 · CAMERA POSITION ESTIMATION"]
@@ -65,7 +65,7 @@ flowchart TD
     end
 
     subgraph L5["5. MAPPING, DIMENSIONS AND AREA"]
-        e3["Bird's-eye map and area<br/><i>planned</i>"]
+        e3["Bird's-eye map and area<br/><b>implemented; accuracy unscored</b>"]
     end
 
     subgraph L6["6. OBJECT RECOGNITION AND COUNTING"]
@@ -83,7 +83,7 @@ flowchart TD
     classDef default fill:#ffffff,stroke:#444,stroke-width:1.5px,color:#1a1a1a
     classDef planned fill:#ffffff,stroke:#999,stroke-width:1.5px,stroke-dasharray:6 4,color:#666
     classDef answer fill:#263238,stroke:#263238,color:#ffffff
-    class c1,c3,d1,d2,p3,e2,e3 planned
+    class d1,p3 planned
     class q1,q2 answer
 
     style L1 fill:#DCEBFB,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
@@ -108,10 +108,10 @@ This also makes each layer replaceable. A different depth model or camera tracke
 
 ## Hosted or on the phone
 
-There are two ways to deploy the same six execution steps. The owner decided on 7 October 2026 that deployment must be on a phone, so the phone is always the capture device. Which of the two options below applies is still open ([Task61](task_list/open/61_agree_field_acceptance_limits_and_the_phone_proces.md)).
+The owner decided on 14 October 2026 that the phone captures and the PC receives, stores and processes. Running processing on the phone comes later, inside the same app. [Task61](task_list/open/61_agree_field_acceptance_limits_and_the_phone_proces.md) now holds only the remaining field acceptance and reference decisions.
 
-- **Hosted.** The phone only records. It saves the video, the phone's motion sensors (accelerometer and gyroscope, together called the IMU) and the phone's own position and depth estimates, then uploads them. A server can run the heavier processing stages. Its full processing time and memory still need measuring. This fits the cloud serving FYLD already runs with MLflow and BentoML. The first software integration run is local prerecorded footage on MasterPC; it is not a deployment. Later work can add FastAPI input and camera streaming behind the same layer boundaries. Task56 tests the complete result.
-- **On the phone, offline.** Some layers can run on the phone with no internet connection. The point is not the final answer. It is quick checks on site, so a worker does not leave with a capture that turns out to be unusable: "you missed the far corner", "tracking was lost here", "about 40 m² so far, 6 cones counted so far".
+- **Hosted, current route.** FYLD capture saves lossless grey and colour images, motion sensors (accelerometer and gyroscope, together called the IMU), camera settings and available ARCore tracking/depth records. It queues them on the phone and streams to the PC's v2 receiver on the LAN. Capture 1.2 and PC replay have run on one real Redmi walk. Independent accuracy, sustained resource use and complete-process timing remain to be measured; Task56 tests the complete result.
+- **On the phone, later.** After comparing methods, selected layers may run inside this same capture app for checks such as missed coverage, tracking loss and provisional measurements/counts. No measurement/counting model has run on this handset. Task57 is deferred until a method and phone workload are selected.
 
 Google listed both candidate models as supporting ARCore depth when checked on 4 October 2026 ([ARCore supported devices](https://developers.google.com/ar/devices)). Only the Redmi is confirmed available for this test. A listing does not establish runtime support or measurement quality on the handset; those still need to be checked.
 
@@ -119,7 +119,7 @@ ARCore offers more than camera position and depth. Outdoors it can label every p
 
 | Layer | Hosted: phone records, server does the rest | On the phone, offline | Offline check worth doing on site |
 |---|---|---|---|
-| 🟦 1. Camera capture | Record video, IMU and ARCore pose and depth into one file with ARCore's [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback). Upload on Wi-Fi to the server. | Same recording, kept on the phone. Android's [Camera2 multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) shows whether two rear lenses can record at once. | Blur, exposure and dropped-frame warnings. A coverage hint showing parts of the site not yet filmed. |
+| 🟦 1. Camera capture | Record lossless grey, colour JPEG, IMU and available ARCore metadata into the phone's disk queue. Stream with cumulative acknowledgements/resume to the PC's [v2 receiver](experiments/01_camera_capture_delivery/phone_session_v2.md). | Same recording, kept on the phone. Android's [Camera2 multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) shows whether two rear lenses can record at once. | Blur, exposure and dropped-frame warnings. A coverage hint showing parts of the site not yet filmed. |
 | 🟪 2. Depth estimation | Large learned models on every frame: [FoundationStereo](https://arxiv.org/abs/2501.09898) if two lenses can record together, otherwise multi-view depth from [Depth Anything 3](https://arxiv.org/abs/2511.10647) or [MapAnything](https://arxiv.org/abs/2509.13414). ARCore depth sets the real-world scale. | ARCore's [Depth API](https://developers.google.com/ar/develop/java/depth/raw-depth). Optionally a small learned model such as [Depth Anything V2](https://arxiv.org/abs/2406.09414) Small, run through [LiteRT](https://ai.google.dev/edge/litert) or [ONNX Runtime](https://onnxruntime.ai/docs/tutorials/mobile/) on the phone's AI chip. | Warn where depth is missing or the subject is too far away for reliable depth. |
 | 🟩 3. Camera position | Full tracking with drift correction on the whole recording: [ORB-SLAM3](https://arxiv.org/abs/2007.11898) with the IMU, or the learned [MASt3R-SLAM](https://arxiv.org/abs/2412.12392) and [VGGT-SLAM 2.0](https://arxiv.org/abs/2601.19887). A final clean-up pass over all frames at once with [COLMAP](https://colmap.github.io/) or [GLOMAP](https://arxiv.org/abs/2407.20219). | ARCore motion tracking, which is built in and runs live. [RTAB-Map for Android](https://github.com/introlab/rtabmap) adds drift correction on top of ARCore's position. | "Tracking lost" alerts. A drift check: return to the starting spot and see how far the path has wandered. |
 | 🟧 4. Surface reconstruction | Dense meshes from depth with [Open3D](https://www.open3d.org/docs/0.19.0/tutorial/pipelines/rgbd_integration.html) or [nvblox](https://arxiv.org/abs/2311.00626). Realistic views with [Gaussian splatting](https://arxiv.org/abs/2308.04079) or its surface-accurate variant [2DGS](https://arxiv.org/abs/2403.17888). Bird's-eye map and areas from the mesh. | ARCore's detected floor and wall planes plus its depth points, or RTAB-Map's on-phone mesh. A rough top-down preview. | Rough footprint and area in m². A map of gaps that were never filmed. |
@@ -296,7 +296,7 @@ GPL-licensed systems (ORB-SLAM3, OpenVINS, VINS-Mono) are used only as accuracy 
 
 Raw datasets, model weights and generated runs are kept on the local machine and are not in the repository. [data/README.md](data/README.md) records where each file came from and how it was checked. [experiments/datasets/README.md](experiments/datasets/README.md) explains which data suits which layer.
 
-These three datasets are all indoors, none is filmed on a phone, and none shows a worksite. A list of public datasets that close those gaps is in [research/README.md](research/README.md#candidate-test-datasets-4-october-2026). It includes phone recordings with ARCore paths (ADVIO), iPhone video with laser-scanned rooms and labelled objects (ScanNet++), construction sites with surveyed references (Hilti, ConSLAM) and road work zones with cones, barriers and signs (ROADWork). A planned investigation will check each one and run the existing experiments on small samples to see where they break.
+These three datasets are all indoors, none is filmed on a phone, and none shows a worksite. A list of public datasets that close those gaps is in [research/README.md](research/README.md#candidate-test-datasets-5-october-2026). It includes phone recordings with ARCore paths (ADVIO), iPhone video with laser-scanned rooms and labelled objects (ScanNet++), construction sites with surveyed references (Hilti, ConSLAM) and road work zones with cones, barriers and signs (ROADWork). The current priority is diagnosing the available Redmi walk; further dataset acquisition needs a specific comparison gap.
 
 A reference used for scoring is never fed to the method being scored, unless a run is explicitly labelled as a control that uses it.
 
@@ -324,19 +324,21 @@ The capture app (Task96, continuing Task95; updated by Task99) merges both apps.
 
 View the recorded Redmi scene in the local [interactive Gaussian-splat viewer](outputs/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) (Task100): orbit, zoom, top view and camera/photo bookmarks. It shows splats derived from the reconstructed surface, coloured by height; photographic Gaussian training has not been run. The HTML and household images stay local.
 
+**Next work, reviewed 15 October (Task101).** The owner judged the scene geometry poor and reported sideways photos in the HTML. [Task102](task_list/open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) first checks viewer versus model-input orientation, then compares raw and learned depth on identical frames, scale sources, camera conventions and anchor/fusion corrections. The 90° sensor mounting angle is recorded; orientation sensitivity is a hypothesis to test, not a diagnosed cause. [Task68](task_list/open/68_add_the_depth_and_area_tests_to_the_default_test_r.md) expands the default checks, and [Task52](task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns capture metadata/sustained-run gaps. The [reviewed task board](task_list/README.md) gives the full order and deferred work.
+
 **Redmi result, checked 15 October (Task99).** The 14 October session `20261014_220756_walk` completed normally with capture 1.2: 29.92 fps, zero reported drops or missing/duplicated frame numbers, motion sensors at 423.54 Hz, 10.22 MB/s received and 0.058 s sending after Stop. The PC stores 225 MB. All images parsed and CPU replay produced 63 updates at 1.58 updates/s with no gap over one second. EuRoC export wrote its files; its check flags one final frame without camera settings. There are 17 frames without ARCore records and 44 new depth maps. The estimated clock offset is -2.67 ms, with correlation 0.62, pending independent calibration. Earlier crashes were diagnosed through capture 1.1; version 1.2 filters invalid point projections and handles JSON serialization errors. [Evidence and limits](experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99). Android Studio/AVD remains proposed and uninstalled.
 
-1. Extend the Redmi app's stream to carry ARCore's tracked points, raw depth with confidence, every pose correction and the tracking state, under one written "phone session" definition shared by the app and the computer. **Built 14 October (Task87):** [phone_session_v1.md](experiments/01_camera_capture_delivery/phone_session_v1.md), with one test fixture that both the Java encoder and the Python reader must match; not yet run on the phone.
+1. The stream carries tracked points, raw depth with confidence, anchor corrections and tracking state under a shared definition. Task87 built [phone session v1](experiments/01_camera_capture_delivery/phone_session_v1.md); Tasks96/99 replaced the two apps with [v2 capture](experiments/01_camera_capture_delivery/phone_session_v2.md), checked on the Redmi. Task52 now owns unmatched metadata and sustained checks rather than building another recorder.
 2. A live processing entry point on the computer that reads the stream and updates the surface, map and object counts at least once per second (absorbs Tasks 76 and 77). **Built 14 October (Task89):** [src/live](src/live/README.md). On recorded data in the stream format, with true poses standing in for ARCore, it updates 1.9 (TUM xyz), 1.6 (TUM desk) and 1.2 (ICL) times a second on the CPU with no gap over 1 s; corrections from ARCore move the surface and objects through anchors. Object counts are far too high when live (14-15 chairs on TUM xyz). Task93 found why: about half the extra identities are the same object placed just past the 0.35 m matching distance, because learned depth moves large objects between views ([src/live](src/live/README.md)).
 3. Measure ARCore against tape-measured distances on real walks, including stairs and outdoors (Task75); show the required ARCore notice; agree field acceptance limits (Task61). **Prepared 14 October (Task92):** [capture guide and scorer](experiments/01_camera_capture_delivery/field_accuracy.md) for loop drift, 3D distance error and tracking loss. The app now has an ARCore notice screen with Google's privacy and terms links. The APK is built; measured walks, the offline COLMAP comparison and acceptance limits remain outstanding.
 
 **Stream B: the open-source route, replacing ARCore.**
 
 1. A recorder that saves raw frames and motion sensors on one clock, with ARCore alongside as a reference. Task88 built the original recorder; Task96 merged it into FYLD capture. Task99 verified a complete 1,194-frame Redmi session through the v2 reader, EuRoC export and clock check ([experiments/open_vio](experiments/open_vio/README.md)). One final frame lacks camera settings, so the checker still reports a metadata problem. The 60 s rest and calibration recordings remain needed.
-2. Calibrate the Redmi's camera and motion sensors (Kalibr). **Pipeline built 14 October 2026** (Task90): on TUM-VI's calibration recordings it reproduces the published calibration to 0.014 degrees, 1.0 mm and 0.13 ms; a printable A4 target and the recording steps are in [experiments/open_vio](experiments/open_vio/README.md#step-2-calibration-task90); the Redmi run waits for its recordings. Then run open visual-inertial systems (Basalt, Kimera-VIO, OKVIS2) offline on those recordings and score them against ARCore and tape measurements, as Task84 did for visual-only SLAM. **First comparison 14 October 2026** (Task91) on the public TUM-VI room1 recording with one camera plus IMU: Basalt (BSD-3) 0.146 m over a 146 m walk, every frame tracked, 44 ms per frame; OKVIS2 0.505 m (only with its own noise settings); Kimera-VIO lost track; OpenVINS (GPL, reference only) 0.064 m. Basalt is the first candidate to port; the Redmi runs wait for recordings.
-3. Port the best one to the phone and replace ARCore's depth with learned depth resized to its points.
+2. Calibrate the Redmi's camera and motion sensors (Kalibr). **Pipeline built 14 October 2026** (Task90): on TUM-VI it reproduces published calibration to 0.014 degrees, 1.0 mm and 0.13 ms. [Task103](task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) now owns the actual Redmi target/rest recordings and calibration. **Task91's public TUM-VI comparison** found Basalt 0.146 m, OKVIS2 0.505 m with its own noise settings, Kimera-VIO lost track and OpenVINS 0.064 m (reference only). [Task104](task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md) owns the unperformed calibrated Redmi path/surface comparison; ARCore is another estimate, not independent truth.
+3. After method selection, Task57 may port the selected processing into the same capture app. Phone inference is deferred by the capture-first decision; public-dataset ranking alone does not select a handset implementation.
 
-Both streams feed the same processing layers in `src/walkthrough`, so the surface, measurement and counting work carries over unchanged. GPU use is still not allowed; all processing runs on the CPU for now.
+Both streams reuse the project's surface, measurement and counting components. `src/live` owns live/replay scheduling and `src/walkthrough` the six-stage runner; any comparison adapter must preserve their contracts rather than assume the inputs are already interchangeable. GPU use is still not allowed; all processing runs on the CPU for now.
 
 ## Possible later output: a phone VR viewer
 

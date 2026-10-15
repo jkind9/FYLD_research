@@ -1,12 +1,12 @@
 ---
 id: "76"
 title: Read saved SfM camera paths and points into the walkthrough
-status: stale
+status: archived
 priority: MEDIUM
 type: experiment
 approval_status: filed 2026-10-13 after the owner asked how to keep the repo's modular structure while testing the image-only design; not yet approved to start
-blocked_by: ["67", "72"]
-blocks: ["77"]
+blocked_by: []
+blocks: []
 verification_test: "src/walkthrough/tests/test_saved_sfm.py"
 plan_reviewed: null
 files:
@@ -23,11 +23,17 @@ baseline_metric:
   baseline_value: "per Task65 and Task70 summaries"
   target: "the same walkthrough report for a run that reads a Task67 camera path and sizes Depth Anything to its points, with every downstream layer unchanged"
 created: 2026-10-13
-last_updated: 2026-10-14
-superseded_by: null
+last_updated: 2026-10-15
+superseded_by: 89
 ---
 
 # Task 76 — Read saved SfM results into the walkthrough
+
+## Board review, 15 October 2026
+
+Absorbed input/pipeline plan. Task89 absorbed Tasks76/77 into src/live; Task96 added v2 replay and Task99 ran it on the Redmi. Do not start a second SfM-input orchestrator. A v2 COLMAP adapter, if needed, belongs to Task102/74; tracked-point export for alternate trackers belongs conditionally to Task104.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

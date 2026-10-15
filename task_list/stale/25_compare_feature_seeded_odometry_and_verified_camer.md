@@ -1,11 +1,11 @@
 ---
 id: "25"
 title: Compare feature seeded odometry and verified camera revisits
-status: open
+status: stale
 approval_status: approved
 priority: LOW
 type: experiment
-blocked_by: [56]
+blocked_by: [102, 75]
 blocks: []
 verification_test: experiments/03_camera_pose_estimation/experiments/tests/test_camera_comparisons.py
 plan_reviewed: null
@@ -20,11 +20,17 @@ baseline_metric:
   baseline_value: "0 feature-seeded or verified-revisit camera comparisons"
   target: "1 same-input comparison reporting drift/failures/runtime and false loop acceptances"
 created: 2026-10-03
-last_updated: 2026-10-07
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task 25: Compare feature seeded odometry and verified camera revisits
+
+## Board review, 15 October 2026
+
+Deferred correction experiment. Task102 must first show a camera-path or revisit failure worth correcting, with Task75 separating drift from learned-depth error. Existing ARCore anchor corrections and Task84 trackers are baselines. Reopen only for a measured residual failure; do not add a second pose-graph system speculatively.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

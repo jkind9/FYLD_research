@@ -211,7 +211,7 @@ The questioned image `1305031102.160407.png` exactly matches the downloaded data
 
 ## Proposed feature and revisit comparisons
 
-[Task25](../../task_list/open/25_compare_feature_seeded_odometry_and_verified_camer.md) follows the completed frozen full-development/held-out baseline in Task13. The current adapter uses direct projected-pixel intensity/depth alignment and identity pair initialisation, not ORB/SIFT descriptors. The approved 30-frame trial remains a short historical baseline. Do not change Task13 settings or rerun its full sequence as part of Task16.
+[Task25](../../task_list/stale/25_compare_feature_seeded_odometry_and_verified_camer.md) is deferred: reopen a separate drift-correction experiment only after Tasks102/75 show a residual camera-path failure. The current adapter uses direct projected-pixel intensity/depth alignment and identity pair initialisation, not ORB/SIFT descriptors. Task13's approved 30-frame trial remains a short historical baseline; its frozen settings remain unchanged.
 
 The first local comparison should extract masked ORB and SIFT correspondences, pair each RGB feature with valid calibrated depth, reject invalid/out-of-range points and estimate a metric rigid transform with a robust solver. Use that transform and its inlier support to initialise/refine the existing Open3D RGB-D odometry. Compare against the existing identity-initialised Open3D path on exactly the same pairs. Freeze feature detector, descriptor, match filtering, robust solver and Open3D settings before held-out evaluation. Image similarity alone is only a retrieval score and never a camera transform.
 

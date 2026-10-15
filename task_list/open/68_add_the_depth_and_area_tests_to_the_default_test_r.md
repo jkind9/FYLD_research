@@ -1,12 +1,12 @@
 ---
 id: "68"
-title: Add the depth and area tests to the default test run
+title: Include all maintained test suites in the default check
 status: open
-priority: MED
+priority: HIGH
 type: bug
 blocked_by: []
 blocks: []
-verification_test: tools/tests/test_suite_inventory.py
+verification_test: "tools/tests/test_suite_inventory.py"
 plan_reviewed: null
 files:
   - pytest.ini
@@ -15,63 +15,45 @@ files:
 docs:
   - README.md
 baseline_metric:
-  source: "pytest --collect-only, 2026-10-08 evening"
-  field: "maintained tests outside the default run"
-  baseline_value: "77 tests (experiments/02_stereo_depth/tests and experiments/05_birds_eye_mapping/tests); default run collects 907"
-  target: "0 maintained test folders outside the default run; default collection 984 or more"
+  source: "15 October board review; evidence below"
+  field: "Include all maintained test suites in the default check"
+  baseline_value: "28 maintained tests directories; pytest omits 10, runner omits 11; src/live is pytest-only"
+  target: "No maintained test directory omitted or inconsistent; one tested inventory rule prevents regression"
 created: 2026-10-08
-last_updated: 2026-10-08
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
-# Task 68 — Add the depth and area tests to the default test run
-
-## Current state
-
-- Not started. Task 65 holds the active lock; start this after it closes or in a separate worktree.
-- Source: HARNESS_WORKFLOW_AUDIT.md finding F5, still open after the 8 October re-check.
-- Task 52 also lists `pytest.ini` and `tools/check.py` for its hygiene checks. Coordinate if both are active; this task changes only the suite lists.
+# Task 68: Include all maintained test suites in the default check
 
 ## In plain English
 
-The project's standard test command does not run the tests for depth estimation or for site measurement, so it can pass while those parts are broken. This task adds them to the standard run and adds a check that fails if any future test folder is left out.
+The default check skips several working parts of the project, including phone capture and the open trackers. Bring its test list into line with the maintained tests and make future omissions fail visibly. Keep test scratch outside the repository.
 
-## What
+## Verified gap, 15 October 2026
 
-- Add `experiments/02_stereo_depth/tests` and `experiments/05_birds_eye_mapping/tests` to `testpaths` in `pytest.ini` and to the suite list in `tools/check.py`.
-- Add `tools/tests/test_suite_inventory.py`: find every `tests/` folder under `src/`, `experiments/` and `tools/` (skipping `third_party/`, outputs and temp folders) and assert each appears in both lists, and that the two lists match.
+The original count of 77 missed depth/area tests is obsolete. Directory and configuration inspection finds 28 maintained `tests/` directories. Both lists omit:
 
-## Why
+- `experiments/01_camera_capture_delivery/tests`
+- `experiments/02_stereo_depth/tests`
+- `experiments/05_birds_eye_mapping/tests`
+- `experiments/06_object_recognition/experiments/06_identity_policy/tests`
+- `experiments/06_object_recognition/experiments/07_spatial_uncertainty/tests`
+- `experiments/06_object_recognition/experiments/08_spatial_uncertainty_latency/tests`
+- `experiments/06_object_recognition/pilot/tests`
+- `experiments/live_slam/tests`
+- `experiments/open_vio/tests`
+- `experiments/sfm/tests`
 
-On 2026-10-08 the default collection was 907 tests and the two omitted folders held 77 more. An earlier collection in the same day also hit four permission errors from temporary folders inside the depth tests; they did not recur this evening, so the inventory test should also make sure collection skips temp folders.
+`pytest.ini` includes `src/live/tests`; `tools/check.py` omits it. These are directory counts, not test-case counts. Collect the current case count at execution rather than retaining 907/984 targets.
 
-## How
+## Plan
 
-| Claim | Existing owner | Callers/consumers | Evidence |
-|---|---|---|---|
-| Default pytest folders are listed here | pytest.ini | `python -m pytest` | pytest.ini:2 |
-| The project check keeps its own copy of the list | tools/check.py | `python tools/check.py` | tools/check.py:66-75 |
-| Hygiene tests for the check already exist | tools/tests | default run | tools/tests/test_check_hygiene.py |
+1. Test first: inventory every maintained tests directory under src, experiments and tools, with explicit skips for external dependencies, ignored run/output and scratch trees. Assert agreement with both default lists; show failures against today's configuration.
+2. Add the missing suites to `pytest.ini` and `tools/check.py`, or use one existing configuration list if that is the least code. Avoid a new registry competing with both.
+3. Use the documented interpreter and OS temporary directories through `tools/check.py`. Run default collection, then the default check in one background queue if long. Report dependencies, skips and pre-existing failures explicitly; do not make an omitted suite disappear behind a broad exclusion.
+4. Prove inventory detects a deliberately omitted maintained folder and does not scan third-party/run folders. Preserve task-board hygiene checks and test scratch cleanup on success/failure.
 
-## Hyperparameters
+## Completion boundary
 
-hyperparameters n/a: test configuration change, no experiment.
-
-## Invariants and recovery
-
-invariants n/a: configuration only; no state.
-
-## Verification
-
-- **Contract test:** `tools/tests/test_suite_inventory.py` fails against the current lists (naming both missing folders) and passes after.
-- **Before/after:** default `--collect-only` count from 907 to at least 984 with no collection errors; `python tools/check.py` passes with the project's documented interpreter, recorded with its path.
-
-## Receipts
-
-| field | value |
-|---|---|
-| closing commit | (fill in) |
-| files changed | (fill in) |
-| test | (fill in) |
-| before / after | (fill in) |
-| result | (fill in) |
+Both entry points collect the same maintained suites, the inventory control fails for omissions, and actual test results are recorded. Task99 already fixed acceptance of `task_list/done`, scratch paths and Ruff cache location; do not redo that work. No model trials or GPU use.

@@ -5,7 +5,7 @@ status: stale
 priority: HIGH
 type: experiment
 approval_status: proposed; no execution authorised by Task30
-blocked_by: [32, 34, 40, 56]
+blocked_by: [56]
 blocks: []
 verification_test: ""
 plan_reviewed: null
@@ -19,11 +19,17 @@ baseline_metric:
   baseline_value: "0 independent sequential-error comparisons; cup RMS 72.8 mm on correlated selected views"
   target: "Measured answer after review; operating thresholds require owner agreement"
 created: 2026-10-04
-last_updated: 2026-10-07
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task35: Measure error propagation and sequential fusion
+
+## Board review, 15 October 2026
+
+Remains deferred. Task102 now owns the immediate one-variable orientation/depth/pose/fusion diagnosis, while Task56 owns complete inherited-error reporting. Reopen this broader sequential-fusion study only for a residual question those reports cannot answer. No duplicate error-reporting framework is planned.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

@@ -1,11 +1,11 @@
 ---
 id: "77"
 title: Reorder the walkthrough so camera tracking comes before depth
-status: stale
+status: archived
 priority: LOW
 type: experiment
 approval_status: filed 2026-10-13; start only if Tasks 72 and 76 show the image-only design is clearly better; not approved to start
-blocked_by: ["72", "76"]
+blocked_by: []
 blocks: []
 verification_test: ""
 plan_reviewed: null
@@ -21,11 +21,17 @@ baseline_metric:
   baseline_value: "two-step runs (SfM experiment, then walkthrough reading its files)"
   target: "one-step run with identical numbers to the Task76 two-step run on the same clip"
 created: 2026-10-13
-last_updated: 2026-10-14
-superseded_by: null
+last_updated: 2026-10-15
+superseded_by: 89
 ---
 
 # Task 77 — Camera tracking before depth in the walkthrough
+
+## Board review, 15 October 2026
+
+Absorbed input/pipeline plan. Task89 processes recorded camera poses before learned depth and sizes depth using the available phone points/depth. Task99 checked the v2 replay. Archive this duplicate architecture plan as superseded by Task89; new convention/orientation defects belong to Task102.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

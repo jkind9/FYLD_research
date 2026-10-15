@@ -1,11 +1,11 @@
 ---
 id: "57"
 title: Deploy and measure the useful edge workload
-status: open
+status: stale
 priority: HIGH
 type: infra
 approval_status: planning authorised 2026-10-06; execution requires task-specific review and frozen settings
-blocked_by: [61]
+blocked_by: [56, 104]
 blocks: []
 verification_test: "experiments/01_camera_capture_delivery/tests/test_edge_workload.py"
 plan_reviewed: null
@@ -24,11 +24,17 @@ baseline_metric:
   baseline_value: "0 deployed useful measurement/counting workloads with sustained target-device evidence"
   target: "1 actual-device feasibility checkpoint and 1 sustained comparable deployment report"
 created: 2026-10-06
-last_updated: 2026-10-07
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task57: Deploy and measure the useful edge workload
+
+## Board review, 15 October 2026
+
+Deferred on-phone processing. The owner decided on 14 October that the phone captures and the PC processes until methods are chosen. Capture packaging and queue/resource checks now belong to Task52. Reopen this task only after method selection and an explicit phone-processing plan, inside the same capture app. The pinned-container rebuild follow-up from Task24 remains here; it is not a prerequisite to diagnose the current walk.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

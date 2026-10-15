@@ -5,7 +5,7 @@ status: stale
 priority: HIGH
 type: experiment
 approval_status: authorised by owner instruction 2026-10-05; existing data and classical methods only
-blocked_by: [31, 56]
+blocked_by: [53, 56]
 validation_gates: [21, 22, 32, 48]
 blocks: []
 verification_test: experiments/06_object_recognition/experiments/02_segmentation/tests/test_task34_metrics.py
@@ -31,11 +31,17 @@ baseline_metric:
   baseline_value: "45 historical masks; 0 scored against public instance polygons"
   target: "All non-crowd outlines in the inherited 5,000-image COCO val2017 selection plus all 457 Task22 proposals; no accuracy target for 3D position"
 created: 2026-10-04
-last_updated: 2026-10-07
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
 # Task34: Evaluate segmentation for position and observed dimensions
+
+## Board review, 15 October 2026
+
+Remains deferred. The historical oracle-box COCO/classical-mask comparison does not establish site geometry or phone suitability. Keep it parked; revisit only if independently scored Task56 results isolate segmentation as the failing component. Historical pending-review gates below no longer describe the current board.
+
+The earlier plan and receipts below are historical. This review changes scheduling and ownership, not their recorded results.
 
 ## In plain English
 

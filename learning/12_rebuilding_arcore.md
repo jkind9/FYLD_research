@@ -1,5 +1,7 @@
 # 12. Rebuilding ARCore from open parts
 
+**Follow-up ownership, 15 October 2026.** The [reviewed board](../task_list/README.md) separates built tooling from unperformed handset work. Task52 owns capture metadata and sustained checks; [Task103](../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) owns the Redmi target video, long rest and calibration; [Task104](../task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md) owns calibrated same-walk tracker/surface comparisons. Tasks90/91 remain completed public-dataset results. Task102 first checks image orientation and geometry conventions. Phone inference remains deferred inside the same capture app; the current PC work is CPU only.
+
 Chapter 11 explained what ARCore does inside. This chapter follows the project's second development stream (Stream B, started 14 October 2026): replacing each of ARCore's functions with open-source or hand-built parts, so the product does not depend on Google. It starts with the part everything else rests on: getting camera images and motion-sensor readings onto one clock. Sources are in [research/visual_inertial_odometry/](../research/visual_inertial_odometry/README.md); the code is [experiments/open_vio/](../experiments/open_vio/README.md).
 
 ## What has to be rebuilt

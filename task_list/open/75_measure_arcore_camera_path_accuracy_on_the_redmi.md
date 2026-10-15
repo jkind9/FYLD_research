@@ -1,13 +1,12 @@
 ---
 id: "75"
-title: Measure ARCore camera path accuracy on the Redmi
+title: Measure Redmi ARCore drift and physical distance error
 status: open
-priority: MEDIUM
+priority: MED
 type: experiment
-approval_status: filed 2026-10-13 from the owner's request to research the tracking problem and file tasks for the best path; needs handset access; not yet planned or approved to start
-blocked_by: ["52"]
+blocked_by: [52, 102]
 blocks: []
-verification_test: ""
+verification_test: "experiments/01_camera_capture_delivery/tests/test_accuracy.py"
 plan_reviewed: null
 files:
   - experiments/01_camera_capture_delivery/**
@@ -15,46 +14,33 @@ docs:
   - experiments/01_camera_capture_delivery/README.md
   - task_list/README.md
 baseline_metric:
-  source: "none on this handset"
-  field: "end-point drift on a closed loop (mm and % of distance walked); error of tape-measured distances between printed markers; tracking-lost events; same walk scored with Task67's COLMAP path"
-  baseline_value: "0 ARCore recordings; the current APK contains no ARCore SDK (Task52)"
-  target: "at least 3 recorded walks with drift and distance error reported"
+  source: "15 October board review; evidence below"
+  field: "Measure Redmi ARCore drift and physical distance error"
+  baseline_value: "1177 matched ARCore records, all tracking; zero independently measured Redmi accuracy trials"
+  target: "At least three closed-loop trials with surveyed marker distances and an offline same-frame camera comparison"
 created: 2026-10-13
-last_updated: 2026-10-13
+last_updated: 2026-10-15
 superseded_by: null
 ---
 
-# Task 75 — ARCore camera path accuracy on the Redmi
+# Task 75: Measure Redmi ARCore drift and physical distance error
 
 ## In plain English
 
-On the phone, the camera path should come from ARCore, Google's tracking system. It combines the camera with the phone's motion sensors and gives real-world size. Published tests show anything from about 1 cm to over 10 cm of error, depending on the phone and the walk. This task measures it on our handset. There is no motion-capture room, so the check uses walks that end where they started, and printed markers whose distances are measured with a tape.
+Measure how far the phone's reported camera path differs from a physical walk. Start and finish at marked positions and measure distances independently with a tape. Tracking success alone does not say the path is accurate.
 
-## What
+## Current evidence
 
-1. Confirm the Redmi is on Google's ARCore supported-device list.
-2. Record ARCore's camera pose with every frame. Either add ARCore to the project's recorder (Task52) or, for a first look, use an existing logger app; Pyojin Kim's ARCore data logger, used in the Sensors 2022 four-system benchmark, is a candidate to verify.
-3. Walk at least three closed loops through a room with printed markers at tape-measured positions. Score end-point drift, distances between markers computed from ARCore poses against the tape, and tracking-lost events.
-4. Run Task67's COLMAP on the same frames and score it the same way, so the phone tracker and the offline image-only path are compared on one recording.
+The installed capture 1.2 app already includes ARCore, its notice and live pose logging. Task99's walk contains 1,177 matched tracking records out of 1,194 images. There is no independent path reference or tape survey. Task92 already built `host/accuracy.py`, its tests and `field_accuracy.md`; reuse them. No alternative logger, new ARCore integration or old phonecheck APK is required.
 
-## Why
+## Plan
 
-The phone design the research points to takes the camera path from ARCore and uses learned depth only to fill in surfaces. That design is only as good as ARCore on this handset, which nobody has measured.
+1. Use Task52's checked capture app and the existing field guide. Coordinate at least three marked closed loops with the owner; record route, duration, physical start/end placement uncertainty and tape-measured marker distances before inspecting predictions. Indoor/stair/outdoor conditions are separate labelled trials, not an unsupported claim about the existing walk's route.
+2. The existing accuracy scorer imports the v1 reader. Test and add a v2 input adapter using the shared reader; do not create a second accuracy scorer. Preserve frame identity, camera convention and anchor revision history; raw live and final corrected path scores are separate.
+3. Report endpoint drift in mm and percent of walked distance, marker-distance error, tracking loss/recovery, missing poses and segment resets. Closure is a partial check, not a full-path accuracy measure.
+4. Reuse Task102/74's v2-to-COLMAP input adaptation on the exact same image IDs. Report offline camera-path disagreement and tape-based metrics; neither ARCore nor COLMAP is independent truth for the other.
+5. Record uncertainties and negative results. Task61 supplies product acceptance limits if a PASS/FAIL claim is wanted; their absence does not prevent reporting measured error.
 
-## How
+## Settings and completion
 
-To be planned before `task.js start`. ARCore's Recording and Playback API can save a session to MP4 and replay it. Google warns that replayed poses may differ from the live ones and between replays, so poses should be logged live.
-
-## Receipts
-
-| field | value |
-|---|---|
-| closing commit | (fill in) |
-| files changed | (fill in) |
-| test | (fill in) |
-| before / after | (fill in) |
-| result | (fill in) |
-
-Notes / caveats / follow-ups:
-
-- Sources: [ARCore recording and playback](https://developers.google.com/ar/develop/java/recording-and-playback/developer-guide), [Kim et al. 2022, four visual-inertial systems compared](https://doaj.org/article/4845749bf71543bb9d8bd51082e46690), [RealityCheck, ARCore drift measurement](https://www.cs.ucr.edu/~jiasi/pub/RealityCheck_ism21.pdf).
+The three-trial minimum is inherited from this task's 13 October plan, not a new owner acceptance threshold. Freeze image orientation, scale fitting and timestamp selection after Task102; new settings are proposed by Claude, not owner-ruled. CPU only. Finish with measured receipts or an explicit remaining owner capture handover; a scorer passing fixtures does not satisfy the physical trials.
