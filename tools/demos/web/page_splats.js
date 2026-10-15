@@ -14,8 +14,30 @@
 
   V.addSplats("splats", pos, normals, colours, alpha, st, sn);
   V.addPoints("points", pos, colours, { size: D.voxel * 0.8, worldSize: true, visible: false });
-  V.addPoints("display", DemoData.positions(D.display.positions), DemoData.array(D.display.colours),
+  if (D.display) V.addPoints("display", DemoData.positions(D.display.positions), DemoData.array(D.display.colours),
     { size: 0.012, worldSize: true, visible: false });
+
+  const fit = () => V.frameBox(S.positions.min, S.positions.max, { yaw: 0.6, pitch: 0.5, distance: 1.05 });
+  document.getElementById("fit-scene")?.addEventListener("click", fit);
+  document.getElementById("top-view")?.addEventListener("click", () => {
+    V.frameBox(S.positions.min, S.positions.max, { yaw: 0, pitch: 1.55 });
+  });
+  if (D.frameScene) {
+    fit();
+    V.canvas.tabIndex = 0;
+    V.canvas.addEventListener("keydown", (event) => {
+      const steps = { ArrowLeft: [-0.12, 0], ArrowRight: [0.12, 0], ArrowUp: [0, 0.12], ArrowDown: [0, -0.12] };
+      const step = steps[event.key];
+      if (step) {
+        event.preventDefault();
+        V.setOrbit(V.target, V.dist, V.yaw + step[0], Math.max(-1.55, Math.min(1.55, V.pitch + step[1])));
+      } else if (["+", "=", "-"].includes(event.key)) {
+        event.preventDefault();
+        const distance = Math.max(0.01, Math.min(100, V.dist * (event.key === "-" ? 1.1 : 0.9)));
+        V.setOrbit(V.target, distance, V.yaw, V.pitch);
+      }
+    });
+  }
 
   const setMode = (mode) => {
     document.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
@@ -27,19 +49,19 @@
   const photo = document.getElementById("compare-photo"), caption = document.getElementById("compare-caption");
   const buttons = document.getElementById("compare-buttons");
   const choose = (c, btn) => {
-    V.lookFromPose(c.pose, D.fy, D.height);
+    V.lookFromPose(c.pose, c.fy || D.fy, c.height || D.height);
     photo.src = c.photo;
-    caption.textContent = `Real photo from desk frame ${c.frame}. Drag the 3D view to leave this camera position.`;
+    caption.textContent = `Real photo from ${D.sceneName || "desk"}, frame ${c.frame}. Drag to explore.`;
     buttons.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
   };
   D.compare.forEach((c, i) => {
     const b = document.createElement("button");
     b.className = "btn";
-    b.textContent = `Frame ${c.frame}`;
+    b.textContent = c.label || `Frame ${c.frame}`;
     b.setAttribute("aria-pressed", "false");
     b.addEventListener("click", () => choose(c, b));
     buttons.appendChild(b);
-    if (i === 1) setTimeout(() => choose(c, b), 0);
+    if (i === 1 && !D.frameScene) setTimeout(() => choose(c, b), 0);
   });
 
   document.getElementById("download-ply").addEventListener("click", () => {
@@ -63,7 +85,7 @@
     const blob = new Blob([header, body.buffer], { type: "application/octet-stream" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "desk_gaussian_splats.ply";
+    link.download = D.downloadName || "desk_gaussian_splats.ply";
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 5000);
   });

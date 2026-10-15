@@ -42,6 +42,14 @@ CPU replay at recorded speed, with both cached models on 16 threads and a 2 cm v
 
 Local outputs are `outputs/capture_task99_220756/live_verified/{updates.jsonl,summary.json,surface.ply}`. The first failed replay is retained separately under `live/`. [Capture metrics and limits](../../experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99).
 
+Task100 adds an offline [interactive Gaussian viewer](../../outputs/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) for that surface. It shows 78,328 surface-derived splats with height colours, point/splat switching, top/fit controls, keyboard orbit/zoom, eight camera/photo bookmarks and a Gaussian PLY download. The HTML is 1.58 MB, embeds its photos and needs no server or network. It does not perform photographic Gaussian training. Generate a viewer with:
+
+```text
+.venv-yolo\Scripts\python -B -m tools.demos.capture_scene --surface <surface.ply> --session <v2 session folder> --out <viewer.html>
+```
+
+The renderer and its previous desk demo are reused. Twelve capture-viewer tests and the existing demo tests pass (30 total); real offline Chromium checks found no browser errors or external requests. Display grouping defaults to 6 cm, proposed by Claude, not owner-ruled. Camera bookmarks use original recorded poses, so later anchor corrections can shift the final surface relative to a photo.
+
 `python -m src.live.score --run <run> --icl data/icl_nuim` scores an ICL run's surface against the published model, as `experiments/sfm/run_dense.py` does.
 
 ## Results, 14 October 2026 (stand-in sessions, replayed at recorded speed, 32-thread desktop CPU, models on 16 threads)

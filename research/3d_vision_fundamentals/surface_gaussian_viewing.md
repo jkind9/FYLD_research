@@ -1,0 +1,11 @@
+# Viewing reconstructed surfaces as Gaussian splats
+
+Checked 15 October 2026 for Task100. Source: Kerbl, Kopanas, Leimkühler and Drettakis, [3D Gaussian Splatting for Real-Time Radiance Field Rendering](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/), SIGGRAPH 2023. No PDF or third-party implementation was downloaded.
+
+The paper represents a scene with Gaussian primitives and optimizes their positions, covariance, opacity and appearance against photographs. Its training and its splat rendering are separate steps. Merely drawing a reconstructed point surface as Gaussian primitives does not establish that this photographic optimization has happened.
+
+The repo already has a dependency-free Gaussian renderer in `tools/demos/web/viewer.js`. Task100 reuses it for the Redmi surface from Task99. The exporter groups the saved points into display cells, estimates surface normals on the CPU and assigns each representative point a flat Gaussian covariance. The tangent standard deviation equals the cell width; the normal standard deviation is one tenth of it. Colour represents ARCore world height. No photographic optimization, new depth inference or GPU training is performed.
+
+Proposed by Claude, not owner-ruled: 6 cm display cells, a 3-cell normal-estimation radius with at most 30 neighbours, opacity 230/255, and eight camera bookmarks. These display settings do not alter the original surface. The 845,428-point Redmi surface gives 78,328 display splats in a 1.58 MB standalone HTML. Reference photos are embedded locally. Recorded camera poses use OpenCV camera axes after conversion from ARCore; world up remains +Y. Later anchor corrections can move the final surface relative to an earlier photo, so bookmarks do not establish pixel-perfect registration.
+
+Offline Chromium checks exercised orbit/zoom, point/splat switching, top and fit views, splat size, camera/photo bookmarks and downloading a standard Gaussian PLY. The PLY has 78,328 finite Gaussian records with unit rotation quaternions. This verifies an interactive surface visualization, not scene accuracy or a trained radiance field. The matching explanation is in [chapter 5](../../learning/05_dense_surfaces.md).

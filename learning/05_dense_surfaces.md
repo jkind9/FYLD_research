@@ -86,6 +86,18 @@ What this teaches:
 
 ## Try it
 
+### View a surface as Gaussian splats
+
+A Gaussian splat is a small soft blob with position, orientation, width, colour and transparency. Overlapping blobs can draw a surface without a triangle mesh. Training those blobs to match photographs is a separate operation; drawing an existing surface as splats does not improve its geometry by itself.
+
+Task100 turns the Redmi walk's saved surface into an offline interactive HTML. It displays 78,328 splats grouped from 845,428 reconstructed points, with height colours, orbit/zoom, a top view and eight recorded-camera/photo bookmarks. The original point cloud is preserved. These are surface-derived splats; photographic Gaussian training has not been run. Source and display settings: [surface Gaussian viewing](../research/3d_vision_fundamentals/surface_gaussian_viewing.md).
+
+```text
+.venv-yolo\Scripts\python -B -m tools.demos.capture_scene --surface <surface.ply> --session <v2 session folder> --out <viewer.html>
+```
+
+### Fuse and score depth
+
 Fuse Depth Anything along the SfM path, sized to SfM points, and score it (TUM desk; paths in `experiments/sfm/README.md`):
 
 ```text

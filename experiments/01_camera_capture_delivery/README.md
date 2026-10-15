@@ -377,7 +377,11 @@ The v2 reader and `src.live.stream.replay` read all 1,194 frames in order. Every
 
 The first recorded anchor id is 1, although the phone created 40 anchors. Initial replay failed because fusion assumed anchor 0 existed. Task99 binds each fragment to an available received anchor and keeps that binding for all later corrections. The regression test verifies the surface still moves with its anchor. CPU replay now completes with both cached models on 16 threads and 2 cm voxels: 63 updates at 1.580 updates/s, longest gap 0.856 s, no gaps over one second, median update 619.4 ms and latency 672.5 ms. It saved 845,428 surface points and applied 83 anchor corrections. Object counts and geometric accuracy remain unvalidated.
 
-Local outputs are `outputs/capture_task99_220756/{validation.json,euroc/,live_verified/}`. Reproduce with:
+Local outputs are `outputs/capture_task99_220756/{validation.json,euroc/,live_verified/}`.
+
+Task100's [interactive 3D scene](../../outputs/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) displays the saved surface as 78,328 Gaussian splats with height colours and eight source-photo bookmarks. It is a private, offline 1.58 MB HTML file; no household images are published. Its controls and Gaussian PLY download were tested offline in Chromium. This is a surface visualization, not photographic Gaussian training. [Exporter and settings](../../src/live/README.md#redmi-capture-12-result-task99).
+
+Reproduce the capture checks with:
 
 ```text
 .venv-yolo\Scripts\python -B experiments/open_vio/host/clock_check.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk
