@@ -6,6 +6,9 @@ Following the camera through a video, live or offline, with a map, refinement an
 
 | Note | What it covers |
 |---|---|
+| [colmap_based_slam.md](colmap_based_slam.md) | COLMAP run as live tracking (COLMAP-SLAM, colmap-odometry, On-the-fly SfM, hloc), read 8 November 2026: what they report, why they do not replace ARCore, and the keyframe rule, known-pose loop and memory habit worth taking |
+| [slam_handbook.md](slam_handbook.md) | The SLAM Handbook (pre-publication, 669 pages), read 7 November 2026: which chapters apply, the drift benchmark, motions that hide scale, calibration and clock limits, and what it cannot answer for a phone |
+| [slam_links_review_2026-11-07.md](slam_links_review_2026-11-07.md) | Five SLAM links supplied by the owner on 7 November 2026: moving objects, object-level SLAM, an Android ORB-SLAM2 app, a robot-to-ARCore display |
 | [sota_slam_review_2026-10-14.md](sota_slam_review_2026-10-14.md) | State-of-the-art SLAM for accuracy and edge latency, 14 October 2026: families, one same-protocol comparison, what to use on the phone and on recorded data |
 | [tracking_review_2026-10-13.md](tracking_review_2026-10-13.md) | Review of 13 October 2026: what is missing, panorama versus 3D, alternatives to COLMAP, phone design |
 | [orb_slam/README.md](orb_slam/README.md) | ORB-SLAM3 as the tracking reference, and current alternatives |
@@ -32,6 +35,9 @@ Saved 13 October 2026 from arXiv or the authors' pages. Paper results are the au
 | robust_reconstruction_indoor_choi_cvpr2015.pdf | Robust Reconstruction of Indoor Scenes: fragments of 50 frames, then robust global registration (saved 14 October) |
 | foundationslam_2512.25008.pdf | FoundationSLAM: foundation-model SLAM accuracy claims |
 | glide_slam_gl_embedded_2607.16897.pdf | GLidE-SLAM: OpenGL ES direct tracking for embedded GPUs |
+| slam_handbook_2026.pdf | The SLAM Handbook draft, `main.pdf` from the public-release repository (saved 7 November 2026; see [slam_handbook.md](slam_handbook.md)) |
+| colmap_slam_morelli2023.pdf | COLMAP-SLAM (ISPRS Archives 2023): COLMAP's mapper run per keyframe; EuRoC results against OpenVSLAM (saved 8 November 2026; see [colmap_based_slam.md](colmap_based_slam.md)) |
+| dl_visual_odometry_morelli2025.pdf | Deep Learning in Visual Odometry for Autonomous Driving (ISPRS Archives 2025): COLMAP-SLAM with ALIKED or SuperPoint against ORB-SLAM3 and DROID-SLAM in CARLA (saved 8 November 2026) |
 
 ## Course lectures
 

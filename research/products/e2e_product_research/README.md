@@ -13,7 +13,7 @@ The [edge products review](../edge_products/README.md) covers stereo cameras and
 
 ## Per-product notes
 
-One folder per product or project, for the eight most relevant to this repository's full chain: phone video, then a real 3D scene, then objects detected and counted once. Each note follows the same layout: a one-paragraph take-away, a table of the same questions, how it works, evidence and limits, which of this repository's layers it covers, and a short test plan.
+One folder per product or project relevant to this repository's full chain: phone video, then a real 3D scene, then objects detected and counted once. Notes cover the main questions, how it works, evidence and limits, which of this repository's layers it covers, and suggested checks.
 
 | Note | Kind | Why it is here |
 |---|---|---|
@@ -25,6 +25,11 @@ One folder per product or project, for the eight most relevant to this repositor
 | [06 ViaSight ZoneSure](06_viasight_zonesure/README.md) | Commercial, hosted | Nearest product aimed at the same objects: phone video checks of cones and signs at road works |
 | [07 SkyeBrowse](07_skyebrowse/README.md) | Commercial, hosted | Closest commercial match to layers 1–4: measured 3D model from ordinary Android video |
 | [08 Scaniverse](08_scaniverse/README.md) | Commercial, on the phone | Phone capture to a real 3D scene viewed in a VR headset; no objects or checked measurement |
+| [09 Lumina](09_lumina/README.md) | Commercial, phone captures and PC processes | Added 8 November 2026. iPhone LiDAR capture with live coverage, desktop splat training on an NVIDIA GPU, measurement and floor plans. Same phone-captures, PC-processes split as this project; open-source parts in [research/gaussian_splatting](../../gaussian_splatting/lumina_open_source_parts.md) |
+| [10 SpAItial Echo-3](10_spaitial_echo3/README.md) | Commercial, phone captures and cloud processes | Added 8 November 2026. A few minutes of iPhone video, no LiDAR needed, becomes a splat scene at real-world scale with missed areas generated. No method or accuracy published; the terms forbid reverse engineering. Open counterparts in [feed-forward splat models](../../feed_forward_3d/feed_forward_splats.md) |
+| [11 Open3Dmap](11_open3dmap/README.md) | Source available, Android capture and cloud/browser processing | Added 9 November 2026. Capture quality checks, COLMAP upload workflow and SplatJSON metadata; root licence is noncommercial, cloud can return labelled synthetic results, and referenced Brush WASM artefacts are absent from the reviewed tree |
+
+[SceneView's Android room scanner](../../phone_ar_platforms/sceneview.md), reviewed 9 November 2026, also implements depth fusion, room-object detection and merging across views inside its demo. The [comparison with Open3Dmap](../sceneview_open3dmap_review_2026-11-09.md) ranks what fits our current pipeline. Neither was executed here. These dated additions extend the original 5 October search below.
 
 OVSeg3R (ordinary video in, labelled 3D objects out) would sit next to IGGT, but no public code was found, so it is covered inside the IGGT note.
 
@@ -104,6 +109,7 @@ The columns are the same in every table:
 | [Matterport](https://matterport.com/news/matterport-launches-property-intelligence-transforming-real-estate) | ✅ | ◐ | capture only | ? | Automatic wall, ceiling and floor-area measurements. Its AI tags objects in a scan as assets. Built for buildings. |
 | [ViaSight ZoneSure](https://www.startlandnews.com/2026/02/zikomo-fields-viasight/) | ❌ none published | ◐ | capture only | ✅ [on Play Store](https://play.google.com/store/apps/details?id=ai.viasight.zonesure) | Phone on the windscreen, drive through a work zone, cloud AI checks signs, cones, barrels and lane markings against the US work-zone rules (MUTCD). Outputs GPS-tagged issues and a report. Nearest product aimed at the same objects. |
 | [Xweather (Vaisala) RoadAI](https://www.xweather.com/products/roadai), [Gaist](https://gaist.co.uk/solutions), [Blyncsy (Bentley)](https://www.bentley.com/software/blyncsy/) | ◐ road condition | ✅ | ❌ vehicle cameras | n/a | Vehicle video turned into a list of road assets (signs, barriers, bollards, cones), each placed once by GPS. Blyncsy uses images from over 800,000 vehicles. Solves "count each object once" at road scale, not walking pace. |
+| [SpAItial Echo-3](https://spaitial.ai/echo-3) | ◐ claimed metric, no accuracy published | ❌ | capture only | ❌ iPhone only, but no LiDAR needed; Android "coming soon" | Added 8 November 2026. A few minutes of iPhone video becomes a splat scene at real-world scale in the cloud; the model generates areas the capture missed. Free first month. [Note](10_spaitial_echo3/README.md). |
 | [FYLD video risk assessment](https://fyld.ai/faq) | ❌ | ❌ | capture only | ✅ | Workers film the site before starting work; AI finds hazards in the video and audio. This is the product this research would plug into. |
 
 ### 2. Commercial: the work happens on the phone

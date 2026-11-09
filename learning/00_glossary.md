@@ -12,6 +12,8 @@ Terms used across the learning chapters, in alphabetical order. Each entry says 
 | **Bundle adjustment** | Solving all camera poses and all 3D points together so that every point projects back onto the pixels where it was seen. The core of structure from motion and of most SLAM systems. |
 | **Calibration (intrinsics)** | The numbers that describe a camera's lens and sensor: focal lengths `fx, fy` and image centre `cx, cy` in pixels, plus lens distortion. Needed to turn pixels into directions. |
 | **Camera pose (extrinsics)** | Where a camera is (position) and which way it points (orientation) for one frame. Stored as a 4 × 4 matrix. *Camera-to-world* moves points from the camera's frame into the world; *world-to-camera* is its inverse. |
+| **Census code (Census transform)** | A short binary code per pixel recording which of its neighbours are brighter than it. Two pixels are compared by counting the bits that differ. Cheap and keeps edges sharp, so phone stereo such as Mobile3DRecon uses it. See chapter 5. |
+| **COLMAP dataset** | A folder of images plus three text files: lens numbers (`cameras.txt`), one pose per image (`images.txt`) and sparse 3D points (`points3D.txt`). Named after the COLMAP tool; every common Gaussian splat trainer reads it. A phone's own poses can be written into one, which skips structure from motion. |
 | **Coverage (surface)** | The share of a reference surface that has a reconstructed point nearby (5 cm in this project). Reported with accuracy because a small, accurate patch can hide a mostly missing room. |
 | **Depth** | Distance from the camera to the surface seen at a pixel, measured along the camera's forward axis, in metres. |
 | **Depth Anything** | A family of learned depth models. V2 Metric Small (25M parameters) is the project's main single-image depth model; Depth Anything 3 takes several images and optional camera poses. |
@@ -19,8 +21,11 @@ Terms used across the learning chapters, in alphabetical order. Each entry says 
 | **Drift** | Slowly growing error in a camera path, because each small step's error adds to the last. |
 | **Factor graph** | A network whose nodes are unknowns (poses, 3D points, sensor biases) and whose links are measurements between them; solving it finds the values that best fit every measurement. Kimera-VIO and GTSAM work this way. |
 | **Feature (keypoint)** | A distinctive, findable spot in an image, such as a corner, with a descriptor that lets it be recognised in another image. SIFT and ORB are classic types; ALIKED is learned. |
+| **Floater** | A patch of reconstructed surface sitting in empty space, away from any real object. See chapter 5. |
+| **Flying pixel** | A depth pixel on the edge between a near and a far object whose depth lies between the two. Back-projected, a row of them forms a sheet in empty space. Learned depth models produce them at every edge. |
 | **Frame** | One image from a video. Also used for a coordinate system ("camera frame", "world frame"); the meaning is clear from context. |
 | **Fusion (TSDF)** | Combining many depth images into one surface. A truncated signed distance function (TSDF) stores, in each small cube of space (voxel), the averaged distance to the nearest surface. |
+| **Gaussian splat** | A small soft blob with a position, orientation, width, colour and transparency. Many thousands drawn together show a scene. *Splat training* adjusts them until renders match the photos; the result looks real but is not a measurement unless depth holds its shape. See chapter 5. |
 | **Global mapper (GLOMAP)** | A structure-from-motion method that solves all camera rotations, then all positions, then refines once. Faster than the incremental mapper on large sets. |
 | **Ground truth / reference** | Independently measured answers used only to score a method: motion-capture camera paths, Kinect depth, a surveyed surface. Never fed to the method being tested. |
 | **IMU** | Inertial measurement unit: the phone's gyroscope and accelerometer. Measures rotation and acceleration hundreds of times a second and gives the direction of gravity. |
@@ -36,6 +41,7 @@ Terms used across the learning chapters, in alphabetical order. Each entry says 
 | **Reprojection error** | Distance in pixels between where a 3D point projects into an image and where it was actually seen. Bundle adjustment minimises it. |
 | **Rolling shutter** | A camera sensor that reads its rows one after another rather than all at once. The last row is read 10-30 ms after the first on a phone (the *readout time*, reported by Android as rolling-shutter skew), so fast motion bends straight lines and each row has its own capture time. |
 | **Scale ambiguity** | From images alone, a scene and every camera position can be made twice as large and still match the photos. Real size must come from somewhere else: a depth sensor, a known distance, or the IMU. |
+| **Semi-global matching (SGM)** | A stereo method that picks each pixel's depth from match costs smoothed along several straight paths across the image (often 8). Small depth changes between neighbours cost a little, large jumps cost more, and jumps are allowed more cheaply at image edges. OpenCV's `StereoSGBM` is a two-view version. |
 | **Shared camera (ARCore)** | An ARCore mode in which ARCore tracks as usual while the app receives its own copy of every camera image from the same capture session. The project's raw recorder uses it to save images and ARCore's poses together. |
 | **SfM (structure from motion)** | Recovering camera poses and 3D points together from overlapping images. Usually offline over all images at once. COLMAP is the standard tool. |
 | **Sliding-window optimiser** | A tracker that keeps only the last few keyframes and re-solves all their poses together at each step, folding older information into a summary (marginalisation). Basalt and OKVIS2 work this way. |
@@ -46,4 +52,5 @@ Terms used across the learning chapters, in alphabetical order. Each entry says 
 | **Timestamp source (Android camera)** | Which clock a phone camera stamps its images on. REALTIME is the same clock as the motion sensors (`elapsedRealtimeNanos`); UNKNOWN is a clock that cannot be compared with them. |
 | **Triangulation** | Finding a 3D point from its pixel positions in two or more views with known poses. |
 | **VIO (visual-inertial odometry)** | Tracking that combines camera images with the IMU. Gives metric size and gravity. ARCore works this way. |
+| **Visual hull** | The 3D shape left when an object's outline from every view is extended back from the camera and only space inside all of them is kept. It is a closed outer shape: hollows that never show on an outline are filled in. |
 | **Voxel** | A small cube of 3D space, the 3D version of a pixel. |

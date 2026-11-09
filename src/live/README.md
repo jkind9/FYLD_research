@@ -15,6 +15,21 @@ Frames arrive about 30 times a second. `LiveProcessor.add()` only records each o
 | Map | Dominant plane and grid footprint (Task55 settings) on the surface thinned to 2.5 cm | `experiments/05_birds_eye_mapping/measure.py` |
 | Objects | YOLO26x on the frame, placed in 3D from the sized depth, counted by same-class matching within 0.35 m (ambiguity margin 0.05 m); runs on a second thread beside fusion and mapping | `experiments/06_object_recognition/pilot/` |
 
+**Clean-up: the offline room build has it, the live processor not yet.** The live processor limits fused depth to 0.1-4.0 m and removes nothing else. The offline `room_build` rejects stale depth, can mask unsupported cells, and since Task126 runs the owner's clean-up (next paragraph). The owner's target scenes are indoor with surfaces under about 10 m (8 November 2026), so the 4.0 m limit cuts part of them; ARCore depth, which sets the size, rarely reaches past 2.5 m.
+
+**Room clean-up: the visibility vote, then the largest pieces (owner, 8 November 2026; Task126). This is a key stage of the system.** The owner tuned every clean-up stage by eye in the Task125 tuner and found that only two changed the room. `room_build` now runs both, in order, on the fused surface:
+
+1. **Visibility vote** (`clean.visibility_vote`): a point is dropped when the frames that see through it outweigh the frames that measure it there (a see-through share above 0.5). Each frame's vote weighs 1/depth², and see-through evidence reaches 8 m.
+2. **Largest pieces** (`clean.largest_pieces`): the surface is cut into grid cells (default the 2 cm fusion voxel, `--piece-cell` to change). Filled cells that touch at a face, edge or corner form one *piece*, which is the 3D form of `cv2.connectedComponents` and behaves like splats one cell wide that touch. The 50 largest pieces with at least 5,000 points each are kept. A continuous walk joins the room into one or a few large pieces, so everything else is a floater.
+
+Radius outliers, statistical outliers, frame counts, the spots rule and the normal rule changed nothing visible and are not run. On the 15 October walk (134 frames): 676,855 fused points, the vote removed 100,086 and pieces 22,702, leaving 554,067. The room is one piece; the next largest holds about 4,400 points. On a 32-thread desktop CPU the vote took 2.41 s and pieces 0.15 s, against 82 s for the whole build. The vote's cost grows with frames × points, so fewer, sharper frames make it cheaper. `surface.ply` is the cleaned room and `raw_surface.ply` the room before clean-up; `summary.json` records the counts and times under `clean_up`. Findings and the comparison with point-chain linking: [research/surface_denoising](../../research/surface_denoising/README.md#owners-setting-in-the-room-build-task126).
+
+**Clean-up and far-sizing trial, Task120.** `python -B -m src.live.denoise_trial --session <v2 session> --out <folder>` fuses the `room_build` frames several ways and scores each against held-out ARCore tracked points (81 s on the CPU for the 15 October walk). The visibility vote in `clean.py` cut surface lying on sight lines ARCore saw through from 9.2% to 1.8% (under 2.5 m) and from 8.6% to 4.1% (beyond), for 0.5 points of ARCore coverage. Edge and side-on masks and near-first weights made it worse. Tracked-point sizing fixed far depth (16% too near to 5%) but, as one size per frame, pushed the near floor down. Full table: [research/surface_denoising](../../research/surface_denoising/README.md#trial-on-the-15-october-walk-8-november-2026-task120). `room_build.grid_size` gained an optional `fallback` size for cells without ARCore depth, and `Fragments.placing_anchor` returns the current pose of the anchor placing a keyframe. `python -B -m tools.demos.cleanup_scene --trial <trial folder> --session <v2 session> --out <viewer.html>` builds an offline page of the room with switches that show the vote's deletions in red or hide them, beside the results table (Task121; local only, it embeds photos). A proposed clean-up stage, with three hooks (before fusion, during fusion, at surface extraction) and the trials to run, is in [research/surface_denoising](../../research/surface_denoising/README.md). One constraint for it: the `ScalableTSDFVolume` used in `fragments.py` takes no per-pixel weights and cannot drop voxels seen only a few times; Open3D's newer `VoxelBlockGrid` can do the second.
+
+**Spots rule and pieces by make-up, Task124.** `clean.wide_support` keeps far surface only if it was measured nearer than 2.5 m or by two more views at least 3° from the first measuring view (COLMAP's geometric filter); frames from one standing spot share one size guess, so they do not confirm each other. `clean.piece_majority` joins neighbours within 3 cm whose normals differ by under 30° (PCL's conditional clustering) and drops pieces where most points failed the rule. On the 15 October walk the rule removed 17% of points with ARCore coverage unchanged and kept the staircase, but did not remove the door echoes; the piece test added 0.3%. The trial now also scores surface behind tracked points and door and stair coverage, and `cleanup_scene --views 65 420` adds those camera bookmarks. Results: [research/surface_denoising](../../research/surface_denoising/README.md).
+
+**Clean-up tuner, Task125.** `python -B -m src.live.cleanup_attributes --session <v2 session> --out <folder>` writes the raw fused room (`raw.ply`) and, per point, the evidence each depth-map stage tests (`attributes.npz`; from `clean.vote_tallies`, `clean.spot_evidence`, `clean.views_measuring` and nearest-neighbour distances). `python -B -m tools.demos.cleanup_tuner --attributes <folder> --session <v2 session> --out <page.html> --views 65 420` builds an offline page where every clean-up stage has an on/off tick and every parameter a slider with a description; chain linking and radius outliers run in the page. `denoise_trial.fuse` now also returns each frame's camera, fused depth and see-through evidence.
+
 **When ARCore corrects its path**, it moves its anchors. Each fragment, and each counted object, is stored relative to a keyframe anchor, so it moves with that anchor's newest pose. Nothing is re-fused. The idea and its limits are in [research/camera_tracking_and_slam/fragments_and_anchors.md](../../research/camera_tracking_and_slam/fragments_and_anchors.md).
 
 This replaces Tasks 76 and 77. The camera path now comes first (from ARCore, before any depth), and learned depth is sized to the tracker's depth and points. The walkthrough in `src/walkthrough` stays as the offline route for recorded files.
@@ -49,6 +64,101 @@ Task100 adds an offline [interactive Gaussian viewer](../../outputs/capture_task
 ```
 
 The renderer and its previous desk demo are reused. Twelve capture-viewer tests and the existing demo tests pass (30 total); real offline Chromium checks found no browser errors or external requests. Display grouping defaults to 6 cm, proposed by Claude, not owner-ruled. Camera bookmarks use original recorded poses, so later anchor corrections can shift the final surface relative to a photo.
+
+## Redmi 15 October walk, Task107
+
+The 14 October walk saved only empty phone depth maps, so its learned depth was sized from tracked points or carried over from earlier updates. The walk `20261015_093913_walk` (822 frames, 27.5 s) has 147 raw depth maps from ARCore, Google's phone tracking library. It was replayed with the Task99 command and settings unchanged: CPU only, 16 threads, 2 cm voxel, recorded speed, objects on. `clock_check.py` and `recording.py --euroc` both exited 0 and reported no problems.
+
+The two walks follow different routes and differ in length (27.5 s against 39.9 s). This is not a paired comparison. It shows whether sizing from ARCore depth engages and how the map changes, not how large the effect is. ARCore depth is not ground truth, and nothing here measures accuracy.
+
+"Size" is the factor that multiplies the model's depth. "Highest point" is the largest distance above the map's dominant plane, the largest flat surface the plane fit finds. ARCore's world y axis points up, so a floor would have a normal close to y.
+
+| | 14 Oct (Task99) | 15 Oct (Task107) |
+|---|---|---|
+| Frames received / updates | 1,194 / 63 | 822 / 47 |
+| Updates per second | 1.58 | 1.70 |
+| Longest gap between updates | 0.856 s | 0.741 s |
+| Gaps over 1 s | 0 | 0 |
+| Median update / latency | 619.4 / 672.5 ms | 565.6 / 632.7 ms |
+| Size from ARCore depth | 0 | 32 |
+| Size from tracked points | 33 | 12 |
+| Size carried from previous update | 30 | 2 |
+| No size (update skipped) | 0 | 1 (update 1, before any source) |
+| Size min / median / max | 0.267 / 0.621 / 5.845 | 0.340 / 0.776 / 1.276 |
+| Dominant plane normal | [-0.98, 0.12, -0.16] | [0.40, 0.07, 0.91] |
+| Angle between normal and world y | 82.9° | 86.2° |
+| Highest point above that plane | 5.98 m | 3.55 m |
+| Observed area / plane area | 25.26 / 5.32 m² | 15.84 / 5.37 m² |
+| Length × width | 6.70 × 6.30 m | 6.35 × 3.75 m |
+| Surface points | 845,428 | 578,774 |
+| Anchor corrections | 83 | 47 |
+| Fragments | 4 | 3 |
+
+ARCore depth now sets the size for 32 of 47 updates (68%). Tracked points cover 12 more. The previous size was reused twice, at updates 35-36. The size stays between 0.34 and 1.28, against a 22-fold spread (0.267 to 5.845) on 14 October. ARCore-depth sizes have median 0.712; tracked-point sizes have median 0.900 on this walk.
+
+The dominant plane is still close to vertical: its normal is 86° from up, so it is a wall, not the floor. Length, width and highest point are therefore measured on and from a wall, not the floor. The 3.55 m highest point is lower than 5.98 m, but it does not show that the height problem is fixed. Whether the floor goes missing because of the plane fit or because the images reached the depth model sideways (the phone was in portrait) is untested. Task109 covers the sideways images.
+
+Local outputs are `outputs/capture_task107_093913/{live/{updates.jsonl,summary.json,surface.ply},euroc/,viewer/redmi-walk-15oct.html,replay.log}`. The viewer holds 47,885 splats in 1.22 MB and embeds household photos, so it stays local.
+
+## Sideways against upright input to the depth model, Task109
+
+The Redmi camera sensor is mounted at 90 degrees (`sensor_orientation_deg: 90`). With the phone held in portrait, every recorded image is on its side, and the live processor passes it to Depth Anything unrotated. `python -B -m src.live.orientation_control --session <v2 session> --out <folder>` runs the cached model twice on the same frames. One pass uses the image as recorded ("sideways"); the other turns it 90 degrees clockwise ("upright") and turns the predicted depth back. Both are scored on the recorded grid after one fitted size per frame (Task72's median rule). Scores are AbsRel (mean absolute relative error) and the share of pixels within 25% (delta < 1.25).
+
+Run on `20261015_093913_walk`: 144 frames pass the sizing rule, and all 144 are portrait by the ARCore pose (the image's long axis within 45 degrees of vertical). 20 are evenly spaced among them (owner-approved settings, 7 November 2026). A saved thumbnail pair was checked by eye: the turned image is the right way up.
+
+| Reference | Input | Median AbsRel | Median share within 25% | Fitted size min / median / max |
+|---|---|---|---|---|
+| ARCore raw depth | sideways | 0.080 | 93.8% | 0.41 / 0.66 / 0.92 |
+| ARCore raw depth | upright | 0.058 | 98.3% | 0.43 / 0.60 / 0.73 |
+| ARCore tracked points | sideways | 0.106 | 88.1% | 0.60 / 0.81 / 1.15 |
+| ARCore tracked points | upright | 0.090 | 92.4% | 0.55 / 0.63 / 0.76 |
+
+Upright input lowers median AbsRel by 27% against ARCore depth (better in 17 of 20 frames) and by 15% against tracked points (19 of 20). Both clear the 10% bar set for "clearly better". The fitted size also varies less from frame to frame: max/min falls from 2.2 to 1.7 against ARCore depth. Limits: ARCore depth and tracked points are references, not ground truth; this is 20 frames from one walk. Task112 owns turning portrait frames upright in the live processor. That change also has to turn the image intrinsics, or keep the turn inside the depth call as this check does.
+
+Local outputs: `outputs/task109_orientation_093913/{frames.json,results.json,000042_recorded.jpg,000042_upright.jpg}`. Tests: `src/live/tests/test_orientation_control.py`.
+
+## Offline room cloud from the ARCore-depth frames, Task113
+
+`python -B -m src.live.room_build --session <v2 session> --out <folder> [--far 4.0]` builds one room cloud from the frames that carry ARCore raw depth. Each image is turned upright for the depth model (Task109). The predicted depth is then fitted to ARCore's confident raw depth with an 8 × 6 grid of sizes rather than one size per frame, and fused with the live fragments, so anchor corrections still apply. It is offline: it uses every depth frame, not the about 1.7 per second the live loop reaches.
+
+The grid was chosen on held-out pixels. Each of the 144 eligible frames of `20261015_093913_walk` had its ARCore pixels split at random into halves: fit on one half, score on the other. Median AbsRel was 0.065 for one size, 0.058 for size plus offset, 0.049 for a size that tilts across the image, 0.050 for a 4 × 3 grid and 0.044 for an 8 × 6 grid.
+
+Surfaces are compared with ARCore depth alone, fused along the same path. Its floor lies at y = -0.76 m (ARCore's y axis points up) with only a few centimetres of spread. That makes it a yardstick for the floor, not ground truth. It reaches neither the ceiling nor the far walls, so points above its top are not counted as errors here.
+
+| Surface (15 Oct walk) | Frames | Points over 10 cm below the floor | Points within 5 cm of the floor | Dominant plane |
+|---|---|---|---|---|
+| ARCore depth only | 147 maps | 0.0% | 11.6% | n/a |
+| Task107 live replay (sideways, 47 updates) | 47 | 7.7% | 4.0% | wall |
+| All posed frames, sideways, one size | 751 | 25.0% | 3.5% | wall |
+| All posed frames, upright, one size | 751 | 15.5% | 5.2% | wall |
+| ARCore-depth frames, upright, one size | 144 | 5.1% | 5.1% | wall |
+| Task113: ARCore-depth frames, upright, grid, 4.0 m | 144 | 5.2% | 4.8% | wall |
+| Task113: same, 2.5 m | 144 | 5.4% | 4.8% | floor, 20° from up |
+
+Turning images upright and fusing only frames with ARCore depth explain most of the change, from 25.0% to 5.1% of points below the floor. Most posed frames carry no depth map (559 of 751), and those are sized from tracked points. The grid fit lowers per-pixel error but leaves the floor figures unchanged. Capping fused depth at 2.5 m drops distant, smeared points, and the floor becomes the dominant plane. Its map then reads 14.7 m² observed, 5.0 × 4.35 m, and 2.85 m from the floor to the highest point. The floor is still a band about 30 cm thick against ARCore's few centimetres, and some walls appear twice. The "one size" rows other than Task107 come from throwaway trial runs of the unchanged `LiveProcessor` (objects off), not from `room_build.py`. Their surfaces are in `outputs/room_allframes_093913/`.
+
+Local outputs: `outputs/capture_task113_093913/{far4.0,far2.5}/{surface.ply,summary.json}` and viewers `outputs/capture_task113_093913/viewer/redmi-room-15oct-{far2.5,far4.0}.html` (42,503 and 53,355 splats). The viewer's photos are still shown as the sensor recorded them, on their side.
+
+## Upright export and frame-by-frame view, Task114
+
+Orientation is now decided per frame, not assumed. `orientation_control.quarter_turns` picks the clockwise quarter turns (0-3) that bring the image's down axis closest to world down in ARCore's gravity-aligned world. `turned_camera` turns the pose, intrinsics and image size to match, and a test checks that the turned camera sees each world point at the pixel where the turned image puts it. On the 15 October walk all 144 fused frames needed one clockwise turn, so the Task113 2.5 m surface is unchanged (555,231 points).
+
+`room_build` also writes `frames.npz`: each fused frame's camera and intrinsics, about 2,000 learned-depth points per frame (every 12th pixel) with photo colours, and every second ARCore depth point. These points use the frame's pose when it was fused, before later anchor corrections, so they show where that frame put them.
+
+`tools.demos.capture_scene` now shows bookmark photos upright and looks from the matching upright camera. With `--frames <frames.npz>` it adds a "Frame by frame" mode: a slider and play button over the fused frames. It shows the points built so far in photo colours, the current frame's learned points in orange and ARCore points in cyan, and the camera outline and path in red, beside the upright photo. "View from camera" looks through each frame's camera.
+
+```text
+.venv-yolo\Scripts\python -B -m src.live.room_build --session <v2 session> --out <folder> --far 2.5
+.venv-yolo\Scripts\python -B -m tools.demos.capture_scene --surface <folder>\surface.ply --session <v2 session> --frames <folder>\frames.npz --out <viewer.html>
+```
+
+The 15 October viewer is `outputs/capture_task114_093913/viewer/redmi-room-15oct-frames.html` (8.33 MB, local only because it embeds household photos). Headless Chromium loaded it with no console errors or network requests; the bookmark and timeline screenshots show upright photos.
+
+### Seeing inside the room (Task 115)
+
+`room_build` now saves the fused volume's photo colours in `surface.ply`, and the viewer shows photo colours by default (a button switches back to height colours). Each splat's normal is turned toward the nearest recorded camera, so its front is the side the phone saw. "Hide surfaces seen from behind" drops splats whose front faces away from the viewer: from outside, the near walls and the ceiling disappear. Ceiling and floor sliders hide everything above or below a height.
+
+The 15 October room at 4.0 m far depth, shown in 3 cm cells: `outputs/capture_task115_093913/viewer/redmi-room-15oct-cutaway.html` (211,242 splats, 12.62 MB, local only). The floor is at about -0.9 m and the ceiling at about 1.6 m in ARCore height, so a ceiling slider value of 1.3 m opens the room from above. From the phone bookmarks, the stairs, TV, rug, table, sofa and window match the photos; anything within about 0.5 m of the camera smears, and walls are still wavy or doubled in places.
 
 `python -m src.live.score --run <run> --icl data/icl_nuim` scores an ICL run's surface against the published model, as `experiments/sfm/run_dense.py` does.
 

@@ -27,6 +27,26 @@ The project uses Open3D's `ScalableTSDFVolume` (`experiments/sfm/src/dense.py`),
 
 MVS is the textbook step after SfM. COLMAP's version needs a CUDA GPU, and the project runs CPU-only unless the owner grants GPU use, so it has not been run yet. The project has tested the third route in detail.
 
+### Multi-view stereo on a phone has been done
+
+Mobile3DRecon (2020) ran MVS live on a 2018 mid-range Android phone, using the phone's tracker for poses. For each new keyframe it:
+
+1. Picks two earlier keyframes taken about 0.6 m away, looking roughly the same way.
+2. Tries many depths per pixel and compares small patches by their *Census* code, a record of which neighbours are brighter than the centre.
+3. Smooths the result with *semi-global matching (SGM)*: passes along 8 image directions that penalise depth jumps except at image edges.
+4. Drops pixels it is unsure of, removes leftover noise with a small network, and fuses the depth into a mesh that grows as the user walks.
+
+It took 70 ms for depth and 31 ms for the mesh per keyframe, each on one CPU core, with about 5 keyframes a second. Against the phone's own time-of-flight depth sensor, its depth was 5.7-10.4 cm RMSE. The 0.6 m gap matters: triangulation error grows with distance squared divided by the gap, so a wide gap keeps far depth accurate. That is the project's missing piece beyond the 2.5 m ARCore depth reaches.
+
+**The routes in the table above can be combined, and published systems do.** Triangulation needs texture and camera movement; learned depth needs neither but gets the size and some shape wrong. So systems triangulate where they can and let learned depth fill blank surfaces. There are two ways to do it:
+
+- Use triangulated points as sizing targets for learned depth. The project does this already with ARCore depth and tracked points.
+- Fuse triangulated depth directly where it is confident, and use learned depth only where triangulation has no answer. Mobile3DRecon and CNN-SLAM work this way.
+
+The project's next test is the first way with many more points: features triangulated between frames 0.3-1 m apart along ARCore's path, so that far surfaces get sizing targets too. The source list and the order to try: [research/dense_surface_fusion/triangulation_and_learned_depth.md](../research/dense_surface_fusion/triangulation_and_learned_depth.md).
+
+Two older systems in the same line were also read. Newcombe and Davison (2010) fitted a rough surface to a tracker's points, drew it from nearby viewpoints, and corrected each pixel's depth along its camera ray with optical flow. Prisacariu et al. (2015) built one object at a time on an iPhone from its outline alone; that gives the outer shape but no hollows. Notes on all three: [research/dense_surface_fusion](../research/dense_surface_fusion/README.md#live-reconstruction-from-one-camera-three-earlier-systems).
+
 ### Sizing learned depth to tracked points
 
 For each frame:
@@ -45,6 +65,71 @@ A live tracker such as ARCore sometimes corrects where it thinks the camera has 
 The fix is to fuse into short pieces of surface, *fragments*, each stored in its own local frame (Choi, Zhou and Koltun, 2015, used 50-frame fragments). Each fragment is placed in the world by a pose that can change later. On the phone that pose comes from an ARCore *anchor*: a fixed point that ARCore keeps consistent with its own corrections. The project's live processor (`src/live`, Task89) starts one anchor per second and gives each group of 10 anchors one fragment. When ARCore moves an anchor, its fragment moves with it, at the cost of one matrix multiply. Counted objects are kept relative to an anchor in the same way.
 
 The price: frames inside one fragment all follow the fragment's first anchor, so a correction that bends the path within 10 s moves the whole fragment rigidly. Where neighbouring fragments overlap, there are two layers of surface until both are placed correctly. Sources: [research/camera_tracking_and_slam/fragments_and_anchors.md](../research/camera_tracking_and_slam/fragments_and_anchors.md).
+
+## When one object appears twice
+
+A fused room can show the same object in two places. Two different frames each put it somewhere, and the volume keeps both. In the 15 October room the sofa's red cushion appeared twice, 0.68 m apart along the camera's line of sight. Both copies came from frames taken at the same spot (Task116).
+
+The cause was depth timing. ARCore's raw depth arrives at about 10 a second, and each depth map carries the time it was measured. For 9 of the walk's 147 depth maps, that time was 4.4 s before the photo they were paired with. Depth measured 4.4 s earlier, from somewhere else, sized the learned depth too small, so those frames put the cushion 0.7 m too near. ARCore's tracked feature points, which do not use depth maps, agree with the copy from fresh depth to about 0.2 m. The room build now skips depth more than 0.1 s older than its photo.
+
+Two lessons follow:
+
+- **Check the data before cleaning the surface.** A clean-up step that deletes one of two copies has to know which copy is right. Here a timestamp told us; a point-count vote between 9 stale and 10 fresh frames would have been close to a coin toss.
+- **Agreement can be built in.** Learned depth sized to ARCore depth will agree with ARCore depth even when both are wrong. An independent check, here ARCore's tracked points, is needed.
+
+With the stale depth gone, the doors still echoed: the hallway door showed as four parallel layers about 0.5 m apart (Task117). The cause is sizing where ARCore has no depth. The room build sizes learned depth in an 8 × 6 grid of cells. A cell with fewer than 20 ARCore depth pixels takes the whole frame's median size. ARCore's confident depth rarely goes past 2.5 m: 95% of it is nearer than that. A door 4.5 m away is therefore always sized from nearer objects, and each frame's near objects differ. Against ARCore's tracked points, depth beyond 3 m came out about 15% too near, and spread by about ±0.45 m at 3.5 m. Fusing only cells with their own ARCore size removed the echoes, but also took away the stairs, the TV wall and the ceiling.
+
+Other systems avoid guessed sizes in one of three ways:
+- **Measure far depth directly**, with LiDAR or a laser scanner.
+- **Triangulate it from several views.** ARCore's own depth works this way, comparing the live frame with an earlier one taken from elsewhere.
+- **Let near readings outvote far ones when merging.** Voxblox, a robot mapping library, weights each reading by one over its distance squared.
+
+The last looks cheapest, but a trial on the same walk (Task120) showed it does not remove echoes by itself. The volume averages only readings that land within a few centimetres of each other, and the echo copies are 0.5 m apart, so each copy stays. Weighted this way, 50% more of the space ARCore saw through held surface. What worked was a vote: each surface point is checked in every frame, and a frame that sees straight through it votes to delete it, with near frames' votes counting more. That cut such points by 53-80%. Sizing far depth from ARCore's tracked points, which ARCore triangulated, moved far depth from 16% too near to 5% too near. But one size for every unmeasured part of the image also pushed the near floor down, so sizing needs to vary with distance. Indoors beyond 2.5 m and outdoors at 10-30 m, triangulation is the route that needs no new sensor. See [research/surface_denoising](../research/surface_denoising/README.md#getting-far-depth-right-what-other-systems-do).
+
+Sources and the list of fixes: [research/dense_surface_fusion](../research/dense_surface_fusion/README.md).
+
+## Cleaning up a fused surface
+
+Averaging in the volume removes random scatter, but some errors survive it. Three kinds matter here:
+
+- **Flying pixels.** Where a near object sits in front of a far wall, learned depth models such as Depth Anything give the edge pixels a depth between the two, because an average is the safest guess when training penalises distance from the answer. Back in 3D, those pixels form a sheet hanging from the object's edge toward the wall. The closer the object and the farther the wall, the longer the sheet. Indoor rooms, with furniture in front of walls everywhere, are full of such edges.
+- **Side-on surfaces.** A surface seen almost edge-on, at a *grazing angle*, gets poor depth from every kind of sensor. The floor far ahead is always side-on: from a phone 0.9 m above it, the floor 5 m away is seen 80° from square-on.
+
+The owner's target scenes are indoor, with surfaces up to about 10 m away. The pipeline fuses depth only out to 4.0 m, and ARCore depth, which sizes the learned depth, rarely reaches past 2.5 m. Beyond that, the main known error is the size of each frame's depth, as with the door echoes above, and clean-up cannot fix it.
+- **Floaters.** Patches in empty space, from a frame that got something wrong once.
+
+The offline room build now cleans its surface (below); the live processor does not yet. Methods exist for each point in the pipeline:
+
+1. **Before fusion, per frame:** drop pixels on large depth jumps and pixels seen side-on. Cheap: one pass over each depth image.
+2. **During fusion:** keep a pixel only if recent frames, projected into it, agree on its depth (a *consistency check*). Delete surface that a later frame looks straight through (*free-space carving*). Weight near, square-on views above far, side-on ones.
+3. **After fusion:** keep only voxels seen by several frames, delete isolated points and small islands, and pull points near a fitted floor or wall onto it.
+
+Two later trials on the same walk (Tasks122 and 124) asked whether any filter removes the echoes, the extra copies of the hallway door and staircase. None does. The reason is that a filter can only remove what frames disagree about. Frames taken from one standing spot share one guess at the size of far depth, so they agree with each other even when they are wrong. Counting frames (keep surface seen by 5 frames) therefore removes echoes only by also deleting much real surface: 39% of all points. Counting standing spots works better. Multi-view stereo programs such as COLMAP only count a second view as support if it sees the point from at least 3° away. Applied here, that rule deleted 17% of the surface, mostly outer copies of walls, without losing any surface that ARCore depth measured, and it kept the staircase. But the door copies survived, because views from several spots agreed on the wrong depth. Echoes need far depth that is consistent when it is fused, not cleaning afterwards.
+
+"Small islands" are found by chain linking: two points belong to one piece if a chain of neighbours, each a few centimetres from the next, joins them. Each piece is then kept or dropped as a whole, by its size or by what it is made of, such as how many of its points a later frame saw through. This is the 3D form of removing small blobs from a 2D mask. It is standard for point clouds and meshes; no splat paper found uses it as its main floater filter. It has two weak spots. A large echo passes a size test. A thin chain of stray points can join a floater to a real wall, and then the floater counts as part of the wall.
+
+**The clean-up the project uses (owner, 8 November 2026).** After tuning every stage by eye, the owner kept two: the vote that deletes surface frames see through, then keep only the largest pieces (up to 50, each with at least 5,000 points). A walk filmed as one continuous video joins the whole room into one or a few large pieces, so anything smaller is a floater. The room build joins pieces from touching grid cells rather than chains of points, the 3D form of finding contours in a 2D mask. Wider cells, like wider splats, bridge wider gaps. On the 15 October walk this removed 18% of the points and kept the room as one piece. The vote took 2.4 s and the pieces 0.15 s on a desktop CPU.
+
+Every clean-up also deletes some real surface, so it is scored like any surface: accuracy and coverage together (next section). A clean-up cannot fix a sizing error such as the cushion's second copy: it has no way to know which copy is right.
+
+The first trial (Task120, 15 October walk) gave a clear answer for this house. Edge and side-on pixels are only 2-9% of the fused depth. Dropping them, or weighting near readings above far ones, left *more* surface in space ARCore had seen through. The vote that deletes surface a frame sees straight through, with near frames counting more, cut that surface by 53-80% for 0.5 points of ARCore coverage. It also takes less than 20 ms per frame on the CPU.
+
+Sources, the CPU cost of each method, the trial and the next steps: [research/surface_denoising](../research/surface_denoising/README.md).
+
+## Photo-realistic scenes: training splats from photos
+
+A fused surface is built for measuring. A *splat scene* is built to look like the photos. Many thousands of Gaussian splats (soft coloured blobs) are adjusted until renders from the recorded camera poses match the images. The result looks real from any angle. Its shape can still be wrong where the photos agree with a wrong shape, such as a blank wall, so sensor depth is added to the training to hold the shape.
+
+Lumina, a commercial product checked on 8 November 2026, shows the usual chain:
+
+1. A LiDAR iPhone records images, depth and camera poses, and colours the camera view by coverage.
+2. The phone refines poses and merges scans.
+3. It exports a *COLMAP dataset*: images plus text files of lens numbers, poses and sparse points.
+4. A PC with an NVIDIA graphics card trains the splats, then measures and draws floor plans.
+
+Every step has open-source parts. Brush (Apache-2.0) trains without NVIDIA's CUDA and builds for Android. DN-Splatter adds a phone-depth loss that is weaker at colour edges, where phone depth is noisy. PocketGS (a paper, no code) trains on an iPhone 15 in about 4 minutes. Training is offline and needs a graphics card, so it does not replace this project's live CPU surface. It could sit beside it as a viewing layer. The cheapest first step is writing the recorded ARCore poses into a COLMAP dataset, which every trainer reads. Full comparison: [research/gaussian_splatting](../research/gaussian_splatting/lumina_open_source_parts.md).
+
+SpAItial Echo-3, released 27 October 2026, skips per-scene training. It takes a few minutes of iPhone video, with no LiDAR needed, and returns a splat scene at real-world scale from the cloud. Its model also generates the parts of the room the camera missed. Nothing about the method or its accuracy is published, and its terms forbid reverse engineering. Open models do the first half in one pass: YoNoSplat and AnySplat (both MIT) predict a splat scene from a set of frames in seconds on a GPU, and YoNoSplat can take the phone's poses so the scene comes out in metres. Generated areas look complete but are invented, so a measured record has to mark them as not seen. On 8 November the owner deferred splat scenes for this project. What matters is how accurately objects found by YOLO are sized in 3D, and a nicer-looking scene does not change that. Details: [the Echo-3 note](../research/products/e2e_product_research/10_spaitial_echo3/README.md) and [feed-forward splat models](../research/feed_forward_3d/feed_forward_splats.md).
 
 ## Scoring a surface
 

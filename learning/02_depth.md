@@ -37,6 +37,8 @@ A model that claims to output metres is "metric" only if that claim is checked. 
 
 > **Project result: the most accurate model was too slow.** Marigold V2 (a diffusion model) gave the best shape, AbsRel 0.036, but took 16.6 s per frame on the GPU and crashed on desk. The owner ruled that anything slower than 1 frame per second is not worth using, so it was dropped.
 
+> **Project result: a sideways image costs the model accuracy.** Phone cameras record in the sensor's landscape orientation, so a phone held upright produces images on their side. On 20 frames of a Redmi walk, Depth Anything V2 Metric Small scored median AbsRel 0.080 against the phone's ARCore depth when fed sideways images, and 0.058 when each image was turned upright first and the depth turned back. That is 27% lower, better in 17 of 20 frames. Against ARCore's tracked points the figures were 0.106 and 0.090. ARCore depth is a reference, not ground truth. (Task109, `src/live/README.md`.)
+
 ### Why a drifting size is so damaging
 
 If each frame's depth is a different size, the same wall lands at a different distance from each camera. Combined, the wall appears several times along the viewing direction. Worse, a tracker that aligns depth images (chapter 3) reads a jump in size as the camera moving. On 30 xyz frames, at frame 16 the depth size jumped from 1.39 to 1.62 and the camera error jumped from 147 to 337 mm in the same frame (Task65).

@@ -1,0 +1,29 @@
+diff --git a/lingbot_map/layers/attention.py b/lingbot_map/layers/attention.py
+index fee688b..3fbf124 100644
+--- a/lingbot_map/layers/attention.py
++++ b/lingbot_map/layers/attention.py
+@@ -224,6 +224,7 @@ class CausalAttention(nn.Module):
+             # Check if we should skip appending to cache (non-keyframe in keyframe mode)
+             skip_append = kv_cache.get("_skip_append", False)
+ 
++            k = k.to(v.dtype)  # FYLD Task130: k leaves k_norm/RoPE in fp32 under CUDA autocast; cache it in bf16 like v
+             k_reshaped = k.view(B, self.num_heads, num_frame_per_block, N // num_frame_per_block, self.head_dim)
+             v_reshaped = v.view(B, self.num_heads, num_frame_per_block, N // num_frame_per_block, self.head_dim)
+ 
+@@ -274,15 +275,13 @@ class CausalAttention(nn.Module):
+             # Note: k from cache is already RoPE-applied, no need to apply again
+ 
+             if self.fused_attn:
+-                # Use mask-based SDPA to ensure same kernel as batch mode
+                 # The causal constraint is enforced by KV cache contents, not by mask
+-                mask = torch.ones(B, 1, q.shape[2], k.shape[2], dtype=torch.bool, device=q.device)
++                # FYLD Task130: the all-true mask was a no-op that forced the slow full-matrix kernel; pass none
+                 x = F.scaled_dot_product_attention(
+                     q,
+                     k,
+                     v,
+                     dropout_p=self.attn_drop.p if self.training else 0.0,
+-                    attn_mask=mask,
+                 )
+ 
+         if self.gate_proj is not None:

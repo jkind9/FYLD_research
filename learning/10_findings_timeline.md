@@ -33,6 +33,13 @@ The project's main findings in the order they were found, with the numbers behin
 
 - **14 October. Live SLAM on the CPU works.** ORB-SLAM3 and stella_vslam, run one frame at a time on the recorded clips: 12.8 and 17.1 mm on TUM xyz (offline SfM 11.9 mm), about 26-28 mm on desk, at 5-12 ms per frame. Their weak point is losing track on fast turns, which ARCore's motion sensors are meant to cover (Task84).
 
+## 14 October - 7 November: the real phone
+
+- **14-15 October. The phone captures a full walk.** Capture 1.2 recorded a 1,194-frame house walk with zero reported drops, and the PC replayed it at 1.58 updates per second (Task99). The owner judged the reconstructed geometry poor.
+- **7 November. That walk has no ARCore depth.** All 44 of its raw-depth maps are empty on the phone's side, so every scale in its reconstruction came from tracked points or was carried over (Task106).
+- **7 November. A usable second walk exists.** The 15 October walk (822 frames) has 147 depth maps, and 144 pass the sizing rule (Task106).
+- **7 November. The depth model saw sideways images.** The phone was in portrait for 90-99% of both walks, and the 90-degree sensor image was never rotated. The effect on depth is untested (Task109).
+
 ## What this adds up to
 
 1. **Get the camera path from a live SLAM system with joint refinement**, not from aligning depth maps. On the phone that is ARCore's tracking. SfM was the offline stand-in used to prove the design on recorded data.

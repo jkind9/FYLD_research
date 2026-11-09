@@ -41,6 +41,7 @@ const SPLAT_VS = `#version 300 es
 precision highp float; precision highp int;
 uniform highp sampler2D u_pos; uniform highp sampler2D u_cova; uniform highp sampler2D u_covb;
 uniform mat4 u_view, u_proj; uniform vec2 u_focal, u_viewport; uniform float u_scale;
+uniform vec3 u_up; uniform vec2 u_cut; uniform int u_oneway;
 in vec2 a_corner; in uint a_index;
 out vec4 v_color; out vec2 v_pos;
 void main() {
@@ -48,8 +49,11 @@ void main() {
   vec4 p = texelFetch(u_pos, uv, 0); vec4 ca = texelFetch(u_cova, uv, 0); vec4 cb = texelFetch(u_covb, uv, 0);
   vec4 cam = u_view * vec4(p.xyz, 1.0);
   vec4 pos2d = u_proj * cam;
-  float clip = 1.2 * pos2d.w;
-  if (cam.z < 0.02 || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip) {
+  float clip = 1.2 * pos2d.w, h = dot(p.xyz, u_up);
+  vec3 nrm = vec3(mod(cb.w, 256.0), mod(floor(cb.w / 256.0), 256.0), floor(cb.w / 65536.0)) / 127.5 - 1.0;
+  bool behind = u_oneway == 1 && dot(mat3(u_view) * nrm, cam.xyz) > 0.0;  // the viewer sees this surface's back
+  if (cam.z < 0.02 || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip
+      || h < u_cut.x || h > u_cut.y || behind) {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0); return;
   }
   float s2 = u_scale * u_scale;
@@ -85,10 +89,12 @@ void main() {
 const POINT_VS = `#version 300 es
 precision highp float;
 uniform mat4 u_view, u_proj; uniform float u_size, u_focal; uniform int u_world;
+uniform vec3 u_up; uniform vec2 u_cut;
 in vec3 a_pos; in vec3 a_color; out vec3 v_color;
 void main() {
   vec4 cam = u_view * vec4(a_pos, 1.0);
-  gl_Position = u_proj * cam;
+  float h = dot(a_pos, u_up);
+  gl_Position = h < u_cut.x || h > u_cut.y ? vec4(0.0, 0.0, 2.0, 1.0) : u_proj * cam;
   gl_PointSize = u_world == 1 ? clamp(u_size * u_focal / max(cam.z, 0.01), 1.0, 64.0) : u_size;
   v_color = a_color;
 }`;
@@ -149,6 +155,8 @@ class DemoViewer {
     this.layers = new Map();
     this.listeners = [];
     this.splatScale = 1.0;
+    this.cut = [-1e9, 1e9];  // shown height window along `up`, metres
+    this.oneWay = false;  // hide splats whose normal faces away from the viewer
     this.progs = {
       splat: compile(gl, SPLAT_VS, SPLAT_FS), point: compile(gl, POINT_VS, POINT_FS), line: compile(gl, LINE_VS, LINE_FS),
     };
@@ -188,7 +196,8 @@ class DemoViewer {
     this.redraw();
   }
 
-  /* Flat Gaussians: covariance = st^2 (I - n n^T) + sn^2 n n^T, built here from normals and sigmas. */
+  /* Flat Gaussians: covariance = st^2 (I - n n^T) + sn^2 n n^T, built here from normals and sigmas.
+   * The normal's sign marks the surface's front for oneWay; it is packed as three bytes in the spare channel. */
   addSplats(name, positions, normals, colors, alphas, tangentSigma, normalSigma, opts = {}) {
     const gl = this.gl, n = positions.length / 3, W = 2048, H = Math.ceil(n / W);
     const pos = new Float32Array(W * H * 4), ca = new Float32Array(W * H * 4), cb = new Float32Array(W * H * 4);
@@ -198,8 +207,10 @@ class DemoViewer {
       const st = tangentSigma[i] * tangentSigma[i], sn = normalSigma[i] * normalSigma[i], d = sn - st;
       pos.set([positions[3 * i], positions[3 * i + 1], positions[3 * i + 2], alphas[i] / 255], 4 * i);
       ca.set([st + d * nx * nx, d * nx * ny, d * nx * nz, st + d * ny * ny], 4 * i);
-      cb.set([d * ny * nz, st + d * nz * nz, colors[3 * i] + 256 * colors[3 * i + 1] + 65536 * colors[3 * i + 2], 0], 4 * i);
+      const front = Math.round((nx + 1) * 127.5) + 256 * Math.round((ny + 1) * 127.5) + 65536 * Math.round((nz + 1) * 127.5);
+      cb.set([d * ny * nz, st + d * nz * nz, colors[3 * i] + 256 * colors[3 * i + 1] + 65536 * colors[3 * i + 2], front], 4 * i);
     }
+    this.layers.get(name)?.tex?.forEach((t) => gl.deleteTexture(t));  // replacing a layer, e.g. new colours
     const layer = { kind: "splat", count: n, visible: opts.visible !== false, order: 0, positions,
       tex: [floatTexture(gl, pos, W, H), floatTexture(gl, ca, W, H), floatTexture(gl, cb, W, H)],
       index: new Uint32Array(n), depth: new Float32Array(n), counts: new Uint32Array(65536 + 1) };
@@ -353,6 +364,9 @@ class DemoViewer {
     gl.uniform2f(P.loc("u_focal"), m.fx, m.fy);
     gl.uniform2f(P.loc("u_viewport"), w, h);
     gl.uniform1f(P.loc("u_scale"), this.splatScale);
+    gl.uniform3fv(P.loc("u_up"), this.up);
+    gl.uniform2fv(P.loc("u_cut"), this.cut);
+    gl.uniform1i(P.loc("u_oneway"), this.oneWay ? 1 : 0);
     ["u_pos", "u_cova", "u_covb"].forEach((name, i) => {
       gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, l.tex[i]); gl.uniform1i(P.loc(name), i);
     });
@@ -372,6 +386,8 @@ class DemoViewer {
       gl.uniform1f(P.loc("u_size"), l.size * (l.world ? 1 : this._dpr));
       gl.uniform1f(P.loc("u_focal"), m.fy);
       gl.uniform1i(P.loc("u_world"), l.world);
+      gl.uniform3fv(P.loc("u_up"), this.up);
+      gl.uniform2fv(P.loc("u_cut"), this.cut);
     }
     gl.bindVertexArray(l.vao);
     gl.drawArrays(l.kind === "point" ? gl.POINTS : gl.LINES, 0, l.count);

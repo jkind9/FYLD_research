@@ -2,6 +2,7 @@
 
 import base64
 import importlib
+import io
 import json
 import re
 import subprocess
@@ -62,6 +63,92 @@ def test_bookmarks_use_arcore_camera_axes_and_normals_are_valid(capture):
     normals = np.frombuffer(base64.b64decode(scene["splat"]["normals"]["b64"]), dtype=np.int8).reshape(-1, 3)
     assert np.all(np.linalg.norm(normals, axis=1) > 120)
     assert scene["compare"][0]["fy"] == 400
+
+
+@pytest.mark.parametrize(("camera_z", "facing"), [(0.0, 1), (-2.0, -1)])
+def test_splats_take_photo_colours_and_face_the_nearest_camera(capture, camera_z, facing):
+    surface, session = capture
+    head, body = surface.read_text().split("end_header\n")
+    head = head.replace("property float z\n", "property float z\nproperty uchar red\nproperty uchar green\nproperty uchar blue\n")
+    surface.write_text(head + "end_header\n" + "\n".join(line + " 200 40 10" for line in body.splitlines()))
+    rows = [json.loads(line) for line in (session / "frames.jsonl").read_text().splitlines()]
+    for row in rows[1:]:
+        row["arcore"]["pose"][2] = camera_z  # the wall is at z = -1
+    (session / "frames.jsonl").write_text("\n".join(json.dumps(row) for row in rows))
+    exporter = importlib.import_module("tools.demos.capture_scene")
+    scene = exporter.load_scene(surface, session, 0.06)
+    colours = np.frombuffer(base64.b64decode(scene["splat"]["colours"]["b64"]), dtype=np.uint8).reshape(-1, 3)
+    assert (colours == [200, 40, 10]).all()
+    assert len(base64.b64decode(scene["splat"]["heightColours"]["b64"])) == colours.size
+    normals = np.frombuffer(base64.b64decode(scene["splat"]["normals"]["b64"]), dtype=np.int8).reshape(-1, 3)
+    assert (np.sign(normals[:, 2]) == facing).all()
+    page = exporter.scene_page(scene)
+    assert 'id="one-way"' in page and 'id="ceiling"' in page and 'id="floor"' in page
+    assert 'id="measure"' in page and 'id="measure-value"' in page
+
+
+def test_cells_missing_from_the_cleaned_surface_are_flagged_removed(capture, tmp_path):
+    surface, session = capture
+    head, body = surface.read_text().split("end_header\n")
+    kept = tmp_path / "kept.ply"  # the clean-up kept the six points with x < 0.4
+    kept.write_text(head.replace("element vertex 9", "element vertex 6") + "end_header\n"
+                    + "\n".join(body.splitlines()[:6]))
+    exporter = importlib.import_module("tools.demos.capture_scene")
+    scene = exporter.load_scene(surface, session, 0.06, kept=kept)
+    removed = np.frombuffer(base64.b64decode(scene["splat"]["removed"]["b64"]), dtype=np.uint8)
+    lo, hi = np.array(scene["splat"]["positions"]["min"]), np.array(scene["splat"]["positions"]["max"])
+    x = lo[0] + np.frombuffer(base64.b64decode(scene["splat"]["positions"]["b64"]), dtype=np.uint16).reshape(-1, 3)[:, 0] \
+        / 65535 * (hi[0] - lo[0])
+    assert (removed == (x > 0.3)).all() and removed.sum() == 3
+    assert scene["source"]["removed_points"] == 3
+    page = exporter.scene_page(scene, report="<h2>Trial</h2>")
+    assert 'id="show-removed"' in page and 'id="hide-removed"' in page and "<h2>Trial</h2>" in page
+    assert 'id="show-removed"' not in exporter.scene_page(exporter.load_scene(surface, session, 0.06))
+
+
+PORTRAIT = [0, 0, 0, 0, 0, -0.7071068, 0.7071068]  # ARCore pose turned -90 degrees about z: image right points down
+
+
+def portrait(session):
+    rows = [json.loads(line) for line in (session / "frames.jsonl").read_text().splitlines()]
+    for row in rows[1:]:
+        row["arcore"]["pose"] = PORTRAIT
+    (session / "frames.jsonl").write_text("\n".join(json.dumps(row) for row in rows))
+
+
+def photo_size(url):
+    return Image.open(io.BytesIO(base64.b64decode(url.split(",", 1)[1]))).size
+
+
+def test_portrait_bookmarks_show_upright_photos_from_upright_cameras(capture):
+    surface, session = capture
+    portrait(session)
+    bookmark = importlib.import_module("tools.demos.capture_scene").load_scene(surface, session, 0.06)["compare"][0]
+    width, height = photo_size(bookmark["photo"])
+    assert height > width
+    assert (bookmark["width"], bookmark["height"]) == (480, 640)
+    np.testing.assert_allclose(np.array(bookmark["pose"])[:3, 1], [0, -1, 0], atol=1e-6)  # image down is world down
+
+
+def test_room_build_frames_become_a_frame_by_frame_timeline(capture, tmp_path):
+    surface, session = capture
+    portrait(session)
+    frames = tmp_path / "frames.npz"
+    pose = np.eye(4)
+    pose[:3, :2] = [[0, -1], [-1, 0], [0, 0]]
+    pose[:3, 2] = [0, 0, -1]
+    np.savez(frames, seq=np.array([1, 2]), poses=np.stack([pose, pose]), intrinsics=np.array([[400, 400, 320, 240]] * 2),
+             sizes=np.array([[640, 480]] * 2), points=np.random.default_rng(0).random((5, 3)),
+             colours=np.full((5, 3), 200, np.uint8), point_offsets=np.array([0, 2, 5]),
+             arcore=np.random.default_rng(1).random((3, 3)), arcore_offsets=np.array([0, 1, 3]))
+    exporter = importlib.import_module("tools.demos.capture_scene")
+    data = exporter.load_scene(surface, session, 0.06, frames)
+    timeline = data["timeline"]
+    assert timeline["seq"] == [1, 2] and timeline["pointOffsets"] == [0, 2, 5] and timeline["arcoreOffsets"] == [0, 1, 3]
+    assert timeline["points"]["count"] == 5 and timeline["arcore"]["count"] == 3
+    assert all(photo_size(p)[1] > photo_size(p)[0] for p in timeline["photos"])
+    np.testing.assert_allclose(np.array(timeline["poses"][0])[:3, 1], [0, -1, 0], atol=1e-6)
+    assert 'data-mode="timeline"' in exporter.scene_page(data)
 
 
 @pytest.mark.parametrize("voxel", [0, -0.1, float("nan")])

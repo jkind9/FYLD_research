@@ -37,6 +37,15 @@ A phone's IMU (gyroscope and accelerometer) measures rotation and acceleration h
 
 This is *visual-inertial odometry* (VIO). ARCore on Android works this way, live, on the phone.
 
+The SLAM Handbook (a pre-publication textbook, read 7 November 2026) adds four practical points:
+
+- **How good is good.** A good VIO system drifts less than 1% of the distance walked, sometimes as little as 0.1%. On a 50 m walk, 1% is 0.5 m.
+- **Some motions hide scale.** With one camera and an IMU, constant acceleration hides the overall scale. Turning on the spot, or walking straight at something, hides the distance to what is in view. Vary the motion while filming.
+- **Calibration is a burden.** Calibrating the camera against the IMU with a printed target is the most accurate method, but too much to ask of field workers. Calibration estimated during use is easier and less accurate.
+- **Clock alignment after the fact is the weaker method.** Systems that cannot sync sensors in hardware can estimate the time offset while they run.
+
+Sources and page references: [research/camera_tracking_and_slam/slam_handbook.md](../research/camera_tracking_and_slam/slam_handbook.md).
+
 ## SLAM against structure from motion
 
 They solve the same problem. SLAM is usually live and processes frames in order; structure from motion (chapter 4) is usually offline and can use every frame at once. Offline gives the most accurate path; live gives a path while the person is still on site. The owner ruled on 14 October 2026 that the deployed system must be live (or update at least once per second), so SLAM, in practice ARCore on the phone, is the deployable choice; SfM is used only as an accurate reference on recorded data. Neither builds dense surfaces or recognises objects: those are later stages that use the poses. [How the methods fit together](methods_inputs_and_outputs.md) draws the boundary and lists every method's inputs and outputs.
@@ -68,6 +77,11 @@ What this means here:
 - **On the phone, the tracker is ARCore.** Research systems can run on phones (ORB-SLAM2 ports report about 30 fps on recent Snapdragon chips), but their visual-inertial versions need the camera and IMU clocks synchronised, which Android makes hard. ARCore does that inside the platform and gives metres and gravity. Its accuracy on our phone is not yet measured (Task75), and published evidence is thin.
 - **On recorded data, a live CPU SLAM system replaces the offline SfM stand-in.** ORB-SLAM3 (GPLv3, allowed as a reference) and stella_vslam (BSD-2) both process frames in order on a CPU.
 - **Learned and foundation-model SLAM are the most accurate but need a GPU**, which is not allowed for now.
+- **Streaming models skip the tracking stage.** LingBot-Map (Apache-2.0) gives a pose and depth per frame from plain video at 12 fps on an RTX 4090. SLAM3R (non-commercial licence) gives dense points at 20+ fps on an RTX 4090D without solving poses at all. Neither gives metres or closes loops, so ARCore would still supply the size. GS-ICP SLAM (MIT) tracks RGB-D frames while growing a Gaussian splat map, up to 107 fps on an RTX 4090. All three are built for a GPU.
+
+> **Project result: one streaming model on the CPU.** LingBot-Map ran on the 15 October Redmi walk on the CPU, with a quarter of its default memory window to fit in RAM, at 0.09 frames per second. One size fitted to ARCore's path held for the whole walk (the size from depth agreed within 3%). Its camera path stayed within 0.118 m RMSE of ARCore's over 6.7 m. Its depth was right in the median from 1 to 4 m, but about twice as scattered as the room build's and 40% too near beyond 4 m. Sized frame by frame to ARCore depth instead, as the room build does, its depth had 38% lower error than Depth Anything V2 on the same frames, so its depth may be worth more as a part than the whole system. (Task128, `experiments/lingbot_map/README.md`, `research/feed_forward_3d/lingbot_map_how_it_works.md`.)
+
+Notes: [LingBot-Map](../research/feed_forward_3d/lingbot_map.md), [SLAM3R](../research/feed_forward_3d/slam3r.md), [splat SLAM](../research/gaussian_splatting/lumina_open_source_parts.md#7-building-splats-live-gaussian-splat-slam).
 
 > **Project result: live SLAM on a CPU is fast and close to the offline path.** Run frame by frame on the recorded clips, ORB-SLAM3 tracks TUM xyz with 12.8 mm error and stella_vslam (BSD-2 licence) with 17.1 mm, against 11.9 mm for offline structure from motion; both take 5-12 ms per frame on a desktop CPU. On the faster desk recording both are about 26-28 mm, but stella_vslam loses 9-12% of frames and ORB-SLAM3 at half frame rate sometimes loses track and starts a second map. (Task84, `experiments/live_slam/README.md`.)
 

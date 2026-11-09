@@ -4,6 +4,7 @@
   const host = document.getElementById("viewer");
   let V;
   try { V = new DemoViewer(host.querySelector("canvas"), { up: D.up }); } catch (e) { showError(host, e); return; }
+  window.sceneViewer = V;  // page_timeline.js adds its layers to the same viewer
 
   const pos = DemoData.positions(S.positions);
   const n = pos.length / 3;
@@ -12,8 +13,88 @@
   const colours = DemoData.array(S.colours), alpha = DemoData.array(S.alpha);
   const st = new Float32Array(n).fill(S.tangentSigma), sn = new Float32Array(n).fill(S.normalSigma);
 
-  V.addSplats("splats", pos, normals, colours, alpha, st, sn);
-  V.addPoints("points", pos, colours, { size: D.voxel * 0.8, worldSize: true, visible: false });
+  let mode = "splats", base = colours, showRemoved = false, hideRemoved = false;
+  // Cells a clean-up removed (capture_scene --kept): optionally painted red, or hidden.
+  const removed = S.removed && DemoData.array(S.removed);
+  const hidden = removed && alpha.map((a, i) => (removed[i] ? 0 : a));
+  const paint = (c) => {
+    if (c) base = c;
+    const shown = showRemoved ? base.map((v, i) => (removed[Math.floor(i / 3)] ? [230, 40, 40][i % 3] : v)) : base;
+    V.addSplats("splats", pos, normals, shown, hideRemoved ? hidden : alpha, st, sn, { visible: mode === "splats" });
+    let p = pos, c3 = shown;
+    if (hideRemoved) {
+      const keep = [];
+      for (let i = 0; i < n; i++) if (!removed[i]) keep.push(i);
+      p = new Float32Array(keep.length * 3); c3 = new Uint8Array(keep.length * 3);
+      keep.forEach((k, j) => { p.set(pos.subarray(3 * k, 3 * k + 3), 3 * j); c3.set(shown.subarray(3 * k, 3 * k + 3), 3 * j); });
+    }
+    V.addPoints("points", p, c3, { size: D.voxel * 0.8, worldSize: true, visible: mode === "points" });
+  };
+  paint(colours);
+  if (removed) {
+    document.getElementById("show-removed").addEventListener("input", (e) => { showRemoved = e.target.checked; paint(); });
+    document.getElementById("hide-removed").addEventListener("input", (e) => { hideRemoved = e.target.checked; paint(); });
+  }
+  const heights = S.heightColours && DemoData.array(S.heightColours);
+  document.querySelectorAll("[data-colour]").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-colour]").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+    paint(b.dataset.colour === "height" ? heights : colours);
+  }));
+  const oneWay = document.getElementById("one-way");
+  if (oneWay) {
+    const ceiling = document.getElementById("ceiling"), floor = document.getElementById("floor");
+    const cut = () => {
+      V.oneWay = oneWay.checked;
+      V.cut = [Number(floor.value), Number(ceiling.value)];
+      document.getElementById("ceiling-value").textContent = `${V.cut[1].toFixed(2)} m`;
+      document.getElementById("floor-value").textContent = `${V.cut[0].toFixed(2)} m`;
+      V.redraw();
+    };
+    [oneWay, ceiling, floor].forEach((el) => el.addEventListener("input", cut));
+    cut();
+  }
+
+  const measure = document.getElementById("measure"), readout = document.getElementById("measure-value");
+  if (measure) {
+    let on = false, picks = [], down = null;
+    // The front-most splat within 8 CSS pixels of the click that the height window and one-way setting still show.
+    const pick = (x, y) => {
+      const eye = V._camera().eye;
+      let best = null;
+      for (let i = 0; i < n; i++) {
+        const p = [pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]], h = V3.dot(p, V.up);
+        if (h < V.cut[0] || h > V.cut[1] || (hideRemoved && removed[i])) continue;
+        if (V.oneWay && V3.dot([normals[3 * i], normals[3 * i + 1], normals[3 * i + 2]], V3.sub(eye, p)) < 0) continue;
+        const s = V.project(p);
+        if (s && Math.hypot(s.x - x, s.y - y) < 8 && (!best || s.z < best.z)) best = { p, z: s.z };
+      }
+      return best && best.p;
+    };
+    const draw = () => {
+      V.addPoints("measure-ends", new Float32Array(picks.flat()), new Uint8Array(picks.flatMap(() => [255, 220, 0])),
+        { size: 0.04, worldSize: true, order: 3 });
+      if (picks.length < 2) { V.remove("measure-line"); readout.textContent = "Click the second point."; return; }
+      V.addLines("measure-line", new Float32Array(picks.flat()), new Uint8Array([255, 220, 0, 255, 220, 0]), { order: 3 });
+      const d = V3.sub(picks[1], picks[0]), total = Math.hypot(d[0], d[1], d[2]), rise = Math.abs(V3.dot(d, V.up));
+      const level = Math.sqrt(Math.max(total * total - rise * rise, 0));
+      readout.textContent = `${total.toFixed(2)} m (level ${level.toFixed(2)} m, height ${rise.toFixed(2)} m)`;
+    };
+    measure.addEventListener("click", () => {
+      on = !on; picks = [];
+      measure.setAttribute("aria-pressed", String(on));
+      ["measure-ends", "measure-line"].forEach((name) => V.remove(name));
+      readout.textContent = on ? "Click the first point." : "";
+    });
+    V.canvas.addEventListener("pointerdown", (e) => { down = [e.offsetX, e.offsetY]; });
+    V.canvas.addEventListener("pointerup", (e) => {
+      if (!on || !down || Math.hypot(e.offsetX - down[0], e.offsetY - down[1]) > 4) return;
+      const p = pick(e.offsetX, e.offsetY);
+      if (!p) { readout.textContent = "No surface under that click; try again."; return; }
+      if (picks.length === 2) picks = [];
+      picks.push(p);
+      draw();
+    });
+  }
   if (D.display) V.addPoints("display", DemoData.positions(D.display.positions), DemoData.array(D.display.colours),
     { size: 0.012, worldSize: true, visible: false });
 
@@ -39,7 +120,8 @@
     });
   }
 
-  const setMode = (mode) => {
+  const setMode = (chosen) => {
+    mode = chosen;
     document.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
     ["splats", "points", "display"].forEach((name) => V.setVisible(name, name === mode));
   };

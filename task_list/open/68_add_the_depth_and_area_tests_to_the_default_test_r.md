@@ -47,6 +47,10 @@ The original count of 77 missed depth/area tests is obsolete. Directory and conf
 
 `pytest.ini` includes `src/live/tests`; `tools/check.py` omits it. These are directory counts, not test-case counts. Collect the current case count at execution rather than retaining 907/984 targets.
 
+## Update, 7 November 2026
+
+Listed as quick experiment 5 in the 7 November review (Task106). Before changing the configuration, run each omitted suite once through `tools/check.py <suite>` and record which pass, fail or cannot collect. That shows whether the default check is hiding failures today.
+
 ## Plan
 
 1. Test first: inventory every maintained tests directory under src, experiments and tools, with explicit skips for external dependencies, ignored run/output and scratch trees. Assert agreement with both default lists; show failures against today's configuration.

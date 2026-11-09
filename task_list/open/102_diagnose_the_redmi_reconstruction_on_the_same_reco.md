@@ -4,7 +4,7 @@ title: Diagnose the Redmi reconstruction on the same recorded walk
 status: open
 priority: HIGH
 type: experiment
-blocked_by: []
+blocked_by: ["107", "108", "109"]
 blocks: []
 verification_test: "src/live/tests/test_sizing.py"
 plan_reviewed: null
@@ -25,7 +25,7 @@ baseline_metric:
   baseline_value: "845428-point poor geometry; 33 point-scaled and 30 previous-scale updates, zero raw-depth-scaled updates; photos appear rotated"
   target: "Reproducible causal comparison distinguishing orientation, depth, pose and fusion; fix only confirmed defects"
 created: 2026-10-15
-last_updated: 2026-10-15
+last_updated: 2026-11-07
 superseded_by: null
 ---
 
@@ -40,6 +40,16 @@ Find why the recorded house looks distorted in the reconstruction. First check w
 Use the immutable v2 session `experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk`, Task99 validation/export and `outputs/capture_task99_220756/live_verified/` baseline. The run received 1,194 images and made 63 CPU updates at 1.58/s. Of those updates, 33 used tracked-point scale and 30 reused previous scale; none used raw-depth scale despite 44 saved new depth maps. There were 83 anchor corrections. These facts do not yet explain the geometry.
 
 On 15 October the owner reported sideways photos in the HTML and proposed orientation-sensitive depth as a cause. Session metadata says `sensor_orientation_deg: 90`. `FrameWriter.java` encodes the Camera2 sensor-grid JPEG without a display rotation; `src/live/processor.py` passes its decoded pixels straight to the depth model; `tools/demos/capture_scene.py` embeds the same photo. This confirms the code path, not the correct upright direction for every image. A sensor mounting angle alone does not supply device orientation throughout a walk.
+
+## Update, 7 November 2026
+
+A read-only probe (Task106) changed the starting point:
+
+- **The 14 October walk has no usable raw depth.** All 44 depth maps are zeros on disk, with stale timestamps. So plan step 3 is answered for that walk: raw-depth scaling had no data. Task111 owns the cause.
+- **The 15 October walk (`20261015_093913_walk`, 822 frames) has 144 usable depth maps.** Diagnosis moves to that walk.
+- **The phone was in portrait for 90-99% of both walks**, so the depth model saw sideways images. The effect is still untested.
+
+The first steps are now separate tasks: Task107 (replay the 15 October walk), Task108 (ARCore depth fused along ARCore's path, covering step 5's raw-depth surface and the axis checks of step 4) and Task109 (rotation control, step 2). This task stays open to combine their results, finish steps 4 and 6, and state the causes.
 
 ## Plan, first checks in order
 

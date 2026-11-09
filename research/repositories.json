@@ -35,6 +35,24 @@
       "update_history": [],
       "resolved_commit": "df6300e0ba3e90058f90b09c4d646279366d3516",
       "fetched_utc": "2026-10-01T18:41:34.474935+00:00"
+    },
+    {
+      "name": "lingbot-map",
+      "url": "https://github.com/robbyant/lingbot-map.git",
+      "ref": "main",
+      "commit": "b9dd1b1de535e6d36e777fb42b8433c781bfd783",
+      "purpose": "Streaming pose and depth from plain video (Task128); candidate core of the reconstruction",
+      "environment": ".venv-lingbot: Python 3.10, torch 2.8.0 cu128, editable install; SDPA attention (FlashInfer not installed); weights lingbot-map.pt and lingbot-map-long.pt (4.63 GB each) in third_party/lingbot-map-weights",
+      "licence_sources": [
+        "https://github.com/robbyant/lingbot-map/blob/main/LICENSE.txt",
+        "https://huggingface.co/robbyant/lingbot-map"
+      ],
+      "submodules_required_for_reference_checkout": false,
+      "setup_status": "cloned at pinned commit and installed 8 Nov 2026; CPU runs only while this PC's GPU serves another project",
+      "executed": true,
+      "update_history": [],
+      "resolved_commit": "b9dd1b1de535e6d36e777fb42b8433c781bfd783",
+      "fetched_utc": "2026-11-08T16:00:00+00:00"
     }
   ],
   "reference_only": [
@@ -52,6 +70,82 @@
       "name": "MASt3R-SLAM",
       "url": "https://github.com/rmurai0610/MASt3R-SLAM",
       "reason": "Code and pretrained weights have separate restrictions; no execution until permitted company use established"
+    },
+    {
+      "name": "SceneView",
+      "url": "https://github.com/sceneview/sceneview",
+      "ref": "main",
+      "commit": "5ba0247805c4820629601153f84fda5e152c0a24",
+      "verified_utc_date": "2026-11-09",
+      "commit_utc_date": "2026-11-07",
+      "reason": "Android implementation reference for ARCore-scaled ML depth, bounded fusion, capture feedback and multi-view room-object merging",
+      "licence": "Apache-2.0 repository; model and ARCore terms separate",
+      "licence_sources": [
+        "https://github.com/sceneview/sceneview/blob/5ba0247805c4820629601153f84fda5e152c0a24/LICENSE"
+      ],
+      "setup_status": "Public metadata, complete recursive tree and selected source reviewed through GitHub connector; no checkout, SDK, APK or model installed",
+      "executed": false,
+      "research_note": "research/phone_ar_platforms/sceneview.md",
+      "tree_source": "https://api.github.com/repos/sceneview/sceneview/git/trees/5ba0247805c4820629601153f84fda5e152c0a24?recursive=1",
+      "reviewed_paths": [
+        "README.md",
+        "LICENSE",
+        "docs/docs/quickstart.md",
+        "arsceneview-depth-ml/src/main/java/io/github/sceneview/ar/depth/ml/DepthAnythingV2Estimator.kt",
+        "arsceneview-depth-ml/src/main/java/io/github/sceneview/ar/depth/ml/ModelSource.kt",
+        "arsceneview/src/main/java/io/github/sceneview/ar/depth/DepthAnchors.kt",
+        "arsceneview/src/main/java/io/github/sceneview/ar/depth/DepthScaleFit.kt",
+        "arsceneview/src/main/java/io/github/sceneview/ar/depth/MlDepthSession.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/RerunScan.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/RerunScanBuilds.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/ReconstructionChoice.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/RoomScan.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/DenseFusion.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/DepthFreshness.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/DepthIntake.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/RerunTsdf.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/ScanCoverage.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/model/CleanModel.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/semantic/SceneFusion.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/semantic/SceneLabel.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/semantic/SceneLift.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/semantic/SceneModel.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/semantic/SceneRecognizer.kt",
+        "samples/android-demo/src/main/java/io/github/sceneview/demo/demos/internal/semantic/SceneRecognitionAndroid.kt"
+      ]
+    },
+    {
+      "name": "Open3Dmap",
+      "url": "https://github.com/x4dqn/Open3Dmap",
+      "ref": "main",
+      "commit": "f17dab79e72d47fa2e6286a33d1a1eb3b8ac6622",
+      "verified_utc_date": "2026-11-09",
+      "commit_utc_date": "2025-08-20",
+      "reason": "Capture quality and scan-metadata reference; low adoption priority because reviewed cloud has mock output, browser runtime artefacts are absent and root licence is noncommercial",
+      "licence": "CC-BY-NC-4.0 root; SplatJSON specification separately states MIT",
+      "licence_sources": [
+        "https://github.com/x4dqn/Open3Dmap/blob/f17dab79e72d47fa2e6286a33d1a1eb3b8ac6622/LICENSE",
+        "https://github.com/x4dqn/Open3Dmap/blob/f17dab79e72d47fa2e6286a33d1a1eb3b8ac6622/docs/splatjson-spec.md"
+      ],
+      "setup_status": "Public metadata, complete 185-entry recursive tree and selected source reviewed through GitHub connector; no checkout, APK, backend or trainer installed",
+      "executed": false,
+      "research_note": "research/products/e2e_product_research/11_open3dmap/README.md",
+      "tree_source": "https://api.github.com/repos/x4dqn/Open3Dmap/git/trees/f17dab79e72d47fa2e6286a33d1a1eb3b8ac6622?recursive=1",
+      "reviewed_paths": [
+        "README.md",
+        "LICENSE",
+        "Android App/Scanner/app/build.gradle",
+        "Android App/Scanner/app/src/main/java/com/openarmap/openarscanner/ui/ARScanActivity.kt",
+        "Android App/Scanner/app/src/main/java/com/openarmap/openarscanner/viewmodel/ARScanViewModel.kt",
+        "Android App/Scanner/app/src/main/java/com/openarmap/openarscanner/repository/ARScanRepository.kt",
+        "Android App/Scanner/app/src/main/java/com/openarmap/openarscanner/model/ARScanData.kt",
+        "open3dmap-web/functions/index.js",
+        "open3dmap-web/functions/colmap_converter.py",
+        "open3dmap-web/functions/colmap-binary.js",
+        "open3dmap-web/js/brush-integration.js",
+        "open3dmap-web/brush-trainer.html",
+        "docs/splatjson-spec.md"
+      ]
     }
   ]
 }

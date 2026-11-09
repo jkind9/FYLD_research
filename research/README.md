@@ -12,14 +12,19 @@ The current [six-piece experiment plan](../experiments/README.md) connects resea
 
 ## Topic folders, 13 October 2026
 
+Added 9 November 2026: [SceneView and Open3Dmap review](products/sceneview_open3dmap_review_2026-11-09.md). SceneView's Android code overlaps our metric-depth, fusion and object-merging stages; Open3Dmap is a lower-priority capture/cloud workflow reference with missing runtime artefacts and noncommercial terms. Detailed notes: [SceneView](phone_ar_platforms/sceneview.md), [Open3Dmap](products/e2e_product_research/11_open3dmap/README.md). Source review only, at pinned commits; no benchmarks run.
+
 Notes and papers are grouped by topic. Each folder's README lists its notes, saved papers and the matching course lectures.
 
 | Folder | What it covers |
 | --- | --- |
-| [camera_tracking_and_slam](camera_tracking_and_slam/README.md) | Following the camera through video. Start with the [13 October review](camera_tracking_and_slam/tracking_review_2026-10-13.md): the project's tracker, not depth, is the main gap |
+| [camera_tracking_and_slam](camera_tracking_and_slam/README.md) | Following the camera through video. Start with the [13 October review](camera_tracking_and_slam/tracking_review_2026-10-13.md): the project's tracker, not depth, is the main gap. The [SLAM Handbook note](camera_tracking_and_slam/slam_handbook.md) (7 November) is the reference text |
+| [dense_surface_fusion](dense_surface_fusion/README.md) | Why fused surfaces float or appear twice, and the fixes. Task116 traced the doubled cushion on the 15 October walk to 4.4 s old ARCore depth maps. Notes on three live one-camera systems (8 November): Mobile3DRecon (multi-view stereo on a phone CPU), Newcombe and Davison 2010, and Prisacariu et al. 2015 (object shape from outlines). The [triangulation note](dense_surface_fusion/triangulation_and_learned_depth.md) sets out how triangulated and learned depth combine, with an order to try |
+| [surface_denoising](surface_denoising/README.md) | Removing floaters, flying pixels and thick floors from fused surfaces, and sizing depth beyond ARCore's reach, with a proposed clean-up stage (8 November). 23 papers. Task120's trial: a visibility vote cut surface in seen-through space by 53-80%. Covers the owner's target scenes: indoor, surfaces under about 10 m |
+| [gaussian_splatting](gaussian_splatting/README.md) | Photo-realistic splat scenes from phone captures (8 November). Lumina's pipeline (iPhone LiDAR capture, PC training) mapped step by step to open-source parts with licences and hardware, plus diffusion repair models. SpAItial Echo-3 (iPhone video, no LiDAR, to a metric splat scene in the cloud) added the same day. 15 papers |
 | [structure_from_motion](structure_from_motion/README.md) | Solving camera poses and sparse points together; COLMAP, GLOMAP and newer methods |
 | [depth_estimation](depth_estimation/README.md) | Phone stereo and learned depth from images or video |
-| [feed_forward_3d](feed_forward_3d/README.md) | Networks that output 3D points and camera poses in one pass (VGGT, MapAnything, Depth Anything 3) |
+| [feed_forward_3d](feed_forward_3d/README.md) | Networks that output 3D points and camera poses in one pass (VGGT, MapAnything, Depth Anything 3), or a splat scene in one pass (YoNoSplat, AnySplat, WorldMirror; 8 November) |
 | [visual_inertial_odometry](visual_inertial_odometry/README.md) | Open-source replacement for ARCore's tracking (Stream B): phone camera and motion-sensor clocks, recording, calibration and open visual-inertial systems |
 | [phone_ar_platforms](phone_ar_platforms/README.md) | ARCore and Apple frameworks: pose, depth and their measured accuracy |
 | [vr_and_stereo_viewing](vr_and_stereo_viewing/README.md) | Headset viewing: stereo video, panoramas, head turning versus head movement |

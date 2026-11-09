@@ -1,0 +1,74 @@
+# Combining triangulation with learned depth
+
+**Question (owner, 8 November 2026):** should COLMAP-style triangulation be combined with the project's depth maps?
+
+**Answer: yes.** Published live systems combine the two, and the project already does in a small way. The common pattern has three parts:
+
+- Triangulate depth wherever the surface has texture and the camera has moved far enough between views.
+- Let learned depth fill blank surfaces.
+- Take real size from the tracker's poses.
+
+The project's gap is beyond 2.5 m, where it has only ARCore's sparse tracked points. Triangulating between frames 0.5-1 m apart along ARCore's recorded path would add far depth that agrees with the path, and it runs on a CPU.
+
+Terms used here:
+
+- **Triangulation**: placing a point in 3D from where it appears in two or more images whose camera poses are known.
+- **Baseline**: how far the camera moved between two such images. For the same matching error, depth error grows with distance squared divided by the baseline.
+- **Sparse triangulation**: a few hundred to a few thousand distinctive points (corners), as in COLMAP's triangulator or ARCore's tracked points.
+- **Dense triangulation (multi-view stereo, MVS)**: a depth for most pixels, found by trying many depths per pixel against neighbouring frames (a *plane sweep*).
+- **Learned depth**: a network's depth from one image (Depth Anything here). It has good shape but no reliable size.
+- **Sizing**: scaling learned depth so it agrees with measured depth (`src/live/sizing.py`, in an 8 × 6 grid of cells).
+
+## What the project has, by distance
+
+| Depth source | How it is made | Where it works | Measured here |
+|---|---|---|---|
+| ARCore raw depth | ARCore triangulates the live frame against a recent keyframe ("depth from motion"), 160 × 90 pixels | Near: 95% of its confident depth is under 2.54 m | Sizes learned depth; within 5% of tracked points up to 3 m (Task117) |
+| ARCore tracked points | ARCore's own sparse triangulation | Reaches 3-4 m. About 19 points per frame on the first Redmi test walk; 1,173 point views beyond 3 m on the 15 October walk | As sizing targets, far depth moved from 16% to 5% too near. One size per frame also pushed the floor down (Task120) |
+| Learned depth (Depth Anything V2) | A network, one image at a time | Everywhere, blank walls included | Shape 8-16 cm off even with perfect size and poses; beyond 3 m still about 15% too near after sizing (Task117) |
+| Sparse COLMAP triangulation along ARCore's path | `point_triangulator` with known poses (pycolmap 4.2.1 is installed in `.venv-sfm`), frames paired by camera distance | Wherever corners are seen from spots far enough apart | Not tried on the Redmi. On TUM, learned depth sized to SfM points came within 8-27 mm of the best possible (Task72) |
+| Dense multi-view stereo along ARCore's path | A plane sweep between keyframes, as in [Mobile3DRecon](mobile3drecon.md) | Textured surfaces, near and far | Not tried |
+
+The first two rows are triangulation already: ARCore does it on the phone. What they lack is baseline. ARCore depth comes from a hand-held phone against a recent keyframe, so its reach is short, and the tracked points are few.
+
+## How published systems combine the two
+
+| System | Triangulated part | Other part | How they are combined |
+|---|---|---|---|
+| [Mobile3DRecon](mobile3drecon.md) (2020, phone CPU) | Dense: semi-global matching (SGM) against two keyframes about 0.6 m away | Small clean-up network | Triangulate first, drop pixels it is unsure of, then the network removes leftover noise |
+| [Newcombe and Davison](live_dense_reconstruction_2010.md) (2010) | Sparse: the tracker's points (PTAM) | A rough surface fitted to those points | The sparse points give a first surface; dense optical flow then corrects each pixel along its camera ray |
+| [CNN-SLAM](../surface_denoising/papers/tateno2017_cnn_slam.pdf) (2017) | Semi-dense depth from direct monocular SLAM | Network depth per keyframe | Each pixel takes the triangulated depth where SLAM has one, and the network's where SLAM fails, such as blank walls |
+| [SfM-guided monocular depth](papers/sfm_guided_monocular_depth_2025.pdf) (2025) | SfM points | Single-image depth | Scale and shift fitted per frame to the points with RANSAC, then TSDF fusion |
+| [TANDEM](papers/koestler2021_tandem.pdf) (2021) | Learned multi-view stereo over posed keyframes | A TSDF built from it | Tracking runs against depth rendered from the TSDF |
+| [SimpleRecon](../surface_denoising/papers/sayed2022_simplerecon.pdf) (2022) | A plane-sweep cost volume over posed keyframes | A 2D network reads the cost volume | The network does the matching; TSDF fusion follows |
+| ARCore depth ([Valentin et al. 2018](https://research.google/pubs/depth-from-motion-for-smartphone-ar/)) | Matching between two frames on the phone | A smoothing solver that fills gaps | Sparse matches made dense. This is already the project's near depth |
+| [Prompt Depth Anything](../depth_estimation/papers/prompt_depth_anything_2412.14015.pdf) (2025) | Low-resolution metric depth fed in | The network | The network reads the sparse depth. Tested here with SfM points: no gain (Task79) |
+
+So there are two ways to combine:
+
+- **A. Triangulated points as sizing targets for learned depth.** The project does this now with ARCore depth and tracked points. It is cheap and fits the current code. It keeps learned depth's shape error, and it needs targets at every distance, so that the size can change with distance (Task120's conclusion).
+- **B. Triangulated depth fused directly where it is confident, learned depth only where triangulation has no answer.** Mobile3DRecon and CNN-SLAM work this way. It removes the 8-16 cm shape error wherever triangulation works, at the cost of a plane sweep per keyframe.
+
+## Proposed order, all on the CPU
+
+1. **Sparse first (way A).** On the 15 October walk:
+   - Triangulate features along the recorded ARCore path with pycolmap's known-pose triangulator, pairing frames 0.3-1 m apart.
+   - Keep COLMAP's checks: two-view geometry, at least 3 views, a minimum angle between rays and a small reprojection error.
+   - Use the points as sizing targets with a size that varies with distance, for example a scale and shift per frame as the 2025 SfM-guided paper fits.
+   - Score beyond 3 m against held-out ARCore tracked points with `python -B -m src.live.depth_check`, and look at the hallway door.
+2. **Dense next (way B).**
+   - Plane sweep with Census costs and SGM between keyframes about 0.6 m apart, as in Mobile3DRecon.
+   - Keep the confident pixels, fill the rest with sized learned depth, and fuse.
+   - Score as in step 1, plus the floor band.
+3. **Live version.** Both steps use only the last few keyframes, so either can run in the live loop if its cost holds. Mobile3DRecon's 48 ms per keyframe on one phone core suggests the dense step can.
+
+## Things to watch
+
+- **Score with points the method did not use.** If tracked points size the depth, score with other tracked points or with COLMAP points.
+- **Blank walls give no triangulation.** Learned depth must fill them, which is why combining beats replacing.
+- **Pose error becomes depth error.** Triangulation trusts ARCore's poses. Pair frames within one fragment (about 10 s on one ARCore anchor), so that an anchor correction cannot split a point between two pose sets.
+- **Wide baselines change how a surface looks.** Frames 0.6 m apart see a surface from different angles. Patch codes such as Census tolerate less change than SIFT features, which is why Mobile3DRecon limits the difference in viewing direction to about 10°.
+- **It avoids stale depth.** Triangulation reads the images, not ARCore's depth maps, so the 4.4 s old depth maps that doubled the cushion (Task116) cannot affect it.
+- **Moving people break both methods.** Mobile3DRecon deletes voxels a new view sees through, which removes a person who stood still and then left.
+
+Related: [COLMAP parts that fit ARCore's path](../structure_from_motion/colmap.md#colmap-parts-that-fit-a-pipeline-that-already-has-arcores-path), and [getting far depth right](../surface_denoising/README.md#getting-far-depth-right-what-other-systems-do).

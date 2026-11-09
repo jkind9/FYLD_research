@@ -38,6 +38,7 @@ From there, there are several ways to build a model:
 | [MapAnything](https://arxiv.org/abs/2509.13414), [Depth Anything 3](https://arxiv.org/abs/2511.10647) | Hosted | Feed-forward 3D points and cameras | Check checkpoint terms. |
 | ARCore depth points and planes | On the phone | Rough live point cloud plus floor and wall planes | Quick coverage and size preview on site. |
 | [RTAB-Map for Android](https://github.com/introlab/rtabmap) | On the phone | Live mesh built on ARCore's position and depth | BSD-3 core. |
+| [Mobile3DRecon](../../research/dense_surface_fusion/mobile3drecon.md) (IEEE TVCG 2020) | On the phone | Live mesh from one camera: depth triangulated between keyframes, a growing TSDF volume that deletes voxels a new view sees through, and re-meshing of only the parts that changed. 101 ms per keyframe on a 2018 phone CPU | Paper only; no code released. |
 | [SuperSplat](https://github.com/playcanvas/supersplat) or a glTF viewer | Viewing on the phone | Shows a model built on the server in a phone browser | Display only; does not measure anything. |
 
 ## Top 5 sources
@@ -60,6 +61,7 @@ More background: [Open3D RGB-D note](../../research/camera_tracking_and_slam/ope
 - **Compare splats and meshes fairly.** Same capture, geometry scored against the reference, realism scored on held-out views, as separate numbers.
 - **Scale up.** Run whole sequences and record memory and time growth.
 - **Export for viewing.** A simplified GLB scene for phones and headsets, kept separate from the full-detail measurement model.
+- **Add a clean-up stage.** Remove flying pixels, side-on depth and floaters before, during and after fusion, and score what each step removes against what it keeps. Methods, sources and order: [research/surface_denoising](../../research/surface_denoising/README.md) (8 November 2026).
 
 The sections below are the detailed experiment record.
 

@@ -23,6 +23,7 @@ class Fragments:
         self._fragment_anchors: dict[int, int] = {}
         self._volumes: dict[int, o3d.pipelines.integration.ScalableTSDFVolume] = {}
         self._points: dict[int, np.ndarray] = {}  # fragment -> points in its anchor's frame, when extracted
+        self._colours: dict[int, np.ndarray] = {}  # fragment -> RGB in 0-1 for those points
         self._world: dict[int, tuple[bytes, np.ndarray]] = {}  # fragment -> (anchor used, points in the world)
         self._frames: dict[int, int] = {}
 
@@ -54,18 +55,29 @@ class Fragments:
         self._points.pop(fragment, None)
         self._frames[fragment] = self._frames.get(fragment, 0) + 1
 
+    def placing_anchor(self, keyframe: int) -> np.ndarray:
+        """Current world_from_anchor of the anchor that places this keyframe's fragment (after its first frame)."""
+        return self._anchors[self._fragment_anchors[keyframe // self.keyframes_per_fragment]]
+
     def surface(self) -> np.ndarray:
         """All fragments' surface points in the world as ARCore now sees it (N x 3, metres)."""
         parts = []
         for fragment, volume in self._volumes.items():
             anchor = self._anchors[self._fragment_anchors[fragment]]
             if fragment not in self._points:
-                self._points[fragment] = np.asarray(volume.extract_point_cloud().points, dtype=np.float64)
+                cloud = volume.extract_point_cloud()
+                self._points[fragment] = np.asarray(cloud.points, dtype=np.float64)
+                self._colours[fragment] = np.asarray(cloud.colors, dtype=np.float64)
                 self._world.pop(fragment, None)
             if self._world.get(fragment, (None,))[0] != anchor.tobytes():
                 self._world[fragment] = (anchor.tobytes(), self._points[fragment] @ anchor[:3, :3].T + anchor[:3, 3])
             parts.append(self._world[fragment][1])
         return np.concatenate(parts) if parts else np.zeros((0, 3))
+
+    def colours(self) -> np.ndarray:
+        """RGB in 0-1 for each point of surface(), in the same order."""
+        self.surface()
+        return np.concatenate([self._colours[f] for f in self._volumes]) if self._volumes else np.zeros((0, 3))
 
     def frames_per_fragment(self) -> dict[int, int]:
         return dict(self._frames)

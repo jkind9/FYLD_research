@@ -393,7 +393,23 @@ Reproduce the capture checks with:
 
 Capture 1.2's APK and identical email copy are in the [deployment index](../../mobile_deployments/README.md), with version and full UTC timestamp in their names. All 30 JVM tests pass. The combined capture, open_vio, live, shared-phone and hygiene suite passes 317 tests with 1 skipped. The 60 s rest, later calibration recordings, full frame/ARCore metadata coverage and independent accuracy remain open.
 
+### Depth and orientation probe, 7 November 2026 (Task106)
+
+A read-only probe of the saved sessions found three things the checks above did not catch:
+
+1. **Every raw-depth map in `20261014_220756_walk` is empty.** All 44 depth files are zeros on disk: 0 non-zero bytes in 1.9 MB of depth and confidence. The phone sent empty buffers; the PC reader is not at fault. This is why replay never sized learned depth from raw depth. Other sessions from capture 1.1 and 1.2 hold real depth (`20261014_212303_walk`: 38 maps; `20261014_214854_walk`: 24 maps). The cause is unknown; Task111 owns it.
+2. **A second completed capture 1.2 walk was never documented.** `20261015_093913_walk` has 822 frames (about 27.5 s at 29.918 fps), `end_reason: stop`, 0 dropped frames, 779 frames with ARCore records and motion sensors at 423.6 Hz. It has 147 raw-depth maps. 144 of them pass the live sizing rule (at least 50 pixels with confidence 128 or more inside the image), with a median of 1,585 confident pixels per map. Tasks107-110 use it.
+3. **The phone was held in portrait for almost both walks.** Gravity lies along the phone's long edge in 90.0% of accelerometer samples on 14 October and 99.4% on 15 October. With the camera sensor mounted at 90 degrees and no rotation applied, the depth model saw sideways images for nearly the whole of both walks. Whether that harms its depth is untested; Task109 measures it.
+
+The Task99 table's "44 new maps with confidence" counts depth messages; none contains a depth value.
+
 Task99 also fixed repository hygiene. `tools/check.py` now accepts `task_list/done`, uses OS scratch and removes it after testing. A shared phone fixture now uses pytest's temporary folder instead of creating `.pytest-temp` beside its source. Ruff's cache is configured outside the repo. Old `.test_*`, pytest scratch and `.ruff_cache` folders were removed; do not recreate them with repo-local `--basetemp` arguments.
+
+### 15 October walk through the live pipeline, 7 November 2026 (Task107)
+
+`20261015_093913_walk` passed both capture checks. `clock_check.py` exited 0 with an empty problem list: camera at 29.92 fps, motion sensors at 423.6 Hz, no gaps over 1.5 times the median interval, 0 frames dropped, ARCore tracking on every frame. The camera-to-motion-sensor clock offset was 0.98 ms, with peak correlation 0.991. `recording.py --euroc` exited 0, reported "no problems found" and wrote the export (images, motion samples and the ARCore camera path) to `outputs/capture_task107_093913/euroc`.
+
+Replayed with the unchanged Task99 settings, the live pipeline gave 47 updates at 1.70 per second, with no gap over 1 s. ARCore raw depth set the scale of learned depth for 32 updates. Tracked points set it for 12, the previous value was reused for 2, and the first update had no source and was skipped. On 14 October, ARCore depth set the scale for none of the 63 updates. The scale factor ranged from 0.34 to 1.28 (0.27 to 5.85 on 14 October). The final map's dominant plane is still within 4° of vertical in ARCore's gravity-aligned world, so the floor is still not the dominant plane. The highest point above that plane is 3.55 m (5.98 m on 14 October). The walks differ in route and length, so this shows that ARCore-depth sizing engages; it does not measure the size of any improvement. ARCore depth is not ground truth, and no accuracy is claimed. [Full before/after table](../../src/live/README.md#redmi-15-october-walk-task107).
 
 ## Historical delivery ownership, 6 October 2026
 

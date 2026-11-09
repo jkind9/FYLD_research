@@ -4,7 +4,7 @@ title: Finish capture metadata coverage and sustained Redmi checks
 status: open
 priority: HIGH
 type: infra
-blocked_by: []
+blocked_by: ["111"]
 blocks: []
 verification_test: "experiments/01_camera_capture_delivery/tests/test_capture_receiver.py"
 plan_reviewed: null
@@ -39,6 +39,13 @@ The phone now records and sends real walks. Finish checking that stopping, camer
 Capture 1.2 (`org.fyld.capture`) replaces phonecheck and rawrecorder. The completed `20261014_220756_walk` has 1,194 frames over 39.88 s, 29.92 fps, no missing/duplicated frame numbers and zero reported drops. Motion sensors ran at 423.54 Hz; receipt was 10.22 MB/s; the PC stores 225 MB. Tasks96-99 built the v2 receiver, resume, readers, crash reporting and serialization fix. Task99 checked 317 tests with 1 skipped and 30 JVM tests. These are recorded results, not a new test run under this review.
 
 Seventeen frames have no ARCore record, frame 1193 has no Camera2 settings, and the first anchor creation is missing. EuRoC export writes its files, but export and clock validation return status 1 for the settings gap. The 30-frame memory buffer can still overflow; one short zero-drop walk proves no sustained guarantee. Estimated clock offset -2.67 ms is not independent calibration.
+
+## Update, 7 November 2026
+
+- The 14 October walk's 44 raw-depth maps are all empty, with timestamps 4-39 s older than their frames. Task111 finds the cause and adds a warning for stale or empty depth; this task waits for it, so the next handset run can check the fix.
+- A second completed walk, `20261015_093913_walk` (822 frames, 0 drops, 43 frames without ARCore records), was never documented. Include its metadata gaps in step 2.
+- Add a walk with people moving through the scene to the owner's next recording round. The SLAM Handbook (section 15.2) and three supplied papers treat moving objects as a main way tracking fails, and every recording so far is of a static scene.
+- Ask the walker to vary their motion and avoid turning on the spot (SLAM Handbook Table 11.1; Task110 measures how often it happened).
 
 ## Plan
 

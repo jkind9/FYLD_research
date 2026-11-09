@@ -25,6 +25,15 @@ def test_frames_join_the_fragment_of_their_keyframe_group():
     assert len(z) > 0 and np.abs(np.median(z) - 1.0) < 0.02
 
 
+def test_surface_colours_are_the_fused_photo_colours():
+    fragments = Fragments(voxel_m=0.02)
+    fragments.set_anchor(0, np.eye(4))
+    fragments.integrate(np.full((48, 64), 1.0, np.float32), np.full((48, 64, 3), (200, 40, 10), np.uint8), K, np.eye(4), 0)
+    colours = fragments.colours()
+    assert colours.shape == fragments.surface().shape
+    np.testing.assert_allclose(np.median(colours, 0) * 255, [200, 40, 10], atol=2)
+
+
 def test_moving_the_group_anchor_moves_its_surface():
     fragments = Fragments(voxel_m=0.02, keyframes_per_fragment=10)
     fragments.set_anchor(0, np.eye(4))
@@ -36,6 +45,17 @@ def test_moving_the_group_anchor_moves_its_surface():
     after = fragments.surface()
     assert len(after) == len(before)
     assert np.allclose(np.median(after, 0) - np.median(before, 0), [0.0, 0.0, 0.5], atol=1e-6)
+
+
+def test_a_keyframe_reports_the_current_pose_of_the_anchor_placing_it():
+    fragments = Fragments(voxel_m=0.02, keyframes_per_fragment=10)
+    fragments.set_anchor(1, np.eye(4))
+    wall(fragments, 1, np.eye(4))
+    moved = np.eye(4)
+    moved[:3, 3] = [0.0, 0.0, 0.5]
+    fragments.set_anchor(0, np.eye(4))
+    fragments.set_anchor(1, moved)
+    assert np.allclose(fragments.placing_anchor(2), moved)
 
 
 def test_missing_group_start_uses_a_received_anchor_and_keeps_that_binding():

@@ -127,8 +127,10 @@ A name can be a whole software package, one complete system, one algorithm insid
 | Method | Kind | Required input | Optional input | Output | Metric? | Live? | Status here |
 |---|---|---|---|---|---|---|---|
 | Open3D RGB-D odometry | Visual odometry, direct | Colour and depth for consecutive frames; intrinsics | — | Pose per frame (frame to frame) | Yes, from the depth | Yes | The walkthrough's first tracker; 112 mm on TUM desk with Kinect depth |
-| COLMAP, incremental mapper | SfM | Images | Intrinsics (else estimated); matching order for video | Poses, intrinsics, sparse 3D points, pixel-to-point links | No | No | Task67: 11.9-34 mm path error |
+| COLMAP, incremental mapper | SfM | Images | Intrinsics (else estimated); matching order for video | Poses, intrinsics, sparse 3D points, pixel-to-point links | No | No | Task67: 11.9-34 mm path error; 15.2 mm on desk with the published lens calibration once `max_extra_param` is raised (8 November) |
 | COLMAP, global mapper (GLOMAP) | SfM | Same | Same | Same | No | No | Task67: faster, dropped frames on ICL |
+| COLMAP triangulation with known poses (`point_triangulator`, `pycolmap.triangulate_points`) | A stage inside SfM, run on a path from elsewhere | Images; camera poses and intrinsics (here from ARCore) | Pairs chosen by camera distance (`spatial_matcher`) | Sparse 3D points with their pixels | Yes, if the poses are | Offline; a version limited to recent keyframes could run live | Proposed 8 November for sizing far depth; not run |
+| COLMAP-SLAM, colmap-odometry | Visual odometry built on COLMAP's mapper | Video; intrinsics | Second camera; satellite positions | Keyframe poses, sparse map | Only with stereo or satellite positions | 5 frames per second with a GPU (authors) | Researched 8 November (`research/camera_tracking_and_slam/colmap_based_slam.md`) |
 | SIFT; ALIKED + LightGlue | Features and matching, a stage inside SfM or SLAM | Images | — | Keypoints, descriptors, matches | — | — | Task67 |
 | ORB-SLAM3 | SLAM, feature-based | Video; intrinsics | Second camera, depth, or IMU | Poses, keyframes, sparse map | With stereo, depth or IMU | Yes | Reference only (GPLv3) |
 | RTAB-Map | SLAM, strong revisit detection | Colour and depth, or stereo; an odometry source | IMU, lidar | Poses, a map graph, dense cloud or mesh built from the depth | Yes | Yes | Researched |
@@ -143,6 +145,8 @@ A name can be a whole software package, one complete system, one algorithm insid
 | VGGT | Several images | — | Poses, intrinsics, depth, 3D points per image | No | Researched (licence limits) |
 | MapAnything | Images | Intrinsics, depth, poses | Poses and 3D points | Yes (predicts a size) | Researched |
 | Depth Anything 3 | One or more images | Poses and intrinsics | Depth, confidence, poses, intrinsics | Only the Metric-Large model | Task80 (Small, CPU) |
+| LingBot-Map | Video, one frame at a time | — | Pose and depth per frame, as frames arrive | No; one size per walk from ARCore's path holds within 3% | Task128: CPU, small window, 0.09 fps; path within 0.12 m of ARCore's; depth scattered (12 fps on an RTX 4090 at the default) |
+| SLAM3R | Video, one frame at a time | — | Dense 3D points per frame in one world frame; no poses | No | Researched; non-commercial; GPU only |
 
 These blur the boundary: one pass gives what SfM and dense depth give separately. They still estimate poses; they just do it inside the network.
 
@@ -153,6 +157,8 @@ These blur the boundary: one pass gives what SfM and dense depth give separately
 | Kinect or other depth sensor | (hardware) | — | Depth image | Yes | TUM reference and control |
 | Two-camera stereo (e.g. OpenCV SGBM) | Two images taken at the same instant; stereo calibration | — | Disparity, then depth | Yes | Planned |
 | Multi-view stereo (COLMAP PatchMatch) | Several images, their poses and intrinsics | — | Depth and surface direction per image | Same size as the poses | Needs GPU permission |
+| Multi-view SGM on keyframes (Mobile3DRecon) | A keyframe, two earlier keyframes about 0.6 m away, their poses and intrinsics | — | Depth with a confidence per pixel, then cleaned by a small network | Same size as the poses (metres with ARCore) | Researched; 70 ms per keyframe on a 2018 phone CPU; no code released |
+| Rough surface corrected by optical flow (Newcombe and Davison 2010) | A reference frame, 3 nearby frames, their poses, a rough surface | — | Depth per pixel, corrected along each camera ray | Same size as the poses | Researched; desk scale, GPU; no code released |
 | ARCore depth | Phone camera moving, IMU | Depth sensor | Low-resolution depth and confidence (about 160 × 120) | Yes | Not yet measured |
 | Depth Anything V2 Metric Small | One image | — | Depth claimed in metres | Claimed; 34-45% off on TUM | Main learned model |
 | ZipDepth | One image | — | Inverse depth up to scale and shift | No | Task54/62 |
@@ -167,6 +173,32 @@ These blur the boundary: one pass gives what SfM and dense depth give separately
 | TSDF fusion (Open3D) | Depth images, poses, intrinsics | One fused surface (points or mesh) | `experiments/sfm/src/dense.py` |
 | Per-frame size to tracked points | Learned depth, sparse 3D points with their pixels, poses | Learned depth resized to agree with the points | Task72 |
 | Grid footprint | 3D points in metres; which way is up | Ground plane, top-down height grid, seen and unknown area | Task55 |
+| Depth freshness check | Depth timestamp and image timestamp | Keep or skip the depth map | Task116: `room_build` skips depth over 0.1 s old |
+| Sizing against the built surface (as in TANDEM) | Learned depth, pose, the surface so far | Learned depth sized to agree with existing geometry | Researched, Task116 |
+| Visibility-based fusion (Merrell 2007) | Several depth maps and their poses | Depth kept only where other views do not see through it | Researched, Task116 |
+| Flying-pixel (depth-jump) mask | One depth image | Depth with pixels on large depth jumps removed | Researched, `research/surface_denoising` |
+| Grazing-angle mask | One depth image and its intrinsics | Depth with side-on pixels removed | Researched, `research/surface_denoising` |
+| Multi-view consistency check (as in COLMAP fusion) | A depth image, recent depth images and all their poses | Depth kept only where enough other views agree | Researched, `research/surface_denoising` |
+| Free-space carving | A fused volume, a new depth image and its pose | Volume with surface in front of the new depth removed | Researched, `research/surface_denoising` |
+| Observation-count threshold | A fused volume with per-voxel weights | Surface only from voxels seen by at least N frames | Researched; Open3D `VoxelBlockGrid.extract_point_cloud(weight_threshold=...)` |
+| Statistical and radius outlier removal | A point cloud | The cloud without isolated points | Researched; Open3D `remove_statistical_outlier`, `remove_radius_outlier` |
+| Connected-piece filter (DBSCAN, conditional clustering, ToMATo, attribute filters) | A point cloud, mesh or voxel grid; a link distance; a test for each piece | The surface without pieces that fail the test (too small, or the wrong make-up) | Size test in `clean.keep_after("clusters")`, Task122; make-up test `clean.piece_majority`, Task124 (0.3% more removals) |
+| Spots rule: agreement with a minimum view angle (after COLMAP's geometric filter) | A fused surface; depth images and poses of the frames that built it | Surface kept only if measured nearby, or measured at the same depth by views at least 3° apart | `clean.wide_support`, Task124: removes 17% of points, mostly far wall copies; door echoes remain |
+| Plane snapping | A point cloud and fitted floor and wall planes | Points near a plane moved onto it | Researched, `research/surface_denoising` |
+
+### Splat scenes: training, live building and repair
+
+A Gaussian splat scene is many soft coloured blobs adjusted to match photos. It is for viewing; the fused surface above stays the measured record. Details: `research/gaussian_splatting`.
+
+| Method | Required input | Output | Status here |
+|---|---|---|---|
+| Known-pose COLMAP export | Images, poses, intrinsics; optional sparse points and depth | A COLMAP dataset every splat trainer reads | Proposed first step; not built |
+| Splat training (gsplat, Brush, LichtFeld Studio, OpenSplat) | A COLMAP or nerfstudio dataset | Splat scene (PLY, SPZ or SOG) | Researched; needs a GPU in practice (OpenSplat on CPU is about 100× slower) |
+| Depth-guided splat training (DN-Splatter, AGS-Mesh) | The same, plus depth per image | Splat scene that keeps sensor shape; a mesh | Researched |
+| On-phone splat training (PocketGS) | Keyframes and ARKit or ARCore poses | Splat scene in about 4 minutes on an iPhone 15 | Paper only; no code |
+| Splat SLAM (GS-ICP SLAM, RTG-SLAM, SplaTAM) | RGB-D video | Poses and a splat map, live | Researched; GPU only |
+| Feed-forward splat models (YoNoSplat, AnySplat, WorldMirror) | A set of frames; YoNoSplat and WorldMirror also take poses and intrinsics, WorldMirror also depth | Splat scene and camera poses in seconds; WorldMirror adds depth and normals | Researched; GPU only. WorldMirror's licence excludes the UK |
+| Diffusion repair (ArtiFixer, World-from-Motion, Difix3D+) | A trained splat scene and its cameras | Repainted views and a retrained scene | Reference only: invents unseen content; ArtiFixer and Difix3D+ weights are non-commercial |
 
 ### Objects
 
@@ -176,6 +208,7 @@ These blur the boundary: one pass gives what SfM and dense depth give separately
 | SAM family | One image and a prompt (box or point) | Video (SAM 2) | Pixel mask per object | Researched; classical masks tested |
 | ByteTrack | Boxes per frame | — | Short-term track IDs; forgets objects out of view | Researched |
 | 3D placement | Box or mask, depth, pose, intrinsics | — | A 3D point on the object's visible surface | Implemented |
+| Shape from outlines, or visual hull (Prisacariu et al. 2015) | Object masks or colour models from many views, their poses | Phone orientation sensor | One object's closed outer shape in a voxel grid; no hollows, no real size | Researched; phone code not released |
 | Persistent identity (association) | 3D sightings, appearance, earlier object records | — | Object records with every sighting; distinct counts | Implemented, not yet independently scored |
 
 ## The questions to ask of any new method
