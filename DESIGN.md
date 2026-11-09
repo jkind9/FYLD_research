@@ -644,6 +644,8 @@ Start this work after a reproducible baseline is identified, rather than waiting
 | 5. Re-point and retire | Experiments import `sitescan`. The walkthrough goes to `evaluation/` or `archive/`. Temporary forwarding imports are deleted | No `importlib` or `sys.path` edits in `sitescan/` or `apps/`. Default tests under 60 s |
 | 6. Documents | Root README rewritten as the product README: what it does, install, run, where things are. `experiments/README.md` status table corrected | The manager runs the depth example from the README on a fresh clone |
 
+**Progress (9 November 2026).** Phases 0 and 1 are done. The baseline is commit `d859867`. `pyproject.toml` and `uv.lock` pin the versions that made the golden outputs (torch 2.11.0 CPU, transformers 5.14.1, open3d 0.19.0, numpy 2.4.2). `sitescan/` holds empty stage folders. The committed fixture `tests/fixtures/tum_desk_20` and its outputs `tum_desk_20_golden.json` are described in `tests/fixtures/README.md`; `pytest -m golden` checks them. The full 15 October room rebuilt to the same 554,067 cleaned points. `models/manifest.toml` lists the two models with their hashes. Not done in phase 1: the local 20-frame slice of the 15 October walk, because a cut from mid-walk loses the anchor events before it; the full-walk run stands in for it. Next: phase 2, starting with the session stage.
+
 During phases 0–3, read-only source review and independent measurements can continue. Freeze a stage's implementation while moving it. After phase 3, method trials use the extracted stages and can run alongside interface work in phases 4–6. Keep work that would change the same stage sequential. Do not make the core refactor depend on a new phone recording, a GPU slot or a completed SceneView benchmark.
 
 ## 12. Risks
@@ -661,12 +663,14 @@ During phases 0–3, read-only source review and independent measurements can co
 
 ## 13. Decisions needed
 
+Phases 0 and 1 went ahead on the recommended answers to 1, 3, 5 and 7: the package is `sitescan`, the fixture is recording format v2, the environment tool is uv, and the code says "scale". Each is cheap to change until phase 2 moves code. Decisions 2 and 4 are not needed until their stages move.
+
 1. **Package name.** Working name `sitescan`.
 2. **The walkthrough runner (about 3,600 lines).** Fold its layer-by-layer tests with known-correct inputs into `evaluation/layers/` (recommended), or archive it.
 3. **Recording version 1.** Drop the v1 reader and have the stand-in write v2 (recommended), or keep both readers.
 4. **Object counting.** Move the pilot into `sitescan/objects/` marked experimental (recommended; the live processor already runs it), or leave it in experiments until counting is fixed.
 5. **Environment tool.** uv (recommended), pip-tools or conda.
-6. **Timing.** Reopened by the owner on 9 November. Recommendation: save the baseline and start phases 0–3 next; resume method trials at their output-preservation check. Do not wait for all open experiments or make those trials wait for phases 4–6. The refactor itself has not started.
+6. **Timing.** Reopened by the owner on 9 November. Recommendation: save the baseline and start phases 0–3 next; resume method trials at their output-preservation check. Do not wait for all open experiments or make those trials wait for phases 4–6. Phases 0 and 1 were done on 9 November.
 7. **Scale or size.** One word in code and product docs for the factor that turns learned depth into metres. "Scale" is recommended.
 
 ## 14. Terms used

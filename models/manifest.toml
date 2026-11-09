@@ -1,0 +1,23 @@
+# Model weights used by the product code. The weights are local only; git keeps this list.
+# Hashes are SHA-256 of the files as they sit today (9 November 2026). The paths move to models/ in phase 2.
+
+[depth_anything_v2_metric_indoor_small]
+role = "learned depth"
+source = "https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Indoor-Small-hf"
+revision = "not recorded at download"
+weights_licence = "Apache-2.0 (Small model)"
+runtime = "transformers 5.14.1, torch 2.11.0, CPU"
+output = "metric depth in metres, indoor (Hypersim fine-tune); still needs the scale stage"
+path = "data/models/depth_anything_v2_metric_indoor_small"
+sha256."model.safetensors" = "e990eb82fbf11b05b7813261196a2b841bdcf5a05f64396724a8987fa90504a3"
+sha256."config.json" = "0b1d9fc591693d16b864249a9cfcf5264c8c00be999c1643fa1c64dc105d55f8"
+sha256."preprocessor_config.json" = "533b16a60445d7cab5086d39b45f92be45624b977972c62d5984d93e98366063"
+
+[yolo26x]
+role = "object detection (experimental)"
+source = "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26x.pt"
+weights_licence = "AGPL-3.0 or Ultralytics commercial; unresolved for proprietary use"
+runtime = "ultralytics 8.4.172 in .venv-yolo"
+output = "COCO boxes and labels"
+path = "checkpoints/yolo26x.pt"
+sha256."yolo26x.pt" = "9fdd44a31c504547ffb81d2c6d9e6dac3493c8eaa8b0398d3f43bae6c7003e92"

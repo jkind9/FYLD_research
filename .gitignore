@@ -107,3 +107,9 @@ experiments/01_camera_capture_delivery/build/container-readiness.json
 
 # Papers and lecture slides are third-party copyright; they stay local. READMEs name each source.
 *.pdf
+
+# The committed test recording (public TUM data) and its golden outputs.
+!tests/fixtures/**
+# Model weights stay local; the manifest records their source, licence and hashes.
+models/*
+!models/manifest.toml

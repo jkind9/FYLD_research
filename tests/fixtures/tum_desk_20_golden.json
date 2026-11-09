@@ -1,0 +1,407 @@
+{
+ "room": {
+  "far_m": 4.0,
+  "voxel_m": 0.02,
+  "cells": [
+   8,
+   6
+  ],
+  "supported_only": false,
+  "clean_up": {
+   "raw_points": 55872,
+   "vote_removed": 232,
+   "pieces_removed": 3678,
+   "piece_cell_m": 0.02,
+   "pieces_kept_at_most": 50,
+   "piece_min_points": 5000
+  },
+  "frames": {
+   "fused": 7,
+   "turns_0": 1,
+   "turns_3": 6
+  },
+  "size_median_min_median_max": [
+   0.6849658378606459,
+   0.8314521795657126,
+   0.9598039480307797
+  ],
+  "surface_points": 51962,
+  "map": {
+   "observed_area_m2": 7.375000000000002,
+   "plane_area_m2": 3.150000000000001,
+   "length_m": 4.45,
+   "width_m": 3.1500000000000004,
+   "highest_m": 0.5259177437686184,
+   "plane_normal": [
+    -0.010294153823430251,
+    -0.022777751395727828,
+    0.9996875534077705
+   ]
+  }
+ },
+ "live": {
+  "updates": [
+   {
+    "frame_seq": 0,
+    "size": 0.8296312574621111,
+    "size_source": "arcore_depth",
+    "surface_points": 9225,
+    "map": {
+     "observed_area_m2": 1.7875000000000003,
+     "plane_area_m2": 0.9975000000000002,
+     "length_m": 1.75,
+     "width_m": 2.5,
+     "highest_m": 0.5271035578585553,
+     "plane_normal": [
+      -0.131072709389503,
+      -0.23430741765637766,
+      0.9632860317083887
+     ]
+    }
+   },
+   {
+    "frame_seq": 1,
+    "size": 0.746747664365057,
+    "size_source": "tracked_points",
+    "surface_points": 15026,
+    "map": {
+     "observed_area_m2": 1.9900000000000004,
+     "plane_area_m2": 1.0700000000000003,
+     "length_m": 2.5500000000000003,
+     "width_m": 1.6,
+     "highest_m": 0.5070654037389135,
+     "plane_normal": [
+      -0.04486138870000488,
+      -0.30977887607624804,
+      0.9497497058387773
+     ]
+    }
+   },
+   {
+    "frame_seq": 2,
+    "size": 0.7950850669102175,
+    "size_source": "tracked_points",
+    "surface_points": 18952,
+    "map": {
+     "observed_area_m2": 2.2125000000000004,
+     "plane_area_m2": 1.0900000000000003,
+     "length_m": 1.8,
+     "width_m": 2.6,
+     "highest_m": 0.5375572194579102,
+     "plane_normal": [
+      -0.059907300273155495,
+      -0.25400229959890774,
+      0.9653465425288728
+     ]
+    }
+   },
+   {
+    "frame_seq": 3,
+    "size": 0.7747924821462076,
+    "size_source": "arcore_depth",
+    "surface_points": 23817,
+    "map": {
+     "observed_area_m2": 2.8625000000000007,
+     "plane_area_m2": 1.0900000000000003,
+     "length_m": 2.6,
+     "width_m": 2.0500000000000003,
+     "highest_m": 0.4902963904596652,
+     "plane_normal": [
+      -0.007975194725829238,
+      -0.1346493453837352,
+      0.9908612163450625
+     ]
+    }
+   },
+   {
+    "frame_seq": 4,
+    "size": 0.7200734098578981,
+    "size_source": "tracked_points",
+    "surface_points": 26900,
+    "map": {
+     "observed_area_m2": 3.0825000000000005,
+     "plane_area_m2": 1.1675000000000002,
+     "length_m": 2.7,
+     "width_m": 2.15,
+     "highest_m": 0.7212215673917994,
+     "plane_normal": [
+      0.00010346419935882494,
+      -0.23588002938016453,
+      0.971782177771733
+     ]
+    }
+   },
+   {
+    "frame_seq": 5,
+    "size": 0.7915314363789983,
+    "size_source": "tracked_points",
+    "surface_points": 35202,
+    "map": {
+     "observed_area_m2": 3.9900000000000007,
+     "plane_area_m2": 1.5650000000000004,
+     "length_m": 3.2,
+     "width_m": 2.6,
+     "highest_m": 0.6600420668380736,
+     "plane_normal": [
+      -0.03198375620041606,
+      -0.0969650207637601,
+      0.9947737552265822
+     ]
+    }
+   },
+   {
+    "frame_seq": 6,
+    "size": 0.7901293661440376,
+    "size_source": "arcore_depth",
+    "surface_points": 44237,
+    "map": {
+     "observed_area_m2": 5.005000000000001,
+     "plane_area_m2": 2.1350000000000002,
+     "length_m": 3.9000000000000004,
+     "width_m": 2.5500000000000003,
+     "highest_m": 0.5463916945796329,
+     "plane_normal": [
+      0.043997612757593334,
+      -0.08727258393451712,
+      0.9952123924896763
+     ]
+    }
+   },
+   {
+    "frame_seq": 7,
+    "size": 0.8506716642476047,
+    "size_source": "tracked_points",
+    "surface_points": 51619,
+    "map": {
+     "observed_area_m2": 5.637500000000001,
+     "plane_area_m2": 2.1775,
+     "length_m": 4.05,
+     "width_m": 2.7,
+     "highest_m": 0.6194234388746037,
+     "plane_normal": [
+      0.018637166933204462,
+      -0.12583803293578028,
+      0.9918757207813675
+     ]
+    }
+   },
+   {
+    "frame_seq": 8,
+    "size": 0.8093668583366352,
+    "size_source": "tracked_points",
+    "surface_points": 58020,
+    "map": {
+     "observed_area_m2": 6.192500000000001,
+     "plane_area_m2": 2.4300000000000006,
+     "length_m": 4.45,
+     "width_m": 3.0500000000000003,
+     "highest_m": 0.5324193435054965,
+     "plane_normal": [
+      0.03847363163298713,
+      -0.0643263633377164,
+      0.9971869928196584
+     ]
+    }
+   },
+   {
+    "frame_seq": 9,
+    "size": 0.7846882875630954,
+    "size_source": "arcore_depth",
+    "surface_points": 59268,
+    "map": {
+     "observed_area_m2": 6.5150000000000015,
+     "plane_area_m2": 2.6800000000000006,
+     "length_m": 4.5,
+     "width_m": 3.7,
+     "highest_m": 0.5433245637194346,
+     "plane_normal": [
+      0.030042129274927172,
+      -0.07181145555388975,
+      0.9969656891387287
+     ]
+    }
+   },
+   {
+    "frame_seq": 10,
+    "size": 0.7052875054488562,
+    "size_source": "tracked_points",
+    "surface_points": 61013,
+    "map": {
+     "observed_area_m2": 6.707500000000001,
+     "plane_area_m2": 2.8375000000000004,
+     "length_m": 4.45,
+     "width_m": 3.7,
+     "highest_m": 0.540786663974462,
+     "plane_normal": [
+      0.04104015429248465,
+      -0.07315119204047404,
+      0.9964760954677773
+     ]
+    }
+   },
+   {
+    "frame_seq": 11,
+    "size": 0.7101542386089194,
+    "size_source": "tracked_points",
+    "surface_points": 61918,
+    "map": {
+     "observed_area_m2": 6.860000000000001,
+     "plane_area_m2": 2.6800000000000006,
+     "length_m": 4.5,
+     "width_m": 3.7,
+     "highest_m": 0.5196439495815424,
+     "plane_normal": [
+      0.05762553268936457,
+      -0.07963293135110083,
+      0.995157220858442
+     ]
+    }
+   },
+   {
+    "frame_seq": 12,
+    "size": 0.6885619634190734,
+    "size_source": "arcore_depth",
+    "surface_points": 63844,
+    "map": {
+     "observed_area_m2": 7.007500000000001,
+     "plane_area_m2": 2.5725000000000007,
+     "length_m": 4.3500000000000005,
+     "width_m": 3.8000000000000003,
+     "highest_m": 0.5521945528221341,
+     "plane_normal": [
+      0.03705910430899707,
+      -0.08298361337453841,
+      0.9958616082062407
+     ]
+    }
+   },
+   {
+    "frame_seq": 13,
+    "size": 0.6727874738200859,
+    "size_source": "tracked_points",
+    "surface_points": 65698,
+    "map": {
+     "observed_area_m2": 7.082500000000001,
+     "plane_area_m2": 2.8925000000000005,
+     "length_m": 4.5,
+     "width_m": 3.75,
+     "highest_m": 0.5290693898596528,
+     "plane_normal": [
+      0.03508888960829847,
+      -0.06710631300591273,
+      0.9971286339188185
+     ]
+    }
+   },
+   {
+    "frame_seq": 14,
+    "size": 0.6570390999907673,
+    "size_source": "tracked_points",
+    "surface_points": 67113,
+    "map": {
+     "observed_area_m2": 7.100000000000001,
+     "plane_area_m2": 2.7925000000000004,
+     "length_m": 4.2,
+     "width_m": 3.8000000000000003,
+     "highest_m": 0.5726340885057893,
+     "plane_normal": [
+      0.005368351225992941,
+      -0.0628548120985576,
+      0.9980082431529158
+     ]
+    }
+   },
+   {
+    "frame_seq": 15,
+    "size": 0.6693122915074409,
+    "size_source": "arcore_depth",
+    "surface_points": 69037,
+    "map": {
+     "observed_area_m2": 7.192500000000002,
+     "plane_area_m2": 2.7850000000000006,
+     "length_m": 4.45,
+     "width_m": 3.75,
+     "highest_m": 0.5492302841780202,
+     "plane_normal": [
+      0.025973633369364618,
+      -0.0705166361075348,
+      0.997172389510295
+     ]
+    }
+   },
+   {
+    "frame_seq": 16,
+    "size": 0.7353483665850522,
+    "size_source": "tracked_points",
+    "surface_points": 70460,
+    "map": {
+     "observed_area_m2": 7.115000000000001,
+     "plane_area_m2": 2.5100000000000007,
+     "length_m": 4.5,
+     "width_m": 3.75,
+     "highest_m": 0.5541767810951856,
+     "plane_normal": [
+      0.0063118566542981185,
+      -0.04738370278956743,
+      0.9988568191565425
+     ]
+    }
+   },
+   {
+    "frame_seq": 17,
+    "size": 0.7983463392698465,
+    "size_source": "tracked_points",
+    "surface_points": 71874,
+    "map": {
+     "observed_area_m2": 7.337500000000001,
+     "plane_area_m2": 2.8675000000000006,
+     "length_m": 4.5,
+     "width_m": 3.7,
+     "highest_m": 0.5941887685416997,
+     "plane_normal": [
+      0.034748918995467046,
+      -0.0590578521350206,
+      0.9976495791257793
+     ]
+    }
+   },
+   {
+    "frame_seq": 18,
+    "size": 0.7390340026687843,
+    "size_source": "arcore_depth",
+    "surface_points": 72510,
+    "map": {
+     "observed_area_m2": 7.342500000000001,
+     "plane_area_m2": 2.5725000000000007,
+     "length_m": 4.4,
+     "width_m": 3.8000000000000003,
+     "highest_m": 0.5780449385724289,
+     "plane_normal": [
+      -0.0011910921354233216,
+      -0.0697607591577667,
+      0.9975630395023951
+     ]
+    }
+   },
+   {
+    "frame_seq": 19,
+    "size": 0.6860369180733183,
+    "size_source": "tracked_points",
+    "surface_points": 73191,
+    "map": {
+     "observed_area_m2": 7.377500000000001,
+     "plane_area_m2": 2.6575000000000006,
+     "length_m": 4.5,
+     "width_m": 3.7,
+     "highest_m": 0.533672163940523,
+     "plane_normal": [
+      0.02969214983643624,
+      -0.046516044124999094,
+      0.9984761558880871
+     ]
+    }
+   }
+  ],
+  "surface_points": 73191
+ }
+}

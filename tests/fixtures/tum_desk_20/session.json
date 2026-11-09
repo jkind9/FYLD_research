@@ -1,0 +1,12 @@
+{
+  "type": "session",
+  "version": 2,
+  "device": {
+    "model": "stand-in"
+  },
+  "started_ms": 0,
+  "control": "reference",
+  "source": "tum:data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk",
+  "every": 5,
+  "note": "ground-truth poses and sensor depth in the phone session format; not ARCore"
+}
