@@ -42,7 +42,7 @@
       "ref": "main",
       "commit": "b9dd1b1de535e6d36e777fb42b8433c781bfd783",
       "purpose": "Streaming pose and depth from plain video (Task128); candidate core of the reconstruction",
-      "environment": ".venv-lingbot: Python 3.10, torch 2.8.0 cu128, editable install; SDPA attention (FlashInfer not installed); weights lingbot-map.pt and lingbot-map-long.pt (4.63 GB each) in third_party/lingbot-map-weights",
+      "environment": "experiments/lingbot_map/.venv: Python 3.10, torch 2.8.0 cu128, editable install; SDPA attention (FlashInfer not installed); weights lingbot-map.pt and lingbot-map-long.pt (4.63 GB each) in third_party/lingbot-map-weights",
       "licence_sources": [
         "https://github.com/robbyant/lingbot-map/blob/main/LICENSE.txt",
         "https://huggingface.co/robbyant/lingbot-map"

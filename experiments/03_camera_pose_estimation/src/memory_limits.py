@@ -2,6 +2,19 @@
 
 import ctypes
 import os
+import sys
+
+
+def direct_interpreter() -> tuple[str, dict[str, str]]:
+    """This Python's interpreter and environment, started without a venv launcher.
+
+    On Windows a venv's python.exe is a launcher that starts the base interpreter as its
+    child, so a Job Object attached to the started process would miss the code it runs.
+    The launcher passes the venv to the base interpreter through __PYVENV_LAUNCHER__.
+    """
+    if sys.prefix == sys.base_prefix:
+        return sys.executable, dict(os.environ)
+    return sys._base_executable, {**os.environ, "__PYVENV_LAUNCHER__": sys.executable}
 
 
 class _BasicLimitInformation(ctypes.Structure):

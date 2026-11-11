@@ -13,7 +13,7 @@ Following the camera through a video, live or offline, with a map, refinement an
 | [tracking_review_2026-10-13.md](tracking_review_2026-10-13.md) | Review of 13 October 2026: what is missing, panorama versus 3D, alternatives to COLMAP, phone design |
 | [orb_slam/README.md](orb_slam/README.md) | ORB-SLAM3 as the tracking reference, and current alternatives |
 | [open3d_rgbd.md](open3d_rgbd.md) | Open3D RGB-D odometry: the project's current tracker |
-| [rtabmap.md](rtabmap.md) | RTAB-Map: tracking and mapping with revisits |
+| [rtabmap.md](rtabmap.md) | RTAB-Map digest, 10 November 2026: pinned release, Android ARCore, corrected maps, surface grouping limits, licences and a controlled comparison with the current pipeline |
 | [mast3r_slam.md](mast3r_slam.md) | MASt3R-SLAM: dense reconstruction from one-camera video |
 | [fragments_and_anchors.md](fragments_and_anchors.md) | Fragments (Choi et al. 2015) and ARCore anchors: keeping a fused surface consistent when the path is corrected (14 October 2026) |
 

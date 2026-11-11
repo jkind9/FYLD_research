@@ -35,14 +35,14 @@ The five conditions are geometry with the last accepted position, geometry with 
 The exact Task20 source run, descriptor cache and settings are pinned in the Task21 task file. To rerun the CPU replay, use the repository Python environment:
 
 ```powershell
-.venv-yolo/Scripts/python.exe -m experiments.06_object_recognition.experiments.04_geometry_identity.run
+.venv/Scripts/python.exe -m experiments.06_object_recognition.experiments.04_geometry_identity.run
 ```
 
 Each replay invocation publishes a new immutable run. To check the accepted run without running inference or publishing another run, set `TASK21_VERIFIED_RUN` to its directory and run:
 
 ```powershell
 $env:TASK21_VERIFIED_RUN = 'experiments/06_object_recognition/experiments/04_geometry_identity/runs/20261004T143434.634726Z_33f59456f7d34e50a64020ed6e0613bb'
-.venv-yolo/Scripts/python.exe -m pytest -q -p no:cacheprovider experiments/06_object_recognition/experiments/04_geometry_identity/tests
+.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider experiments/06_object_recognition/experiments/04_geometry_identity/tests
 Remove-Item Env:\TASK21_VERIFIED_RUN
 ```
 

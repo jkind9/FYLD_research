@@ -3,7 +3,6 @@
 import json
 import os
 import subprocess
-import sys
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -17,7 +16,7 @@ import psutil
 from experiments.datasets.acquisition import sha256
 from experiments.shared.runs import verify_run, write_json
 
-from .memory_limits import WindowsProcessMemoryLimit
+from .memory_limits import WindowsProcessMemoryLimit, direct_interpreter
 
 WALL_CLOCK_LIMIT_S = 30 * 60
 MEMORY_LIMIT_BYTES = 2 * 1024**3
@@ -444,8 +443,9 @@ def supervise(
         "--_deadline-monotonic",
         str(start + wall_clock_limit_s),
     ]
+    interpreter, environment = direct_interpreter()
     command = [
-        sys.executable,
+        interpreter,
         "-c",
         _WORKER_BOOTSTRAP,
         str(release_file),
@@ -480,7 +480,7 @@ def supervise(
     last_launch_write = start
     try:
         try:
-            process = process_factory(command, cwd=repo)
+            process = process_factory(command, cwd=repo, env=environment)
         except OSError as error:
             reason = f"Worker launch failed: {error}"
         if process is None:

@@ -1,12 +1,12 @@
 """Run LingBot-Map on a phone session's frames and save a camera pose and a depth map for every frame.
 
-Runs in .venv-lingbot (Python 3.10, torch 2.8.0 cu128) and reuses LingBot-Map's own demo.py for loading,
+Runs in experiments/lingbot_map/.venv (Python 3.10, torch 2.8.0 cu128) and reuses LingBot-Map's own demo.py for loading,
 the model and post-processing. Frames are turned 90 degrees clockwise first, because the Redmi records
 portrait walks on their side (Task109). Only what compare.py needs is kept, as memory-mappable .npy files:
 depth.npy and depth_conf.npy (float16, N x 518 x 518), extrinsic.npy (world-to-camera, N x 3 x 4),
 intrinsic.npy (N x 3 x 3), and run.json with timings and memory peaks.
 
-    .venv-lingbot\\python -B experiments/lingbot_map/run.py --frames <session>/frames --model <ckpt.pt> --out <folder>
+    experiments\\lingbot_map\\.venv\\python -B experiments/lingbot_map/run.py --frames <session>/frames --model <ckpt.pt> --out <folder>
 """
 
 import argparse

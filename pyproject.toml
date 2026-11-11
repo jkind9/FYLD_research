@@ -18,7 +18,19 @@ live = [
     "open3d>=0.19",
 ]
 # Ultralytics is AGPL-3.0 or commercial; kept apart until its terms are settled (DESIGN.md 7.5).
-objects = ["ultralytics"]
+objects = ["ultralytics>=8.4"]
+# Structure from motion, used by experiments/sfm only.
+sfm = ["pycolmap>=4.2"]
+# Scoring, viewers and experiment reports outside the product.
+eval = [
+    "matplotlib>=3.10",
+    "plotly>=6.6",
+    "playwright>=1.59",
+    "psutil>=7.2",
+    "pyyaml>=6.0",
+    # LGPL-3.0; the Video Depth Anything trial in src/walkthrough needs it.
+    "easydict>=1.13",
+]
 dev = [
     "pytest>=9.0",
     "ruff>=0.16",
@@ -43,6 +55,13 @@ constraint-dependencies = [
     "transformers==5.14.1",
     "open3d==0.19.0",
     "safetensors==0.8.0",
+    "ultralytics==8.4.172",
+    "pycolmap==4.2.1",
+    "plotly==6.6.0",
+    "playwright==1.59.0",
+    "psutil==7.2.2",
+    "matplotlib==3.10.8",
+    "easydict==1.13",
     "pytest==9.0.2",
     "ruff==0.16.2",
 ]

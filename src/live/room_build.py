@@ -22,71 +22,39 @@ from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 
-import cv2
 import numpy as np
 import open3d as o3d
 from PIL import Image
 
+from sitescan.depth import predict as predict_depth
+from sitescan.mapping import measure_site
+from sitescan.scale.fit import (  # noqa: F401
+    CELLS,
+    MIN_CELL_PIXELS,
+    cell_index,
+    supported_pixels,
+)
+from sitescan.scale.fit import fit_grid as grid_size
+from sitescan.scale.targets import MAX_DEPTH_AGE_S  # noqa: F401
+from sitescan.scale.targets import fresh_depth as _fresh_depth
+
 from . import clean, orientation_control, sizing
 from .fragments import Fragments
-from .processor import LiveProcessor
 from .stream import read_session, session_v1
 
-CELLS = (8, 6)  # columns, rows; chosen by held-out AbsRel over 1, 2-parameter, 4 x 3 and 8 x 6 fits
-MIN_CELL_PIXELS = 20
-TIMELINE_STEP = 12  # pixel stride for the saved per-frame points: about 2,000 per frame
-# One ARCore depth period on the Redmi. On the 15 October walk 138 of 147 depth maps were 7-40 ms older than their
-# image; frames 669-691 carried 4.4 s old maps that placed a cushion 0.7 m off its fresh-depth position (Task116).
-MAX_DEPTH_AGE_S = 0.1
-
-
-def cell_index(uv: np.ndarray, image_size, cells: tuple[int, int] = CELLS) -> np.ndarray:
-    """Grid cell of each pixel (u, v), numbered row by row."""
-    (w, h), (nx, ny) = image_size, cells
-    cols, rows = np.clip(uv[:, 0].astype(int), 0, w - 1), np.clip(uv[:, 1].astype(int), 0, h - 1)
-    return np.minimum(rows * ny // h, ny - 1) * nx + np.minimum(cols * nx // w, nx - 1)
-
-
-def supported_pixels(uv: np.ndarray, shape, cells: tuple[int, int] = CELLS) -> np.ndarray:
-    """Pixels whose grid cell holds at least MIN_CELL_PIXELS ARCore depth pixels, so their size is not the fallback."""
-    (h, w), (nx, ny) = shape, cells
-    counts = np.bincount(cell_index(uv, (w, h), cells), minlength=nx * ny).reshape(ny, nx)
-    rows, cols = np.minimum(np.arange(h) * ny // h, ny - 1), np.minimum(np.arange(w) * nx // w, nx - 1)
-    return counts[rows[:, None], cols[None, :]] >= MIN_CELL_PIXELS
+TIMELINE_STEP = 12  # pixel stride for the saved per-frame points
 
 
 def upright_depth(model, colour: np.ndarray, world_from_camera: np.ndarray):
     """Learned depth and validity on the recorded grid, predicted from the image turned upright (Task109)."""
     turns = orientation_control.quarter_turns(world_from_camera)
-    depth, valid = model(np.ascontiguousarray(orientation_control.upright(colour, turns)))
-    return orientation_control.recorded(depth, turns), orientation_control.recorded(valid, turns), turns
-
-
-def grid_size(model: np.ndarray, valid: np.ndarray, uv: np.ndarray, target: np.ndarray,
-              cells: tuple[int, int] = CELLS, fallback: float | None = None) -> np.ndarray | None:
-    """Per-pixel size: median target / model in each cell, blended.
-
-    A cell with too few targets takes `fallback` (a log size), or the frame median when none is given.
-    """
-    h, w = model.shape
-    cols, rows = np.clip(uv[:, 0].astype(int), 0, w - 1), np.clip(uv[:, 1].astype(int), 0, h - 1)
-    keep = valid[rows, cols] & (model[rows, cols] > 0)
-    if keep.sum() < sizing.MIN_DEPTH_PIXELS:
-        return None
-    cols, rows = cols[keep], rows[keep]
-    log_ratio = np.log(target[keep] / model[rows, cols])
-    nx, ny = cells
-    grid = np.full((ny, nx), np.median(log_ratio) if fallback is None else fallback)
-    cell = cell_index(uv[keep], (w, h), cells)
-    for index in np.unique(cell):
-        mine = cell == index
-        if mine.sum() >= MIN_CELL_PIXELS:
-            grid.flat[index] = np.median(log_ratio[mine])
-    return np.exp(cv2.resize(grid, (w, h), interpolation=cv2.INTER_LINEAR))
+    depth, valid = predict_depth(model, colour, world_from_camera)
+    return depth, valid, turns
 
 
 def fresh_depth(frame) -> bool:
-    return frame.camera_t_ns - frame.depth.t_ns <= MAX_DEPTH_AGE_S * 1e9
+    """The room frame's measured-depth freshness under the shared age rule."""
+    return _fresh_depth(frame.depth.t_ns, frame.camera_t_ns)
 
 
 def _world(uv: np.ndarray, z: np.ndarray, intrinsics, world_from_camera: np.ndarray) -> np.ndarray:
@@ -233,7 +201,7 @@ def main(argv: list[str] | None = None) -> int:
                "supported_only": args.supported_only, "clean_up": clean_up,
                "frames": dict(outcome), "size_median_min_median_max": [min(sizes), float(np.median(sizes)), max(sizes)],
                "surface_points": len(surface),
-               "map": LiveProcessor._map(SimpleNamespace(_cameras=cameras), surface)}
+               "map": measure_site(surface, cameras)}
     (args.out / "summary.json").write_text(json.dumps(summary, indent=1))
     print(json.dumps(summary, indent=1))
     return 0

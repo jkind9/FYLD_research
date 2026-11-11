@@ -91,10 +91,10 @@ The numerical score and the inspected preview agree: observed room surfaces are 
 
 An initial sequential CPU run stopped after seven frames without a completion manifest. A second run rebuilt all nine frames and performed one exact reverse query against their joined cloud. It took about 3.3 minutes. The final publication preserves those verified numerical outputs and corrects how earlier fault summaries are labelled; source computation timing remains in `metrics.json`, with copying/publication timing recorded separately. Earlier directories remain intact. Fault summaries from the incomplete run are diagnostic records only and are excluded from the completed measurements. Independent analytic tests verify that incorrect scale and pose direction worsen error. Those dataset fault queries were not repeated for this publication.
 
-Install the [CPU requirements](requirements.txt), then run from the repository root:
+Build the environment, then run from the repository root:
 
 ```powershell
-python -m pip install -r experiments/04_surface_reconstruction/requirements.txt
+uv sync --all-extras
 python -B tools/check.py
 python -B -m experiments.04_surface_reconstruction.src.run --dataset data/icl_nuim --frame-ids <explicit IDs> --threshold-m <reporting distance in metres>
 ```

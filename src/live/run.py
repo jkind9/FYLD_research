@@ -16,11 +16,12 @@ import json
 import sys
 import threading
 import time
+from functools import partial
 from pathlib import Path
 
 import numpy as np
 
-from experiments.shared.contracts import Calibration
+from sitescan.depth import load_model
 
 from .processor import LiveProcessor
 from .stream import capture_receiver, replay
@@ -29,21 +30,7 @@ DEPTH_CHECKPOINT = Path("data/models/depth_anything_v2_metric_indoor_small")
 DETECTOR_CHECKPOINT = Path("checkpoints/yolo26x.pt")
 
 
-def depth_anything(checkpoint: Path):
-    """Depth Anything V2 Metric Small on the CPU as depth_model(rgb) -> (depth_m, valid)."""
-    from src.walkthrough.steps.contracts import ColourFrame
-    from src.walkthrough.steps.depth import DepthAnythingV2Metric
-
-    predict = DepthAnythingV2Metric(checkpoint, device="cpu").load()
-
-    def estimate(colour: np.ndarray):
-        h, w = colour.shape[:2]
-        # the model ignores calibration; the record only satisfies the frame contract
-        frame = ColourFrame("live", None, Calibration(w, h, 1.0, 1.0, w / 2, h / 2, "x-right_y-down_z-forward"), colour)
-        prediction = next(iter(predict(iter([frame]), run=None)))
-        return prediction.depth, prediction.valid
-
-    return estimate
+depth_anything = partial(load_model, threads=None)
 
 
 def yolo26x(checkpoint: Path):

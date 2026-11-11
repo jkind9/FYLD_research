@@ -1,4 +1,4 @@
-"""Save Depth Anything V2 Metric Small depth for every frame of a sequence (CPU, `.venv-yolo`).
+"""Save Depth Anything V2 Metric Small depth for every frame of a sequence (CPU, `.venv`).
 
     python -m experiments.sfm.dump_depth --recording icl:data/icl_nuim/trajectory2 --every 2 \
         --output experiments/sfm/runs/depth/icl_every2

@@ -178,7 +178,7 @@ A Gaussian splat is a small soft blob with position, orientation, width, colour 
 Task100 turns the Redmi walk's saved surface into an offline interactive HTML. It displays 78,328 splats grouped from 845,428 reconstructed points, with height colours, orbit/zoom, a top view and eight recorded-camera/photo bookmarks. The original point cloud is preserved. These are surface-derived splats; photographic Gaussian training has not been run. Source and display settings: [surface Gaussian viewing](../research/3d_vision_fundamentals/surface_gaussian_viewing.md).
 
 ```text
-.venv-yolo\Scripts\python -B -m tools.demos.capture_scene --surface <surface.ply> --session <v2 session folder> --out <viewer.html>
+.venv\Scripts\python -B -m tools.demos.capture_scene --surface <surface.ply> --session <v2 session folder> --out <viewer.html>
 ```
 
 ### Fuse and score depth
@@ -186,8 +186,8 @@ Task100 turns the Redmi walk's saved surface into an offline interactive HTML. I
 Fuse Depth Anything along the SfM path, sized to SfM points, and score it (TUM desk; paths in `experiments/sfm/README.md`):
 
 ```text
-.venv-sfm\Scripts\python -m experiments.sfm.run_dense --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 --depth model-sfm-size --depth-maps <Depth Anything run> --poses sfm:<SfM run>/output/incremental --sfm-size best-fit --run-root experiments/sfm/runs/dense_tum_desk
-.venv-sfm\Scripts\python -m experiments.sfm.report --dense experiments/sfm/runs/dense_tum_desk/*
+.venv\Scripts\python -m experiments.sfm.run_dense --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 --depth model-sfm-size --depth-maps <Depth Anything run> --poses sfm:<SfM run>/output/incremental --sfm-size best-fit --run-root experiments/sfm/runs/dense_tum_desk
+.venv\Scripts\python -m experiments.sfm.report --dense experiments/sfm/runs/dense_tum_desk/*
 ```
 
 `output/surface_points.npy` in the run folder can be opened in any point-cloud viewer.

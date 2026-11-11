@@ -12,6 +12,7 @@ from PIL import Image
 
 from experiments.shared.geometry import check_depth_grid, depth_metres
 from experiments.shared.runs import Run, write_json
+from sitescan.depth.model import infer, load_model
 
 from ..records import StepResult, Unavailable, failed_step
 from .capture import calibration_for, saved_colour_frames
@@ -102,59 +103,24 @@ class DepthAnythingV2Metric:
             raise ValueError("Depth Anything V2 maximum depth must be positive and finite")
 
     def load(self) -> DepthEstimator:
-        if not self.checkpoint.is_dir():
-            raise FileNotFoundError(
-                f"Local model checkpoint directory not found: {self.checkpoint}"
-            )
-
-        import torch
-        from transformers import AutoImageProcessor, AutoModelForDepthEstimation
-
-        processor = AutoImageProcessor.from_pretrained(
-            self.checkpoint, local_files_only=True
-        )
-        model = AutoModelForDepthEstimation.from_pretrained(
-            self.checkpoint, local_files_only=True
-        )
-        model = model.to(self.device).eval()
-        return partial(
-            _predict_metric_depth,
-            processor=processor,
-            model=model,
-            torch=torch,
-            device=self.device,
-            max_depth_m=self.max_depth_m,
-        )
+        estimate = load_model(self.checkpoint, threads=None, device=self.device,
+                              max_depth_m=self.max_depth_m)
+        return partial(_predict_arrays, estimate=estimate)
 
 
-def _predict_metric_depth(
-    frames: Iterator[ColourFrame],
-    *,
-    run: Run,
-    processor: Any,
-    model: Any,
-    torch: Any,
-    device: str,
-    max_depth_m: float = 20.0,
-) -> Iterator[DepthPrediction]:
-    """Predict metric camera-axis depth using RGB input alone."""
-    del run  # Timing is measured by the owning depth layer.
+def _predict_arrays(frames, *, run, estimate):
+    """Walkthrough predictions adapted from the shared RGB-array model callable."""
     for frame in frames:
-        image = Image.fromarray(frame.colour, mode="RGB")
-        inputs = processor(images=image, return_tensors="pt")
-        inputs = {name: tensor.to(device) for name, tensor in inputs.items()}
-        with torch.inference_mode():
-            predicted = model(**inputs).predicted_depth
-            prediction = torch.nn.functional.interpolate(
-                predicted.unsqueeze(1),
-                size=frame.colour.shape[:2],
-                mode="bicubic",
-                align_corners=False,
-            )[0, 0]
-        depth, valid = depth_metres(prediction.detach().cpu().numpy(), units_per_metre=1)
-        valid &= depth <= max_depth_m
-        depth = np.where(valid, depth, np.nan)
+        depth, valid = estimate(frame.colour)
         yield DepthPrediction(frame.frame_id, depth, valid)
+
+
+def _predict_metric_depth(frames, *, run, processor, model, torch, device,
+                          max_depth_m=20.0):
+    """Walkthrough predictions using caller-supplied loaded model components."""
+    estimate = partial(infer, processor=processor, model=model, torch=torch,
+                       device=device, max_depth_m=max_depth_m)
+    yield from _predict_arrays(frames, run=run, estimate=estimate)
 
 
 @dataclass(frozen=True)

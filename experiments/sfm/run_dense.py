@@ -1,7 +1,7 @@
 """Fuse per-frame depth along a camera path into one surface and score it against a reference.
 
 Poses come from the recording's ground truth (`--poses true`, Task71 controls) or from a saved
-SfM run (`--poses sfm:<run>/output/<mapper>`, Task72). Example (`.venv-sfm`):
+SfM run (`--poses sfm:<run>/output/<mapper>`, Task72). Example (`.venv`):
 
     python -m experiments.sfm.run_dense --recording icl:data/icl_nuim/trajectory2 --every 2 \
         --depth sensor --poses true --run-root experiments/sfm/runs/dense_icl

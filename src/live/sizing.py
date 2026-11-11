@@ -5,51 +5,29 @@ The size multiplies the model's depth (median of target / model at matched pixel
 
 from __future__ import annotations
 
-import importlib
-
 import numpy as np
+
+from sitescan import scale
+from sitescan.scale.fit import MIN_DEPTH_PIXELS, MIN_POINTS
+from sitescan.scale.fit import fit_one as _fit
+from sitescan.scale.targets import MIN_CONFIDENCE  # noqa: F401
+from sitescan.types import ArcoreDepth, Camera
 
 from .stream import session_v1
 
-dense = importlib.import_module("experiments.sfm.src.dense")
-
-MIN_CONFIDENCE = 128  # Google's suggested cut-off for raw depth confidence (0-255)
-MIN_DEPTH_PIXELS = 50  # learning chapter 2: about 50 good points per frame are enough
-MIN_POINTS = 20  # Task72's minimum tracked points per frame
-
 
 def depth_targets(depth: session_v1.Depth, image_k, image_size) -> tuple[np.ndarray, np.ndarray]:
-    """Confident raw depth pixels as (image pixel u, v) and depth in metres along the camera axis.
-
-    The depth image has its own field of view and intrinsics, so each pixel goes back to a 3D
-    camera point and forward into the sent image.
-    """
-    y, x = np.nonzero((depth.depth_m > 0) & (depth.confidence >= MIN_CONFIDENCE))
-    fx, fy, cx, cy = depth.intrinsics
-    fxi, fyi, cxi, cyi = image_k
-    uv = np.c_[cxi + fxi * (x - cx) / fx, cyi + fyi * (y - cy) / fy]
-    inside = (uv[:, 0] >= 0) & (uv[:, 0] < image_size[0]) & (uv[:, 1] >= 0) & (uv[:, 1] < image_size[1])
-    return uv[inside], depth.depth_m[y, x][inside].astype(np.float64)
+    """Measured targets adapted from the wire depth record."""
+    height, width = depth.depth_m.shape
+    raw = ArcoreDepth(depth.t_ns, depth.depth_m, depth.confidence,
+                      Camera(*depth.intrinsics, width, height))
+    return scale.depth_targets(raw, Camera(*image_k, *image_size))
 
 
 def point_targets(frame: session_v1.Frame) -> tuple[np.ndarray, np.ndarray]:
-    """Tracked points in front of the camera as (pixel, depth along the camera axis)."""
-    if frame.pose is None or not len(frame.point_ids):
-        return np.zeros((0, 2)), np.zeros(0)
-    camera_from_world = np.linalg.inv(session_v1.world_from_camera(frame.pose))
-    z = -(frame.points_world @ camera_from_world[2, :3] + camera_from_world[2, 3])
-    keep = z > 0
-    return frame.points_pixel[keep], z[keep]
-
-
-def _fit(model: np.ndarray, valid: np.ndarray, uv: np.ndarray, target: np.ndarray, minimum: int) -> float | None:
-    h, w = model.shape
-    cols, rows = np.clip(uv[:, 0].astype(int), 0, w - 1), np.clip(uv[:, 1].astype(int), 0, h - 1)
-    keep = valid[rows, cols]
-    if keep.sum() < minimum:
-        return None
-    fitted = dense.fit_size(model[rows, cols][keep], target[keep])
-    return None if fitted is None else fitted[0]
+    """Tracked targets adapted from a wire camera pose."""
+    pose = None if frame.pose is None else session_v1.world_from_camera_cv(frame.pose)
+    return scale.point_targets(frame.points_world, frame.points_pixel, pose)
 
 
 def frame_size(model: np.ndarray, valid: np.ndarray, frame: session_v1.Frame,

@@ -9,7 +9,7 @@ For a new recording, install FYLD capture from the deployment index and follow t
 Start the host in the repository root:
 
 ```text
-.venv-yolo\Scripts\python experiments/01_camera_capture_delivery/host/receiver.py --out outputs/field_accuracy/indoor-01 --sessions 1
+.venv\Scripts\python experiments/01_camera_capture_delivery/host/receiver.py --out outputs/field_accuracy/indoor-01 --sessions 1
 ```
 
 Use the computer address printed by the receiver, on the same Wi-Fi as the phone. Press **Stream to computer**. Press **Stop streaming** after the walk. The receiver writes one session subfolder containing `session.json`, `frames.jsonl`, JPEGs and available raw depth. Keep that folder intact. A stream saved before Task87 has no versioned session header or depth and cannot be scored by this tool.
@@ -17,7 +17,7 @@ Use the computer address printed by the receiver, on the same Wi-Fi as the phone
 To measure host processing speed on the same walk, use this instead of the receiver command (both use port 8765):
 
 ```text
-.venv-yolo\Scripts\python -m src.live.run --listen 8765 --out outputs/field_accuracy/indoor-01-live
+.venv\Scripts\python -m src.live.run --listen 8765 --out outputs/field_accuracy/indoor-01-live
 ```
 
 After stopping the phone stream, wait for the host to finish and save the final surface and summary. Score the received session under `outputs/field_accuracy/indoor-01-live/sessions/<received-session>`, not the host's `updates.jsonl`: dropped processing updates must not remove poses from the tracking check. Object counts are still known to be too high; this task does not validate them.
@@ -52,7 +52,7 @@ Save a JSON file beside each session. The numbers below are an example, not meas
 ```
 
 ```text
-.venv-yolo\Scripts\python experiments/01_camera_capture_delivery/host/accuracy.py --session outputs/field_accuracy/indoor-01/<received-session> --measurements outputs/field_accuracy/indoor-01/measurements.json --out outputs/field_accuracy/indoor-01/scores.json
+.venv\Scripts\python experiments/01_camera_capture_delivery/host/accuracy.py --session outputs/field_accuracy/indoor-01/<received-session> --measurements outputs/field_accuracy/indoor-01/measurements.json --out outputs/field_accuracy/indoor-01/scores.json
 ```
 
 The scorer refuses missing or untracked checkpoints, reversed loop endpoints, repeated or decreasing timestamps/sequences, nonfinite poses, and nonpositive or nonfinite tape lengths. It preserves the measurements and session header, including any `control: reference` label from stand-in data. Such data does not establish phone accuracy.

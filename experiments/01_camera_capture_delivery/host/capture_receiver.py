@@ -23,9 +23,9 @@ from pathlib import Path
 
 from PIL import Image
 
-import protocol
-import session_v2
-from session_v1 import _require
+from sitescan.session import protocol
+from sitescan.session import wire_v2 as session_v2
+from sitescan.session.wire_v1 import _require
 
 PORT = 8766
 TIMEOUT_S = 20

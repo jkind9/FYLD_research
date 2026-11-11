@@ -4,17 +4,18 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.spatial.transform import Rotation  # type: ignore[import-untyped]
 
+from sitescan.depth.model import metres
+
 from .contracts import Calibration
 
 
 def depth_metres(encoded: ArrayLike, units_per_metre: float) -> tuple[NDArray, NDArray]:
     if not np.isfinite(units_per_metre) or units_per_metre <= 0:
         raise ValueError("Depth scale must be positive and finite")
-    depth = np.asarray(encoded, dtype=np.float64) / units_per_metre
-    if depth.ndim != 2:
+    encoded = np.asarray(encoded, dtype=np.float64)
+    if encoded.ndim != 2:
         raise ValueError("Depth must be a two-dimensional image")
-    valid = np.isfinite(depth) & (depth > 0)
-    return np.where(valid, depth, np.nan), valid
+    return metres(encoded, units_per_metre)
 
 
 def check_depth_grid(depth: NDArray, valid: NDArray, calibration: Calibration) -> None:

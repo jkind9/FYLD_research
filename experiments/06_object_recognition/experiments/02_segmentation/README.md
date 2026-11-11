@@ -11,12 +11,12 @@ No learned segmentation weights are acquired. The existing YOLO26x checkpoint su
 Use the existing installed environment:
 
 ```powershell
-.venv-yolo/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.02_segmentation.run
+.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.02_segmentation.run
 ```
 
 The command verifies Task17's frozen publication and original archive-member hashes. It also verifies the accepted Task28 cache when available. `--cache` can name its offline copy. An explicit missing or invalid cache path fails before publication. If the default optional cache is absent, the receipt marks the predicted condition unavailable. `--output` selects a new run root; destinations inside an existing run are rejected before mutation. Each publication captures source code, environment, settings, masks, original images, overlays and completion hashes. Interrupted runs remain incomplete; restart creates a fresh directory.
 
-Fresh deployment uses an isolated environment and `requirements.txt`. It pins one OpenCV package, opencv-python 5.0.0.93, whose runtime version is 5.0.0, plus inherited shared dependencies. No installs were needed for this run. Transfer original inputs and verified publications offline; no automatic downloads occur.
+The repository's `uv.lock` pins one OpenCV package, opencv-python 5.0.0.93, whose runtime version is 5.0.0. No installs were needed for this run. Transfer original inputs and verified publications offline; no automatic downloads occur.
 
 ## Accepted measured result
 
@@ -43,7 +43,7 @@ Final verification: 28 focused tests pass with 92% production statement coverage
 Task34 is not ready to start. Task31 must complete first, and the independent review records for Tasks21, 22, 32 and 48 must satisfy the gates in its task file. `task.js start` does not check those gates, so its status alone is not a prerequisite check. After the gates clear and the task receives a fresh plan-review PASS, the planned runner invocation is:
 
 ```powershell
-.venv-yolo/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.02_segmentation.run_task34 --coco-root data/coco2017 --task22-run experiments/06_object_recognition/experiments/05_replay/runs/20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66 --task46-run experiments/06_object_recognition/experiments/06_identity_policy/runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16f0f3d53b --output experiments/06_object_recognition/experiments/02_segmentation/runs/<new-run-id>
+.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.02_segmentation.run_task34 --coco-root data/coco2017 --task22-run experiments/06_object_recognition/experiments/05_replay/runs/20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66 --task46-run experiments/06_object_recognition/experiments/06_identity_policy/runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16f0f3d53b --output experiments/06_object_recognition/experiments/02_segmentation/runs/<new-run-id>
 ```
 
 Replace `<new-run-id>` with a directory confirmed not to exist. Restore COCO, Task22 and Task46 inputs from authorized offline copies first. The command does not download missing inputs.

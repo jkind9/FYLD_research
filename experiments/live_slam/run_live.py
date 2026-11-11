@@ -3,7 +3,7 @@
     python -m experiments.live_slam.run_live --system stella --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
         --run-root experiments/live_slam/runs/stella_tum_xyz
 
-Needs the systems built by native/setup_wsl.sh and the runners built as in README.md. Uses `.venv-sfm`.
+Needs the systems built by native/setup_wsl.sh and the runners built as in README.md. Uses the repository's `.venv`.
 """
 
 from __future__ import annotations

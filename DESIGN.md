@@ -1,8 +1,10 @@
 # Design: turning the research repository into product code
 
-Draft for the owner's review, 8 November 2026. Nothing has been moved yet. This document proposes the structure, the rules and the order of the move. The move itself is separate work.
+Design first drafted for the owner's review on 8 November 2026. The move is in progress; section 11 records the completed stages. This document defines the structure, rules and order of the move.
 
 Revised 9 November with [SceneView/Open3Dmap reuse decisions](research/products/sceneview_open3dmap_review_2026-11-09.md#reuse-and-licence-decisions-9-november-2026). The proposed next step is the shared-pipeline move through phase 3 in section 11. New methods follow its output-preservation check; they need not wait for the later interface and Android moves. This remains a recommendation for the timing the owner has reopened.
+
+Revised 10 November with the [RTAB-Map](research/camera_tracking_and_slam/rtabmap.md) and [surface-grouping](research/surface_denoising/surface_grouping.md) reviews. The layers, stages and migration order stay as they are. Section 7.14 records where the later trials land.
 
 It is written for three readers: the project owner, the manager who reads the repository, and whoever writes the product code next. It assumes no knowledge of the code. Terms are explained where they first appear and listed at the end.
 
@@ -22,6 +24,7 @@ It is written for three readers: the project owner, the manager who reads the re
 12. [Risks](#12-risks)
 13. [Decisions needed](#13-decisions-needed)
 14. [Terms used](#14-terms-used)
+15. [Review of the move, 9 November 2026](#15-review-of-the-move-9-november-2026)
 
 ## 1. The proposal in brief
 
@@ -367,7 +370,7 @@ Every run writes one folder, `outputs/<session>_<pipeline>_<yyyymmdd-hhmm>/`, wi
   1. Scale: about 40 lines of arithmetic; a direct port to Kotlin.
   2. Depth model: export to ONNX or LiteRT (TensorFlow Lite). ZipDepth, a smaller candidate (6.1 million parameters, 24 ms per frame on a desktop CPU), exported to ONNX, but its TensorFlow Lite conversion failed. Depth Anything V2 Small has not been tried.
   3. Objects: YOLO on the phone is a known path; Google's ARCore ML sample does it.
-  4. Fusion and clean-up last. Open3D, which fuses today, does not publish an Android build (to confirm before planning the port), so this needs other code.
+  4. Fusion and clean-up last. Open3D, which fuses today, does not publish an Android build (to confirm before planning the port), so this needs other code. RTAB-Map's Android ARCore driver (BSD-3-Clause core) is one candidate; its accuracy and speed on the Redmi are unmeasured.
 - **One app throughout.** The capture app gains processing behind a setting. There is no second app; the owner ruled this on 14 October.
 - **`android/` layout:** the Gradle project, its tests, and `releases.md` with one entry per build (today one README per build in `mobile_deployments/`). APK files are kept as release files, not in git.
 - **Python stays the reference.** A phone port is correct when it matches the Python output on the parity fixture, not when its output looks right.
@@ -435,6 +438,19 @@ Direct adaptation of SceneView's Apache-2.0 source is a possible reuse route. Be
 Open3Dmap's root CC BY-NC 4.0 code is outside the proposed proprietary product dependency set. Learn from the capture workflow and metadata requirements; implement from our own session contract and separately licensed upstream components. Do not translate its code and treat the result as a new permissive implementation. The SplatJSON document's MIT statement does not cover the app. The research note records the licence sources and unresolved artefact scope.
 
 The first method trial is scale support and bounded hold after the live path receives the established room-build fixes. Object association follows stable geometry and an independently labelled inventory. LiteRT, Kotlin fusion and a detector swap remain separate later comparisons. None of these replaces the far-depth triangulation question.
+
+### 7.14 Learning from RTAB-Map and the surface-grouping review
+
+The [RTAB-Map review](research/camera_tracking_and_slam/rtabmap.md) and the [surface-grouping review](research/surface_denoising/surface_grouping.md) (10 November) add trials, not structure. Each trial lands inside the existing layers. The order and scoring of the trials are in the [project plan](PROJECT_PLAN.md#what-to-take-from-rtab-map-and-the-surface-grouping-review).
+
+| Concern | Design consequence |
+|---|---|
+| RTAB-Map is a C++ tool with its own dependencies | It stays in `experiments/` with its own build, as COLMAP does (7.5). Its adapter reads recordings through `sitescan.session`. The product depends on it only if a trial adopts it |
+| Two systems can correct the same surface | RTAB-Map's pose graph and our anchors both move geometry after a correction. If its poses are ever adopted, fusion applies one correction, not both |
+| Grouping by colour and surface direction | A new function in `cleanup/` beside `largest_pieces`, chosen by a setting |
+| Region-aware scale | A new function in `scale/` beside `fit_grid`, chosen by a setting |
+| Correcting depth from surfaces matched across views | The one idea that does not fit one stage. It keeps each frame's patch before fusion, corrects depth, then rebuilds. That means a second pass in the room orchestrator and probably a new stage between scale and fusion. Add that stage only when a trial adopts the method |
+| Kinds of match | Same material, same class, same surface and same physical object are different relations. A learned embedding (a vector describing appearance) suggests a match but is not an identity: two identical cones stay two objects in `objects/` |
 
 ## 8. How the code should read
 
@@ -639,12 +655,12 @@ Start this work after a reproducible baseline is identified, rather than waiting
 | 1. Skeleton and golden outputs | Add `pyproject.toml`, the lock file and empty stage folders. Build both fixtures. Run today's code and relevant existing tests, explicitly including folders skipped by default discovery. Save baseline outputs and tolerances before moving a stage | Relevant existing tests and `pytest -m golden` pass against today's implementation; a full local 15 October room result is also saved |
 | 2. Stages, in chain order | Session, depth, scale, fusion, clean-up, mapping, objects. For each: copy the adopted functions, rewrite to section 8, write the README to section 9, add behaviour tests, point the old location at the new function so experiments keep working | Golden outputs unchanged after each stage |
 | 3. Orchestrators, same behaviour | Connect live and room to the extracted stages. Keep current model, scale fallback, frame choice and experimental counting behaviour. Product code must not import the old implementations or experiments | Both pipelines match the phase 1 outputs. The full 15 October room reproduces the baseline 554,067 cleaned points within the recorded tolerance. Live replay stays at or above 1 update/s. This completes the shared-pipeline move |
-| 3a. Behaviour changes and trials | First give live upright images, grid scale and the fresh-depth rule, one checked change at a time. Then trial scale support and hold expiry, and far-depth triangulation. Object association waits for stable geometry and labelled objects. Frame selection from 7.12 remains its own off/on experiment | Record before/after accuracy, coverage and cost for each change; keep a new default only with supporting results. A new baseline records an adopted change. The trials do not block independent work in phases 4–6 |
+| 3a. Behaviour changes and trials | First give live upright images, grid scale and the fresh-depth rule, one checked change at a time. Then trial scale support and hold expiry, and far-depth triangulation with region-aware scale as its control. Depth correction from surfaces matched across views follows triangulation (7.14). Object association and colour grouping in clean-up wait for stable geometry and labelled objects. RTAB-Map's mapping is an experiment with frames, depth and poses held fixed. Frame selection from 7.12 remains its own off/on experiment | Record before/after accuracy, coverage and cost for each change; keep a new default only with supporting results. A new baseline records an adopted change. The trials do not block independent work in phases 4–6 |
 | 4. Interfaces and app | `apps/cli.py`, `apps/receiver/`, `apps/viewer/`; the app to `android/` | A new walk recorded and processed using only the new commands |
 | 5. Re-point and retire | Experiments import `sitescan`. The walkthrough goes to `evaluation/` or `archive/`. Temporary forwarding imports are deleted | No `importlib` or `sys.path` edits in `sitescan/` or `apps/`. Default tests under 60 s |
 | 6. Documents | Root README rewritten as the product README: what it does, install, run, where things are. `experiments/README.md` status table corrected | The manager runs the depth example from the README on a fresh clone |
 
-**Progress (9 November 2026).** Phases 0 and 1 are done. The baseline is commit `d859867`. `pyproject.toml` and `uv.lock` pin the versions that made the golden outputs (torch 2.11.0 CPU, transformers 5.14.1, open3d 0.19.0, numpy 2.4.2). `sitescan/` holds empty stage folders. The committed fixture `tests/fixtures/tum_desk_20` and its outputs `tum_desk_20_golden.json` are described in `tests/fixtures/README.md`; `pytest -m golden` checks them. The full 15 October room rebuilt to the same 554,067 cleaned points. `models/manifest.toml` lists the two models with their hashes. Not done in phase 1: the local 20-frame slice of the 15 October walk, because a cut from mid-walk loses the anchor events before it; the full-walk run stands in for it. Next: phase 2, starting with the session stage.
+**Progress (9 November 2026).** Phases 0 and 1 are done. The baseline is commit `d859867`. `pyproject.toml` and `uv.lock` pin the versions that made the golden outputs (torch 2.11.0 CPU, transformers 5.14.1, open3d 0.19.0, numpy 2.4.2). `sitescan/` now contains session, depth, scale, fusion, cleanup and mapping; objects and pipelines remain empty. The committed fixture `tests/fixtures/tum_desk_20` and its outputs `tum_desk_20_golden.json` are described in `tests/fixtures/README.md`; `pytest -m golden` checks them. The full 15 October room rebuilt to the same 554,067 cleaned points. `models/manifest.toml` lists the two models with their hashes. Not done in phase 1: the local 20-frame slice of the 15 October walk, because a cut from mid-walk loses the anchor events before it; the full-walk run stands in for it. Phase 2: the session stage now lives in `sitescan/session`, with shared RGB records and OpenCV matrix poses. Old callers use forwarding imports. Its golden outputs, full-room numbers and Chromium page match the baseline. Depth now lives in `sitescan/depth`; its array callable replaces the dummy calibration, with recorded live input and upright room input preserved. Its golden and full-room outputs match. Scale now lives in `sitescan/scale`, offering single and grid fits with shared target projection. Live fallback and room freshness remain unchanged; golden and full-room outputs match. Fusion now lives in `sitescan/fusion`, with fragment bindings, corrected surfaces and RGB order preserved. Golden and full-room outputs match. Cleanup now keeps only the visibility vote and largest pieces in `sitescan/cleanup`; rejected filters and tuner diagnostics live in `experiments/surface_cleanup`. Old imports, golden outputs and full-room results match. Mapping now lives in `sitescan/mapping`, with array-based plane and footprint functions shared by both callers. The room no longer fakes a live processor; experiment chunk readers remain outside the package. Golden and full-room results match. Next: objects.
 
 During phases 0–3, read-only source review and independent measurements can continue. Freeze a stage's implementation while moving it. After phase 3, method trials use the extracted stages and can run alongside interface work in phases 4–6. Keep work that would change the same stage sequential. Do not make the core refactor depend on a new phone recording, a GPU slot or a completed SceneView benchmark.
 
@@ -666,9 +682,9 @@ During phases 0–3, read-only source review and independent measurements can co
 Phases 0 and 1 went ahead on the recommended answers to 1, 3, 5 and 7: the package is `sitescan`, the fixture is recording format v2, the environment tool is uv, and the code says "scale". Each is cheap to change until phase 2 moves code. Decisions 2 and 4 are not needed until their stages move.
 
 1. **Package name.** Working name `sitescan`.
-2. **The walkthrough runner (about 3,600 lines).** Fold its layer-by-layer tests with known-correct inputs into `evaluation/layers/` (recommended), or archive it.
+2. **The walkthrough runner (about 3,600 lines).** Owner chose on 9 November: keep its layer-by-layer tests with known-correct inputs in `evaluation/layers/`.
 3. **Recording version 1.** Drop the v1 reader and have the stand-in write v2 (recommended), or keep both readers.
-4. **Object counting.** Move the pilot into `sitescan/objects/` marked experimental (recommended; the live processor already runs it), or leave it in experiments until counting is fixed.
+4. **Object counting.** Owner chose on 9 November: move the pilot into `sitescan/objects/` marked experimental; keep its current behaviour.
 5. **Environment tool.** uv (recommended), pip-tools or conda.
 6. **Timing.** Reopened by the owner on 9 November. Recommendation: save the baseline and start phases 0–3 next; resume method trials at their output-preservation check. Do not wait for all open experiments or make those trials wait for phases 4–6. Phases 0 and 1 were done on 9 November.
 7. **Scale or size.** One word in code and product docs for the factor that turns learned depth into metres. "Scale" is recommended.
@@ -692,3 +708,61 @@ Phases 0 and 1 went ahead on the recommended answers to 1, 3, 5 and 7: the packa
 | Visibility vote | Drop a point when the views that see through it outweigh the views that see it there |
 | VOL | Variance of Laplacian: the variance of an image's second spatial derivative, used here to rank candidate sharpness |
 | ZNCC | Zero-mean normalised cross-correlation: image similarity after removing mean brightness and normalising contrast |
+
+## 15. Review of the move, 9 November 2026
+
+The owner asked for a full review once the stage moves were reported done: does the code follow this design, has any capability been lost, and is the repository clean and easy to find one's way around? This section records what the review found, before any fix. Section 11's progress note records what was then changed.
+
+### What is in place
+
+- Six of the seven stages live in `sitescan/`: session, depth, scale, fusion, clean-up and mapping. Together they are 1,436 lines in 26 files. The largest module is the v2 recording reader at 256 lines. No stage imports an experiment, carries a task number or loads code by folder path. Ruff passes.
+- Each moved stage has a README in the section 9 shape and a behaviour test file in `tests/`.
+- The golden outputs, the full 15 October room (554,067 cleaned points, 6.35 × 3.30 m) and a live replay at 1.59 updates per second were all reproduced after the last move. The default test suite passed: 1,046 tests, 7 skipped, in 348 s on the system Python.
+
+### Findings
+
+**The move is not finished.**
+
+1. The objects stage was not moved. Task 144 is filed under `done/`, but its record says the work did not start. `sitescan/objects/` and `sitescan/pipelines/` hold one docstring each, and `sitescan/io.py` does not exist.
+2. Phase 3 has not started. Both orchestrators are still in `src/live`. `processor.py` still loads the object pilot by string, and still builds a dummy `Calibration` inside a `SimpleNamespace` to satisfy the pilot's record types. This is the pattern section 3 names as problem 2. `run.py` loads the detector the same way.
+3. No page shows how the orchestrators combine the stages. A reader has to trace `src/live/processor.py` and `room_build.py` by hand.
+
+**In the moved stages.**
+
+4. The shared `Frame` record and `session.frames()` are used by tests only. Both orchestrators still read the checked wire records through `read_wire_session` and convert poses themselves.
+5. `session.frames()` returns anchor poses in OpenCV camera axes. Both orchestrators place fragments with anchor matrices in ARCore's camera axes. In exact arithmetic the two give the same surface, because the axis change cancels. In floating point the TSDF grid sits differently, so switching the orchestrators to `frames()` is a behaviour change. It needs its own golden check, not a silent swap.
+6. `cleanup.clean_room` is the catalogue's headline function, but the room build does not call it. It calls the vote and the piece filter separately, to time and count each.
+7. `mapping` keeps the running sums of the chunked experiment it came from: `total = np.zeros(3)` followed by `total += ...`, in two places. The result is the same; the code reads as if it streams.
+8. `scale.fit` repeats the same two lines that clip pixel positions to the image in three functions.
+
+**Repository layout.**
+
+9. There are six Python environments at the root. `.venv` is empty. `.venv-sitescan` is the locked product environment (1.3 GB). `.venv-yolo` adds Ultralytics on top of the system Python, and `.venv-colmap` adds pycolmap 3.12.6 the same way. `.venv-sfm` holds pycolmap 4.2.1 and Open3D (820 MB). `.venv-lingbot` is a conda environment with Python 3.10 and CUDA PyTorch 2.8 (7.6 GB). The full test suite runs only on the system Python, which has CUDA PyTorch; the locked `dev` extra lacks psutil, matplotlib, plotly, Playwright, PyYAML, pycolmap and Ultralytics, so the suite cannot run in the locked environment.
+10. Model weights sit in `data/models/` and `checkpoints/`, not `models/`, although `models/manifest.toml` exists.
+11. The root still holds `HARNESS_WORKFLOW_AUDIT.md` (115 KB), a `.coverage` file from 14 October, `demo_outputs/` (8 tracked files, 18 MB of generated pages), `checkpoints/` and `.worktrees/task-44`. The last is a stale copy of files from 5 October, not a registered git worktree.
+12. `outputs/` has 72 entries. 25 are named after task numbers and 21 are loose `.log` or `.csv` files beside the folder they describe. Pytest scratch folders (`task92_pytest_*`) and input clips (`task65_clips`, `task51_real_clips`) sit among the results.
+13. `src/` mixes the two orchestrators with 7 trial and scoring scripts (`denoise_trial`, `landmark_probe`, `depth_check`, `cleanup_attributes`, `count_report`, `score`, `stand_in`) and the 3,600-line walkthrough runner. The owner chose on 9 November to move the walkthrough to `evaluation/layers/`. `src/` holds 42 imports that load code by folder path; there were 35 when this design was written.
+14. The default test lane takes 348 s, against the 60 s aim in section 7.7. `pytest.ini` lists 19 test folders by hand.
+
+**Documents.**
+
+15. The root README (423 lines) is a research narrative from mid-October. It says depth has "no method run", names Task55 as owner of a mapping method that now exists, and never mentions `sitescan`. Much of it repeats `PROJECT_PLAN.md`.
+16. The status table in `experiments/README.md` is out of date in the same way.
+17. `src/live/README.md` (199 lines) mixes how to run the code with dated results from nine tasks.
+18. The `sitescan` README tells readers to use `.venv-sitescan` for the product and `.venv-yolo` for objects.
+
+### Fixes, in order
+
+1. One environment: `.venv`, built by `uv sync` from `uv.lock`, with extras for objects, structure from motion and the experiment tests. The full suite and the golden lane run in it. LingBot-Map's conda environment cannot join (Python 3.10, CUDA PyTorch 2.8), so it moves into its experiment folder. The other environments are removed.
+2. Move the objects stage, keeping its behaviour. Detection, lifting a box into 3D, matching and counting become array functions; the object list that persists between frames becomes one small class, as `Fragments` is for fusion.
+3. Move both orchestrators into `sitescan/pipelines/`, with `sitescan/io.py` for writing results and `apps/cli.py` as the one command. They keep reading wire records and keep ARCore-axes anchors (finding 5), so outputs do not change. `src/live/run.py` and `room_build.py` keep working as thin forwards until phase 5.
+4. Small code fixes for findings 6–8, each checked against the golden outputs.
+5. Move the walkthrough and the trial scripts out of `src/` into `evaluation/`. Default tests become the product lane; the full suite stays one command.
+6. Tidy the root and `outputs/`: weights into `models/`, the audit file into `archive/`, demo pages and old runs into named groups under `outputs/`.
+7. Rewrite the root README as the product README with a map of the repository; correct the experiments status table; move dated results out of how-to READMEs; add a page that shows how the orchestrators combine the stages.
+
+### Status, 10 November 2026
+
+Fix 1 is done. `uv sync --all-extras` builds the one root environment, `.venv`, from `uv.lock`; new extras are `objects` (Ultralytics 8.4.172), `sfm` (pycolmap 4.2.1) and `eval` (matplotlib, plotly, Playwright, psutil, PyYAML, easydict), pinned to the versions past runs used. In `.venv` the default lane gave 1,044 passed and 2 failed: experiment 03's tracker supervisor started its worker through the venv's `python.exe` launcher, so the Windows memory cap held the launcher and not the worker. The supervisor now starts the base interpreter directly (`direct_interpreter` in `memory_limits.py`), and both tests pass in `.venv` and on the system Python. The golden lane passes in `.venv` (3 passed). `.venv-sitescan`, `.venv-yolo`, `.venv-colmap` and `.venv-sfm` are removed; the LingBot-Map conda environment now sits at `experiments/lingbot_map/.venv` and still starts. Eight experiment `requirements.txt` files that the lock now covers are removed; the two GPU and WSL pins in `experiments/02_stereo_depth` stay. Task record 145 was closed early by another session and does not show this; this note is the record.
+
+Fixes 2–7 have not started. The work paused on 10 November so a parallel Codex session could finish its research task first. That task (148, the RTAB-Map and surface-grouping reviews) finished the same day, so fix 2, the objects stage, is next. The stage moves since commit `5f6f7e9` are not yet committed.

@@ -4,6 +4,8 @@ What removes stray and doubled points from the project's fused surfaces, how oth
 
 The live pipeline today (`src/live`) runs depth → size → fuse → surface → map → objects. The live loop has no clean-up stage: its only filters are a depth range of 0.1-4.0 m and ARCore confidence ≥ 128 when choosing sizing targets. The offline `room_build` also rejects depth maps more than 0.1 s older than their photo and, since Task126, runs the owner's clean-up: the visibility vote, then the largest pieces ([below](#owners-setting-in-the-room-build-task126)).
 
+The [surface grouping digest](surface_grouping.md), added 10 November 2026, examines joining patches by geometry, colour, texture and learned features. It identifies direct prior art for region-based depth scaling and proposes a controlled test of temporal surface association, measurement accuracy and distinct-object retention. The [RTAB-Map digest](../camera_tracking_and_slam/rtabmap.md) covers an existing mapping backend to use as a separate comparison.
+
 ## Terms used here
 
 - **Fusion**: merging many per-frame depth images, each placed by its camera pose, into one surface. The project uses Open3D's signed-distance volume (TSDF) with 2 cm voxels and a truncation of 4 voxels.

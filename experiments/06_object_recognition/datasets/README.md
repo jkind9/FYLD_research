@@ -8,7 +8,7 @@ Two pre-gap frames are enrollment; four later frames are evaluation; validation 
 
 ## Prepare and inspect
 
-Use the existing Python environment and pinned dependencies in `experiments/shared/requirements.txt`. No model, inference or download is required.
+Use the repository's `.venv` (`uv sync --all-extras`). No model, inference or download is required.
 
 ```powershell
 python -B -m experiments.06_object_recognition.datasets.prepare

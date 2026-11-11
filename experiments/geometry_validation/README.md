@@ -47,10 +47,10 @@ The first local CPU inspection on 2 October 2026 processed frames 1, 2 and 3. It
 
 Task 03 now supplies a CPU-only control that decodes clean ICL depth, applies supplied camera poses and exports every stage. It does not estimate movement. Its shared records preserve image identifiers, calibration, metres, pose direction and separate world/segment origins. ICL image IDs are not timestamps; this adapter records no capture time.
 
-Run from the repository root after installing [control dependencies](../shared/requirements.txt):
+Run from the repository root after building the environment:
 
 ```powershell
-python -m pip install -r experiments/shared/requirements.txt
+uv sync --all-extras
 python -B tools/check.py -q
 python -B -m experiments.geometry_validation.src.run --dataset data/icl_nuim --frame-ids <explicit IDs>
 ```

@@ -12,6 +12,7 @@ A **Gaussian splat** is a small soft blob with a position, orientation, width, c
 |---|---|
 | [lumina_open_source_parts.md](lumina_open_source_parts.md) | Lumina's pipeline step by step, the open-source part for each step with licence and hardware, what this project can take, and two questions for the owner. Start here |
 | [generative_repair.md](generative_repair.md) | ArtiFixer and World-from-Motion: video diffusion models that repaint thin parts of a splat scene. Reference only: the new content is invented |
+| [idol.md](idol.md) | One photo to a generated 3D object, including unseen sides. Possible object previews; no published metric accuracy or persistent counting result. Assessed 10 November 2026 |
 | [Lumina product note](../products/e2e_product_research/09_lumina/README.md) | The product itself, in the same layout as the other product notes |
 | [SpAItial Echo-3 product note](../products/e2e_product_research/10_spaitial_echo3/README.md) | iPhone video, no LiDAR needed, to a metric splat scene with generated fill, processed in the cloud; free routes, terms and open counterparts (8 November) |
 | [Feed-forward splat models](../feed_forward_3d/feed_forward_splats.md) | YoNoSplat, AnySplat, WorldMirror, Depth Anything 3: a splat scene in one pass, without per-scene training |

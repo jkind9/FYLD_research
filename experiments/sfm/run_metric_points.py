@@ -1,7 +1,7 @@
 """How many metric depth readings does the SfM world need to get its real-world size?
 
 Draws N depth-camera readings at SfM points, sizes the world from them, and scores the camera
-path against the true path. Example (`.venv-sfm`):
+path against the true path. Example (`.venv`):
 
     python -m experiments.sfm.run_metric_points --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
         --every 1 --sfm-run experiments/sfm/runs/tum_xyz/<run>/output/incremental --run-root experiments/sfm/runs/metric_tum_xyz

@@ -689,8 +689,10 @@ def test_windows_job_reports_memory_cap_event_below_reported_peak_limit():
         "except MemoryError: break'); "
         "print(len(blocks)*8*1024**2, flush=True)"
     )
+    interpreter, environment = supervisor.direct_interpreter()
     process = subprocess.Popen(
-        [sys.executable, "-B", "-u", "-c", code],
+        [interpreter, "-B", "-u", "-c", code],
+        env=environment,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

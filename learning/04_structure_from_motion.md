@@ -81,11 +81,11 @@ Learned methods solve the same problem differently: DROID-SLAM and DPVO (learned
 
 ## Try it
 
-Run COLMAP on the TUM xyz clip and score it (needs `.venv-sfm` and the COLMAP build in `third_party/`; see `experiments/sfm/README.md`, "Running"):
+Run COLMAP on the TUM xyz clip and score it (needs the repository's `.venv` and the COLMAP build in `third_party/`; see `experiments/sfm/README.md`, "Running"):
 
 ```text
-.venv-sfm\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --features sift --run-root experiments/sfm/runs/tum_xyz
-.venv-sfm\Scripts\python -m experiments.sfm.report experiments/sfm/runs/tum_xyz/*
+.venv\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --features sift --run-root experiments/sfm/runs/tum_xyz
+.venv\Scripts\python -m experiments.sfm.report experiments/sfm/runs/tum_xyz/*
 ```
 
 Open `debug/colmap/` in the run folder to see the database, the models and COLMAP's own logs.

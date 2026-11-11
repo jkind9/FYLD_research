@@ -38,7 +38,7 @@ cp <repo>/experiments/live_slam/native/run_stella.cc .. && cp <repo>/experiments
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j 16
 ```
 
-(the same for `orbslam3`). Then, from Windows in `.venv-sfm`:
+(the same for `orbslam3`). Then, from Windows in the repository's `.venv`:
 
 ```text
 python -m experiments.live_slam.run_live --system stella --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --run-root experiments/live_slam/runs/stella_tum_xyz_every2

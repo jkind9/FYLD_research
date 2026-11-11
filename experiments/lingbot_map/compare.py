@@ -7,7 +7,7 @@ fused learned depth. ARCore is not ground truth: every number here is agreement 
 
 Writes compare.json and lingbot_cloud.ply (ARCore world, metres, y up) into the run folder.
 
-    .venv-sfm\\Scripts\\python -B -m experiments.lingbot_map.compare --run <run folder> --session <v2 session> [--surface <surface.ply>]
+    .venv\\Scripts\\python -B -m experiments.lingbot_map.compare --run <run folder> --session <v2 session> [--surface <surface.ply>]
 """
 
 import argparse

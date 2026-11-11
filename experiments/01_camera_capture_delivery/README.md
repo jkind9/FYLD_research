@@ -328,7 +328,7 @@ Task96 continues Task95, which was closed as a hand-over on 14 October without b
 python experiments/01_camera_capture_delivery/host/capture_receiver.py --out experiments/01_camera_capture_delivery/runs/capture --port 8766
 ```
 
-It prints this PC's address (192.168.68.123 on the owner's network) to type into the app, and writes one folder per session: `session.json`, `frames.jsonl`, `cam0/<seq>.png` (lossless grey), `frames/<seq>.jpg`, `depth/<seq>.bin`, `imu.csv`, `telemetry.jsonl`, and at the end `summary.json` (frames, missing frame numbers, IMU rates and gaps, a clock-base check, MB/s achieved, connections, and how long sending ran after Stop). It checks every message and refuses a bad one with an error message. `Receiver(..., on_frame=...)` calls back for each new frame, which is how `python -m src.live.run --listen 8766 --out <run>` processes a walk while it arrives. Use `.venv-sfm` (numpy, Pillow). **Local network only:** the protocol has no authentication or encryption; sending over the internet needs a tunnel with authentication, which is out of scope.
+It prints this PC's address (192.168.68.123 on the owner's network) to type into the app, and writes one folder per session: `session.json`, `frames.jsonl`, `cam0/<seq>.png` (lossless grey), `frames/<seq>.jpg`, `depth/<seq>.bin`, `imu.csv`, `telemetry.jsonl`, and at the end `summary.json` (frames, missing frame numbers, IMU rates and gaps, a clock-base check, MB/s achieved, connections, and how long sending ran after Stop). It checks every message and refuses a bad one with an error message. `Receiver(..., on_frame=...)` calls back for each new frame, which is how `python -m src.live.run --listen 8766 --out <run>` processes a walk while it arrives. Use the repository's `.venv`. **Local network only:** the protocol has no authentication or encryption; sending over the internet needs a tunnel with authentication, which is out of scope.
 
 **Tests.**
 
@@ -386,9 +386,9 @@ Task100's [interactive 3D scene](../../outputs/capture_task99_220756/viewer/redm
 Reproduce the capture checks with:
 
 ```text
-.venv-yolo\Scripts\python -B experiments/open_vio/host/clock_check.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk
-.venv-yolo\Scripts\python -B experiments/open_vio/host/recording.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --euroc <new output folder>
-.venv-yolo\Scripts\python -B -m src.live.run --replay experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --out <new output folder> --threads 16
+.venv\Scripts\python -B experiments/open_vio/host/clock_check.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk
+.venv\Scripts\python -B experiments/open_vio/host/recording.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --euroc <new output folder>
+.venv\Scripts\python -B -m src.live.run --replay experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --out <new output folder> --threads 16
 ```
 
 Capture 1.2's APK and identical email copy are in the [deployment index](../../mobile_deployments/README.md), with version and full UTC timestamp in their names. All 30 JVM tests pass. The combined capture, open_vio, live, shared-phone and hygiene suite passes 317 tests with 1 skipped. The 60 s rest, later calibration recordings, full frame/ARCore metadata coverage and independent accuracy remain open.

@@ -32,23 +32,22 @@ Task27 records immutable run links and final measurements. Revised mapping editi
 
 The tested environment uses Windows, Python 3.12, torch 2.11.0+cu128, torchvision 0.26.0+cu128 and an NVIDIA GeForce RTX 5070 Ti. A fresh GPU machine needs the appropriate NVIDIA driver and matching [PyTorch installation](https://pytorch.org/get-started/locally/). Installation on a second machine is unverified. Owner authorisation is required for GPU execution and checkpoint acquisition.
 
-Use a separate environment with the existing GPU-enabled PyTorch:
+Ultralytics comes with the `objects` extra of the repository's one environment:
 
 ```powershell
-python -m venv --system-site-packages .venv-yolo
-.venv-yolo/Scripts/python.exe -m pip install -r experiments/06_object_recognition/pilot/requirements.txt
+uv sync --all-extras
 ```
 
 Explicitly acquire the [official YOLO26x checkpoint](https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26x.pt) at ignored `checkpoints/yolo26x.pt`. Our 118667365-byte checkpoint has SHA-256 `9fdd44a31c504547ffb81d2c6d9e6dac3493c8eaa8b0398d3f43bae6c7003e92`. Acquisition metadata is alongside it. Ultralytics and the checkpoint use AGPL-3.0; deployment licence suitability remains unresolved. The runner requires these exact bytes and the basename `yolo26x.pt` before importing the model loader. Other filenames can trigger model substitution in Ultralytics. Alternate models need a separate recorded protocol.
 
 ```powershell
-.venv-yolo/Scripts/python.exe -B -m experiments.06_object_recognition.pilot.run detect --device 0
+.venv/Scripts/python.exe -B -m experiments.06_object_recognition.pilot.run detect --device 0
 ```
 
 Inspect the printed run's `debug/detections.png`. Then map that verified run:
 
 ```powershell
-.venv-yolo/Scripts/python.exe -B -m experiments.06_object_recognition.pilot.run map --detection-run <detection-run-directory> --reviewed
+.venv/Scripts/python.exe -B -m experiments.06_object_recognition.pilot.run map --detection-run <detection-run-directory> --reviewed
 ```
 
 Open the second run's `review.html`. Scene data, Plotly and the annotated image are embedded for offline viewing. `review.png` is a static preview. Each run retains input hashes, configuration, installed environment, source snapshot, stage timing and a verified manifest. Failed or incomplete runs cannot be consumed. Copied parent artifacts must match their pinned detection manifest.

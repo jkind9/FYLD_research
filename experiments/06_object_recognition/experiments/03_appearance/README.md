@@ -23,7 +23,7 @@ All twenty-five same-class pairs are retained, including observations of distinc
 Use the already installed pinned environment:
 
 ```powershell
-.venv-yolo/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.03_appearance.run
+.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.03_appearance.run
 ```
 
 The command verifies inputs, constructs the existing checkpoint directly, requests one embedding per crop and publishes a new run. The first request also causes the installed predictor's full-model CUDA warmup. The recorded first-call cost includes that warmup. GPU runtime, precision, pooled layer, vector length and checkpoint hashes are checked and recorded. No automatic download or silent CPU fallback occurs.

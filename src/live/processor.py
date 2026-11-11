@@ -9,28 +9,26 @@ from __future__ import annotations
 
 import importlib
 import threading
-from concurrent.futures import ThreadPoolExecutor
 import time
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
-import open3d as o3d
 from PIL import Image
 
 from experiments.shared.contracts import Calibration, Pose
+from sitescan.mapping import measure_site
 
 from . import sizing
 from .fragments import DEPTH_RANGE_M, Fragments
 from .stream import session_v1
 
-footprint_owner = importlib.import_module("experiments.05_birds_eye_mapping.measure")
 localisation = importlib.import_module("experiments.06_object_recognition.pilot.localisation")
 association = importlib.import_module("experiments.06_object_recognition.pilot.association")
 
-# Task55's frozen grid-footprint settings (src/walkthrough/steps/mapping.py GridFootprint).
 MAP_SETTINGS = {"cell_size_m": 0.05, "inlier_distance_m": 0.02, "iterations": 500, "sample_size": 50_000, "seed": 0}
 MIN_MAP_POINTS = 1000
 
@@ -126,23 +124,8 @@ class LiveProcessor:
         return self.fragments.surface()
 
     def _map(self, surface: np.ndarray) -> dict:
-        """Task55's footprint on the surface thinned to half a map cell, so its cost stays flat as the surface grows."""
-        if len(surface) < MIN_MAP_POINTS:
-            return {"skipped": f"fewer than {MIN_MAP_POINTS} surface points"}
-        settings = MAP_SETTINGS
-        cloud = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(surface))
-        surface = np.asarray(cloud.voxel_down_sample(settings["cell_size_m"] / 2).points)
-        try:
-            plane = footprint_owner.fit_dominant_plane(
-                surface, inlier_distance_m=settings["inlier_distance_m"], iterations=settings["iterations"],
-                sample_size=settings["sample_size"], seed=settings["seed"])
-            measured = footprint_owner.footprint(surface, plane, np.mean(self._cameras, 0) - plane.point,
-                                                 cell_size_m=settings["cell_size_m"], band_m=settings["inlier_distance_m"])
-        except ValueError as error:
-            return {"skipped": str(error)}
-        return {"observed_area_m2": measured.observed_area_m2, "plane_area_m2": measured.plane_area_m2,
-                "length_m": measured.length_m, "width_m": measured.width_m, "highest_m": measured.highest_m,
-                "plane_normal": measured.plane.normal.tolist()}
+        """Site measurements from the shared surface method."""
+        return measure_site(surface, self._cameras, min_points=MIN_MAP_POINTS, **MAP_SETTINGS)
 
     def _objects(self, image_path, depth, valid, frame, world_from_camera, keyframe, anchors) -> tuple[float, list[dict]]:
         """Detect, place and count on the worker thread; returns its milliseconds and one log row per detection."""

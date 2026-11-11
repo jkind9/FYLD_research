@@ -1,10 +1,10 @@
-"""Depth Anything 3 Small depth for every SfM-placed frame (CPU, `.venv-yolo`).
+"""Depth Anything 3 Small depth for every SfM-placed frame (CPU, `.venv`).
 
 The model code is cloned to third_party/depth-anything-3 (commit 3d835ec) with its extra packages in
 third_party/da3-deps; neither is installed into an environment:
 
     PYTHONPATH="<repo>/third_party/depth-anything-3/src;<repo>/third_party/da3-deps" \
-    .venv-yolo/Scripts/python.exe -B -m experiments.sfm.dump_da3_depth --recording icl:data/icl_nuim/trajectory2 --every 2 \
+    .venv/Scripts/python.exe -B -m experiments.sfm.dump_da3_depth --recording icl:data/icl_nuim/trajectory2 --every 2 \
         --sfm-run experiments/sfm/runs/icl_lr2/<run>/output/incremental --size 0.2774 --mode posed --output experiments/sfm/runs/depth/icl_da3_posed
 
 `single` runs each photo alone (relative depth, to be sized per frame like Task72); `posed` gives windows of

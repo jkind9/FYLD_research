@@ -39,10 +39,10 @@ This replaces Tasks 76 and 77. The camera path now comes first (from ARCore, bef
 ```text
 # live, from the capture app (Record walk; type this computer's address into the app): runs the v2 capture
 # receiver on port 8766, saves the session under <out>/sessions and processes frames as they arrive
-.venv-yolo\Scripts\python -m src.live.run --listen 8766 --out outputs/live/<name>
+.venv\Scripts\python -m src.live.run --listen 8766 --out outputs/live/<name>
 
 # a saved session (v2 from the capture receiver, v1 from the old receiver or the stand-in below), fed at its recorded speed
-.venv-yolo\Scripts\python -m src.live.run --replay <session folder> --out outputs/live/<name>
+.venv\Scripts\python -m src.live.run --replay <session folder> --out outputs/live/<name>
 ```
 
 Each run writes `updates.jsonl` (one line per update: frame used, delay, stage times, size and its source, map measurements, counts), `surface.ply` and `summary.json` (updates per second, longest gap between updates, median stage times). `--voxel` sets the fusion voxel (default 0.02 m), `--threads` the CPU threads for the models (default 16), `--no-objects` skips detection.
@@ -60,7 +60,7 @@ Local outputs are `outputs/capture_task99_220756/live_verified/{updates.jsonl,su
 Task100 adds an offline [interactive Gaussian viewer](../../outputs/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) for that surface. It shows 78,328 surface-derived splats with height colours, point/splat switching, top/fit controls, keyboard orbit/zoom, eight camera/photo bookmarks and a Gaussian PLY download. The HTML is 1.58 MB, embeds its photos and needs no server or network. It does not perform photographic Gaussian training. Generate a viewer with:
 
 ```text
-.venv-yolo\Scripts\python -B -m tools.demos.capture_scene --surface <surface.ply> --session <v2 session folder> --out <viewer.html>
+.venv\Scripts\python -B -m tools.demos.capture_scene --surface <surface.ply> --session <v2 session folder> --out <viewer.html>
 ```
 
 The renderer and its previous desk demo are reused. Twelve capture-viewer tests and the existing demo tests pass (30 total); real offline Chromium checks found no browser errors or external requests. Display grouping defaults to 6 cm, proposed by Claude, not owner-ruled. Camera bookmarks use original recorded poses, so later anchor corrections can shift the final surface relative to a photo.
@@ -148,8 +148,8 @@ Orientation is now decided per frame, not assumed. `orientation_control.quarter_
 `tools.demos.capture_scene` now shows bookmark photos upright and looks from the matching upright camera. With `--frames <frames.npz>` it adds a "Frame by frame" mode: a slider and play button over the fused frames. It shows the points built so far in photo colours, the current frame's learned points in orange and ARCore points in cyan, and the camera outline and path in red, beside the upright photo. "View from camera" looks through each frame's camera.
 
 ```text
-.venv-yolo\Scripts\python -B -m src.live.room_build --session <v2 session> --out <folder> --far 2.5
-.venv-yolo\Scripts\python -B -m tools.demos.capture_scene --surface <folder>\surface.ply --session <v2 session> --frames <folder>\frames.npz --out <viewer.html>
+.venv\Scripts\python -B -m src.live.room_build --session <v2 session> --out <folder> --far 2.5
+.venv\Scripts\python -B -m tools.demos.capture_scene --surface <folder>\surface.ply --session <v2 session> --frames <folder>\frames.npz --out <viewer.html>
 ```
 
 The 15 October viewer is `outputs/capture_task114_093913/viewer/redmi-room-15oct-frames.html` (8.33 MB, local only because it embeds household photos). Headless Chromium loaded it with no console errors or network requests; the bookmark and timeline screenshots show upright photos.

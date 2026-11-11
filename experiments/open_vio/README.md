@@ -60,7 +60,7 @@ All settings are proposals by Claude of 14 October 2026, not owner rulings.
 
 The offset is measured by cross-correlating the gyroscope's angular speed with the angular speed of ARCore's camera rotation (the Twist-n-Sync method family). Positive means the gyroscope stamps a motion later than the camera. ARCore places its pose at the centre of exposure of the middle image row, while Camera2 stamps the start of exposure of the first row, so even a perfectly aligned phone shows half the exposure plus half the readout time; `camera_imu_clock_offset_ms` is what remains after removing it. Published phones showed offsets up to 30 ms (MARS logger paper), so the offset is measured, not assumed. Kalibr measures it independently in step 2.
 
-Use the `.venv-sfm` environment (numpy, scipy, OpenCV and Pillow). The receiver reuses experiment 01's `host/protocol.py` framing and offers an `on_frame` callback; `python -m src.live.run --listen 8766 --out <run>` uses it for live processing. Replay reads the same v2 folder. The protocol has no authentication or encryption: LAN only; internet use needs a tunnel and authentication, outside this task.
+Use the repository's `.venv` (see the root README). The receiver reuses experiment 01's `host/protocol.py` framing and offers an `on_frame` callback; `python -m src.live.run --listen 8766 --out <run>` uses it for live processing. Replay reads the same v2 folder. The protocol has no authentication or encryption: LAN only; internet use needs a tunnel and authentication, outside this task.
 
 ### Build, install, record
 

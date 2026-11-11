@@ -139,7 +139,7 @@ Without `--depth`, the depth layer is unavailable and later layers wait, so the 
 ### Choosing real methods from the command line
 
 ```powershell
-.venv-yolo/Scripts/python.exe -B -m src.walkthrough.cli `
+.venv/Scripts/python.exe -B -m src.walkthrough.cli `
   --dataset <tum-recording-or-clip> --run-root outputs/walkthrough `
   --depth depth-anything --device cpu --mapping grid-footprint `
   --detector-checkpoint checkpoints/yolo26x.pt --max-distance-m 0.35 --ambiguity-margin-m 0.05 `
@@ -161,7 +161,7 @@ Without `--depth`, the depth layer is unavailable and later layers wait, so the 
 | `--max-distance-m`, `--ambiguity-margin-m` | Objects | Counting settings; 0.35 and 0.05 are the values inherited from experiment 06's pilot (`pilot/replay.py:46`) |
 | `--segmentation rectangle\|grabcut\|canny`, `--appearance` | Objects | Optional diagnostics that never change counts |
 
-`--partial` lets a layer run when its own inputs exist, so later layers still run when one layer is unavailable. `--steps capture` requests a capture-only diagnostic; all six status rows stay visible. The `.venv-yolo` environment has every library the real methods need (PyTorch 2.11, Transformers 5.14.1, Open3D 0.19.0, Ultralytics 8.4.172). YOLO prints warnings to standard output ahead of the JSON summary; the same summary is saved in `output/result.json`.
+`--partial` lets a layer run when its own inputs exist, so later layers still run when one layer is unavailable. `--steps capture` requests a capture-only diagnostic; all six status rows stay visible. The repository's `.venv` has every library the real methods need (PyTorch 2.11, Transformers 5.14.1, Open3D 0.19.0, Ultralytics 8.4.172). YOLO prints warnings to standard output ahead of the JSON summary; the same summary is saved in `output/result.json`.
 
 **Frame spacing matters.** Tracking starts a new origin whenever two frames are more than 0.1 s apart. A clip made of every third 30 Hz frame has gaps of about 0.1 s and broke into 16 pieces; every second frame (gaps up to 0.068 s) tracked all 29 steps.
 

@@ -21,15 +21,14 @@ One run takes one recording and one feature type:
 COLMAP is the official 4.2.1 Windows build without CUDA, downloaded on 2026-10-13 from `https://github.com/colmap/colmap/releases/download/4.2.1/colmap-x64-windows-nocuda.zip` (SHA-256 `c493d88cb4a43f21afba42cb55bf786e5434a0420e73db0ba1454c5d8b3686ae`) and unpacked to `third_party/colmap-4.2.1-windows-nocuda/` (ignored by Git). The pycolmap 4.2.1 Windows wheel can read models but aborts on ALIKED extraction, so every COLMAP stage runs through the command-line build and pycolmap only reads the saved models.
 
 ```text
-python -m venv .venv-sfm
-.venv-sfm\Scripts\python -m pip install -r experiments\sfm\requirements.txt
-.venv-sfm\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 ^
+uv sync --all-extras
+.venv\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 ^
     --features sift --run-root experiments/sfm/runs/tum_desk ^
     --depth-run outputs/task65_runs/desk/depth-anything/20261008T160022.468281Z_86f38337bb0b4db9ad2a2126b3a0b646
-.venv-sfm\Scripts\python -m pytest experiments\sfm\tests -p no:cacheprovider --import-mode=importlib
+.venv\Scripts\python -m pytest experiments\sfm\tests -p no:cacheprovider --import-mode=importlib
 ```
 
-`--recording` is `tum:<folder>` (a TUM recording or Task65 clip with `rgb.txt` and `groundtruth.txt`) or `icl:<folder>` (an ICL-NUIM trajectory folder). `--depth-run` names a finished walkthrough run whose Depth Anything maps set the size. The tests need `.venv-sfm` (pycolmap) and skip elsewhere; the end-to-end test also needs the COLMAP build and takes about 5 s.
+`--recording` is `tum:<folder>` (a TUM recording or Task65 clip with `rgb.txt` and `groundtruth.txt`) or `icl:<folder>` (an ICL-NUIM trajectory folder). `--depth-run` names a finished walkthrough run whose Depth Anything maps set the size. The tests need pycolmap (the `sfm` extra of `.venv`) and skip without it; the end-to-end test also needs the COLMAP build and takes about 5 s.
 
 | File | Responsibility |
 |---|---|
@@ -201,7 +200,7 @@ What this shows:
 
 ## Prompt Depth Anything fed with SfM points (Task79)
 
-Prompt Depth Anything (Small, 25.1M parameters, Apache-2.0 code and checkpoint) takes a low-resolution depth map as a second input and returns full-resolution depth in metres. It was trained on iPhone lidar. Here the map is built per frame from that frame's SfM points (track length ≥ 3, reprojection error ≤ 2 px, at least 20 points), multiplied by the 20-reading size from Task78, on a 192 × 256 grid for the 480 × 640 image. Two fills between points: *linear* (triangulated interpolation) and *nearest* point. The model's depth is fused along the SfM path with the same size, scoring and reference as the rows above. Run with `dump_prompt_depth.py` (`.venv-yolo`) and `run_dense --depth model`. Mean distance to the reference:
+Prompt Depth Anything (Small, 25.1M parameters, Apache-2.0 code and checkpoint) takes a low-resolution depth map as a second input and returns full-resolution depth in metres. It was trained on iPhone lidar. Here the map is built per frame from that frame's SfM points (track length ≥ 3, reprojection error ≤ 2 px, at least 20 points), multiplied by the 20-reading size from Task78, on a 192 × 256 grid for the 480 × 640 image. Two fills between points: *linear* (triangulated interpolation) and *nearest* point. The model's depth is fused along the SfM path with the same size, scoring and reference as the rows above. Run with `dump_prompt_depth.py` and `run_dense --depth model`. Mean distance to the reference:
 
 | Recording | Depth Anything resized to the SfM points (Task78, 20 readings) | Prompt DA, linear fill | Prompt DA, nearest fill | Task71 ceiling (true poses, exact size per frame) |
 |---|---:|---:|---:|---:|

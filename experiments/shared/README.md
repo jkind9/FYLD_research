@@ -8,11 +8,10 @@
 | `runs.py` | Unique run lifecycle, source/environment/configuration snapshot and artifact validation |
 | `timing.py` | Monotonic stage timing, explicit frame counts and weighted throughput |
 | `exporting.py` | Lossless stage arrays, coloured point clouds, visual rasters and 3D previews |
-| `requirements.txt` | Direct dependency versions used for CPU validation |
 
 OpenCV is a shared CPU dependency because the walkthrough imports segmentation and classical appearance modules at startup. Models still load only when selected.
 
-Install with `python -m pip install -r experiments/shared/requirements.txt` from the repository root. Run `python -B tools/check.py -q` for CPU tests with caches outside the repository. The working environment is Python 3.12.10; dependency versions reflect that environment. A clean isolated installation and edge-device packaging remain separate checks.
+Build the environment with `uv sync --all-extras` from the repository root. Run `python -B tools/check.py -q` for CPU tests with caches outside the repository. The working environment is Python 3.12.10; dependency versions reflect that environment. A clean isolated installation and edge-device packaging remain separate checks.
 
 `read_phone_session` takes a Camera2 report, the exported bundle folder and the
 phone-session export validator. It rechecks image hashes, decodes every JPEG,

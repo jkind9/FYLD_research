@@ -7,6 +7,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from sitescan.scale import fit_ratio
+
 
 @dataclass(frozen=True)
 class DepthFrame:
@@ -75,12 +77,13 @@ def fit_size(model_depth: np.ndarray, target_depth: np.ndarray, *, with_shift: b
     Size only: median of target / model, robust to outliers. With shift: least squares, refit
     after dropping the largest residuals of a first fit.
     """
+    if not with_shift:
+        scale = fit_ratio(model_depth, target_depth)
+        return None if scale is None else (scale, 0.0)
     good = np.isfinite(model_depth) & np.isfinite(target_depth) & (model_depth > 0) & (target_depth > 0)
     model, target = model_depth[good], target_depth[good]
     if len(model) < 2:
         return None
-    if not with_shift:
-        return float(np.median(target / model)), 0.0
     design = np.column_stack([model, np.ones_like(model)])
     size, shift = np.linalg.lstsq(design, target, rcond=None)[0]
     residual = np.abs(design @ (size, shift) - target)

@@ -30,11 +30,11 @@ The owner watches RAM while runs go. `run.py` keeps it bounded:
 ## Run it
 
 ```text
-.venv-lingbot\python -B experiments/lingbot_map/run.py --frames <session>/frames --model third_party/lingbot-map-weights/lingbot-map.pt --out <run folder> --device cpu --stride 3 --window 16 [--first 10]
-.venv-sfm\Scripts\python -B -m experiments.lingbot_map.compare --run <run folder> --session <session> --surface outputs/room_build_clean_up_093913/surface.ply
+experiments\lingbot_map\.venv\python -B experiments/lingbot_map/run.py --frames <session>/frames --model third_party/lingbot-map-weights/lingbot-map.pt --out <run folder> --device cpu --stride 3 --window 16 [--first 10]
+.venv\Scripts\python -B -m experiments.lingbot_map.compare --run <run folder> --session <session> --surface outputs/room_build_clean_up_093913/surface.ply
 ```
 
-Set `PYTHONIOENCODING=utf-8` first: LingBot-Map prints characters the Windows console code page cannot show. Setup of `.venv-lingbot` (Python 3.10, torch 2.8.0 cu128, LingBot-Map at commit b9dd1b1) is recorded in `research/repositories.json`.
+Set `PYTHONIOENCODING=utf-8` first: LingBot-Map prints characters the Windows console code page cannot show. Setup of `experiments/lingbot_map/.venv` (Python 3.10, torch 2.8.0 cu128, LingBot-Map at commit b9dd1b1) is recorded in `research/repositories.json`.
 
 ## Results
 

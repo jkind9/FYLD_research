@@ -1,7 +1,7 @@
 """Task45 Part B: box jitter on the TUM freiburg1 desk recording, with a noise floor.
 
 Usage (detector environment, GPU only when no other process is using it):
-    .venv-yolo/Scripts/python.exe -B -m \
+    .venv/Scripts/python.exe -B -m \
         experiments.06_object_recognition.experiments.01_detection.jitter_run \
         --data-root <checkout>/data --checkpoint <checkout>/checkpoints/yolo26x.pt
 

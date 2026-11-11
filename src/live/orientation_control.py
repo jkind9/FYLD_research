@@ -17,37 +17,17 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from sitescan.depth.orientation import (  # noqa: F401
+    quarter_turns,
+    recorded,
+    turned_camera,
+    upright,
+)
+
 from . import sizing
 from .stream import read_session, session_v1
 
 PORTRAIT = 0.7  # |camera x . world up| above this: the image's long edge is vertical, so one turn applies
-
-
-def upright(image: np.ndarray, turns: int = 1) -> np.ndarray:
-    """The image turned clockwise by `turns` quarter turns."""
-    return np.rot90(image, k=-turns)
-
-
-def recorded(image: np.ndarray, turns: int = 1) -> np.ndarray:
-    return np.rot90(image, k=turns)
-
-
-def quarter_turns(world_from_camera_cv: np.ndarray) -> int:
-    """Clockwise quarter turns (0-3) that bring the image's down axis closest to world down (ARCore y is up)."""
-    x, y = world_from_camera_cv[:3, 0], world_from_camera_cv[:3, 1]
-    down_after = [y, x, -y, -x]  # each turn makes the old right axis the new down axis
-    return int(np.argmax([-axis[1] for axis in down_after]))
-
-
-_CLOCKWISE = np.array([[0.0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])  # old camera axes from new
-
-
-def turned_camera(world_from_camera_cv: np.ndarray, intrinsics, size, turns: int):
-    """Pose, (fx, fy, cx, cy) and (width, height) of the camera that took upright(image, turns)."""
-    T, (fx, fy, cx, cy), (w, h) = np.asarray(world_from_camera_cv, float), intrinsics, size
-    for _ in range(turns % 4):
-        T, (fx, fy, cx, cy), (w, h) = T @ _CLOCKWISE, (fy, fx, h - 1 - cy, cx), (h, w)
-    return T, (fx, fy, cx, cy), (w, h)
 
 
 def score(model: np.ndarray, valid: np.ndarray, uv: np.ndarray, target: np.ndarray, minimum: int) -> dict | None:

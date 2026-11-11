@@ -9,6 +9,7 @@ import sys
 import pytest
 
 runner = importlib.import_module("experiments.03_camera_pose_estimation.src.run")
+memory_limits = importlib.import_module("experiments.03_camera_pose_estimation.src.memory_limits")
 
 
 @pytest.mark.parametrize(
@@ -101,8 +102,10 @@ def test_current_process_memory_limit_reads_configured_job_limit(tmp_path):
         "print(limit,flush=True); "
         "raise SystemExit(0 if limit==int(sys.argv[2]) else 1)"
     )
+    interpreter, environment = memory_limits.direct_interpreter()
     process = subprocess.Popen(
-        [sys.executable, "-B", "-u", "-c", code, str(release_path), str(limit_bytes)],
+        [interpreter, "-B", "-u", "-c", code, str(release_path), str(limit_bytes)],
+        env=environment,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
