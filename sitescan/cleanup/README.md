@@ -26,7 +26,7 @@ attributes remain aligned. These are the two adopted filters; trials live in
 
 ## Run it
 
-Run in `.venv-sitescan` from the repository root:
+Run from the repository root with `.venv/Scripts/python.exe`:
 
 ```python
 import numpy as np
@@ -50,7 +50,7 @@ print(keep.shape, keep.dtype)
 | `margin_share` | 0.05 | Existing allowance for relative learned-depth error | [Cleanup evidence](../../research/surface_denoising/README.md) |
 | `min_depth_m` | 0.5 m | Preserve the original cap on near-view weights | [Cleanup tests](../../tests/test_sitescan_cleanup.py) |
 | Projection near depth | 0.1 m | Preserve the original point projection limit | [Fusion range](../fusion/README.md) |
-| Evidence far depth | 8 m | Room callers retain see-through evidence beyond the 4 m fusion limit | [Adopted room build](../../src/live/room_build.py) |
+| Evidence far depth | 8 m | Room callers retain see-through evidence beyond the 4 m fusion limit | [Room pipeline](../pipelines/room.py) |
 | `cell` | 0.02 m in `clean_room`; required by `largest_pieces` | Default matches fusion voxel spacing | [Adopted chain](../../DESIGN.md#2-where-the-project-is) |
 | `keep` | 50 pieces | Owner chose this in the cleanup tuner | [Adopted chain](../../DESIGN.md#2-where-the-project-is) |
 | `min_points` | 5,000 | Owner's minimum piece size in the tuner | [Adopted chain](../../DESIGN.md#2-where-the-project-is) |
@@ -66,7 +66,6 @@ expects a nonempty cloud; `clean_room` skips it when voting leaves no points.
 ## Tests
 
 `tests/test_sitescan_cleanup.py` checks vote evidence, equal votes, capped weights,
-missing observations, piece size/count limits, ordered masks and empty results. Existing
-cleanup, trial, attribute and viewer tests check the compatibility imports. The golden
-lane and full-room rebuild check unchanged numerical outputs; Chromium checks a newly
-generated offline page after the move.
+missing observations, piece size/count limits, ordered masks and empty results. The
+rejected filters' tests are in `experiments/surface_cleanup/tests`. The golden lane and
+full-room rebuild check unchanged numerical outputs.

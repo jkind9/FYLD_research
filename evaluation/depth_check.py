@@ -4,7 +4,7 @@ A tracked point comes from ARCore's tracking, not its depth maps, so it checks b
 by their own ARCore depth ("supported") and cells that took the frame-median fallback. One physical point is
 counted once per frame that sees it.
 
-    python -B -m src.live.depth_check --session <v2 session> --out <check.json>
+    python -B -m evaluation.depth_check --session <v2 session> --out <check.json>
 """
 
 import argparse
@@ -16,11 +16,20 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from . import sizing
-from .room_build import fresh_depth, grid_size, supported_pixels, upright_depth
-from .stream import read_session, session_v1
+from sitescan import scale, session
+from sitescan.depth import load_model
+from sitescan.depth import predict as predict_depth
+from sitescan.pipelines import DEPTH_MODEL
+from sitescan.pipelines.room import fresh_depth
+from sitescan.scale import fit_grid, supported_pixels
+from sitescan.session import wire_v1
 
-BINS = (0.0, 1.0, 2.0, 3.0, 4.0)  # metres along the camera axis; 4.0 is room_build's far limit
+BINS = (0.0, 1.0, 2.0, 3.0, 4.0)  # metres along the camera axis; 4.0 is the room pipeline's far limit
+
+
+def point_targets(frame) -> tuple[np.ndarray, np.ndarray]:
+    """ARCore's tracked points in a wire frame, as pixel positions and camera-plane depths."""
+    return scale.point_targets(frame.points_world, frame.points_pixel, wire_v1.world_from_camera_cv(frame.pose))
 
 
 def summarise(learned: np.ndarray, tracked: np.ndarray, supported: np.ndarray, bins=BINS) -> list[dict]:
@@ -43,22 +52,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
 
-    from .run import DEPTH_CHECKPOINT, depth_anything
-    model = depth_anything(DEPTH_CHECKPOINT)
+    model = load_model(DEPTH_MODEL, threads=None)
     keyframe, learned, tracked, supported, frames = None, [], [], [], 0
-    for frame in read_session(args.session):
+    for frame in session.read_wire_session(args.session):
         if frame.anchor_created is not None:
             keyframe = frame.anchor_created[0]
         if frame.depth is None or frame.pose is None or keyframe is None or not fresh_depth(frame):
             continue
         colour = np.asarray(Image.open(io.BytesIO(frame.image_jpeg)).convert("RGB"))
-        depth, valid, _ = upright_depth(model, colour, session_v1.world_from_camera_cv(frame.pose))
-        uv, target = sizing.depth_targets(frame.depth, frame.intrinsics, frame.image_size)
-        size = grid_size(depth, valid, uv, target)
+        depth, valid = predict_depth(model, colour, wire_v1.world_from_camera_cv(frame.pose))
+        uv, target = scale.depth_targets(session.arcore_depth(frame.depth), session.camera(frame))
+        size = fit_grid(depth, valid, uv, target)
         if size is None:
             continue
         frames += 1
-        pixels, z = sizing.point_targets(frame)
+        pixels, z = point_targets(frame)
         h, w = depth.shape
         inside = (pixels[:, 0] >= 0) & (pixels[:, 0] < w) & (pixels[:, 1] >= 0) & (pixels[:, 1] < h)
         cols, rows = pixels[inside, 0].astype(int), pixels[inside, 1].astype(int)

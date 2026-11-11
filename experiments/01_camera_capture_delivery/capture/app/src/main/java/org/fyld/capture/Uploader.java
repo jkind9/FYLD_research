@@ -16,7 +16,7 @@ import java.util.ArrayDeque;
 import java.util.List;
 
 /**
- * Sends the phone's queued sessions to host/capture_receiver.py (phone_session_v2.md), oldest first: up to WINDOW
+ * Sends the phone's queued sessions to apps/receiver/capture_receiver.py (phone_session_v2.md), oldest first: up to WINDOW
  * messages unacknowledged, cumulative acknowledgements, files deleted only once acknowledged, and after a dropped
  * connection a new hello, resuming after the last message the PC holds with no gap. Plain Java, tested on the JVM.
  */

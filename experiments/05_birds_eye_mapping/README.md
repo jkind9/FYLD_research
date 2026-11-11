@@ -56,7 +56,7 @@ Run them with `python -m pytest experiments/05_birds_eye_mapping/tests -q`.
 
 ### First real runs
 
-The walkthrough's `GridFootprint` method measured 30 frames of TUM `freiburg1_xyz`. The dominant plane is the desk top. Results with the two depth sources ([walkthrough README](../../src/walkthrough/README.md#first-real-method-runs-7-october-2026)):
+The walkthrough's `GridFootprint` method measured 30 frames of TUM `freiburg1_xyz`. The dominant plane is the desk top. Results with the two depth sources ([walkthrough README](../../evaluation/layers/README.md#first-real-method-runs-7-october-2026)):
 
 | Depth source | Points on the plane | Desk-plane area | Seen footprint | Region | Unknown inside region |
 |---|---|---|---|---|---|
@@ -133,4 +133,4 @@ Projection code will move to [experiments/shared](../shared/README.md) once its 
 
 ## Walkthrough measurement boundary
 
-Step 5 of the walkthrough uses `GridFootprint` (`src/walkthrough/steps/mapping.py`) when `--mapping grid-footprint` is passed. It measures each tracking origin separately, never joining separate worlds, saves each origin's grids under `output/predictions/mapping/`, and the visual index shows one top-down map per origin. It does not infer area from sampled viewer points or fill unseen space. See [the six-step runner](../../src/walkthrough/README.md).
+Step 5 of the walkthrough uses `GridFootprint` (`evaluation/layers/steps/mapping.py`) when `--mapping grid-footprint` is passed. It measures each tracking origin separately, never joining separate worlds, saves each origin's grids under `output/predictions/mapping/`, and the visual index shows one top-down map per origin. It does not infer area from sampled viewer points or fill unseen space. See [the six-step runner](../../evaluation/layers/README.md).

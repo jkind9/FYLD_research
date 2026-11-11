@@ -62,7 +62,7 @@ Then multiply everything by the SfM world's metric size (chapter 4) and fuse alo
 
 A live tracker such as ARCore sometimes corrects where it thinks the camera has been, for example when it recognises a place it saw earlier. A signed-distance volume cannot take back a frame it has already fused, so a surface fused into one big volume would keep the old, wrong positions.
 
-The fix is to fuse into short pieces of surface, *fragments*, each stored in its own local frame (Choi, Zhou and Koltun, 2015, used 50-frame fragments). Each fragment is placed in the world by a pose that can change later. On the phone that pose comes from an ARCore *anchor*: a fixed point that ARCore keeps consistent with its own corrections. The project's live processor (`src/live`, Task89) starts one anchor per second and gives each group of 10 anchors one fragment. When ARCore moves an anchor, its fragment moves with it, at the cost of one matrix multiply. Counted objects are kept relative to an anchor in the same way.
+The fix is to fuse into short pieces of surface, *fragments*, each stored in its own local frame (Choi, Zhou and Koltun, 2015, used 50-frame fragments). Each fragment is placed in the world by a pose that can change later. On the phone that pose comes from an ARCore *anchor*: a fixed point that ARCore keeps consistent with its own corrections. The project's live processor (`sitescan/pipelines`, Task89) starts one anchor per second and gives each group of 10 anchors one fragment. When ARCore moves an anchor, its fragment moves with it, at the cost of one matrix multiply. Counted objects are kept relative to an anchor in the same way.
 
 The price: frames inside one fragment all follow the fragment's first anchor, so a correction that bends the path within 10 s moves the whole fragment rigidly. Where neighbouring fragments overlap, there are two layers of surface until both are placed correctly. Sources: [research/camera_tracking_and_slam/fragments_and_anchors.md](../research/camera_tracking_and_slam/fragments_and_anchors.md).
 
@@ -157,7 +157,7 @@ Mean distance from the reconstructed surface to the reference (lower is better).
 
 Sources: Tasks 71, 72, 78, 79 and 80 in `experiments/sfm/README.md`, which also lists Depth Anything 3's other modes.
 
-**Live, 14 October (Task89).** The live processor, fed ICL in the phone stream format with the true path and the rendered depth standing in for ARCore's raw depth, fused 28 frames while the clip played at its recorded speed (about one frame a second). Its surface is 46 mm from the reference on average, with 71% of points within 5 cm, but it covers only 22% of the room. It is not comparable with the table above, which fuses every frame: fewer frames give fewer points to be wrong and less of the room. See `src/live/README.md`.
+**Live, 14 October (Task89).** The live processor, fed ICL in the phone stream format with the true path and the rendered depth standing in for ARCore's raw depth, fused 28 frames while the clip played at its recorded speed (about one frame a second). Its surface is 46 mm from the reference on average, with 71% of points within 5 cm, but it covers only 22% of the room. It is not comparable with the table above, which fuses every frame: fewer frames give fewer points to be wrong and less of the room. See `https://github.com/jkind9/FYLD_research/blob/9bf3b51/src/live/README.md`.
 
 What this teaches:
 
@@ -186,7 +186,7 @@ Task100 turns the Redmi walk's saved surface into an offline interactive HTML. I
 Fuse Depth Anything along the SfM path, sized to SfM points, and score it (TUM desk; paths in `experiments/sfm/README.md`):
 
 ```text
-.venv\Scripts\python -m experiments.sfm.run_dense --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 --depth model-sfm-size --depth-maps <Depth Anything run> --poses sfm:<SfM run>/output/incremental --sfm-size best-fit --run-root experiments/sfm/runs/dense_tum_desk
+.venv\Scripts\python -m experiments.sfm.run_dense --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 --depth model-sfm-size --depth-maps <Depth Anything run> --poses sfm:<SfM run>/output/incremental --sfm-size best-fit --run-root experiments/sfm/runs/dense_tum_desk
 .venv\Scripts\python -m experiments.sfm.report --dense experiments/sfm/runs/dense_tum_desk/*
 ```
 

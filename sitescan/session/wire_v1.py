@@ -106,6 +106,7 @@ def project(pose, intrinsics, points_world: np.ndarray) -> np.ndarray:
 
 
 def check_session(header: dict) -> dict:
+    """A checked v1 session-start header."""
     _require(
         header.get("type") == "session" and header.get("version") == VERSION,
         f"session start must be type session, version {VERSION}",
@@ -179,6 +180,7 @@ def parse_arcore(record: dict, depth_payload: bytes) -> dict:
 
 
 def parse_frame(header: dict, payload: bytes) -> Frame:
+    """A checked v1 frame record from its header and its JPEG and depth bytes."""
     _require(
         header.get("type") == "frame" and header.get("version") == VERSION,
         f"frame must be type frame, version {VERSION}",

@@ -81,7 +81,7 @@ def _preflight_output(repo: Path) -> None:
         repo / checked_inputs.APPEARANCE_RELATIVE,
         repo / checked_inputs.IDENTITY_RELATIVE,
         repo / "data",
-        repo / "checkpoints",
+        repo / "models",
     ]
     if not destination.is_relative_to(repo.resolve()):
         raise ValueError("Task22 output root must stay inside this repository")

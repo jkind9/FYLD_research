@@ -33,7 +33,7 @@ The scale fitter solves `1/z = s*d + t`, where `d` is the network output and `z`
 
 Source: [fit and smoother](https://github.com/sceneview/sceneview/blob/5ba0247805c4820629601153f84fda5e152c0a24/arsceneview/src/main/java/io/github/sceneview/ar/depth/DepthScaleFit.kt). Anchor projection and plane sampling are separate in [DepthAnchors](https://github.com/sceneview/sceneview/blob/5ba0247805c4820629601153f84fda5e152c0a24/arsceneview/src/main/java/io/github/sceneview/ar/depth/DepthAnchors.kt).
 
-**Project inference:** the anchor-span check and bounded hold are more useful leads than swapping our depth model for the same family. Our [live sizing](../../src/live/sizing.py) uses a median depth ratio; the [room build](../../src/live/room_build.py) uses an 8 × 6 grid of local ratios. Compare these contracts explicitly. A two-parameter fit on relative inverse depth cannot be dropped into metric-depth code unchanged. Neither approach establishes accuracy outside the distances covered by its anchors.
+**Project inference:** the anchor-span check and bounded hold are more useful leads than swapping our depth model for the same family. Our [live sizing](../../sitescan/scale/fit.py) uses a median depth ratio; the [room build](../../sitescan/pipelines/room.py) uses an 8 × 6 grid of local ratios. Compare these contracts explicitly. A two-parameter fit on relative inverse depth cannot be dropped into metric-depth code unchanged. Neither approach establishes accuracy outside the distances covered by its anchors.
 
 ## Freshness: a match to our doubled-surface problem
 

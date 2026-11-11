@@ -62,7 +62,7 @@ HYPERPARAMETERS = {
     "zipdepth_export_build": {"value": "npu", "source": "confirmed 2026-10-07"},
     "zipdepth_output_convention": {
         "value": "relative_inverse_depth",
-        "source": "inherited data/models/ZipDepth/zipdepth/evaluation/evaluator.py:3,51",
+        "source": "inherited models/ZipDepth/zipdepth/evaluation/evaluator.py:3,51",
     },
     "marigold_resolution_px": {
         "value": [640, 480],
@@ -86,15 +86,15 @@ HYPERPARAMETERS = {
     "repeats_per_frame": {"value": 3, "source": "confirmed 2026-10-07"},
     "reference_units_per_metre": {
         "value": 5000.0,
-        "source": "inherited src/walkthrough/steps/depth.py:43-45",
+        "source": "inherited evaluation/layers/steps/depth.py:43-45",
     },
     "reference_max_depth_m": {
         "value": 4.0,
-        "source": "inherited src/walkthrough/steps/depth.py:43-45",
+        "source": "inherited evaluation/layers/steps/depth.py:43-45",
     },
     "reference_pair_tolerance_s": {
         "value": 0.02,
-        "source": "inherited src/walkthrough/steps/depth.py:43-45",
+        "source": "inherited evaluation/layers/steps/depth.py:43-45",
     },
 }
 SEQUENCE_NAMES = ("rgbd_dataset_freiburg1_xyz", "rgbd_dataset_freiburg1_desk")
@@ -164,7 +164,7 @@ def _validate_checkpoint(method: str, checkpoint: Path) -> Path:
 def _load_method(args: argparse.Namespace) -> Callable[..., Iterator[Any]]:
     checkpoint = _validate_checkpoint(args.method, args.checkpoint)
     if args.method == "depth-anything":
-        depth_step = importlib.import_module("src.walkthrough.steps.depth")
+        depth_step = importlib.import_module("evaluation.layers.steps.depth")
         method = depth_step.DepthAnythingV2Metric(
             checkpoint=checkpoint,
             device=args.device,

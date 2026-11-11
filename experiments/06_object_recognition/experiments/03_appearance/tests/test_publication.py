@@ -118,8 +118,8 @@ def test_nested_output_rejected_before_effects(fixture_repo, tmp_path, suffix):
         "data",
         "data/object_revisits/desk_smoke_v1",
         "data/object_revisits/desk_smoke_v1/deeper",
-        "checkpoints",
-        "checkpoints/deeper",
+        "models",
+        "models/deeper",
     ],
 )
 def test_protected_source_destination_rejected_before_publication(

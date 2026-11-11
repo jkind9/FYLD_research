@@ -326,7 +326,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=("detect", "map"))
     parser.add_argument(
-        "--checkpoint", type=Path, default=ROOT / "checkpoints/yolo26x.pt"
+        "--checkpoint", type=Path, default=ROOT / "models/yolo26x.pt"
     )
     parser.add_argument("--device", choices=("cpu", "0"), default="0")
     parser.add_argument("--rgb", default=HYPERPARAMETERS["frame"]["value"])

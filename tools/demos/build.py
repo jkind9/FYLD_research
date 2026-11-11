@@ -1,4 +1,4 @@
-"""Build the shareable demo pages in demo_outputs/ from saved experiment runs.
+"""Build the shareable demo pages in outputs/demo_pages/ from saved experiment runs.
 
 Usage, from the repository root:
     python -B -m tools.demos.build --source-root <checkout with local runs and data>
@@ -72,7 +72,7 @@ def main() -> None:
         help="checkout containing local experiment runs and data",
     )
     parser.add_argument(
-        "--out", type=Path, default=Path("demo_outputs"), help="output folder"
+        "--out", type=Path, default=Path("outputs/demo_pages"), help="output folder"
     )
     parser.add_argument(
         "--identity-run",

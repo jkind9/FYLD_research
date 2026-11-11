@@ -1,7 +1,7 @@
 """Build one per-stage accuracy report from pinned, verified runs (Task 44).
 
 Usage:
-    python -B -m experiments.evaluation.run --runs-root <repo holding the run folders>
+    python -B -m evaluation.stage_report.run --runs-root <repo holding the run folders>
 
 Run folders are gitignored, so `--runs-root` names the checkout that holds them.
 Every run is verified and its manifest hash checked against the pin before any
@@ -12,8 +12,8 @@ import argparse
 from pathlib import Path
 from typing import Any
 
-from experiments.evaluation import render, schema
-from experiments.evaluation.stages import camera, detection, identity, surface
+from evaluation.stage_report import render, schema
+from evaluation.stage_report.stages import camera, detection, identity, surface
 from experiments.shared.runs import Run, write_json
 
 HYPERPARAMETERS = {
@@ -137,7 +137,7 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--runs-root", type=Path, default=repo)
     parser.add_argument(
-        "--output", type=Path, default=repo / "experiments/evaluation/runs"
+        "--output", type=Path, default=repo / "evaluation/stage_report/runs"
     )
     arguments = parser.parse_args(argv)
     path = publish(build(arguments.runs_root.resolve()), repo, arguments.output)

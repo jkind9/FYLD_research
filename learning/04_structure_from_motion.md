@@ -84,7 +84,7 @@ Learned methods solve the same problem differently: DROID-SLAM and DPVO (learned
 Run COLMAP on the TUM xyz clip and score it (needs the repository's `.venv` and the COLMAP build in `third_party/`; see `experiments/sfm/README.md`, "Running"):
 
 ```text
-.venv\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --features sift --run-root experiments/sfm/runs/tum_xyz
+.venv\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --features sift --run-root experiments/sfm/runs/tum_xyz
 .venv\Scripts\python -m experiments.sfm.report experiments/sfm/runs/tum_xyz/*
 ```
 

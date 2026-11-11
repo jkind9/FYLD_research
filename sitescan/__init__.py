@@ -1,1 +1,1 @@
-"""Room surfaces and site measures from a phone walk. Stages fill in as they move from src/live (DESIGN.md section 11)."""
+"""Room surfaces, site measurements and object counts from a phone recording: stages and orchestrators."""

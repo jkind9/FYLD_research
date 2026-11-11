@@ -45,7 +45,7 @@ print([f.seq for f in frames if f.depth is not None])
 
 | Name | Default | Why | Evidence |
 |---|---|---|---|
-| `speed` | 1.0 | Reproduce camera timing; zero removes waiting | [Replay contract](../../src/live/tests/test_stream.py) |
+| `speed` | 1.0 | Reproduce camera timing; zero removes waiting | [Replay tests](../../tests/test_sitescan_session.py) |
 | `stop` | None | Replay until the recording ends unless a caller supplies a stop event | [Replay tests](../../tests/test_sitescan_session.py) |
 | `reader` | `frames` | New callers receive shared records; old live callers temporarily select wire records | [Architecture](../../DESIGN.md#5-target-architecture) |
 | `PIXEL_TOLERANCE_PX` | 0.5 px | Accept recorded rounding while checking point projection | [Wire contract](FORMAT.md) |
@@ -56,10 +56,10 @@ print([f.seq for f in frames if f.depth is not None])
 The reader does not align camera and ARCore clocks or reject stale depth. Frame choice
 and freshness belong to the pipelines. Replay waits synchronously; stop is checked between
 frames, so an outstanding wait completes first. V1 remains readable for existing tools;
-new recordings use v2. `wire_v1`, `wire_v2` and `read_wire_session` retain the old record
-shapes until those tools and pipelines move. Only `frames` exposes package records.
-Direct host scripts need the installed package in `.venv-sitescan`; run them with that
-environment's Python, or use `python -m` from the repository root.
+new recordings use v2. `wire_v1`, `wire_v2` and `read_wire_session` keep the checked wire records, which both
+pipelines still read; `arcore_depth` and `camera` turn their parts into the shared types.
+Only `frames` returns whole package records. Switching the pipelines to `frames` changes
+anchor axes and so the fused grid in floating point; it needs its own golden check.
 
 ## Tests
 

@@ -28,7 +28,7 @@ its extracted points without fusing those frames again. RGB colours follow the s
 
 ## Run it
 
-Run in `.venv-sitescan` from the repository root. Fixture depth stands in for scaled learned depth:
+Run from the repository root with `.venv/Scripts/python.exe`. Fixture depth stands in for scaled learned depth:
 
 ```python
 from sitescan import session
@@ -49,7 +49,7 @@ print(fragments.surface().shape[1], fragments.frames_per_fragment())
 | Name | Default | Why | Evidence |
 |---|---|---|---|
 | `voxel_m` | Required; room and live use 0.02 m | Adopted surface resolution; 52 mm mean surface error on the synthetic ICL control | [Measured chain](../../DESIGN.md#2-where-the-project-is) |
-| `keyframes_per_fragment` | 10 | Adopted grouping keeps correction work local | [Fragment tests](../../src/live/tests/test_fragments.py) |
+| `keyframes_per_fragment` | 10 | Adopted grouping keeps correction work local | [Fusion tests](../../tests/test_sitescan_fusion.py) |
 | `TRUNCATION_VOXELS` | 4 | Retain the existing signed-distance averaging band | [Original fusion control](../../experiments/sfm/src/dense.py) |
 | `DEPTH_RANGE_M` | 0.1–4.0 m | Preserve the adopted near and far integration limits | [Fusion tests](../../tests/test_sitescan_fusion.py) |
 
@@ -63,7 +63,7 @@ The stage applies no visibility vote, component filtering or frame selection.
 
 ## Tests
 
-`python -B -m pytest -q tests/test_sitescan_fusion.py src/live/tests/test_fragments.py`
+`python -B -m pytest -q tests/test_sitescan_fusion.py`
 checks empty surfaces, group boundaries, missing group-start anchors, corrections,
 point order, refreshed extraction after integration, RGB alignment and depth limits.
 The golden lane and full room rebuild check unchanged counts and measurements.

@@ -59,12 +59,12 @@ def test_largest_pieces_retains_original_order_and_respects_size_and_count():
 def test_clean_room_combines_vote_and_component_masks_without_reordering():
     points = np.array([[0.0, 0.0, 2.0], [0.01, 0.0, 2.0], [0.0, 0.0, 1.0], [2.0, 0.0, 2.0]])
     views = [(np.eye(4), CAMERA, np.full((3, 3), 2.0))]
-    np.testing.assert_array_equal(
-        clean_room(points, views, cell=0.02, min_points=2), [True, True, False, False]
-    )
+    voted, kept = clean_room(points, views, cell=0.02, min_points=2)
+    np.testing.assert_array_equal(voted, [True, True, False, True])
+    np.testing.assert_array_equal(kept, [True, True, False, False])
 
 
 def test_clean_room_returns_empty_when_no_points_survive_the_vote():
-    assert clean_room(np.empty((0, 3)), []).shape == (0,)
-    keep = clean_room(np.array([[0.0, 0.0, 1.0]]), [(np.eye(4), CAMERA, np.full((3, 3), 2.0))])
-    np.testing.assert_array_equal(keep, [False])
+    assert clean_room(np.empty((0, 3)), []).kept.shape == (0,)
+    cleaned = clean_room(np.array([[0.0, 0.0, 1.0]]), [(np.eye(4), CAMERA, np.full((3, 3), 2.0))])
+    np.testing.assert_array_equal(cleaned.kept, [False])

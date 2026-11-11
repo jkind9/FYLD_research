@@ -85,7 +85,7 @@ def output_root(repo: Path, destination: Path) -> Path:
     resolved = destination.resolve()
     if not resolved.is_relative_to(root):
         raise ValueError("Output must remain inside the repository")
-    protected = [repo / "data", repo / "checkpoints", repo / TASK20_RUN_RELATIVE]
+    protected = [repo / "data", repo / "models", repo / TASK20_RUN_RELATIVE]
     protected.extend(
         (
             repo / "data/object_revisits/desk_smoke_v1",

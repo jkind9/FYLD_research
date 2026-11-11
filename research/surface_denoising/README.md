@@ -2,7 +2,7 @@
 
 What removes stray and doubled points from the project's fused surfaces, how other systems avoid guessing the size of far depth, and where both fit in the live pipeline. The far-depth part merges a note written the same day in `research/dense_surface_fusion/other_systems.md`, now removed. Started 8 November 2026, after the owner asked for a dedicated denoising stage, "particularly for low depth distance scenes": indoor scenes with surfaces under about 10 m from the camera (owner, same day). Sources were checked against the papers' own text unless a row says otherwise. A first trial on the 15 October walk (Task120) is reported below; the vote it found useful is not in the live processor yet.
 
-The live pipeline today (`src/live`) runs depth → size → fuse → surface → map → objects. The live loop has no clean-up stage: its only filters are a depth range of 0.1-4.0 m and ARCore confidence ≥ 128 when choosing sizing targets. The offline `room_build` also rejects depth maps more than 0.1 s older than their photo and, since Task126, runs the owner's clean-up: the visibility vote, then the largest pieces ([below](#owners-setting-in-the-room-build-task126)).
+The live pipeline today (`sitescan/pipelines`) runs depth → size → fuse → surface → map → objects. The live loop has no clean-up stage: its only filters are a depth range of 0.1-4.0 m and ARCore confidence ≥ 128 when choosing sizing targets. The offline `room_build` also rejects depth maps more than 0.1 s older than their photo and, since Task126, runs the owner's clean-up: the visibility vote, then the largest pieces ([below](#owners-setting-in-the-room-build-task126)).
 
 The [surface grouping digest](surface_grouping.md), added 10 November 2026, examines joining patches by geometry, colour, texture and learned features. It identifies direct prior art for region-based depth scaling and proposes a controlled test of temporal surface association, measurement accuracy and distinct-object retention. The [RTAB-Map digest](../camera_tracking_and_slam/rtabmap.md) covers an existing mapping backend to use as a separate comparison.
 
@@ -23,7 +23,7 @@ These come from the 15 October Redmi walk (`20261015_093913_walk`). ARCore depth
 
 | Symptom | Measured | Cause found so far | Source |
 |---|---|---|---|
-| Floor is a thick band | About 30 cm thick, against a few centimetres for ARCore depth fused alone | Not established | Task113, [src/live/README.md](../../src/live/README.md) |
+| Floor is a thick band | About 30 cm thick, against a few centimetres for ARCore depth fused alone | Not established | Task113, [old live README](https://github.com/jkind9/FYLD_research/blob/9bf3b51/src/live/README.md) |
 | Points below the floor | 5.2% of points more than 10 cm below it (4.0 m far limit) | Distant, smeared learned depth; capping at 2.5 m makes the floor the dominant plane | Task113 |
 | Near objects smear | Anything within about 0.5 m of the camera smears (judged by eye in the viewer) | Not established | Task115 |
 | One object twice | Red cushion 0.68 m apart, along the line of sight | 9 depth maps 4.4 s old; fixed in `room_build` by rejecting stale depth | Task116, [dense_surface_fusion](../dense_surface_fusion/README.md) |
@@ -35,7 +35,7 @@ The last two are errors in each frame's size, not noise. A generic clean-up filt
 
 Three limits of the current pipeline decide what clean-up can do at this range:
 
-- **Fusion stops at 4.0 m.** `src/live/fragments.py` (`DEPTH_RANGE_M`) and `room_build` (`--far`) drop depth beyond 4.0 m. The far part of a 10 m room is never fused.
+- **Fusion stops at 4.0 m.** `sitescan/fusion/fragments.py` (`DEPTH_RANGE_M`) and `room_build` (`--far`) drop depth beyond 4.0 m. The far part of a 10 m room is never fused.
 - **ARCore depth reaches about 2.5 m.** On the 15 October walk, 95% of confident ARCore depth is nearer than 2.54 m and 0.8% is beyond 3 m (Task117). Beyond that, learned depth is sized from each frame's median, so each frame puts a far wall at a different depth. That is the cause of the door echoes.
 - **Error grows with distance.** Learned depth sized to ARCore scored a median relative error of 0.044-0.058 (Tasks109 and 113), measured where ARCore has depth, mostly under 2.5 m. If that held further out, it would be 13-17 cm at 3 m and 44-58 cm at 10 m. Against ARCore's tracked points, depth beyond 3 m came out about 15% too near (Task117).
 
@@ -155,15 +155,15 @@ The owner's request quoted a search summary with five strategies. What the sourc
 | Depth-aware regularisation | Real for splats (DN-Splatter, TIDI-GS). In this pipeline, sizing learned depth to ARCore depth already plays that role |
 | "Weight updates inversely against tracking uncertainty" | No source found that does this with a phone tracker; ARCore exposes no pose covariance |
 
-## Proposed clean-up stage for `src/live`
+## Proposed clean-up stage for `sitescan/pipelines`
 
-`src/live/clean.py` now holds the trial versions of the masks, the near-first passes and the visibility vote (Task120). The proposal below is revised by the trial results in the next section.
+`experiments/surface_cleanup/` now holds the trial versions of the masks, the near-first passes and the visibility vote (Task120). The proposal below is revised by the trial results in the next section.
 
 1. **Between size and fuse, per frame:** stale-depth rejection and better sizing beyond ARCore depth's reach. The depth-jump and grazing-angle masks are dropped as stand-alone fixes: on the 15 October walk they added floaters.
 2. **After fusion, against recent views:** the visibility vote, with near views outvoting far ones. In the trial it removed 53-80% of the surface lying in empty space. Live, each update would add its newest view's votes to running totals kept per surface point, about 17 ms against a 680,000-point surface.
 3. **When the surface is extracted:** an observation-count threshold, then outlier and cluster filters, then optional plane snapping. Run on each finished fragment once, not on the whole surface every update, so it stays inside the one-second budget.
 
-Two Open3D facts shape the work. Version 0.19's legacy `ScalableTSDFVolume`, used by `src/live/fragments.py`, takes no per-pixel weights and has no observation-count threshold. The newer `o3d.t.geometry.VoxelBlockGrid` has the threshold (`extract_point_cloud(weight_threshold=3.0)`), exposes each voxel's weight, and can render depth from the model (`ray_cast`), which a consistency check against the built surface needs. It also takes no per-pixel weights, so stage 2 weights need custom code either way.
+Two Open3D facts shape the work. Version 0.19's legacy `ScalableTSDFVolume`, used by `sitescan/fusion/fragments.py`, takes no per-pixel weights and has no observation-count threshold. The newer `o3d.t.geometry.VoxelBlockGrid` has the threshold (`extract_point_cloud(weight_threshold=3.0)`), exposes each voxel's weight, and can render depth from the model (`ray_cast`), which a consistency check against the built surface needs. It also takes no per-pixel weights, so stage 2 weights need custom code either way.
 
 ## How to score a clean-up
 
@@ -176,7 +176,7 @@ Every clean-up removes some real surface. Report what it removes and what it kee
 
 ## Trial on the 15 October walk, 8 November 2026 (Task120)
 
-`python -B -m src.live.denoise_trial --session <v2 session> --out <folder>` runs Depth Anything V2 Metric Small once per frame that `room_build` fuses (134 frames), then fuses and scores each variant below. CPU only, with the GPU hidden from the process; the whole run takes 81 s. Tracked points with even ids may be used for sizing; only odd ids (2,418 point views in cells without ARCore depth, and every odd-id view for the surface scores) are used for scoring. Tracked points are ARCore's own triangulation, not ground truth; ICL-NUIM has not been run yet. The settings are first guesses by Claude, not tuned: edge jump 5% in a 3 × 3 neighbourhood, side-on beyond 75°, vote margin the larger of 8 cm and 5%. The baseline reproduces `room_build` to within 2 of 676,855 points; the trial stores depth as 32-bit floats. A repeat run gave identical scores.
+`python -B -m experiments.surface_cleanup.denoise_trial --session <v2 session> --out <folder>` runs Depth Anything V2 Metric Small once per frame that `room_build` fuses (134 frames), then fuses and scores each variant below. CPU only, with the GPU hidden from the process; the whole run takes 81 s. Tracked points with even ids may be used for sizing; only odd ids (2,418 point views in cells without ARCore depth, and every odd-id view for the surface scores) are used for scoring. Tracked points are ARCore's own triangulation, not ground truth; ICL-NUIM has not been run yet. The settings are first guesses by Claude, not tuned: edge jump 5% in a 3 × 3 neighbourhood, side-on beyond 75°, vote margin the larger of 8 cm and 5%. The baseline reproduces `room_build` to within 2 of 676,855 points; the trial stores depth as 32-bit floats. A repeat run gave identical scores.
 
 **Where the fused depth lies.** 10% of fused pixels are within 1 m, 76% at 1-2.5 m and 14% at 2.5-4 m; 1.2% of valid pixels lie beyond 4 m and are dropped. This walk is a small house, so it does not test a 10 m room. Depth-jump pixels are 1.8-3.0% of each band and side-on pixels 6.8-8.9%. The prediction that the floor band is mostly flying-pixel or side-on depth is not supported: removing both cut points below the floor by only 11%.
 
@@ -209,7 +209,7 @@ What this shows:
 
 **Where the vote's deletions sit (Task121).** 98% of the 97,008 removed points lie between 0.1 m and 2.2 m above the floor, in the room's open space. It removed 2.8% of points within 10 cm of the floor and 0.4% above 2.2 m. It also removed 19% of all points at low-furniture height (0.1-0.76 m above the floor), so some real furniture may have gone with the floaters. Only a scene with a known true surface, such as ICL-NUIM, can tell how much.
 
-**Viewer.** `python -B -m tools.demos.cleanup_scene --trial <denoise_trial folder> --session <v2 session> --out <viewer.html>` builds one offline page. It shows the room before clean-up, with two switches: one paints red what the vote removes, the other hides it to show the cleaned room. The results table above sits below the 3D view. The 15 October page is `outputs/denoise_trial_093913_v2/viewer/redmi-room-15oct-cleanup.html` (196,914 splats in 3 cm cells, 4.86 MB). It embeds household photos, so it stays local. Headless Chromium with software rendering (SwiftShader, no GPU) loaded it in three states (as opened, removed in red, removed hidden) with no console errors or network requests. Seen from above with the removed points hidden, the floor and table show through where a red layer hung before.
+**Viewer.** `python -B -m tools.demos.cleanup_scene --trial <denoise_trial folder> --session <v2 session> --out <viewer.html>` builds one offline page. It shows the room before clean-up, with two switches: one paints red what the vote removes, the other hides it to show the cleaned room. The results table above sits below the 3D view. The 15 October page is `outputs/cleanup/denoise_trial_093913_v2/viewer/redmi-room-15oct-cleanup.html` (196,914 splats in 3 cm cells, 4.86 MB). It embeds household photos, so it stays local. Headless Chromium with software rendering (SwiftShader, no GPU) loaded it in three states (as opened, removed in red, removed hidden) with no console errors or network requests. Seen from above with the removed points hidden, the floor and table show through where a red layer hung before.
 
 ### Floating-piece removal against the door and stair echoes (Task122)
 
@@ -234,7 +234,7 @@ What this shows:
 3. **No filter removes the door or stair echoes.** The best combination halves the blocked share at the door (6.4% to 2.6%) and the stairs (8.2% to 4.0%) and removes a third of all points. Seen from frames 65 and 420, it clears the haze in front of the camera, but it also deletes most of the staircase: the open banister lets frames see through to the wall behind, and few frames see the stairs. The door echoes do not visibly change.
 4. **Why: each echo layer is backed by several frames.** Echo layers survived "seen by 5 frames", so frames taken from one spot agree with each other on a wrong size. A filter can only remove what frames disagree about. The echoes need consistent far depth when it is fused: triangulated depth along ARCore's path, or far sizing that agrees between standing spots.
 
-Viewer with the combined clean-up shown in red: `outputs/denoise_trial_093913_v5/viewer/redmi-room-15oct-cleanup-combined.html` (`--kept vote_far_seen_3_clusters_3cm`), local only. Camera views from frames 65 and 420, before and after: `outputs/denoise_trial_093913_v5/camera_shots/`.
+Viewer with the combined clean-up shown in red: `outputs/cleanup/denoise_trial_093913_v5/viewer/redmi-room-15oct-cleanup-combined.html` (`--kept vote_far_seen_3_clusters_3cm`), local only. Camera views from frames 65 and 420, before and after: `outputs/cleanup/denoise_trial_093913_v5/camera_shots/`.
 
 ### Agreement between standing spots, and pieces by make-up (Task124)
 
@@ -247,7 +247,7 @@ Task122 found that echo layers survive because frames from one standing spot agr
 | MVSNet (PyTorch port) [`eval.py`](https://github.com/xy-guo/MVSNet_pytorch/blob/master/eval.py), `check_geometric_consistency` | Each source view's depth is projected into the reference; it agrees if it lands within 1 px and 1% depth. A pixel is kept if at least 3 views agree and the network's confidence is over 0.8 | 1 px, 1%, 3 views |
 | PCL tutorial [`conditional_euclidean_clustering.cpp`](https://github.com/PointCloudLibrary/pcl/blob/master/doc/tutorials/content/sources/conditional_euclidean_clustering/conditional_euclidean_clustering.cpp) | Two neighbours join one cluster only if a condition holds; the example tests intensity, or normals within 30°. Clusters smaller than a thousandth or larger than a fifth of the cloud are set aside and can be read back | 30°; size limits N/1000 and N/5 |
 
-Two rules were built from these (`src/live/clean.py`):
+Two rules were built from these (`experiments/surface_cleanup/`):
 
 - **Spots rule** (`wide_support`, after COLMAP's filter). A surface point is kept if some view measured it nearer than 2.5 m, where ARCore depth sizes the learned depth. Otherwise it needs two more views that measured it at the same depth (within the vote margin, the larger of 8 cm and 5%) from rays at least 3° from the first measuring view's ray. Angles are taken against the first view that measured the point, which is cheaper than comparing every pair. So a point whose first view sat between two others can be dropped even though those two are more than 3° apart.
 - **Pieces by make-up** (`piece_majority`, after PCL's conditional clustering). Points within 3 cm whose normals differ by under 30° join one piece, so the side-on strip at a corner does not join an echo copy to the wall behind it. A piece is removed whole when more than half its points fail the spots rule. This is the "remove a component by its make-up" idea from the chain-linking section above.
@@ -278,13 +278,13 @@ What this shows:
 
 Filtering can only remove what views disagree about. The spots rule finds disagreement between standing spots and removes it, but at the door several spots agree on wrong sizes. This supports the Task122 conclusion: the door echoes need consistent far depth at fusion time.
 
-**Viewer and pictures (local only; they embed household photos).** `python -B -m tools.demos.cleanup_scene --trial outputs/denoise_trial_093913_v7 --session <v2 session> --out <page.html> --kept wide --views 65 420`. `--views` adds camera buttons for the door (frame 65) and stair (frame 420) views; the table gained the within-10 cm and behind columns. Pages: `outputs/denoise_trial_093913_v7/viewer/redmi-room-15oct-cleanup-wide.html` (spots rule alone) and `...-vote_far_wide_pieces.html` (vote, spots rule and pieces). Both loaded in headless Chromium with software rendering, with no console errors or network requests. Camera shots from frames 65 and 420, and from above, each as opened, with removals in red and with removals hidden: `outputs/denoise_trial_093913_v7/camera_shots/<variant>/`. Top-down slices 0.9-1.5 m above the floor: `outputs/denoise_trial_093913_v7/top_slices/`. From frame 65's own camera the echo layers lie behind one another along the line of sight and hide each other; the top views show them.
+**Viewer and pictures (local only; they embed household photos).** `python -B -m tools.demos.cleanup_scene --trial outputs/cleanup/denoise_trial_093913_v7 --session <v2 session> --out <page.html> --kept wide --views 65 420`. `--views` adds camera buttons for the door (frame 65) and stair (frame 420) views; the table gained the within-10 cm and behind columns. Pages: `outputs/cleanup/denoise_trial_093913_v7/viewer/redmi-room-15oct-cleanup-wide.html` (spots rule alone) and `...-vote_far_wide_pieces.html` (vote, spots rule and pieces). Both loaded in headless Chromium with software rendering, with no console errors or network requests. Camera shots from frames 65 and 420, and from above, each as opened, with removals in red and with removals hidden: `outputs/cleanup/denoise_trial_093913_v7/camera_shots/<variant>/`. Top-down slices 0.9-1.5 m above the floor: `outputs/cleanup/denoise_trial_093913_v7/top_slices/`. From frame 65's own camera the echo layers lie behind one another along the line of sight and hide each other; the top views show them.
 
 ### Clean-up tuner page (Task125)
 
 The owner asked for every clean-up setting on a slider, starting from the raw room, to tune chain linking by eye. Two steps build it:
 
-    python -B -m src.live.cleanup_attributes --session <v2 session> --out <folder>
+    python -B -m experiments.surface_cleanup.cleanup_attributes --session <v2 session> --out <folder>
     python -B -m tools.demos.cleanup_tuner --attributes <folder> --session <v2 session> --out <page.html> --views 65 420
 
 The first fuses the room under `room_build` rules (`raw.ply`, no clean-up) and stores, per point, the evidence the depth-map stages test: frames measuring it, see-through share of the weighted vote, nearest measured depth, second-widest angle between measuring views, and mean distance to its 20 nearest neighbours. The second builds one offline page (17.3 MB for 676,853 points; local only, it embeds photos). Each stage has an on/off tick and each parameter a slider with a description: vote share; minimum frames; spots angle and trusted distance; outlier spread; radius and neighbour count; and for chain linking the link distance, neighbours needed to extend a chain (DBSCAN's `min_points`; 1 is plain chain linking), maximum normal difference for a link (PCL's rule), minimum piece size, and how many of the largest pieces to keep (2DGS's rule). Radius outliers and chain linking run in the page on the raw points (1-3 s per change in headless Chromium without a GPU).
@@ -302,7 +302,7 @@ The first fuses the room under `room_build` rules (`raw.ply`, no clean-up) and s
 
 Fused points sit about 2 cm apart, so the room falls apart between 2 and 3 cm, and the neighbour count matters as much as the distance. Which setting removes echoes without removing real surface has to be judged by eye; the numbers only show how strongly the room holds together.
 
-Local outputs: `outputs/cleanup_tuner_093913/{raw.ply,attributes.npz,redmi-room-15oct-tuner.html}`.
+Local outputs: `outputs/cleanup/cleanup_tuner_093913/{raw.ply,attributes.npz,redmi-room-15oct-tuner.html}`.
 
 ### Owner's setting in the room build (Task126)
 
@@ -328,9 +328,9 @@ What this shows:
 
 `room_build` now runs the vote and touching-cell pieces at 2 cm. On the 15 October walk it kept 554,067 of 676,855 points (vote −100,086, pieces −22,702) in 2.41 s for the vote over 134 frames and 0.15 s for pieces. The vote here uses each frame's sized depth, not 8-bit stored evidence, so its count differs slightly from the tuner's (576,769 against 577,276 after the vote). The dense cell grid uses one byte per cell plus a 4-byte label: 12 million cells (about 60 MB) for this room at 2 cm; a 10 × 3 × 10 m room is 37.5 million.
 
-Local outputs: `outputs/room_build_clean_up_093913/{surface.ply,raw_surface.ply,summary.json,redmi-room-15oct-clean.html}` (the viewer is local only; it embeds photos).
+Local outputs: `outputs/cleanup/room_build_clean_up_093913/{surface.ply,raw_surface.ply,summary.json,redmi-room-15oct-clean.html}` (the viewer is local only; it embeds photos).
 
-Local outputs: `outputs/denoise_trial_093913_v7/{results.json,<variant>.ply}` (all 22 variants, Task124; earlier variants give the same scores as before), `outputs/denoise_trial_093913_v5/` (Task122's 16 variants), `outputs/denoise_trial_093913_v2/` (Task120), and the first run in `outputs/denoise_trial_093913/`. It lacks the two "beyond 2.5 m" rows, has the same numbers for the rest, and adds one more variant (tracked-point size in every cell, masks and vote: blocked 1.2% and 4.2%, 119,990 points below the floor). Tests: `src/live/tests/test_clean.py` and `test_denoise_trial.py`.
+Local outputs: `outputs/cleanup/denoise_trial_093913_v7/{results.json,<variant>.ply}` (all 22 variants, Task124; earlier variants give the same scores as before), `outputs/cleanup/denoise_trial_093913_v5/` (Task122's 16 variants), `outputs/cleanup/denoise_trial_093913_v2/` (Task120), and the first run in `outputs/cleanup/denoise_trial_093913/`. It lacks the two "beyond 2.5 m" rows, has the same numbers for the rest, and adds one more variant (tracked-point size in every cell, masks and vote: blocked 1.2% and 4.2%, 119,990 points below the floor). Tests: `experiments/surface_cleanup/tests/test_filters.py` and `test_denoise_trial.py`.
 
 ## Order to try
 

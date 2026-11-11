@@ -38,7 +38,7 @@ Ultralytics comes with the `objects` extra of the repository's one environment:
 uv sync --all-extras
 ```
 
-Explicitly acquire the [official YOLO26x checkpoint](https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26x.pt) at ignored `checkpoints/yolo26x.pt`. Our 118667365-byte checkpoint has SHA-256 `9fdd44a31c504547ffb81d2c6d9e6dac3493c8eaa8b0398d3f43bae6c7003e92`. Acquisition metadata is alongside it. Ultralytics and the checkpoint use AGPL-3.0; deployment licence suitability remains unresolved. The runner requires these exact bytes and the basename `yolo26x.pt` before importing the model loader. Other filenames can trigger model substitution in Ultralytics. Alternate models need a separate recorded protocol.
+Explicitly acquire the [official YOLO26x checkpoint](https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26x.pt) at ignored `models/yolo26x.pt`. Our 118667365-byte checkpoint has SHA-256 `9fdd44a31c504547ffb81d2c6d9e6dac3493c8eaa8b0398d3f43bae6c7003e92`. Acquisition metadata is alongside it. Ultralytics and the checkpoint use AGPL-3.0; deployment licence suitability remains unresolved. The runner requires these exact bytes and the basename `yolo26x.pt` before importing the model loader. Other filenames can trigger model substitution in Ultralytics. Alternate models need a separate recorded protocol.
 
 ```powershell
 .venv/Scripts/python.exe -B -m experiments.06_object_recognition.pilot.run detect --device 0
@@ -85,4 +85,4 @@ A fresh RGB-only review on3October2026 found the cup partly visible at1305031460
 
 ## Importable Task46 counting
 
-Use `importlib.import_module("experiments.06_object_recognition.pilot.association").associate_frame` for the unchanged counting method. `replay.associate_frame` remains the same compatibility import, including its numerical behavior. The replay remains a standalone supplied-depth/supplied-pose control, with unchanged settings and commands. New complete sequencing belongs to [the root runner](../../../src/walkthrough/README.md), whose counts are isolated by estimated origin.
+Use `importlib.import_module("experiments.06_object_recognition.pilot.association").associate_frame` for the unchanged counting method. `replay.associate_frame` remains the same compatibility import, including its numerical behavior. The replay remains a standalone supplied-depth/supplied-pose control, with unchanged settings and commands. New complete sequencing belongs to [the root runner](../../../evaluation/layers/README.md), whose counts are isolated by estimated origin.

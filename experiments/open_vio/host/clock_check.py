@@ -15,16 +15,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
+import recording
 from scipy.spatial.transform import Rotation
 
-import recording
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "01_camera_capture_delivery" / "host"))
-from session_v2 import stream_stats  # noqa: E402
+from sitescan.session.wire_v2 import stream_stats
 
 HYPERPARAMETERS = {
     "offset_search_ms": {"value": 200, "source": "proposed by Claude 2026-10-14, not owner-ruled"},

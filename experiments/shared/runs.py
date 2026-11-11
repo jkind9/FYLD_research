@@ -86,10 +86,10 @@ def _git(repo: Path, *arguments: str) -> str:
 def _snapshot(repo: Path, destination: Path, run_root: Path) -> dict:
     files = {}
     sources: list[Path] = []
-    for root in (repo, repo / "experiments", repo / "src", repo / "src/walkthrough"):
+    for root in (repo, repo / "experiments", repo / "evaluation", repo / "evaluation/layers"):
         if root.is_symlink():
             raise ValueError(f"Source snapshot refuses symbolic link: {root}")
-    for root in (repo / "experiments", repo / "src/walkthrough"):
+    for root in (repo / "experiments", repo / "evaluation/layers"):
         for directory, children, names in os.walk(root):
             for name in children:
                 child = Path(directory) / name

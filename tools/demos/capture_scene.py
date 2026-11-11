@@ -16,8 +16,8 @@ import open3d as o3d
 from PIL import Image
 from scipy.spatial import cKDTree
 
-from src.live import orientation_control
-from src.live.stream import session_v1
+from sitescan.depth.orientation import quarter_turns, turned_camera, upright
+from sitescan.session import wire_v1
 
 from .pack import (
     colormap,
@@ -31,10 +31,10 @@ from .page import build_page, read_web, viewer_html, write_page
 
 def upright_view(session: Path, seq: int, world_from_camera: np.ndarray, intrinsics, longest: int = 480) -> dict:
     """A recorded photo and its camera, both turned so the image's down axis is closest to world down."""
-    turns = orientation_control.quarter_turns(world_from_camera)
+    turns = quarter_turns(world_from_camera)
     with Image.open(session / "frames" / f"{seq:06d}.jpg") as image:
-        pose, k, (width, height) = orientation_control.turned_camera(world_from_camera, intrinsics, image.size, turns)
-        rgb = orientation_control.upright(np.asarray(image.convert("RGB")), turns)
+        pose, k, (width, height) = turned_camera(world_from_camera, intrinsics, image.size, turns)
+        rgb = upright(np.asarray(image.convert("RGB")), turns)
     scale = longest / max(width, height)
     return {"photo": image_data_url(rgb, size=(round(width * scale), round(height * scale))), "pose": pose.tolist(),
             "fx": float(k[0]), "fy": float(k[1]), "width": width, "height": height}
@@ -47,7 +47,7 @@ def face_cameras(points: np.ndarray, normals: np.ndarray, cameras: np.ndarray) -
 
 
 def load_timeline(frames: Path, session: Path, seconds: dict[int, float]) -> dict:
-    """Room-build frames (src.live.room_build frames.npz) as steps: camera, upright photo and the points each added."""
+    """Room-build frames (frames.npz from the room pipeline) as steps: camera, upright photo and the points each added."""
     saved = np.load(frames)
     views = [upright_view(session, int(seq), pose, k, longest=320)
              for seq, pose, k in zip(saved["seq"], saved["poses"], saved["intrinsics"])]
@@ -109,11 +109,11 @@ def load_scene(surface: Path, session: Path, voxel_m: float, frames: Path | None
         if not np.isfinite(row["arcore"]["pose"]).all() or not np.isfinite(row["arcore"]["intrinsics"]).all():
             raise ValueError("bookmark pose and intrinsics must be finite")
         seq = int(row["seq"])
-        view = upright_view(session, seq, session_v1.world_from_camera_cv(row["arcore"]["pose"]), row["arcore"]["intrinsics"])
+        view = upright_view(session, seq, wire_v1.world_from_camera_cv(row["arcore"]["pose"]), row["arcore"]["intrinsics"])
         elapsed = (row["camera_t_ns"] - rows[0]["camera_t_ns"]) / 1e9
         compare.append({"frame": seq, "label": f"{elapsed:.1f} s", "photo": view["photo"], "pose": view["pose"],
                         "fy": view["fy"], "height": view["height"], "width": view["width"]})
-    cameras = np.array([session_v1.world_from_camera_cv(row["arcore"]["pose"])[:3, 3] for row in posed])
+    cameras = np.array([wire_v1.world_from_camera_cv(row["arcore"]["pose"])[:3, 3] for row in posed])
     normals = face_cameras(points, np.asarray(cloud.normals), cameras[np.isfinite(cameras).all(1)])
     with surface.open("rb") as stream:
         digest = hashlib.file_digest(stream, "sha256").hexdigest()
@@ -245,7 +245,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--voxel", type=float, default=0.06,
                         help="display cell size in metres (proposed by Claude, not owner-ruled)")
-    parser.add_argument("--frames", type=Path, help="frames.npz from src.live.room_build: adds the frame-by-frame view")
+    parser.add_argument("--frames", type=Path, help="frames.npz from the room pipeline: adds the frame-by-frame view")
     args = parser.parse_args()
     data = load_scene(args.surface, args.session, args.voxel, args.frames)
     size = write_page(args.out.parent, args.out.name, scene_page(data), max_bytes=20_000_000)

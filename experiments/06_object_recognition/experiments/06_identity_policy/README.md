@@ -44,4 +44,4 @@ The complete local run is `runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16
 
 Association alone took 9.27 ms in this one CPU replay. That excludes inference, localization, file verification, publication and page building; it is not end-to-end latency. More candidate tracks also introduce more ambiguous matches. Independent labels are needed to establish whether new IDs correctly isolate books or split a physical object.
 
-The cup's frame104 and frame359 detections retain `object-0005` across the empty frame268. A separate shifted cup detection starts `object-0011`, so even this return success does not prove a correct cup count. [Demo 06](../../../../demo_outputs/06_objects_in_3d.html) displays the corrected identities and their remaining unassigned cases.
+The cup's frame104 and frame359 detections retain `object-0005` across the empty frame268. A separate shifted cup detection starts `object-0011`, so even this return success does not prove a correct cup count. [Demo 06](../../../../outputs/demo_pages/06_objects_in_3d.html) displays the corrected identities and their remaining unassigned cases.

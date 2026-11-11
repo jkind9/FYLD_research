@@ -3,7 +3,7 @@
 Usage (detector environment, GPU only when no other process is using it):
     .venv/Scripts/python.exe -B -m \
         experiments.06_object_recognition.experiments.01_detection.placement_run \
-        --data-root <checkout>/data --checkpoint <checkout>/checkpoints/yolo26x.pt
+        --data-root <checkout>/data --checkpoint <checkout>/models/yolo26x.pt
 
 `--limit N` scores only the first N images (by image id) for a smoke check.
 The detector sees only image pixels; outlines are read after detection.

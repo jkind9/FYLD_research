@@ -49,7 +49,7 @@ The same structure appears in classical SLAM: fixed reference frames, a window o
 | **Its confidence map**, as a weight in clean-up | Promising | Per-frame-sized depth against tracked points, by confidence quarter: middle half 0.162 wide in the least confident quarter, 0.071 in the most confident. Partly distance (median 3.2 m against 1.5 m) |
 | **Its whole map with one size per walk** | Not better | The owner judged the viewer no better than the cleaned room build. Measured: depth scatter about twice the room build's, 40% too near beyond 4 m (CPU, 16-frame window) |
 | **Its camera path** | Not needed now | Within 0.12 m RMSE of ARCore's over 6.7 m. ARCore already gives metres and gravity on the phone |
-| **The memory design**, as an idea | Yes | Anchors for scale, a recent window in full, summaries of older frames. It matches the fragments-and-anchors design in `src/live/fragments.py` and could guide which frames the clean-up vote keeps |
+| **The memory design**, as an idea | Yes | Anchors for scale, a recent window in full, summaries of older frames. It matches the fragments-and-anchors design in `sitescan/fusion/fragments.py` and could guide which frames the clean-up vote keeps |
 | **The encoder alone**, for object re-identification | Possible, heavy | Its DINOv2 ViT-L gives per-patch appearance features. Stage 06 considered DINOv2 ViT-S for this; one shared encoder could serve depth and objects |
 | **The camera or depth head on its own** | No | Both read the trunk's tokens. Without the 909 M-parameter trunk they have nothing to read |
 | **Training a smaller copy** | Not now | The authors trained on 26 datasets over about 21,500 GPU hours for one stage. A small model distilled from it would still need large data and GPU time |

@@ -7,13 +7,13 @@ from typing import Any
 
 import pytest
 
+from evaluation.layers import pipeline
+from evaluation.layers.config import STEP_NAMES, PipelineSpec
+from evaluation.layers.records import StepResult
+from evaluation.layers.steps.capture import PhoneExport
+from evaluation.layers.tests.providers import with_controls
+from evaluation.layers.validation import ScoreRequest
 from experiments.shared.runs import verify_run, write_json
-from src.walkthrough import pipeline
-from src.walkthrough.config import STEP_NAMES, PipelineSpec
-from src.walkthrough.records import StepResult
-from src.walkthrough.steps.capture import PhoneExport
-from src.walkthrough.tests.providers import with_controls
-from src.walkthrough.validation import ScoreRequest
 
 
 def _spec(tmp_path: Path) -> PipelineSpec:

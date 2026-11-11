@@ -1,11 +1,11 @@
 """Clean-up and far-sizing trials on one walk, scored against held-out ARCore tracked points.
 
-The depth model runs once per frame that room_build would fuse (fresh ARCore depth, upright input, 8 x 6 grid
+The depth model runs once per frame that the room pipeline would fuse (fresh ARCore depth, upright input, 8 x 6 grid
 size, 4.0 m far limit). Each variant is then fused and scored. Tracked points with even ids may size depth; only
 odd ids score it, so no variant is scored on points it was fitted to. Tracked points come from ARCore's tracking,
 not its depth maps, so they check depth beyond ARCore depth's reach. Sources: research/surface_denoising.
 
-    python -B -m src.live.denoise_trial --session <v2 session> --out <folder>
+    python -B -m experiments.surface_cleanup.denoise_trial --session <v2 session> --out <folder>
 """
 
 from __future__ import annotations
@@ -21,17 +21,30 @@ import numpy as np
 import open3d as o3d
 from scipy.spatial import cKDTree
 
-from . import clean
-from .fragments import Fragments
-from .room_build import (
-    _world,
-    depth_model,
-    fusable_frames,
-    grid_size,
-    parse_room_args,
-    room_parser,
-    supported_pixels,
+from apps.cli import parse_room_args, room_parser
+from experiments.surface_cleanup.filters import (
+    CLUSTER_EPS_M,
+    keep_after,
+    piece_majority,
 )
+from experiments.surface_cleanup.masks import (
+    edge_mask,
+    near_first_passes,
+    view_angle_mask,
+)
+from experiments.surface_cleanup.support import (
+    MEASURED_M,
+    WIDE_ANGLE_DEG,
+    views_measuring,
+    wide_support,
+)
+from sitescan.cleanup import visibility_vote
+from sitescan.cleanup.vote import VOTE_FAR_M
+from sitescan.depth import load_model
+from sitescan.fusion import Fragments
+from sitescan.pipelines import DEPTH_MODEL
+from sitescan.pipelines.room import fusable_frames, world_points
+from sitescan.scale import fit_grid, supported_pixels
 
 FLOOR_Y = -0.76  # ARCore depth fused alone puts the 15 October floor here, with a few cm spread (Task113)
 BANDS = (0.0, 1.0, 2.5, 4.0)  # metres; ARCore depth rarely reaches past 2.5 m (Task117)
@@ -46,13 +59,13 @@ BEHIND_M = 1.0  # door echo layers lie 0.44-0.5 m apart (Task117), so two layers
 FOCUS = {"door_frame_65": 65, "stairs_frame_420": 420}
 FOCUS_HALF_WIDTH = 30  # recorded frames either side, about 1 s
 _PLAIN = {"sizing": "grid", "masks": False, "near_first": False, "vote": None, "wide": None, "pieces": False,
-          "measured_m": clean.MEASURED_M, "min_views": 0, "post": None, "eps": clean.CLUSTER_EPS_M}
+          "measured_m": MEASURED_M, "min_views": 0, "post": None, "eps": CLUSTER_EPS_M}
 VARIANTS = {name: _PLAIN | changes for name, changes in {
     "baseline": {},
     "masks": {"masks": True},
     "near_first": {"near_first": True},
     "vote": {"vote": "fused"},  # see-through evidence only from fused depth (under 4 m)
-    "vote_far": {"vote": "far"},  # see-through evidence from depth out to clean.VOTE_FAR_M
+    "vote_far": {"vote": "far"},  # see-through evidence from depth out to VOTE_FAR_M
     "sor": {"post": "sor"},
     "radius": {"post": "radius"},
     "clusters": {"post": "clusters"},
@@ -64,12 +77,12 @@ VARIANTS = {name: _PLAIN | changes for name, changes in {
     "tracked_sizing": {"sizing": "tracked"},
     "far_sizing": {"sizing": "far"},
     "far_sizing_vote_far": {"sizing": "far", "vote": "far"},
-    "wide": {"wide": clean.WIDE_ANGLE_DEG},  # far surface needs agreeing views from other spots (COLMAP)
+    "wide": {"wide": WIDE_ANGLE_DEG},  # far surface needs agreeing views from other spots (COLMAP)
     "wide_6deg": {"wide": 6.0},
-    "wide_2m": {"wide": clean.WIDE_ANGLE_DEG, "measured_m": 2.0},  # does one-spot depth at 2.0-2.5 m keep echoes?
-    "wide_pieces": {"wide": clean.WIDE_ANGLE_DEG, "pieces": True},  # and mostly-unsupported pieces go whole (PCL)
-    "vote_far_wide": {"vote": "far", "wide": clean.WIDE_ANGLE_DEG},
-    "vote_far_wide_pieces": {"vote": "far", "wide": clean.WIDE_ANGLE_DEG, "pieces": True},
+    "wide_2m": {"wide": WIDE_ANGLE_DEG, "measured_m": 2.0},  # does one-spot depth at 2.0-2.5 m keep echoes?
+    "wide_pieces": {"wide": WIDE_ANGLE_DEG, "pieces": True},  # and mostly-unsupported pieces go whole (PCL)
+    "vote_far_wide": {"vote": "far", "wide": WIDE_ANGLE_DEG},
+    "vote_far_wide_pieces": {"vote": "far", "wide": WIDE_ANGLE_DEG, "pieces": True},
 }.items()}
 
 
@@ -117,7 +130,7 @@ def sight_line_hits(surface: cKDTree, cameras: np.ndarray, points: np.ndarray,
 
 
 def collect(session: Path, model) -> tuple[list, Counter]:
-    """('anchor', id, pose) and ('frame', record) events in session order, for the frames room_build fuses."""
+    """('anchor', id, pose) and ('frame', record) events in session order, for the frames the room pipeline fuses."""
     events, outcome = [], Counter()
     for kind, *item in fusable_frames(session, model, outcome):
         if kind == "anchor":
@@ -125,17 +138,17 @@ def collect(session: Path, model) -> tuple[list, Counter]:
             continue
         record = item[0]
         frame, world_from_camera, depth, valid, uv, target, grid = (
-            record.frame, record.world_from_camera, record.depth, record.valid, record.uv, record.target, record.size)
+            record.frame, record.world_from_camera, record.depth, record.valid, record.uv, record.target, record.scale)
         camera = (frame.points_world - world_from_camera[:3, 3]) @ world_from_camera[:3, :3]
         ahead = camera[:, 2] > 0
         ids, pixels, z = frame.point_ids[ahead], frame.points_pixel[ahead], camera[ahead, 2]
         fit = ids % 2 == 0
         fallback = tracked_fallback(depth, valid, uv, pixels[fit], z[fit])
         outcome["tracked_fallback" if fallback is not None else "no_tracked_fallback"] += 1
-        tracked = grid if fallback is None else grid_size(depth, valid, uv, target, fallback=fallback)
+        tracked = grid if fallback is None else fit_grid(depth, valid, uv, target, fallback=fallback)
         far_fit = fit & (z >= FAR_FROM_M)
         far_fallback = tracked_fallback(depth, valid, uv, pixels[far_fit], z[far_fit])
-        far = grid if far_fallback is None else far_sizes(depth, grid, grid_size(depth, valid, uv, target,
+        far = grid if far_fallback is None else far_sizes(depth, grid, fit_grid(depth, valid, uv, target,
                                                                                   fallback=far_fallback))
         h, w = depth.shape
         inside = ~fit & (pixels[:, 0] >= 0) & (pixels[:, 0] < w) & (pixels[:, 1] >= 0) & (pixels[:, 1] < h)
@@ -146,7 +159,7 @@ def collect(session: Path, model) -> tuple[list, Counter]:
             depth=depth.astype(np.float32), valid=valid,
             sizes={"grid": grid.astype(np.float32), "tracked": tracked.astype(np.float32),
                    "far": far.astype(np.float32)},
-            arcore=_world(uv[::4], target[::4], frame.intrinsics, world_from_camera),
+            arcore=world_points(uv[::4], target[::4], frame.intrinsics, world_from_camera),
             held_out=SimpleNamespace(ids=ids[~fit], world=frame.points_world[ahead][~fit], z=z[~fit],
                                      rows=rows, cols=cols, inside=inside[~fit],
                                      supported=supported_pixels(uv, depth.shape)[rows, cols]))))
@@ -156,7 +169,7 @@ def collect(session: Path, model) -> tuple[list, Counter]:
 
 def fuse(events: list, variant: dict, voxel: float, far: float) -> tuple[np.ndarray, np.ndarray, list, dict, list]:
     """Surface, colours, per frame the correction now @ inverse(then) of the anchor placing it, removal counts, and
-    per frame (camera_from_world, intrinsics, fused depth, see-through evidence out to clean.VOTE_FAR_M)."""
+    per frame (camera_from_world, intrinsics, fused depth, see-through evidence out to VOTE_FAR_M)."""
     fragments, placed, removed = Fragments(voxel_m=voxel), [], Counter()
     for kind, *rest in events:
         if kind == "anchor":
@@ -167,17 +180,17 @@ def fuse(events: list, variant: dict, voxel: float, far: float) -> tuple[np.ndar
         seen = frame.valid & (sized > 0)
         keep = seen & (sized < far)
         if variant["masks"]:
-            edge, angle = clean.edge_mask(sized), clean.view_angle_mask(sized, frame.intrinsics)
+            edge, angle = edge_mask(sized), view_angle_mask(sized, frame.intrinsics)
             removed["edge_pixels"] += int((keep & edge).sum())
             removed["angle_pixels"] += int((keep & angle & ~edge).sum())
             seen &= ~edge & ~angle
             keep &= ~edge & ~angle
         removed["fused_pixels"] += int(keep.sum())
         depth = np.where(keep, sized, 0.0)
-        for part, repeats in clean.near_first_passes(depth) if variant["near_first"] else [(depth, 1)]:
+        for part, repeats in near_first_passes(depth) if variant["near_first"] else [(depth, 1)]:
             for _ in range(repeats):
                 fragments.integrate(part, frame.colour, frame.intrinsics, frame.world_from_camera, frame.keyframe)
-        far_evidence = np.where(seen & (sized < clean.VOTE_FAR_M), sized, 0.0)
+        far_evidence = np.where(seen & (sized < VOTE_FAR_M), sized, 0.0)
         placed.append((frame, fragments.placing_anchor(frame.keyframe).copy(), far_evidence, depth))
     surface, colours = fragments.surface(), fragments.colours()
     corrections = [fragments.placing_anchor(f.keyframe) @ np.linalg.inv(then) for f, then, *_ in placed]
@@ -186,24 +199,24 @@ def fuse(events: list, variant: dict, voxel: float, far: float) -> tuple[np.ndar
     fused = [(cam, k, d) for cam, k, d, _ in views]
     if variant["vote"]:
         evidence = [(cam, k, e if variant["vote"] == "far" else d) for cam, k, d, e in views]
-        keep = clean.visibility_vote(surface, evidence)
+        keep = visibility_vote(surface, evidence)
         removed["vote_points"] = int((~keep).sum())
         surface, colours = surface[keep], colours[keep]
     if variant["wide"]:
-        keep = clean.wide_support(surface, fused, variant["measured_m"], variant["wide"])
+        keep = wide_support(surface, fused, variant["measured_m"], variant["wide"])
         if variant["pieces"]:
             cloud = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(surface))
             cloud.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=3 * voxel, max_nn=30))
-            keep = clean.piece_majority(surface, np.asarray(cloud.normals), ~keep)
+            keep = piece_majority(surface, np.asarray(cloud.normals), ~keep)
         removed["wide_points"] = int((~keep).sum())
         surface, colours = surface[keep], colours[keep]
     if variant["min_views"]:
-        seen = clean.views_measuring(surface, fused)
+        seen = views_measuring(surface, fused)
         keep = seen >= variant["min_views"]
         removed["seen_too_few_times_points"] = int((~keep).sum())
         surface, colours = surface[keep], colours[keep]
     if variant["post"]:
-        keep = clean.keep_after(surface, variant["post"], variant["eps"])
+        keep = keep_after(surface, variant["post"], variant["eps"])
         removed["post_points"] = int((~keep).sum())
         surface, colours = surface[keep], colours[keep]
     return surface, colours, corrections, dict(removed), views
@@ -216,7 +229,7 @@ def diagnose(frames: list, far: float) -> dict:
         depth = frame.depth * frame.sizes["grid"]
         valid = frame.valid & (depth > 0)
         fused = valid & (depth < far)
-        edge, angle = clean.edge_mask(depth), clean.view_angle_mask(depth, frame.intrinsics)
+        edge, angle = edge_mask(depth), view_angle_mask(depth, frame.intrinsics)
         counts["beyond_far"] += int((valid & ~fused).sum())
         for low, high in pairwise(BANDS):
             band = fused & (depth >= low) & (depth < high)
@@ -276,13 +289,13 @@ def score(surface: np.ndarray, frames: list, corrections: list) -> dict:
         out[f"blocked_share_{name}"] = window_share(blocked, samples, seqs, focus, FOCUS_HALF_WIDTH)
         out[f"behind_share_{name}"] = window_share(behind, behind_samples, seqs, focus, FOCUS_HALF_WIDTH)
         out[f"within_10cm_{name}"] = window_share(near_surface, np.ones(len(points)), seqs, focus, FOCUS_HALF_WIDTH)
-    out["floating_points"] = int((~clean.keep_after(surface, "clusters")).sum())
+    out["floating_points"] = int((~keep_after(surface, "clusters")).sum())
     return out
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_room_args(room_parser(__doc__.splitlines()[0]), argv)
-    events, outcome = collect(args.session, depth_model(args.threads))
+    events, outcome = collect(args.session, load_model(DEPTH_MODEL, threads=args.threads))
     frames = [record for kind, record, *_ in events if kind == "frame"]
     args.out.mkdir(parents=True)
     results = {"session": str(args.session), "far_m": args.far, "voxel_m": args.voxel, "frames": dict(outcome),

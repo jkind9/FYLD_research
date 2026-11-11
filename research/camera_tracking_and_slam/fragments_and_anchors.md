@@ -1,6 +1,6 @@
 # Fragments and anchors: keeping a fused surface consistent when the camera path is corrected
 
-**Take-away:** fuse depth into short pieces of surface (*fragments*), each stored in its own local frame, and place each fragment in the world with a pose that can change later. A path correction then moves whole fragments instead of forcing a re-fusion. The project's live processor (`src/live/fragments.py`, Task89) does this with one fragment per 10 ARCore keyframe anchors.
+**Take-away:** fuse depth into short pieces of surface (*fragments*), each stored in its own local frame, and place each fragment in the world with a pose that can change later. A path correction then moves whole fragments instead of forcing a re-fusion. The project's live processor (`sitescan/fusion/fragments.py`, Task89) does this with one fragment per 10 ARCore keyframe anchors.
 
 ## Sources
 

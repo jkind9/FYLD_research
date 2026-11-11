@@ -1,19 +1,23 @@
 # Experiments: six execution steps
 
-The project is built as six execution steps, each tested on its own with known inputs before being connected. The [root README](../README.md) explains the problem, the layers, the hosted-versus-phone options and the results in plain terms. This guide covers how the experiment folders are organised, the rules every experiment follows, and how the layers connect.
+The project was built as six execution steps, each tested on its own with known inputs before being connected. The methods these experiments chose now live in [`sitescan/`](../sitescan/README.md); each experiment folder keeps its README as the evidence record. The [project plan](../PROJECT_PLAN.md) tells the research story. This guide covers how the experiment folders are organised, the rules every experiment follows, and how the layers connect.
+
+Status on 11 November 2026:
 
 | Layer | Folder | What it answers | Status |
 |---|---|---|---|
-| 🟦 1. Camera capture | [01_camera_capture_delivery](01_camera_capture_delivery/README.md) | Can a phone record what the other layers need and deliver it? | Redmi capability export verified; image capture still missing |
-| 🟪 2. Depth estimation | [02_stereo_depth](02_stereo_depth/README.md) | How far away is each pixel, in metres? | Test data ready; no method run |
-| 🟩 3. Camera position estimation | [03_camera_pose_estimation](03_camera_pose_estimation/README.md) | Where was the camera for each frame? | Frozen full runs: xyz 53.6 mm and desk 280.4 mm position RMSE |
-| 4. Surface reconstruction | [04_surface_reconstruction](04_surface_reconstruction/README.md) | What observed geometry can be placed in metres? | Historical supplied-input surface control; metric method boundary available |
-| 5. Mapping, dimensions and area | [05_birds_eye_mapping](05_birds_eye_mapping/README.md) | How big is the observed site, and what remains unknown? | Real method unavailable under Task55 |
-| 🟥 6. Object recognition and counting | [06_object_recognition](06_object_recognition/README.md) | Which objects are there, where, and how many distinct ones? | Early trials and a 60-frame replay |
-| Support | [geometry_validation](geometry_validation/README.md), [shared](shared/README.md), [datasets](datasets/README.md) | Coordinate checks, shared records and run export, test data guidance | In use |
+| 🟦 1. Camera capture | [01_camera_capture_delivery](01_camera_capture_delivery/README.md) | Can a phone record what the other layers need and deliver it? | Capture app 1.2 on the Redmi records colour, grey images, motion sensors, ARCore pose, tracked points and depth: 1,194 frames at 29.9 fps on 14 October. The reader is `sitescan/session`, the receiver `apps/receiver` |
+| 🟪 2. Depth estimation | [02_stereo_depth](02_stereo_depth/README.md) | How far away is each pixel, in metres? | Depth Anything V2 Metric Indoor Small adopted (`sitescan/depth`); turning images upright cut AbsRel against ARCore depth from 0.080 to 0.058. Marigold, Prompt Depth Anything, Depth Anything 3 and ZipDepth were tried and not adopted |
+| 🟩 3. Camera position estimation | [03_camera_pose_estimation](03_camera_pose_estimation/README.md) | Where was the camera for each frame? | ARCore's path is used on the phone. This experiment's tracker, frozen full runs: xyz 53.6 mm and desk 280.4 mm position RMSE |
+| 4. Surface reconstruction | [04_surface_reconstruction](04_surface_reconstruction/README.md) | What observed geometry can be placed in metres? | Anchor-tied fragment fusion adopted (`sitescan/fusion`). 7.8 mm on the synthetic supplied-input control; 46–52 mm in live replay of ICL |
+| 5. Mapping, dimensions and area | [05_birds_eye_mapping](05_birds_eye_mapping/README.md) | How big is the observed site, and what remains unknown? | Dominant plane and grid footprint adopted (`sitescan/mapping`). Accuracy unscored: no independent measurement of a real room yet |
+| 🟥 6. Object recognition and counting | [06_object_recognition](06_object_recognition/README.md) | Which objects are there, where, and how many distinct ones? | Pilot moved to `sitescan/objects`, marked experimental. Live replay overcounts (51 identities on TUM fr1 xyz) |
+| Clean-up | [surface_cleanup](surface_cleanup/README.md) | Which surface clean-up filters help? | Visibility vote and largest pieces adopted (`sitescan/cleanup`); six other filters rejected; the trial and tuner scripts live here |
+| Support | [geometry_validation](geometry_validation/README.md), [shared](shared/README.md), [datasets](datasets/README.md) | Coordinate checks, shared records and run export, test data guidance | In use. The layer-by-layer runner and the per-stage report moved to [`evaluation/`](../evaluation/README.md) |
 | Standalone | [live_slam](live_slam/README.md) | Live camera tracking from images alone (stella_vslam, ORB-SLAM3) run frame by frame on the CPU and scored against the true paths | xyz 12.8-17.1 mm, desk 26-28 mm live, 5-12 ms per frame; desk tracking drops 3-12% of frames |
-| Standalone | [open_vio](open_vio/README.md) | Replacing ARCore with open parts (Stream B): raw camera and motion-sensor recorder on the phone, calibration, open visual-inertial trackers scored against ARCore | Recorder app built; calibration pipeline reproduces TUM-VI (0.014 degrees, 1.0 mm, 0.13 ms); on TUM-VI room1 with one camera Basalt 0.146 m, OpenVINS 0.064 m (GPL reference); no Redmi recording yet |
-| Standalone | [sfm](sfm/README.md) | Camera path and 3D structure from images alone (COLMAP 4.2.1), scored against true paths and surfaces; outputs are read by later tasks, not wired into the walkthrough | Desk: every frame placed, 24 mm best-fit error with size (walkthrough tracker 112 mm with Kinect depth) |
+| Standalone | [open_vio](open_vio/README.md) | Replacing ARCore with open parts: raw camera and motion-sensor recorder on the phone, calibration, open visual-inertial trackers scored against ARCore | Recorder app built; calibration pipeline reproduces TUM-VI (0.014 degrees, 1.0 mm, 0.13 ms); on TUM-VI room1 with one camera Basalt 0.146 m, OpenVINS 0.064 m (GPL reference); no Redmi recording yet |
+| Standalone | [sfm](sfm/README.md) | Camera path and 3D structure from images alone (COLMAP 4.2.1), scored against true paths and surfaces | Desk: every frame placed, 24 mm best-fit error with size |
+| Standalone | [lingbot_map](lingbot_map/README.md) | Does a feed-forward 3D model give better depth than the adopted one? | Its depth, scaled by ARCore, had 38% lower error than Depth Anything V2 on the same frames, but it needs a 1.16-billion-parameter model on a GPU |
 
 Each layer README starts with a guide: how the layer works from first principles, hosted and on-phone method options with licences, its top 5 sources and what can be improved. The detailed experiment record follows.
 
@@ -200,9 +204,9 @@ Start with controls and a simple baseline. Test normal inputs, boundaries and a 
 
 Numeric product acceptance limits, processing budgets and tunable settings have not been selected. Agree and record them before running a comparison. A completed experiment may conclude that a method is unsuitable; completion is an evidenced decision, not a requirement for a positive result.
 
-Per-stage accuracy against reference data is collected in one report by [experiments/evaluation](evaluation/README.md). It re-scores verified runs with each experiment's own scorer, lists every stage (unscored stages are marked unavailable with a reason), records which reference data each score used, and compares two reports stage by stage. New stage measures should report into it rather than inventing another format.
+Per-stage accuracy against reference data is collected in one report by [evaluation/stage_report](../evaluation/stage_report/README.md). It re-scores verified runs with each experiment's own scorer, lists every stage (unscored stages are marked unavailable with a reason), records which reference data each score used, and compares two reports stage by stage. New stage measures should report into it rather than inventing another format.
 
-Reusable geometry, records and run exporting live in [experiments/shared](shared/README.md). Keep estimator-specific code with its experiment; promote a helper only when another experiment needs the same behaviour. The root [src placeholder](../src/README.md) does not own a second implementation.
+Reusable geometry, records and run exporting live in [experiments/shared](shared/README.md). Keep estimator-specific code with its experiment; promote a helper only when another experiment needs the same behaviour. Adopted methods live in [sitescan](../sitescan/README.md); experiments import them and never hold a second copy.
 
 ## Build order
 
@@ -256,4 +260,4 @@ The [task board](../task_list/README.md#next-execution-sequence) puts all three 
 
 ## Canonical six-step execution
 
-The [root runner](../src/walkthrough/README.md) now calls capture/input validation, depth, camera tracking, surface reconstruction, mapping/dimensions/area, then object recognition/distinct counting. Segmentation and appearance are optional parts of step 6, disabled by default. Experiment methods remain independently callable. Error analysis imports each owner's dedicated validation area after predictions are saved and hashed. Real depth and mapping remain unavailable; software control success proves this organisation only. Existing supplied-input replays, frozen commands and saved runs remain historical controls.
+The [root runner](../evaluation/layers/README.md) now calls capture/input validation, depth, camera tracking, surface reconstruction, mapping/dimensions/area, then object recognition/distinct counting. Segmentation and appearance are optional parts of step 6, disabled by default. Experiment methods remain independently callable. Error analysis imports each owner's dedicated validation area after predictions are saved and hashed. Real depth and mapping remain unavailable; software control success proves this organisation only. Existing supplied-input replays, frozen commands and saved runs remain historical controls.

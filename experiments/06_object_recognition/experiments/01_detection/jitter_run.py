@@ -3,7 +3,7 @@
 Usage (detector environment, GPU only when no other process is using it):
     .venv/Scripts/python.exe -B -m \
         experiments.06_object_recognition.experiments.01_detection.jitter_run \
-        --data-root <checkout>/data --checkpoint <checkout>/checkpoints/yolo26x.pt
+        --data-root <checkout>/data --checkpoint <checkout>/models/yolo26x.pt
 
 The detector sees only colour images. Depth and motion capture are read after
 detection. This measures consistency over time, not placement accuracy.

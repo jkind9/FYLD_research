@@ -1,1 +1,5 @@
 cache-dir = "~/.cache/ruff/mobile_depth_estimation_tracking"
+
+[lint.flake8-bugbear]
+# Frozen settings records cannot change, so one default instance can be shared safely.
+extend-immutable-calls = ["sitescan.pipelines.live.LiveSettings", "sitescan.pipelines.room.RoomSettings"]

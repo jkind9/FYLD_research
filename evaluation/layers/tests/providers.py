@@ -10,8 +10,8 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-from src.walkthrough.config import PipelineSpec
-from src.walkthrough.steps.contracts import ColourFrame, DepthPrediction
+from evaluation.layers.config import PipelineSpec
+from evaluation.layers.steps.contracts import ColourFrame, DepthPrediction
 
 pose_backends = importlib.import_module(
     "experiments.03_camera_pose_estimation.src.backend"

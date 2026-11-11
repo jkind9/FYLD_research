@@ -3,7 +3,7 @@
 One run = one recording and one feature type; the matches feed both the incremental and the
 global mapper. Example (repository root, `.venv`):
 
-    python -m experiments.sfm.run_sfm --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
+    python -m experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
         --features sift --run-root experiments/sfm/runs/tum_xyz
 """
 

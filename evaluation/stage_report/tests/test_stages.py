@@ -2,8 +2,8 @@
 
 import importlib
 
-from experiments.evaluation.stages import identity
-from experiments.evaluation.tests import fixtures
+from evaluation.stage_report.stages import identity
+from evaluation.stage_report.tests import fixtures
 
 
 def test_identity_report_uses_public_validation_without_private_runner(tmp_path, monkeypatch):

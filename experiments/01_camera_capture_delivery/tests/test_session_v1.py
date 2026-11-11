@@ -10,7 +10,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "host"))
-import session_v1
+from sitescan.session import wire_v1 as session_v1
 
 FIXTURE = ROOT / "tests" / "fixtures" / "session_v1"
 

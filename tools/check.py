@@ -62,25 +62,7 @@ def main() -> int:
         **os.environ,
         "PYTHONDONTWRITEBYTECODE": "1",
     }
-    args = sys.argv[1:] or [
-        "src/walkthrough/tests",
-        "experiments/geometry_validation/tests",
-        "experiments/shared/tests",
-        "experiments/evaluation/tests",
-        "experiments/datasets/tests",
-        "experiments/04_surface_reconstruction/tests",
-        "experiments/03_camera_pose_estimation/tests",
-        "experiments/06_object_recognition/tests",
-        "experiments/06_object_recognition/shared/tests",
-        "experiments/06_object_recognition/datasets/tests",
-        "experiments/06_object_recognition/experiments/01_detection/tests",
-        "experiments/06_object_recognition/experiments/02_segmentation/tests",
-        "experiments/06_object_recognition/experiments/03_appearance/tests",
-        "experiments/06_object_recognition/experiments/04_geometry_identity/tests",
-        "experiments/06_object_recognition/experiments/05_replay/tests",
-        "tools/demos/tests",
-        "tools/tests",
-    ]
+    args = sys.argv[1:] or ["-c", "pytest-full.ini"]
     with tempfile.TemporaryDirectory(prefix="fyld-scene-mapping-checks-") as scratch:
         cache = Path(scratch)
         environment.update(

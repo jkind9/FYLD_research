@@ -33,12 +33,12 @@ def ransac(points: np.ndarray, rng, *, inlier_distance_m: float, iterations: int
     return best_point, best_normal
 
 
-def scatter_axes(reference: np.ndarray, total: np.ndarray, outer: np.ndarray, count: int):
-    """Centre and principal axes from accumulated first and second moments."""
-    if count < 3:
+def scatter_axes(reference: np.ndarray, relative: np.ndarray):
+    """Centre and principal axes of points given relative to a reference point."""
+    if len(relative) < 3:
         raise ValueError("Fewer than 3 points lie on the plane")
-    mean = total / count
-    covariance = outer / count - np.outer(mean, mean)
+    mean = relative.sum(axis=0) / len(relative)
+    covariance = relative.T @ relative / len(relative) - np.outer(mean, mean)
     _, vectors = np.linalg.eigh(covariance)
     return reference + mean, vectors[:, ::-1].T
 
@@ -61,10 +61,5 @@ def fit_dominant_plane(
     )
     point, normal = ransac(subset, rng, inlier_distance_m=inlier_distance_m, iterations=iterations)
     inliers = points[np.abs((points - point) @ normal) <= inlier_distance_m]
-    relative = inliers - point
-    total = np.zeros(3)
-    outer = np.zeros((3, 3))
-    total += relative.sum(axis=0)
-    outer += relative.T @ relative
-    centre, axes = scatter_axes(point, total, outer, len(inliers))
+    centre, axes = scatter_axes(point, inliers - point)
     return Plane(centre, axes[2], len(inliers) / len(points), "fitted_dominant_plane")

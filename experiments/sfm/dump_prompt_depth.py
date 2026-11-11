@@ -1,6 +1,6 @@
 """Prompt Depth Anything depth for every SfM-placed frame, prompted with that frame's SfM points (CPU, `.venv`).
 
-    python -m experiments.sfm.dump_prompt_depth --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
+    python -m experiments.sfm.dump_prompt_depth --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
         --sfm-run experiments/sfm/runs/tum_xyz/<run>/output/incremental --size 0.0459 --fill linear \
         --output experiments/sfm/runs/depth/xyz_prompt_linear
 """

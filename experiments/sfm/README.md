@@ -1,8 +1,8 @@
 # Structure from motion (standalone)
 
-This folder answers one question: **can the camera path and the scene's 3D structure be recovered from the images alone, more accurately than the walkthrough's depth-based tracker?** It runs established structure-from-motion software on recordings we already have and scores the result against their true camera paths and surfaces. It does not change the six-layer walkthrough in `src/walkthrough`; its saved outputs are files that later tasks read.
+This folder answers one question: **can the camera path and the scene's 3D structure be recovered from the images alone, more accurately than the walkthrough's depth-based tracker?** It runs established structure-from-motion software on recordings we already have and scores the result against their true camera paths and surfaces. It does not change the six-layer walkthrough in `evaluation/layers`; its saved outputs are files that later tasks read.
 
-The owner asked for this on 13 October 2026: standalone SfM experiments in their own folder, on existing data, with speed and edge deployment in mind but not the focus. Tasks: [67](../../task_list/open/67_track_the_camera_without_depth_so_depth_scale_erro.md) (camera path), [71](../../task_list/open/71_rebuild_surfaces_from_the_recorded_camera_poses_to.md) (surfaces from true poses), [72](../../task_list/open/72_scale_learned_depth_to_the_image_only_tracker_s_3d.md) (dense structure from the SfM path), [76](../../task_list/open/76_read_saved_sfm_camera_paths_and_points_into_the_wa.md) (walkthrough readers). Background: [the tracking review](../../research/camera_tracking_and_slam/tracking_review_2026-10-13.md).
+The owner asked for this on 13 October 2026: standalone SfM experiments in their own folder, on existing data, with speed and edge deployment in mind but not the focus. Tasks: [67](../../task_list/done/67_track_the_camera_without_depth_so_depth_scale_erro.md) (camera path), [71](../../task_list/done/71_rebuild_surfaces_from_the_recorded_camera_poses_to.md) (surfaces from true poses), [72](../../task_list/done/72_scale_learned_depth_to_the_image_only_tracker_s_3d.md) (dense structure from the SfM path), [76](../../task_list/archive/76_read_saved_sfm_camera_paths_and_points_into_the_wa.md) (walkthrough readers). Background: [the tracking review](../../research/camera_tracking_and_slam/tracking_review_2026-10-13.md).
 
 ## How it works
 
@@ -22,9 +22,9 @@ COLMAP is the official 4.2.1 Windows build without CUDA, downloaded on 2026-10-1
 
 ```text
 uv sync --all-extras
-.venv\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 ^
+.venv\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 ^
     --features sift --run-root experiments/sfm/runs/tum_desk ^
-    --depth-run outputs/task65_runs/desk/depth-anything/20261008T160022.468281Z_86f38337bb0b4db9ad2a2126b3a0b646
+    --depth-run outputs/task_runs/task65_runs/desk/depth-anything/20261008T160022.468281Z_86f38337bb0b4db9ad2a2126b3a0b646
 .venv\Scripts\python -m pytest experiments\sfm\tests -p no:cacheprovider --import-mode=importlib
 ```
 

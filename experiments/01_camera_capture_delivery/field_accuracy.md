@@ -17,7 +17,7 @@ Use the computer address printed by the receiver, on the same Wi-Fi as the phone
 To measure host processing speed on the same walk, use this instead of the receiver command (both use port 8765):
 
 ```text
-.venv\Scripts\python -m src.live.run --listen 8765 --out outputs/field_accuracy/indoor-01-live
+.venv\Scripts\python -m apps.cli live --port 8765 --out outputs/field_accuracy/indoor-01-live
 ```
 
 After stopping the phone stream, wait for the host to finish and save the final surface and summary. Score the received session under `outputs/field_accuracy/indoor-01-live/sessions/<received-session>`, not the host's `updates.jsonl`: dropped processing updates must not remove poses from the tracking check. Object counts are still known to be too high; this task does not validate them.
@@ -74,6 +74,6 @@ These are the camera poses logged live. No similarity alignment, scale fitting, 
 
 ## What remains after capture
 
-For each environment, report the distance errors, closure drift, tracking loss, received gaps and capture conditions. Run the saved session through `src.live.run --replay` if live processing was not measured during capture. Report surface/map error and object-count error separately when independent references exist.
+For each environment, report the distance errors, closure drift, tracking loss, received gaps and capture conditions. Run the saved session through `apps.cli replay --session` if live processing was not measured during capture. Report surface/map error and object-count error separately when independent references exist.
 
 Task75 also calls for Task67's offline COLMAP path on the same images. Its runner currently accepts TUM and ICL datasets, not phone sessions. Add that input adapter after the first measured capture. Reserve one measured distance for setting COLMAP's otherwise unknown scale and score on other distances; fitting scale to every test distance would hide the error. Do not substitute ARCore as the ground truth for that comparison. Task75 stays open for the real captures and comparison; Task61 stays open for acceptance limits.

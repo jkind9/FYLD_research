@@ -5,8 +5,8 @@ import json
 import numpy as np
 from PIL import Image
 
-from src.live import stand_in
-from src.live.stream import session_v1
+from evaluation import stand_in
+from sitescan.session import read_wire_session, wire_v1
 
 
 def tum_folder(root, frames=9, step_s=0.2):
@@ -28,14 +28,14 @@ def tum_folder(root, frames=9, step_s=0.2):
 def test_stand_in_session_reads_back_as_v1(tmp_path):
     folder = tum_folder(tmp_path / "clip")
     out = stand_in.write_session(f"tum:{folder}", tmp_path / "session", depth_size=(16, 12))
-    frames = list(session_v1.read_session(out))
+    frames = list(read_wire_session(out))
     assert [f.seq for f in frames] == list(range(9))
     assert [f.seq for f in frames if f.depth is not None] == [0, 3, 6]
     assert [f.anchor_created[0] for f in frames if f.anchor_created] == [0, 1]  # one per second
     assert all(len(f.point_ids) == stand_in.POINTS_PER_FRAME for f in frames)
     assert np.allclose(frames[3].depth.depth_m, 2.0)
     # ground truth is in OpenCV camera axes; the session carries ARCore axes
-    assert np.allclose(session_v1.world_from_camera_cv(frames[4].pose)[:3, 3], [0.4, 0, 0])
-    assert np.allclose(session_v1.world_from_camera_cv(frames[4].pose)[:3, :3], np.eye(3))
+    assert np.allclose(wire_v1.world_from_camera_cv(frames[4].pose)[:3, 3], [0.4, 0, 0])
+    assert np.allclose(wire_v1.world_from_camera_cv(frames[4].pose)[:3, :3], np.eye(3))
     record = json.loads((out / "session.json").read_text())
     assert record["control"] == "reference" and record["version"] == 1

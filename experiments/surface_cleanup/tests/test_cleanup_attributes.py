@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from src.live import cleanup_attributes
+from experiments.surface_cleanup import cleanup_attributes
 
 K = (100.0, 100.0, 32.0, 24.0)
 

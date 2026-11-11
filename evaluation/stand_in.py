@@ -1,6 +1,6 @@
 """Turn a recorded clip into a phone session v1 folder, as a stand-in until ARCore recordings exist.
 
-    python -m src.live.stand_in --recording tum:data/tum/rgbd_dataset_freiburg1_xyz --out <session folder>
+    python -m evaluation.stand_in --recording tum:data/tum/rgbd_dataset_freiburg1_xyz --out <session folder>
 
 This is a reference control, never a measurement of ARCore: the poses are the recording's ground truth and
 the "raw depth" is its depth sensor, subsampled to ARCore's size. session.json says so (control: reference).
@@ -22,7 +22,7 @@ import numpy as np
 from PIL import Image
 from scipy.spatial.transform import Rotation
 
-from .stream import session_v1
+from sitescan.session import wire_v1
 
 sequences = importlib.import_module("experiments.sfm.src.sequences")
 
@@ -31,7 +31,7 @@ DEPTH_EVERY = 3
 POINTS_PER_FRAME = 20
 ANCHOR_INTERVAL_NS = 1_000_000_000
 ICL_FPS = 30.0  # ICL's time column is the frame number
-POSE_TOLERANCE_S = 0.02  # inherited reference matching tolerance (src/walkthrough README)
+POSE_TOLERANCE_S = 0.02  # inherited reference matching tolerance (evaluation/layers README)
 
 
 def _arcore_pose(world_from_camera_cv: np.ndarray) -> list[float]:
@@ -78,7 +78,7 @@ def write_session(recording: str, out: Path, *, every: int = 1, depth_size=(160,
             pick = rng.choice(len(u), size=min(POINTS_PER_FRAME, len(u)), replace=False)
             camera = np.c_[(u[pick] - cx) / fx, (v[pick] - cy) / fy, np.ones(len(pick))] * sensor[v[pick], u[pick]][:, None]
             world = camera @ world_from_camera[:3, :3].T + world_from_camera[:3, 3]
-            pixels = session_v1.project(pose, (fx, fy, cx, cy), world)
+            pixels = wire_v1.project(pose, (fx, fy, cx, cy), world)
             header["points"] = [[seq * 100 + i, *world[i], *pixels[i], 1.0] for i in range(len(pick))]
             payload = jpeg
             if seq % DEPTH_EVERY == 0:
@@ -95,7 +95,7 @@ def write_session(recording: str, out: Path, *, every: int = 1, depth_size=(160,
             if last_anchor_ns is None or t_ns - last_anchor_ns >= ANCHOR_INTERVAL_NS:
                 header["anchor"] = {"id": anchors, "pose": pose}
                 anchors, last_anchor_ns = anchors + 1, t_ns
-            session_v1.parse_frame(header, payload)  # refuse to write anything the receiver would refuse
+            wire_v1.parse_frame(header, payload)  # refuse to write anything the receiver would refuse
             (out / "frames" / f"{seq:06d}.jpg").write_bytes(jpeg)
             log.write(json.dumps(header) + "\n")
             seq += 1

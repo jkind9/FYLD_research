@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from src.live.depth_check import summarise
+from evaluation.depth_check import summarise
 
 
 def test_summary_splits_by_support_and_distance():

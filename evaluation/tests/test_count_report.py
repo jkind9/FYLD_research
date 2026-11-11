@@ -2,7 +2,7 @@
 
 import json
 
-from src.live import count_report
+from evaluation import count_report
 
 
 def detection(label, confidence, outcome, object_id, nearest):

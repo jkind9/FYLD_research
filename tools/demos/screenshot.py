@@ -1,6 +1,6 @@
 """Open every demo page in headless Chromium, save screenshots and report errors and requests.
 
-Usage: python -B -m tools.demos.screenshot --pages demo_outputs --out <folder> [--click page.html=selector ...]
+Usage: python -B -m tools.demos.screenshot --pages outputs/demo_pages --out <folder> [--click page.html=selector ...]
 Network access is blocked; any request other than the page itself or a data URL counts as a failure.
 """
 
@@ -48,7 +48,7 @@ def check(pages: Path, out: Path, clicks: dict[str, list[str]], width: int, heig
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--pages", type=Path, default=Path("demo_outputs"))
+    parser.add_argument("--pages", type=Path, default=Path("outputs/demo_pages"))
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--click", action="append", default=[], help="page.html=css-selector, clicked before the screenshot")
     parser.add_argument("--width", type=int, default=1360)

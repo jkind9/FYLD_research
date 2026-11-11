@@ -12,7 +12,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Phone session v2 messages other than frames (phone_session_v2.md), and the wire framing of host/protocol.py:
+ * Phone session v2 messages other than frames (phone_session_v2.md), and the wire framing of sitescan/session/protocol.py:
  * 4-byte big-endian length + UTF-8 JSON header, 4-byte big-endian length + payload. Plain Java, tested on the JVM.
  */
 final class SessionMessages {

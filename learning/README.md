@@ -21,7 +21,7 @@ A person walks through a worksite filming with a phone. We want two things from 
                                                      match across views, count
 ```
 
-The project builds and tests each box on its own with known inputs, then connects them. The repository code that runs all six in order is `src/walkthrough/`.
+The project builds and tests each box on its own with known inputs, then connects them. The repository code that runs all six in order is `evaluation/layers/`.
 
 ## Reading order
 

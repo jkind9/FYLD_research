@@ -8,16 +8,16 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from src.walkthrough import pipeline
-from src.walkthrough.steps import mapping, objects, tracking
-from src.walkthrough.steps.capture import TumSequence
-from src.walkthrough.steps.depth import RecordedSensorDepth
-from src.walkthrough.steps.tracking import ReferencePoses
-from src.walkthrough.tests import providers
-from src.walkthrough.tests.test_adapters import (
+from evaluation.layers import pipeline
+from evaluation.layers.steps import mapping, objects, tracking
+from evaluation.layers.steps.capture import TumSequence
+from evaluation.layers.steps.depth import RecordedSensorDepth
+from evaluation.layers.steps.tracking import ReferencePoses
+from evaluation.layers.tests import providers
+from evaluation.layers.tests.test_adapters import (
     config as config,  # noqa: PLC0414 - pytest fixture export
 )
-from src.walkthrough.tests.test_adapters import read
+from evaluation.layers.tests.test_adapters import read
 
 
 def timing(result):

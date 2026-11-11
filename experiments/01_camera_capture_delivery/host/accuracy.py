@@ -10,7 +10,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
-import session_v1
+
+from sitescan.session import read_wire_session, wire_v1
 
 
 def _positive(value, name):
@@ -91,9 +92,9 @@ def main():
     parser.add_argument("--measurements", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    metadata = session_v1.check_session(json.loads((args.session / "session.json").read_text(encoding="utf-8")))
+    metadata = wire_v1.check_session(json.loads((args.session / "session.json").read_text(encoding="utf-8")))
     measured = json.loads(args.measurements.read_text(encoding="utf-8"))
-    result = score(session_v1.read_session(args.session), measured)
+    result = score(read_wire_session(args.session), measured)
     result["session"] = metadata
     result["measurements"] = measured
     result["measurements_file"] = str(args.measurements.resolve())

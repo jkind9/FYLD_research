@@ -23,8 +23,8 @@ The script keeps every 5th frame, takes the first 20, and rewrites today's stand
 
 The outputs of today's code on `tum_desk_20`, saved before any stage moved into `sitescan/`:
 
-- `room`: `src.live.room_build` with its defaults (4 m far limit, 2 cm voxel, 16 threads). 7 frames fused, 55,872 raw points, 51,962 after clean-up.
-- `live`: `src.live.processor.LiveProcessor` fed every frame and updated after each one, without threads or timing, objects off. 20 updates, 73,191 points at the end.
+- `room`: `sitescan.pipelines.room` with its defaults (4 m far limit, 2 cm voxel, 16 threads). 7 frames fused, 55,872 raw points, 51,962 after clean-up.
+- `live`: `sitescan.pipelines.LiveProcessor` fed every frame and updated after each one, without threads or timing, objects off. 20 updates, 73,191 points at the end.
 
 Timings are left out. Rebuild the outputs only when a behaviour change is adopted on purpose:
 
@@ -36,4 +36,4 @@ The test lane: `python -B -m pytest -m golden tests/golden`. It needs the depth 
 
 ## The 15 October walk: local only
 
-The full room build on `20261015_093913_walk` is the second reference. It shows a home, so neither the recording nor its output is in git. Saved run: `outputs/baseline_d859867/room_15oct/summary.json`: 134 frames fused, 676,855 raw points, 554,067 after clean-up, map 6.35 × 3.30 m.
+The full room build on `20261015_093913_walk` is the second reference. It shows a home, so neither the recording nor its output is in git. Saved run: `outputs/refactor/baseline_d859867/room_15oct/summary.json`: 134 frames fused, 676,855 raw points, 554,067 after clean-up, map 6.35 × 3.30 m.

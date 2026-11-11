@@ -1,4 +1,4 @@
-"""Today's room build and live processor still give the saved outputs on the TUM fixture."""
+"""The room and live pipelines still give the saved outputs on the TUM fixture."""
 
 import json
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.live.run import DEPTH_CHECKPOINT
+from sitescan.pipelines import DEPTH_MODEL
 from tests.golden import run
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
@@ -17,7 +17,7 @@ RELATIVE = 1e-3
 ABSOLUTE = 1e-3
 
 pytestmark = [pytest.mark.golden,
-              pytest.mark.skipif(not DEPTH_CHECKPOINT.exists(), reason="depth model weights are local only")]
+              pytest.mark.skipif(not DEPTH_MODEL.exists(), reason="depth model weights are local only")]
 
 
 def numbers(value, path=""):

@@ -8,6 +8,7 @@ Updated 9 November 2026 with [SceneView and Open3Dmap reuse choices](research/pr
 
 Updated 10 November 2026 with reviews of [RTAB-Map](research/camera_tracking_and_slam/rtabmap.md) and of [grouping surfaces by geometry, colour, texture and embeddings](research/surface_denoising/surface_grouping.md). Neither changes the refactor or its timing. They change what the RTAB-Map comparison holds fixed, add trials after the refactor ([order and evidence](#what-to-take-from-rtab-map-and-the-surface-grouping-review)), add content the next recording round needs and add a second research question.
 
+Updated 11 November 2026: the shared-pipeline refactor is done. The product code is `sitescan/`, started by `python -m apps.cli`; the root README now describes the product, and this plan keeps the research story.
 ## Contents
 
 - [The aim](#the-aim)
@@ -238,6 +239,8 @@ Cheap checks the market review proposed, none run yet: score one capture through
 
 ## Next steps
 
+**Update, 11 November: steps 1 and 2 below are done.** Every stage and both pipelines live in `sitescan/`, with outputs unchanged ([DESIGN section 15](DESIGN.md#status-11-november-2026)). Step 3 is next. The ordered list is also in the root README's [Future work](README.md#future-work).
+
 **Timing recommendation, 9 November: start the shared-pipeline refactor next.** The owner put the refactor before new experiments on 8 November and has now reopened its timing. The source review is enough to identify useful parts; another whole-system benchmark is not a prerequisite to moving the code we already intend to keep. Follow [DESIGN.md section 11](DESIGN.md#11-migration-plan) through its baseline and shared-pipeline checks. Do not wait for all open experiments or for a full Android port.
 
 1. **Save today's answer.** Identify the source state, dependencies, models, exact commands and outputs for both pipelines. Preserve the local household recording outside git. Run the relevant existing tests explicitly because default discovery is incomplete. A baseline check that fails must be understood before that stage moves.
@@ -302,7 +305,7 @@ flowchart LR
 
 | Phase | Tasks | Output | Needs from the owner |
 |---|---|---|---|
-| 0. Shared-pipeline refactor | New implementation work; not started | Reproducible baseline, adopted stages and both pipelines on one implementation; outputs unchanged before behaviour trials. DESIGN phases 0–3 define this check | Resolve the design's package/environment choices when implementation starts; timing recommendation is above |
+| 0. Shared-pipeline refactor | **Done, 11 November** | All stages and both pipelines in `sitescan/`; the full 15 October room and the golden fixture outputs unchanged; live replay speed unchanged under the same load ([DESIGN section 15](DESIGN.md#status-11-november-2026)) | Behaviour trials, starting with live's upright images, grid scale and fresh-depth rule |
 | 1. Diagnose | 107, 108, 109, 102, 68 | Replay of the 15 October walk; a surface from phone depth alone; the measured effect of sideways images; tested causes for the poor house-walk model; a test run that covers every test folder | Confirm the proposed experiment settings |
 | 1a. Surface clean-up and far sizing | 120–126 done; next not yet a task | Task120 trial: a visibility vote cut surface in seen-through space by 53-80%; masks and near-first weights made it worse. Task126 put the vote and a largest-pieces filter in the room build. Next: clean-up in the live processor, checked on ICL; far sizing that varies with distance. Candidate for far sizing (8 November): real-size points triangulated with COLMAP from frames taken at different spots along ARCore's path, first offline in `room_build`. Then dense multi-view stereo between keyframes about 0.6 m apart, as Mobile3DRecon ran on a phone CPU, fused where it is confident ([note](research/dense_surface_fusion/triangulation_and_learned_depth.md)) | None; target scenes set as indoor, under about 10 m (8 November) |
 | 1b. Capture checks from recordings | 111, 110 | Why the 14 October depth is empty, with a warning for next time; how much of each walk hides scale | Confirm the motion thresholds |
@@ -338,7 +341,7 @@ Answered on 8 November: a photo-realistic splat scene as an output is not wanted
 | Task board, order and dispositions | [task_list/README.md](task_list/README.md) |
 | Findings in date order | [learning/10_findings_timeline.md](learning/10_findings_timeline.md) |
 | Phone capture and the house walk | [experiments/01_camera_capture_delivery/README.md](experiments/01_camera_capture_delivery/README.md) |
-| Live processing on the PC | [src/live/README.md](src/live/README.md) |
+| Live and room pipelines on the PC | [sitescan/pipelines/README.md](sitescan/pipelines/README.md); dated results in [evaluation/results.md](evaluation/results.md) |
 | Open-source trackers and calibration | [experiments/open_vio/README.md](experiments/open_vio/README.md) |
 | Products and open projects | [research/products/e2e_product_research/README.md](research/products/e2e_product_research/README.md) |
 | Tracking methods review | [research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md](research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md) |

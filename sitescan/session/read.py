@@ -50,21 +50,25 @@ def read_wire_session(folder: Path | str) -> Iterator[wire_v1.Frame]:
                 yield wire_v1.parse_frame(header, payload)
 
 
+def camera(record: wire_v1.Frame) -> Camera | None:
+    """The colour image's camera of a wire record, if it has intrinsics."""
+    if record.intrinsics is None:
+        return None
+    return Camera(*record.intrinsics, *record.image_size)
+
+
+def arcore_depth(depth: wire_v1.Depth) -> ArcoreDepth:
+    """A wire depth record as the shared depth type, with its own camera."""
+    height, width = depth.depth_m.shape
+    return ArcoreDepth(depth.t_ns, depth.depth_m, depth.confidence, Camera(*depth.intrinsics, width, height))
+
+
 def frames(folder: Path | str) -> Iterator[Frame]:
     """Frames in file order, with RGB arrays and world_from_camera matrices."""
     for record in read_wire_session(folder):
         with Image.open(BytesIO(record.image_jpeg)) as image:
             rgb = np.asarray(image.convert("RGB"))
-        camera = None
-        if record.intrinsics is not None:
-            camera = Camera(*record.intrinsics, *record.image_size)
-        depth = None
-        if record.depth is not None:
-            d = record.depth
-            height, width = d.depth_m.shape
-            depth = ArcoreDepth(
-                d.t_ns, d.depth_m, d.confidence, Camera(*d.intrinsics, width, height)
-            )
+        depth = None if record.depth is None else arcore_depth(record.depth)
         pose = None if record.pose is None else wire_v1.world_from_camera_cv(record.pose)
         created = record.anchor_created
         if created is not None:
@@ -74,7 +78,7 @@ def frames(folder: Path | str) -> Iterator[Frame]:
             record.seq,
             record.t_ns,
             rgb,
-            camera,
+            camera(record),
             pose,
             depth,
             record.point_ids,

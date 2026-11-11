@@ -29,7 +29,7 @@ Read 7 November 2026. The owner judged it essential reading for this project. Th
 ## What it confirms
 
 1. **Camera plus motion sensors is the standard design.** A single camera cannot recover real-world scale. An IMU (gyroscope and accelerometer) supplies scale and the direction of gravity, so only 4 unknowns remain (x, y, z and heading) instead of 7 (section 7.8, p. 220-221). ARCore and Basalt both work this way; Basalt and OKVIS2 are among the systems named.
-2. **TSDF fusion suits noisy depth.** A TSDF (truncated signed distance field) stores each surface as a distance on a voxel grid. Section 5.5 (p. 146) says it fuses noisy depth better than points or meshes, which are "more sensitive to the quality of the depth measurements". The project's live fusion already uses Open3D's TSDF volume (`src/live/fragments.py`).
+2. **TSDF fusion suits noisy depth.** A TSDF (truncated signed distance field) stores each surface as a distance on a voxel grid. Section 5.5 (p. 146) says it fuses noisy depth better than points or meshes, which are "more sensitive to the quality of the depth measurements". The project's live fusion already uses Open3D's TSDF volume (`sitescan/fusion/fragments.py`).
 3. **Matching objects after tracking is one recognised approach.** Chapter 16 describes the alternative: objects become landmarks with a class, pose, scale and shape, optimised together with the camera path (Definition 16.1, p. 456).
 
 ## What it changes for the project

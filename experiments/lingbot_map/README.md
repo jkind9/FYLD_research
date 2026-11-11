@@ -31,7 +31,7 @@ The owner watches RAM while runs go. `run.py` keeps it bounded:
 
 ```text
 experiments\lingbot_map\.venv\python -B experiments/lingbot_map/run.py --frames <session>/frames --model third_party/lingbot-map-weights/lingbot-map.pt --out <run folder> --device cpu --stride 3 --window 16 [--first 10]
-.venv\Scripts\python -B -m experiments.lingbot_map.compare --run <run folder> --session <session> --surface outputs/room_build_clean_up_093913/surface.ply
+.venv\Scripts\python -B -m experiments.lingbot_map.compare --run <run folder> --session <session> --surface outputs/cleanup/room_build_clean_up_093913/surface.ply
 ```
 
 Set `PYTHONIOENCODING=utf-8` first: LingBot-Map prints characters the Windows console code page cannot show. Setup of `experiments/lingbot_map/.venv` (Python 3.10, torch 2.8.0 cu128, LingBot-Map at commit b9dd1b1) is recorded in `research/repositories.json`.
@@ -140,6 +140,6 @@ The owner judged the LingBot-Map viewer no better than the cleaned room build. T
 
 LingBot-Map's depth has a better shape: 38% lower error against ARCore depth, and 20% lower against tracked points, which reach farther. Its confidence map also marks its worst pixels. Against tracked points, per-frame-sized depth has a middle half 0.162 wide in its least confident quarter and 0.071 wide in its most confident; part of that is distance (median 3.2 m against 1.5 m). The test this points to is a room build with LingBot-Map's depth in place of Depth Anything V2 ([parts note](../../research/feed_forward_3d/lingbot_map_how_it_works.md#next-test-this-suggests)). The scoring script is not yet in the repository: it was run from a scratch file while another session held the task board.
 
-Local outputs: `outputs/lingbot_map_15oct_first100_gpu/` (with `lingbot-map-first100-gpu-viewer.html`) and `outputs/lingbot_map_15oct_stride3_cpu_first100/` (the CPU run cut to the same frames), each with `compare.json` and `lingbot_cloud.ply`; VRAM logs in `outputs/lingbot_map_15oct_first100_gpu_vram.csv`.
+Local outputs: `outputs/lingbot_map/lingbot_map_15oct_first100_gpu/` (with `lingbot-map-first100-gpu-viewer.html`) and `outputs/lingbot_map/lingbot_map_15oct_stride3_cpu_first100/` (the CPU run cut to the same frames), each with `compare.json` and `lingbot_cloud.ply`; VRAM logs in `outputs/lingbot_map/lingbot_map_15oct_first100_gpu_vram.csv`.
 
-Local outputs (not in git): `outputs/lingbot_map_15oct_stride3_cpu/` holds `compare.json`, `lingbot_cloud.ply` (494,264 points at 2 cm), `topdown.png` (both maps from above with the camera paths) and `lingbot-map-15oct-viewer.html` (203,305 splats, 4.7 MB, embeds photos).
+Local outputs (not in git): `outputs/lingbot_map/lingbot_map_15oct_stride3_cpu/` holds `compare.json`, `lingbot_cloud.ply` (494,264 points at 2 cm), `topdown.png` (both maps from above with the camera paths) and `lingbot-map-15oct-viewer.html` (203,305 splats, 4.7 MB, embeds photos).

@@ -7,9 +7,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.walkthrough.records import Unavailable
-from src.walkthrough.steps import video_depth
-from src.walkthrough.steps.contracts import Calibration, ColourFrame
+from evaluation.layers.records import Unavailable
+from evaluation.layers.steps import video_depth
+from evaluation.layers.steps.contracts import Calibration, ColourFrame
 
 CAMERA = Calibration(8, 6, 5.0, 5.0, 4.0, 3.0, "x-right_y-down_z-forward")
 
@@ -103,8 +103,8 @@ def test_device_must_be_cpu_or_cuda(device):
 def test_cli_offers_it_raw_and_with_the_overlap_chain():
     import argparse
 
-    from src.walkthrough.cli import DEFAULT_DEPTH_CHECKPOINTS, depth_choice
-    from src.walkthrough.steps.depth_scale import OverlapChainScale, ScaleCorrected
+    from evaluation.layers.cli import DEFAULT_DEPTH_CHECKPOINTS, depth_choice
+    from evaluation.layers.steps.depth_scale import OverlapChainScale, ScaleCorrected
 
     args = argparse.Namespace(depth="video-depth-anything", depth_checkpoint=None, dataset=Path("tum"),
                               device="cpu", points_per_frame=50, depth_scale=None)

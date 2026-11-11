@@ -16,12 +16,12 @@ import numpy as np
 from PIL import Image
 
 from experiments.shared.contracts import Calibration
-from src.walkthrough.steps.contracts import ColourFrame
-from src.walkthrough.steps.depth import DepthAnythingV2Metric
+from evaluation.layers.steps.contracts import ColourFrame
+from evaluation.layers.steps.depth import DepthAnythingV2Metric
 
 from .src import sequences
 
-CHECKPOINT = Path("data/models/depth_anything_v2_metric_indoor_small")
+CHECKPOINT = Path("models/depth_anything_v2_metric_indoor_small")
 
 
 def main(argv: list[str] | None = None) -> int:

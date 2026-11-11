@@ -16,9 +16,9 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from src.walkthrough.steps import depth as depth_step
-from src.walkthrough.steps import depth_scale
-from src.walkthrough.steps.contracts import Calibration, ColourFrame, DepthPrediction
+from evaluation.layers.steps import depth as depth_step
+from evaluation.layers.steps import depth_scale
+from evaluation.layers.steps.contracts import Calibration, ColourFrame, DepthPrediction
 
 WIDTH, HEIGHT, FOCAL = 320, 240, 260.0
 CAMERA = Calibration(WIDTH, HEIGHT, FOCAL, FOCAL, 159.5, 119.5, "x-right_y-down_z-forward")

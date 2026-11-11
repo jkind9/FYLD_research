@@ -19,9 +19,9 @@ Every run also creates `output/visualizations/index.html` and `manifest.json`. T
 
 ```python
 from pathlib import Path
-from src.walkthrough.config import PipelineSpec
-from src.walkthrough.pipeline import run
-from src.walkthrough.steps.capture import TumSequence
+from evaluation.layers.config import PipelineSpec
+from evaluation.layers.pipeline import run
+from evaluation.layers.steps.capture import TumSequence
 
 spec = PipelineSpec(
     run_root=Path("outputs/walkthrough"),
@@ -68,7 +68,7 @@ A frozen choice records its name, settings and control label. Its `load()` retur
 ```python
 from dataclasses import dataclass, field
 import numpy as np
-from src.walkthrough.steps.contracts import DepthPrediction
+from evaluation.layers.steps.contracts import DepthPrediction
 
 @dataclass(frozen=True)
 class FlatDepth:
@@ -106,8 +106,8 @@ Surface point order preserves correspondence with source colours. Each surface s
 
 ```python
 from dataclasses import replace
-from src.walkthrough.steps.depth import RecordedSensorDepth
-from src.walkthrough.steps.tracking import ReferencePoses
+from evaluation.layers.steps.depth import RecordedSensorDepth
+from evaluation.layers.steps.tracking import ReferencePoses
 
 root = spec.source.root
 controlled = replace(spec, depth=RecordedSensorDepth(root),
@@ -130,8 +130,8 @@ Controls use `software` for fixed fixtures and `reference` for recorded answers.
 From the repository root:
 
 ```powershell
-python -B -m src.walkthrough.cli --dataset data/tum/rgbd_dataset_freiburg1_xyz --run-root outputs/walkthrough
-python -B -m src.walkthrough.cli --report <camera-report.json> --bundle <export-folder> --run-root <output-folder>
+python -B -m evaluation.layers.cli --dataset data/tum/rgbd_dataset_freiburg1_xyz --run-root outputs/walkthrough
+python -B -m evaluation.layers.cli --report <camera-report.json> --bundle <export-folder> --run-root <output-folder>
 ```
 
 Without `--depth`, the depth layer is unavailable and later layers wait, so the command returns exit code 2. The scorer still records the tracking reference path and hash.
@@ -139,25 +139,25 @@ Without `--depth`, the depth layer is unavailable and later layers wait, so the 
 ### Choosing real methods from the command line
 
 ```powershell
-.venv/Scripts/python.exe -B -m src.walkthrough.cli `
+.venv/Scripts/python.exe -B -m evaluation.layers.cli `
   --dataset <tum-recording-or-clip> --run-root outputs/walkthrough `
   --depth depth-anything --device cpu --mapping grid-footprint `
-  --detector-checkpoint checkpoints/yolo26x.pt --max-distance-m 0.35 --ambiguity-margin-m 0.05 `
+  --detector-checkpoint models/yolo26x.pt --max-distance-m 0.35 --ambiguity-margin-m 0.05 `
   --partial
 ```
 
 | Flag | Layer | Choices |
 |---|---|---|
-| `--depth` | Depth | `depth-anything` (Depth Anything V2 Metric Small, local weights in `--depth-checkpoint`, default `data/models/depth_anything_v2_metric_indoor_small`) or `recorded` (the dataset's own sensor depth, labelled a reference control; needs `--dataset`) |
+| `--depth` | Depth | `depth-anything` (Depth Anything V2 Metric Small, local weights in `--depth-checkpoint`, default `models/depth_anything_v2_metric_indoor_small`) or `recorded` (the dataset's own sensor depth, labelled a reference control; needs `--dataset`) |
 | `--device` | Depth | `cpu` (default) or `cuda` |
-| `--depth zipdepth-scaled`, `--points-per-frame` | Depth | ZipDepth's phone build (default weights `data/models/ZipDepth/checkpoints/zipdepth_base_npu.pth`) scaled each frame from 50 random recorded depth pixels; a labelled reference control that needs `--dataset`, and `data/models/ZipDepth` on `PYTHONPATH` |
-| `--depth video-depth-anything` | Depth | Metric Video Depth Anything Small (default weights `data/models/Video-Depth-Anything/checkpoints/metric_video_depth_anything_vits.pth`); needs `data/models/Video-Depth-Anything` on `PYTHONPATH`. It reads the whole clip before returning any frame. |
+| `--depth zipdepth-scaled`, `--points-per-frame` | Depth | ZipDepth's phone build (default weights `models/ZipDepth/checkpoints/zipdepth_base_npu.pth`) scaled each frame from 50 random recorded depth pixels; a labelled reference control that needs `--dataset`, and `models/ZipDepth` on `PYTHONPATH` |
+| `--depth video-depth-anything` | Depth | Metric Video Depth Anything Small (default weights `models/Video-Depth-Anything/checkpoints/metric_video_depth_anything_vits.pth`); needs `models/Video-Depth-Anything` on `PYTHONPATH`. It reads the whole clip before returning any frame. |
 | `--depth-scale` | Depth | On top of `depth-anything` or `video-depth-anything`, multiplies each frame by one factor: `overlap-chain` (from earlier frames' overlap; colour frames only, no reference), `pose-triangulated` (corners triangulated with the recording's motion-capture poses plus 5 mm noise, standing in for phone tracking; reference control), `overlap-chain-pose-anchor` (the chain's frame-to-frame factors times one run-wide factor from the triangulated points; reference control), `reference-frame` or `reference-global` (fitted to the sensor depth per frame or once per run; reference controls). Reference choices need `--dataset`. The factor each frame got is saved in `depth.json` as `method_diagnostics`. |
 | `--pose-noise-m`, `--chain-smoothing-frames` | Depth | Settings for the scale sources above: per-frame translation noise added to the motion-capture poses (default 0.005 m), and a causal median over the last n chain factors (default 1, none). Refused with any other `--depth-scale`. |
 | `--detector-device` | Objects | `cpu` (default) or `0` for GPU 0 |
 | `--report-pages` | After the run | Builds the interactive report pages described below |
 | `--mapping` | Mapping | `grid-footprint` (experiment 05: 5 cm cells over each origin's dominant plane) |
-| `--detector-checkpoint` (old spelling `--checkpoint`) | Objects | YOLO26x weights, for example `checkpoints/yolo26x.pt` |
+| `--detector-checkpoint` (old spelling `--checkpoint`) | Objects | YOLO26x weights, for example `models/yolo26x.pt` |
 | `--max-distance-m`, `--ambiguity-margin-m` | Objects | Counting settings; 0.35 and 0.05 are the values inherited from experiment 06's pilot (`pilot/replay.py:46`) |
 | `--segmentation rectangle\|grabcut\|canny`, `--appearance` | Objects | Optional diagnostics that never change counts |
 
@@ -167,7 +167,7 @@ Without `--depth`, the depth layer is unavailable and later layers wait, so the 
 
 ### First real-method runs, 7 October 2026
 
-30 frames of TUM `freiburg1_xyz` (the first 60 RGB frames, every second one; about 2 seconds), CPU only, all six layers real: TUM capture, depth, CPU odometry, metric points, grid footprint mapping and YOLO26x objects. The clip is `outputs/task51_real_clips/rgbd_dataset_freiburg1_xyz_first60_every2` (byte copies of the RGB and nearest depth frames plus the full ground-truth file). Runs are under `outputs/task55_real_runs/reviewed_*` (local, not in Git); each has an `output/visualizations/index.html` showing every handoff. Re-running gives identical numbers.
+30 frames of TUM `freiburg1_xyz` (the first 60 RGB frames, every second one; about 2 seconds), CPU only, all six layers real: TUM capture, depth, CPU odometry, metric points, grid footprint mapping and YOLO26x objects. The clip is `outputs/inputs/task51_real_clips/rgbd_dataset_freiburg1_xyz_first60_every2` (byte copies of the RGB and nearest depth frames plus the full ground-truth file). Runs are under `outputs/task_runs/task55_real_runs/reviewed_*` (local, not in Git); each has an `output/visualizations/index.html` showing every handoff. Re-running gives identical numbers.
 
 | Depth source | Tracking steps linked | Camera position error (RMSE) | Step error (RMSE) | Desk-plane area | Seen footprint | Region | Distinct provisional objects |
 |---|---|---|---|---|---|---|---|
@@ -195,7 +195,7 @@ End to end, including loading, visual export and scoring, the run took 48.6 s: 0
 
 ## Interactive run report
 
-`--report-pages`, or `python -B -m tools.demos.run_report <run-folder>` afterwards, writes six offline single-file pages to `<run-folder>-report/`, in the same style as `demo_outputs/`. They read only the run's saved files and `output/scores.json`; the sealed run is not changed.
+`--report-pages`, or `python -B -m tools.demos.run_report <run-folder>` afterwards, writes six offline single-file pages to `<run-folder>-report/`, in the same style as `outputs/demo_pages/`. They read only the run's saved files and `output/scores.json`; the sealed run is not changed.
 
 | Page | What it shows | Error graph against true answers |
 |---|---|---|
@@ -269,7 +269,7 @@ Phone geometry currently requires the full unrotated sensor grid, zero skew and 
 ## Software checks
 
 ```powershell
-python -B tools/check.py src/walkthrough/tests experiments/shared/tests -q
+python -B tools/check.py evaluation/layers/tests experiments/shared/tests -q
 ```
 
 The fixtures test execution order, saved contracts, timing, reference labels, scoring integrity, failures and visual exports. They are ordinary method choices labelled `software`, never physical accuracy evidence. Existing frozen experiment commands and historical runs remain unchanged.

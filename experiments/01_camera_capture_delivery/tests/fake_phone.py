@@ -1,6 +1,6 @@
 """A stand-in for the capture app in tests: builds phone session v2 messages and sends them as Uploader.java does.
 
-Also used by experiments/open_vio/tests and src/live/tests to write synthetic v2 session folders.
+Also used by experiments/open_vio/tests and tests/ to write synthetic v2 session folders.
 """
 
 from __future__ import annotations
@@ -8,16 +8,13 @@ from __future__ import annotations
 import json
 import socket
 import struct
-import sys
 import zlib
 from pathlib import Path
 
 import numpy as np
 
-HOST = Path(__file__).resolve().parents[1] / "host"
-sys.path.insert(0, str(HOST))
-import capture_receiver  # noqa: E402
-import protocol  # noqa: E402
+from apps.receiver import capture_receiver
+from sitescan.session import protocol
 
 FIXTURE = Path(__file__).resolve().parents[1] / "capture" / "app" / "src" / "test" / "resources" / "session_v2"
 SESSION = "20261014_201500_walk"

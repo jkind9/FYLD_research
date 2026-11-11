@@ -20,8 +20,7 @@ import socket
 import time
 from pathlib import Path
 
-import protocol
-import session_v1
+from sitescan.session import protocol, wire_v1
 
 PORT = 8765
 
@@ -49,12 +48,12 @@ class Receiver:
                     (session / "report.json").write_bytes(payload)
                     continue
                 if header.get("type") == "session":
-                    (session / "session.json").write_text(json.dumps(session_v1.check_session(header), indent=2), encoding="utf-8")
+                    (session / "session.json").write_text(json.dumps(wire_v1.check_session(header), indent=2), encoding="utf-8")
                     session_started = True
                     continue
                 if not session_started:
                     raise ValueError("a frame arrived before the session start message")
-                frame = session_v1.parse_frame(header, payload)
+                frame = wire_v1.parse_frame(header, payload)
                 name = f"{frame.seq:06d}"
                 (session / "frames" / f"{name}.jpg").write_bytes(frame.image_jpeg)
                 if frame.depth is not None:

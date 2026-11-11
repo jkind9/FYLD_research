@@ -3,7 +3,7 @@
 Points use each frame's own pose. Anchor corrections move a whole fragment rigidly, so they cannot separate
 copies made inside one fragment.
 
-    python -B -m src.live.landmark_probe --session <v2 session> --first 660 --last 730 --out <probe.json>
+    python -B -m evaluation.landmark_probe --session <v2 session> --first 660 --last 730 --out <probe.json>
 """
 
 import argparse
@@ -15,9 +15,13 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from . import sizing
-from .room_build import _world, grid_size, upright_depth
-from .stream import read_session, session_v1
+from sitescan import scale, session
+from sitescan.depth import load_model
+from sitescan.depth import predict as predict_depth
+from sitescan.pipelines import DEPTH_MODEL
+from sitescan.pipelines.room import world_points
+from sitescan.scale import fit_grid
+from sitescan.session import wire_v1
 
 
 def red_mask(rgb: np.ndarray) -> np.ndarray:
@@ -44,34 +48,33 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--first", type=int, required=True)
     parser.add_argument("--last", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--far", type=float, default=4.0, help="furthest fused depth in metres, as room_build")
+    parser.add_argument("--far", type=float, default=4.0, help="furthest fused depth in metres, as the room pipeline")
     args = parser.parse_args(argv)
 
-    from .run import DEPTH_CHECKPOINT, depth_anything
-    model = depth_anything(DEPTH_CHECKPOINT)
+    model = load_model(DEPTH_MODEL, threads=None)
     keyframe, rows = None, []
-    for frame in read_session(args.session):
+    for frame in session.read_wire_session(args.session):
         if frame.anchor_created is not None:
             keyframe = frame.anchor_created[0]
         if not args.first <= frame.seq <= args.last or frame.depth is None or frame.pose is None or keyframe is None:
             continue
         colour = np.asarray(Image.open(io.BytesIO(frame.image_jpeg)).convert("RGB"))
         mask = red_mask(colour)
-        world_from_camera = session_v1.world_from_camera_cv(frame.pose)
+        world_from_camera = wire_v1.world_from_camera_cv(frame.pose)
         row = {"seq": frame.seq, "fragment": keyframe // 10, "camera": world_from_camera[:3, 3].tolist(),
                "mask_pixels": int(mask.sum()), "depth_age_s": (frame.camera_t_ns - frame.depth.t_ns) / 1e9}
-        uv, target = sizing.depth_targets(frame.depth, frame.intrinsics, frame.image_size)
+        uv, target = scale.depth_targets(session.arcore_depth(frame.depth), session.camera(frame))
         on = mask[uv[:, 1].astype(int), uv[:, 0].astype(int)]
         row["arcore_pixels"] = int(on.sum())
         if on.any():
-            row["arcore"] = np.median(_world(uv[on], target[on], frame.intrinsics, world_from_camera), 0).tolist()
-        depth, valid, _ = upright_depth(model, colour, world_from_camera)
-        size = grid_size(depth, valid, uv, target)
-        if size is not None:  # room_build skips the frame otherwise
+            row["arcore"] = np.median(world_points(uv[on], target[on], frame.intrinsics, world_from_camera), 0).tolist()
+        depth, valid = predict_depth(model, colour, world_from_camera)
+        size = fit_grid(depth, valid, uv, target)
+        if size is not None:  # the room pipeline skips the frame otherwise
             rows_, cols = np.nonzero(mask & valid & (depth * size < args.far))
             if len(rows_):
                 z = depth[rows_, cols] * size[rows_, cols]
-                row["learned"] = np.median(_world(np.c_[cols, rows_], z, frame.intrinsics, world_from_camera), 0).tolist()
+                row["learned"] = np.median(world_points(np.c_[cols, rows_], z, frame.intrinsics, world_from_camera), 0).tolist()
         if "arcore" in row and "learned" in row:
             row["learned_minus_arcore_along_across_m"] = ray_split(
                 np.array(row["camera"]), np.array(row["arcore"]), np.array(row["learned"]))

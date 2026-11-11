@@ -3,15 +3,14 @@
 import json
 import queue
 import socket
-import threading
 
+import fake_phone
 import numpy as np
+from sitescan.session import protocol
 import pytest
 from PIL import Image
 
-import capture_receiver
-import fake_phone
-import protocol
+from apps.receiver import capture_receiver
 
 
 @pytest.fixture

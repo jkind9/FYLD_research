@@ -37,9 +37,9 @@ from .validation import ScoreRequest
 pose_evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
 # Local weights each depth choice uses when --depth-checkpoint is not given.
 DEFAULT_DEPTH_CHECKPOINTS = {
-    "depth-anything": Path("data/models/depth_anything_v2_metric_indoor_small"),
-    "zipdepth-scaled": Path("data/models/ZipDepth/checkpoints/zipdepth_base_npu.pth"),
-    "video-depth-anything": Path("data/models/Video-Depth-Anything/checkpoints/metric_video_depth_anything_vits.pth"),
+    "depth-anything": Path("models/depth_anything_v2_metric_indoor_small"),
+    "zipdepth-scaled": Path("models/ZipDepth/checkpoints/zipdepth_base_npu.pth"),
+    "video-depth-anything": Path("models/Video-Depth-Anything/checkpoints/metric_video_depth_anything_vits.pth"),
 }
 SCALED_DEPTH_SOURCES = (
     "overlap-chain", "pose-triangulated", "overlap-chain-pose-anchor", "reference-frame", "reference-global"

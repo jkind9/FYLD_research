@@ -25,7 +25,7 @@ import torch
 
 REPO = Path(__file__).resolve().parents[2] / "third_party" / "lingbot-map"
 sys.path.insert(0, str(REPO))
-import demo  # noqa: E402  LingBot-Map's demo.py
+import demo
 
 SCALE_FRAMES = 8  # demo.py default: the first frames fix the scene's scale
 

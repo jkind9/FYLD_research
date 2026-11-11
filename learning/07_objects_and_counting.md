@@ -25,7 +25,7 @@ Cost is the other half of the brief ("SAM works but is very heavy"). The experim
 
 ## Try it
 
-Open the published object demo in a browser: `demo_outputs/06_objects_in_3d.html`. It shows detections, 3D positions and provisional identities on the desk recording.
+Open the published object demo in a browser: `outputs/demo_pages/06_objects_in_3d.html` (built locally by `python -B -m tools.demos.build`). It shows detections, 3D positions and provisional identities on the desk recording.
 
 ## Further reading
 

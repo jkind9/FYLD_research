@@ -250,7 +250,7 @@ def _run_condition(
 def run_evaluation(repo: Path = ROOT, output: Path | None = None) -> Path:
     destination = inputs.output_root(repo, output or RUN_ROOT)
     manifest, cache_path, publication_receipt = inputs.preflight(repo)
-    for parent in (repo / "data", repo / "checkpoints"):
+    for parent in (repo / "data", repo / "models"):
         if not parent.exists():
             raise ValueError(f"Required frozen input tree is missing: {parent}")
     configuration = {

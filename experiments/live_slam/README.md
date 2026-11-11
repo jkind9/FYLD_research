@@ -1,6 +1,6 @@
 # Live SLAM on recorded data
 
-This folder answers one question: **how accurate and how fast is an established live SLAM system on the project's recordings, when it only ever sees frames up to the current one?** The owner ruled on 14 October 2026 that the deployed system must be live (or update at least once per second), so the offline structure-from-motion path in `experiments/sfm` can only be a reference. On the phone, ARCore will track the camera; until ARCore recordings exist, this is the evidence for live tracking accuracy. Task: [84](../../task_list/open/84_live_cpu_slam_on_the_recorded_data_scored_causally.md). Background: [the SLAM review](../../research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md).
+This folder answers one question: **how accurate and how fast is an established live SLAM system on the project's recordings, when it only ever sees frames up to the current one?** The owner ruled on 14 October 2026 that the deployed system must be live (or update at least once per second), so the offline structure-from-motion path in `experiments/sfm` can only be a reference. On the phone, ARCore will track the camera; until ARCore recordings exist, this is the evidence for live tracking accuracy. Task: [84](../../task_list/done/84_live_cpu_slam_on_the_recorded_data_scored_causally.md). Background: [the SLAM review](../../research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md).
 
 ## How it works
 
@@ -41,7 +41,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j 16
 (the same for `orbslam3`). Then, from Windows in the repository's `.venv`:
 
 ```text
-python -m experiments.live_slam.run_live --system stella --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --run-root experiments/live_slam/runs/stella_tum_xyz_every2
+python -m experiments.live_slam.run_live --system stella --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --run-root experiments/live_slam/runs/stella_tum_xyz_every2
 python -m pytest experiments/live_slam/tests -p no:cacheprovider --import-mode=importlib
 ```
 

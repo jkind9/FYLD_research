@@ -1,423 +1,469 @@
-# Measuring worksites and counting objects from a phone walkthrough
+# sitescan: room measurements and object counts from a phone walk
 
-This repository is a research project. It asks whether a person walking through a worksite with a phone can produce two useful outputs:
+A person walks through a room with an Android phone running the capture app. The phone
+records colour images, its own camera path from ARCore (Google's phone tracking library)
+and ARCore's raw depth, and sends them to a PC. The PC turns the recording into:
 
-1. **A measured 3D model of the visible site**, so its size, areas and dimensions can be read off in metres.
-2. **A count of distinct objects**, where an object that leaves the camera view and comes back is counted once, not twice.
+1. a cleaned 3D surface of the room in metres;
+2. its floor area, length, width and height;
+3. counts of the objects seen (experimental; it overcounts).
 
-The work is split into six execution steps. Each layer is built and tested on its own with known inputs, then connected to the others. This README explains the problem, the layers, what has been measured so far and what is still unknown. It is meant to be read on its own. The experiment folders hold the detail. For progress, strategy, the market picture and next steps on one page, read the [project plan](PROJECT_PLAN.md). New to SLAM and 3D vision? The [learning folder](learning/README.md) explains every part from first principles, with this project's results.
+It runs either **live**, updating at least once a second while the recording arrives, or
+**offline** on a saved recording, which gives a cleaner room. Everything runs on the CPU.
+
+This repository started as research. The adopted method now lives in one package,
+`sitescan/`, with the experiments that chose it kept beside it. For the research story,
+results and decisions, read the [project plan](PROJECT_PLAN.md). For the code design, read
+[DESIGN.md](DESIGN.md). New to 3D vision? The [learning chapters](learning/README.md) explain
+each part from first principles.
 
 ## Contents
 
-- [The problem this solves](#the-problem-this-solves)
-- [The six execution steps](#the-six-execution-steps)
-- [Why build the layers separately](#why-build-the-layers-separately)
-- [Hosted or on the phone](#hosted-or-on-the-phone)
-- [Layer by layer](#layer-by-layer)
-- [What has been measured so far](#what-has-been-measured-so-far)
-- [ARCore: what it gives, its terms, and an open-source replacement](#arcore-what-it-gives-its-terms-and-an-open-source-replacement)
-- [What is still unknown](#what-is-still-unknown)
-- [Data used for testing](#data-used-for-testing)
-- [What comes next](#what-comes-next)
-- [Possible later output: a phone VR viewer](#possible-later-output-a-phone-vr-viewer)
-- [Repository layout and checks](#repository-layout-and-checks)
-- [Terms used in this project](#terms-used-in-this-project)
+- [What it gives today](#what-it-gives-today)
+- [How it works](#how-it-works)
+- [Install](#install)
+- [Run it](#run-it)
+- [Walkthrough notebook](#walkthrough-notebook)
+- [Repository map](#repository-map)
+- [Tests](#tests)
+- [Future work](#future-work)
+- [Licences and data](#licences-and-data)
+- [Function index](#function-index)
+- [Terms used](#terms-used)
 
-## The problem this solves
+## What it gives today
 
-FYLD suggested three research areas:
+| Output | Result so far | Limit |
+|---|---|---|
+| Room surface (offline) | 15 October walk of a home, Redmi Note 11 Pro: 134 frames fused into 676,855 points; clean-up kept 554,067 in 51 s | No independent measurement of the room exists yet, so its accuracy is unscored |
+| Room measures | 6.35 × 3.30 m, 13.8 m² observed area, from the same walk | Same: no tape-measured reference yet |
+| Live updates | 1.58 updates per second on the 14 October walk (63 updates, no gap over 1 s); 1.61–1.90 on public recordings | The map is recomputed over the whole surface each update, so a large room will cross one second |
+| Surface accuracy (control) | 46–52 mm mean distance to the reference model of the public ICL living room, with the true camera path standing in for ARCore | Not a phone result |
+| Object counts | Detected, placed in 3D and matched | Overcounts: 51 identities on a public desk recording with far fewer objects |
 
-| Suggested area | How this project relates to it |
-|---|---|
-| Deployment pipelines for cloud and edge devices. MLflow and BentoML are used for cloud today; there is no plan for edge devices yet. | **One of three project goals, alongside accuracy and latency.** Shared records support replacing components, but do not establish phone compatibility or speed. Capture 1.2 recorded 1,194 Redmi frames and PC replay ran at 1.58 updates/s; longer device workloads and independent accuracy remain unverified. Tasks52 and 57 own actual capture and deployment. |
-| Identify a worksite from a first-person video walkthrough, then estimate its size. | **Main focus, layers 1 to 4.** A normal video is flat. To measure a site you need to know how far away each pixel is (depth, layer 2) and where the camera was for each frame (camera position, layer 3). Together these place every pixel in one shared 3D space in metres (layer 4). Size, area and a top-down map then come from that 3D model. Recognising a site on a return visit is part of layer 3: the camera tracker must notice it is somewhere it has been before. |
-| Count objects in first-person video where an object can leave and re-enter the frame many times, efficiently. SAM works but is very heavy. | **Main focus, step 6.** Counting in 2D fails because the same cone or barrier looks like a new object each time it comes back into view. Once objects have a position in the shared 3D space, a returning object comes back at the same place, so position and appearance together can decide "same object" or "new object". On efficiency, the experiments test whether cheap boxes or simple masks are good enough before reaching for a heavy segmentation model, and record the cost of every step. |
+All results, with dates and commands, are in [evaluation/results.md](evaluation/results.md).
 
-## The six execution steps
-
-Each coloured block is one layer. Boxes with a solid border work today; dashed boxes are planned. The word under each box gives its status:
-
-- **measured**: scored against an independent reference, with an error in millimetres.
-- **early trial**: works on a small recorded example and has been inspected, but has not been scored on a broad test.
-- **stand-in** or **control**: a known-good input used in place of a layer that is not built yet, so the layers below can still be tested.
-- **planned**: not built.
+## How it works
 
 ```mermaid
-flowchart TD
-    subgraph L1["1 · CAMERA CAPTURE"]
-        direction LR
-        c1["Phone walkthrough<br/><b>early trial</b>"] ~~~ c2["Benchmark recordings<br/><b>stand-in</b>"] ~~~ c3["Delivery to PC<br/><b>early trial</b>"]
-    end
-
-    subgraph L2["2 · DEPTH ESTIMATION"]
-        direction LR
-        d1["Stereo from two lenses<br/><i>planned</i>"] ~~~ d2["Phone depth API<br/><b>early trial</b>"] ~~~ d3["Recorded sensor depth<br/><b>stand-in</b>"]
-    end
-
-    subgraph L3["3 · CAMERA POSITION ESTIMATION"]
-        direction LR
-        p1["Visual tracking<br/><b>6.9 mm error</b>"] ~~~ p2["Reference camera path<br/><b>control</b>"] ~~~ p3["Drift correction<br/><i>planned</i>"]
-    end
-
-    subgraph L4["4. SURFACE RECONSTRUCTION"]
-        direction LR
-        e1["Point surfaces<br/><b>7.8 mm error</b>"] ~~~ e2["Meshes · splats<br/><i>planned</i>"]
-    end
-
-    subgraph L5["5. MAPPING, DIMENSIONS AND AREA"]
-        e3["Bird's-eye map and area<br/><b>implemented; accuracy unscored</b>"]
-    end
-
-    subgraph L6["6. OBJECT RECOGNITION AND COUNTING"]
-        direction LR
-        o1["Detection<br/><b>early trial</b>"] --> o2["Segmentation<br/><b>early trial</b>"] --> o3["Similarity<br/><b>early trial</b>"] --> o4["Tracking and counting<br/><b>early trial</b>"]
-    end
-
-    subgraph OUT["WHAT IT ANSWERS"]
-        direction LR
-        q1(["How big is the site?"]) ~~~ q2(["How many of each object?"])
-    end
-
-    L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> OUT
-
-    classDef default fill:#ffffff,stroke:#444,stroke-width:1.5px,color:#1a1a1a
-    classDef planned fill:#ffffff,stroke:#999,stroke-width:1.5px,stroke-dasharray:6 4,color:#666
-    classDef answer fill:#263238,stroke:#263238,color:#ffffff
-    class d1,p3 planned
-    class q1,q2 answer
-
-    style L1 fill:#DCEBFB,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
-    style L2 fill:#E9E3F6,stroke:#5E35B1,stroke-width:2px,color:#311B92
-    style L3 fill:#DBF0EE,stroke:#00897B,stroke-width:2px,color:#004D40
-    style L4 fill:#FDEEDB,stroke:#FB8C00,stroke-width:2px,color:#BF360C
-    style L6 fill:#FADDE8,stroke:#D81B60,stroke-width:2px,color:#880E4F
-    style OUT fill:#ECEFF1,stroke:#546E7A,stroke-width:2px,color:#263238
+flowchart LR
+    rec["Recording<br/>colour, ARCore pose,<br/>ARCore depth"] --> s["session<br/>read and check"]
+    s --> d["depth<br/>learned depth,<br/>image turned upright"]
+    d --> sc["scale<br/>fit to ARCore depth<br/>(8 × 6 grid)"]
+    sc --> f["fusion<br/>TSDF fragments that<br/>follow anchor corrections"]
+    f --> c["cleanup<br/>visibility vote,<br/>largest pieces"]
+    c --> m["mapping<br/>floor plane, area,<br/>length, width, height"]
+    sc --> o["objects<br/>detect, place, match,<br/>count (experimental)"]
 ```
 
-Read it top to bottom. Each layer can use the output of any layer above it, not only the one directly above. For example, object isolation uses the original images (layer 1), depth (layer 2) and camera positions (layer 3) to place each object, and its objects sit in the same 3D space as the environment model (layer 4). The site-size answer comes from step 5, using step 4 geometry; the object count comes from step 6.
-
-## Why build the layers separately
-
-If the final 3D model is wrong, you need to know which layer caused it. A bent wall could come from bad depth, a bad camera path or a bad surface-building step. Testing all of them together cannot tell these apart.
-
-So each layer is first tested with **perfect inputs from the layers above it**. Public benchmark recordings supply measured depth and an exact reference camera path, recorded with motion-capture equipment. The surface-building layer can then be scored with depth and camera path known to be right. Any error is its own.
-
-After a layer passes on its own, one stand-in at a time is swapped for a real layer. For example: build the surface with the reference camera path, then again with the tracked camera path, and measure how much worse it gets. That difference is the camera tracker's contribution to the error. Two stand-ins are never swapped in the same comparison.
-
-This also makes each layer replaceable. A different depth model or camera tracker can be dropped in as long as it reads and writes the same records.
-
-## Hosted or on the phone
-
-The owner decided on 14 October 2026 that the phone captures and the PC receives, stores and processes. Running processing on the phone comes later, inside the same app. [Task61](task_list/open/61_agree_field_acceptance_limits_and_the_phone_proces.md) now holds only the remaining field acceptance and reference decisions.
-
-- **Hosted, current route.** FYLD capture saves lossless grey and colour images, motion sensors (accelerometer and gyroscope, together called the IMU), camera settings and available ARCore tracking/depth records. It queues them on the phone and streams to the PC's v2 receiver on the LAN. Capture 1.2 and PC replay have run on one real Redmi walk. Independent accuracy, sustained resource use and complete-process timing remain to be measured; Task56 tests the complete result.
-- **On the phone, later.** After comparing methods, selected layers may run inside this same capture app for checks such as missed coverage, tracking loss and provisional measurements/counts. No measurement/counting model has run on this handset. Task57 is deferred until a method and phone workload are selected.
-
-Google listed both candidate models as supporting ARCore depth when checked on 4 October 2026 ([ARCore supported devices](https://developers.google.com/ar/devices)). Only the Redmi is confirmed available for this test. A listing does not establish runtime support or measurement quality on the handset; those still need to be checked.
-
-ARCore offers more than camera position and depth. Outdoors it can label every pixel as road, pavement, building, vehicle, person and so on (Scene Semantics). It can supply building and terrain shapes from Street View data within about 100 m (Streetscape Geometry), and can give a location fix with heading (Geospatial). The toolkit and phone-sensor inventory is recorded in [research/phone_ar_platforms/arcore](research/phone_ar_platforms/arcore/README.md). Task52 turns the selected inputs into a tested recording; the inventory itself establishes no runtime result.
-
-| Layer | Hosted: phone records, server does the rest | On the phone, offline | Offline check worth doing on site |
-|---|---|---|---|
-| 🟦 1. Camera capture | Record lossless grey, colour JPEG, IMU and available ARCore metadata into the phone's disk queue. Stream with cumulative acknowledgements/resume to the PC's [v2 receiver](experiments/01_camera_capture_delivery/phone_session_v2.md). | Same recording, kept on the phone. Android's [Camera2 multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) shows whether two rear lenses can record at once. | Blur, exposure and dropped-frame warnings. A coverage hint showing parts of the site not yet filmed. |
-| 🟪 2. Depth estimation | Large learned models on every frame: [FoundationStereo](https://arxiv.org/abs/2501.09898) if two lenses can record together, otherwise multi-view depth from [Depth Anything 3](https://arxiv.org/abs/2511.10647) or [MapAnything](https://arxiv.org/abs/2509.13414). ARCore depth sets the real-world scale. | ARCore's [Depth API](https://developers.google.com/ar/develop/java/depth/raw-depth). Optionally a small learned model such as [Depth Anything V2](https://arxiv.org/abs/2406.09414) Small, run through [LiteRT](https://ai.google.dev/edge/litert) or [ONNX Runtime](https://onnxruntime.ai/docs/tutorials/mobile/) on the phone's AI chip. Multi-view stereo between keyframes, as [Mobile3DRecon](http://www.cad.zju.edu.cn/home/gfzhang/projects/mobile-3d-recon.pdf) ran on one core of a 2018 phone CPU (paper only, no code). | Warn where depth is missing or the subject is too far away for reliable depth. |
-| 🟩 3. Camera position | Full tracking with drift correction on the whole recording: [ORB-SLAM3](https://arxiv.org/abs/2007.11898) with the IMU, or the learned [MASt3R-SLAM](https://arxiv.org/abs/2412.12392) and [VGGT-SLAM 2.0](https://arxiv.org/abs/2601.19887). A final clean-up pass over all frames at once with [COLMAP](https://colmap.github.io/) or [GLOMAP](https://arxiv.org/abs/2407.20219). | ARCore motion tracking, which is built in and runs live. [RTAB-Map for Android](https://github.com/introlab/rtabmap) adds drift correction on top of ARCore's position. | "Tracking lost" alerts. A drift check: return to the starting spot and see how far the path has wandered. |
-| 🟧 4. Surface reconstruction | Dense meshes from depth with [Open3D](https://www.open3d.org/docs/0.19.0/tutorial/pipelines/rgbd_integration.html) or [nvblox](https://arxiv.org/abs/2311.00626). Realistic views with [Gaussian splatting](https://arxiv.org/abs/2308.04079) or its surface-accurate variant [2DGS](https://arxiv.org/abs/2403.17888). Bird's-eye map and areas from the mesh. | ARCore's detected floor and wall planes plus its depth points, or RTAB-Map's on-phone mesh. A rough top-down preview. | Rough footprint and area in m². A map of gaps that were never filmed. |
-| 5. Mapping, dimensions and area | Read full observed geometry and a defined reference plane to measure the site. Task55 owns the real method. | The selected edge method still needs implementation and measured evidence. | Defined area and dimensions with unknown coverage visible. |
-| 🟥 6. Object recognition and counting | Detect, outline and follow objects named in plain text with [SAM 3](https://arxiv.org/abs/2511.16719) ("traffic cone", "barrier"). Compare appearance between sightings with [DINOv2](https://arxiv.org/abs/2304.07193) or [DINOv3](https://arxiv.org/abs/2508.10104) features. Build a 3D map of individual objects in the style of [ConceptGraphs](https://arxiv.org/abs/2309.16650). | A small detector trained on site object types: [RF-DETR](https://arxiv.org/abs/2511.09554) Nano or [YOLO26](https://docs.ultralytics.com/models/yolo26) nano. Short-term following with [ByteTrack](https://arxiv.org/abs/2110.06864). ARCore position and depth place each object in 3D so a returning object is not counted twice. [MobileSAM](https://arxiv.org/abs/2306.14289) only on chosen frames when an outline is needed. | A running provisional count, with uncertain or seen-once objects flagged for a second look. |
-
-None of these methods has been measured on the two test phones yet. Published speeds come from the authors' own hardware and do not predict phone speed. Licences differ, and some forbid commercial use:
-- ORB-SLAM3 is GPLv3.
-- YOLO26 is AGPL-3.0 unless an enterprise licence is bought.
-- MASt3R-SLAM and the original VGGT weights are non-commercial.
-- RF-DETR, Open3D, MobileSAM and DINOv2 use permissive licences.
-
-Check each licence before anything ships. Each layer README lists more options, with licences, under "Methods: hosted and on the phone".
-
-## Layer by layer
-
-### 🟦 1. Camera capture
-
-**Question:** can a phone provide images, with capture times and lens calibration, that the other layers can use? Can they be delivered to an edge computer or cloud server?
-
-- **In:** a chosen phone, camera settings and a recording request.
-- **Out:** a saved bundle of images, each with camera identity, capture time and calibration (focal length, image centre, lens distortion and the offset between lenses).
-- **Phone available:** Redmi Note 11 Pro 4G, model 2201116TG, Android 13; Samsung S23 availability is unconfirmed.
-- **Where it stands:** a native Camera2 capability session from the Redmi lists one rear camera and one front camera, with no advertised simultaneous-camera sets. Its export contains no image captures. The staged camera APK still needs a verified rear-camera image export; runtime depth and camera position remain untested. The Android Debug Bridge (ADB) is available in WSL, but its latest device query found no attached handset. A local browser preview and video-stream test is possible over HTTPS, but it cannot report the native concurrent-camera support and sensor details needed to assess stereo.
-- **Stand-in today:** public benchmark recordings (see [Data used for testing](#data-used-for-testing)).
-- **Key sources:** [ARCore Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) · [Android multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) · [ARCore supported devices](https://developers.google.com/ar/devices) · [MobiDepth, phone stereo timing](research/depth_estimation/mobidepth.md) · [Construction photo capture guidance](research/construction_site_context/construction_capture_guidance.md)
-- **Details:** [experiments/01_camera_capture_delivery](experiments/01_camera_capture_delivery/README.md)
-
-### 🟪 2. Depth estimation
-
-**Question:** how far away is each pixel, in metres?
-
-- **In:** two images taken side by side at the same moment, or frames from a single-camera video, plus calibration.
-- **Out:** a depth image in metres, a mask of which pixels have a valid depth, and a confidence value if the method gives one.
-- **Plan:** use two-lens stereo if the phones allow it, otherwise single-camera video.
-  1. Check whether either phone lets an app record two rear lenses at the same moment (layer 1). If so, compute stereo depth from the pair.
-  2. If not, use single-camera methods: ARCore depth on the phone, and learned video depth such as Depth Anything 3 or MapAnything on a server. Real-world scale then comes from ARCore, GPS or objects of known size.
-  3. Phone lenses sit only 1–2 cm apart, so stereo adds little depth beyond a few metres. The single-video route is therefore developed alongside, not held back waiting for the stereo answer. It is also the route that works on ordinary video recorded without a special app.
-  4. Beyond the 2.5 m that ARCore depth reaches, triangulate between frames taken 0.5-1 m apart along ARCore's path. Sparse points come first, as sizing targets for learned depth; dense multi-view stereo comes next, fused where it is confident. Learned depth fills blank surfaces. Published live systems combine the two this way, and Mobile3DRecon ran the dense step on a phone CPU ([note](research/dense_surface_fusion/triangulation_and_learned_depth.md)). Not yet tried.
-- **Where it stands:** the Middlebury stereo test set (15 indoor scenes with exact reference depth) is downloaded and checked. No depth method has been run yet.
-- **Stand-in today:** depth measured by a depth sensor in the benchmark recordings. It has holes and noise, like real depth would.
-- **Key sources:** [ARCore Raw Depth](https://developers.google.com/ar/develop/java/depth/raw-depth) · [FoundationStereo](https://arxiv.org/abs/2501.09898) · [Depth Anything 3](https://arxiv.org/abs/2511.10647) · [Mobile3DRecon](research/dense_surface_fusion/mobile3drecon.md) · [MobileStereoNet](https://arxiv.org/abs/2108.09770) · [Middlebury stereo benchmark](https://vision.middlebury.edu/stereo/submit3/)
-- **Details:** [experiments/02_stereo_depth](experiments/02_stereo_depth/README.md)
-
-### 🟩 3. Camera position estimation
-
-**Question:** where was the camera, and which way was it pointing, for every frame? This is called camera tracking, or pose estimation.
-
-- **In:** images, calibration, capture times and optionally depth or phone motion-sensor readings.
-- **Out:** a position and orientation for every frame, plus a flag for when tracking was lost.
-- **Where it stands:** the frozen CPU tracker completed the full 792-observation Freiburg1 xyz run and the separately selected 573-observation desk run. Their position root-mean-square errors were **53.6 mm** and **280.4 mm**. They took 480 seconds and 342 seconds end to end, with peak committed memory of **1.88 GiB** and **1.87 GiB** under the 2 GiB process limit. The desk recording is from the same indoor sensor/site as xyz, so it is a held-out sequence, not a different site. Product accuracy and wait limits remain undecided, and phone performance is still unknown.
-- **Next:** compare drift correction only if the owner-agreed accuracy limits or later revisit tests require it. The existing 30-frame result remains a short historical trial.
-- **Control:** the benchmark's own motion-capture camera path, used where a later layer needs a known-correct path.
-- **Key sources:** [ORB-SLAM3](https://arxiv.org/abs/2007.11898) · [MASt3R-SLAM](https://arxiv.org/abs/2412.12392) · [VGGT-SLAM 2.0](https://arxiv.org/abs/2601.19887) · [RTAB-Map](https://github.com/introlab/rtabmap) · [TUM RGB-D benchmark](https://cvg.cit.tum.de/data/datasets/rgbd-dataset)
-- **Details:** [experiments/03_camera_pose_estimation](experiments/03_camera_pose_estimation/README.md)
-
-### 🟧 4. Surface reconstruction
-
-**Question:** can depth and camera positions be combined into a 3D model of the visible site that is accurate in metres, and turned into views people can use?
-
-This layer covers everything that shows or measures the environment: point surfaces, meshes, textured models, Gaussian splats and the bird's-eye map with area measurements.
-
-- **In:** depth images, camera positions and calibration.
-- **Out:** a 3D model in metres, with a record of which parts were actually seen. Unseen areas stay marked as unknown, never as empty.
-- **Where it stands:** a point surface was built from 9 views of a synthetic living room (ICL-NUIM) using supplied depth and camera positions. It contains 2.73 million points. Their average distance to the room's separate reference model is **7.8 mm** (maximum 31.5 mm). Only 22.3% of the whole reference room is within 5 cm of an observed point, because 9 views do not see the whole room.
-- **Planned:**
-  - Compare points with denser display options: oriented patches, meshes built from depth, textured meshes from photos, Gaussian splats and neural radiance fields. Geometric accuracy and how realistic it looks are scored separately, because a model can look right and still be the wrong size.
-  - A bird's-eye map: project the 3D model onto the ground and report heights, boundaries and areas. This is first tested on simple made-up shapes whose true sizes are known in advance, such as a step, a hole and an overhang.
-- **Key sources:** [KinectFusion](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/ismar2011.pdf) · [nvblox](https://arxiv.org/abs/2311.00626) · [3D Gaussian splatting](https://arxiv.org/abs/2308.04079) · [2D Gaussian splatting](https://arxiv.org/abs/2403.17888) · [COLMAP](https://colmap.github.io/)
-- **Details:** [experiments/04_surface_reconstruction](experiments/04_surface_reconstruction/README.md), [experiments/05_birds_eye_mapping](experiments/05_birds_eye_mapping/README.md) and the shared [geometry check](experiments/geometry_validation/README.md)
-
-### 5. Mapping, dimensions and area
-
-This execution step reads full observed geometry and reports site dimensions, a defined area and unknown coverage. Its real method remains unavailable under Task55. It is separate from surface reconstruction and cannot use sampled viewer points as measurements.
-
-### 🟥 6. Object recognition and counting
-
-**Question:** which objects are in the scene, where are they in 3D, and how many distinct ones are there, even when one leaves the view and comes back?
-
-This layer is a chain of four steps:
-
-| Step | What it does | Where it stands |
+| Stage | What it does, in one line | Detail |
 |---|---|---|
-| **Detection** | Draws a labelled box round each object in each image | The YOLO26x detector found 4 of 5 reference cups in six reviewed desk frames. |
-| **Segmentation** | Picks out the object's own pixels inside the box, so depth is read from the object, not the wall behind it | 45 masks compared on 15 boxes: plain rectangles, GrabCut and filled outlines. Masks change which depth pixels are used. Whether that makes positions more accurate is not yet shown. Learned segmentation models such as SAM have not been run in this layer. |
-| **Similarity** | Compares appearance between views (image templates and learned features) | Template matching ranked 7 of 7 test pairs correctly. Features taken from inside the detector ranked 6 correctly and got 1 monitor wrong. ResNet50 and other feature models are untested. |
-| **Tracking and counting** | Decides whether each new sighting is an object already seen or a new one, and keeps a history for each object | On 11 reviewed sightings of 3 objects, rules using 3D position alone, and position plus appearance, both assigned all 11 correctly. Appearance alone left 4 undecided. A 60-frame replay processed 457 detections and kept a full history for every object. |
+| Session | Reads the recording, checks every record, converts poses once to one convention | [sitescan/session](sitescan/session/README.md) |
+| Depth | Depth Anything V2 Metric Indoor Small predicts depth for every pixel; right shape, wrong scale | [sitescan/depth](sitescan/depth/README.md) |
+| Scale | Multiplies learned depth by the median ratio to ARCore's confident depth, per cell of an 8 × 6 grid | [sitescan/scale](sitescan/scale/README.md) |
+| Fusion | Averages scaled depth into volumes of 10 keyframes, each tied to an ARCore anchor, so ARCore's path corrections move the surface without re-fusing | [sitescan/fusion](sitescan/fusion/README.md) |
+| Cleanup | Drops points that other views see through, then keeps the 50 largest connected pieces | [sitescan/cleanup](sitescan/cleanup/README.md) |
+| Mapping | Finds the dominant plane and measures the surface on a grid laid on it | [sitescan/mapping](sitescan/mapping/README.md) |
+| Objects | YOLO26x boxes, placed at the median depth inside the box, matched to objects of the same class within 0.35 m | [sitescan/objects](sitescan/objects/README.md) |
 
-How it uses the layers above: each detection's depth (layer 2) and the camera position (layer 3) turn its box into a 3D position. When an object comes back into view, its new 3D position is compared with the positions of objects already found. That is what stops it being counted twice.
+Two orchestrators call these stages ([sitescan/pipelines](sitescan/pipelines/README.md)). The
+**room build** uses every frame with fresh ARCore depth and cleans the room once at the end.
+The **live processor** takes the newest frame once per update and keeps the last scale when a
+frame has no depth. Neither contains a method of its own.
 
-A small example: a cup is seen in desk frame 104, is out of view in frame 268, and comes back in frame 359. Every position-based rule kept it on the same identity across the gap. Its measured position on return was 20 mm from where it was first seen.
+## Install
 
-Every detection keeps its own record and a link to its source image, including rejected ones. A new unmatched object can get a provisional identity until more evidence confirms it.
-
-- **Key sources:** [SAM 3](https://arxiv.org/abs/2511.16719) · [RF-DETR](https://arxiv.org/abs/2511.09554) · [ConceptGraphs](https://arxiv.org/abs/2309.16650) · [ByteTrack](https://arxiv.org/abs/2110.06864) · [DINOv2](https://arxiv.org/abs/2304.07193)
-- **Details:** [experiments/06_object_recognition](experiments/06_object_recognition/README.md)
-
-## What has been measured so far
-
-All results below are on recorded public data on a desktop computer. None is from a phone or a worksite.
-
-| Layer | Data | Result | What it does not show |
-|---|---|---|---|
-| 3. Camera position | Full 792-frame Freiburg1 xyz and 573-frame desk sequences | Position RMSE: 53.6 mm xyz and 280.4 mm desk; 1.65 and 1.68 observations/s; peak commit 1.88 and 1.87 GiB on CPU | Owner-set accuracy and wait limits; another site; phone speed |
-| 4. Environment | 9 views of a synthetic room (ICL-NUIM), supplied depth and camera path | 7.8 mm mean distance to the reference room; 22.3% of the whole room covered within 5 cm | Real phone depth; tracked camera paths; meshes |
-| 5. Detection | 6 reviewed desk frames | 4 of 5 cups found | A broad, unseen test set |
-| 5. Segmentation | 15 boxes, 3 mask methods | 45 masks; depth pixels chosen differ by method | That masks improve position or size |
-| 5. Similarity | Checked pairs of the same objects | Templates 7 of 7 correct; detector features 6 of 7 | Telling apart two identical objects |
-| 5. Tracking and counting | 11 reviewed sightings, then a 60-frame replay with 457 detections | All 11 assigned correctly by position-based rules | Accuracy on a large, independently labelled inventory |
-
-**How repeatable is an object's position?** In the 60-frame replay, one cup was seen 16 times and kept the same identity. Its 3D positions were spread by **72.8 mm** (root-mean-square) around their middle. The two furthest-apart sightings were 291.7 mm apart. This measures the visible surface of the cup from different angles, which moves as the camera moves. It is not the error against the cup's true centre, because no true centre was surveyed.
-
-**Late-object births fixed, 5 October:** the historical replay blocked new same-class identities after the first object, leaving 90 of 95 book detections undecided. Task46 removes that restriction and replays the same cached boxes, depth and poses. It produces six provisional book identities and leaves five book detections undecided. Across all classes, unresolved detections fall from 226 to 56 and provisional identities rise from 18 to 55. These are policy outcomes, not a verified physical-object count. [Demo 06](demo_outputs/06_objects_in_3d.html) shows the corrected replay; box-and-depth 3D association is the next priority.
-
-### Results from 13-14 October 2026
-
-These changed the design: the camera path should come from a live tracker using image features (on the phone, ARCore), and learned depth should only fill in surfaces, resized each frame to the tracker's points. Details in [learning/10_findings_timeline.md](learning/10_findings_timeline.md).
-
-| Question | Data | Result |
-|---|---|---|
-| Is the old tracker the weak point? | TUM xyz and desk, Kinect depth | Yes: 34 and 112 mm path error after a best fit, against 9-18 mm for published SLAM ([tracking review](research/camera_tracking_and_slam/tracking_review_2026-10-13.md)) |
-| Camera path from images alone, offline | TUM xyz, desk; ICL | 11.9, 21.5-24 and 34 mm with COLMAP structure from motion ([experiments/sfm](experiments/sfm/README.md)). Desk reaches 15.2 mm with the published lens calibration once COLMAP's lens limit (`max_extra_param`, default 1) is raised; found 8 November |
-| Camera path from images alone, live on a CPU | Same | ORB-SLAM3 12.8 / 25.8 / 39 mm; stella_vslam (BSD-2) 17.1 / 28.3 / 38 mm; 5-12 ms per frame ([experiments/live_slam](experiments/live_slam/README.md)) |
-| Real-world size | Same, 20 depth readings | Path within 1.15 times the best possible; more readings add nothing ([experiments/sfm](experiments/sfm/README.md), Task78) |
-| Surface from learned depth sized to tracked points | ICL, desk, xyz | 93 / 156 / 166 mm mean distance, within 8-27 mm of the best possible with true poses; newer models (Prompt Depth Anything, Depth Anything 3 Small) not better on real data |
-| ARCore on the project's Redmi | 15 s walk indoors | Tracking on 100% of 891 frames, 4.9 ms per update; raw depth 160 x 90 from motion; 19 tracked points per frame; 29 frames per second streamed with poses to a computer over Wi-Fi ([experiment 01](experiments/01_camera_capture_delivery/README.md)) |
-
-Each experiment folder links to interactive viewers for its runs, such as a camera-path viewer, a point-surface viewer and the 60-frame object replay. These are generated locally and are not stored in the repository.
-
-## Android package build
-
-The current phone app is the Redmi check app (14 October 2026): it runs ARCore, shows the camera, checks tracking and depth, and streams frames with their poses to a computer; built and documented in [experiment 01](experiments/01_camera_capture_delivery/README.md#redmi-check-app-arcore-and-host-streaming-task85). The older packaging test below is kept for its build record.
-
-A verified 64-bit Android (`arm64`) test APK now comes from the repository build command in [experiment 01](experiments/01_camera_capture_delivery/README.md). The APK runs only `print(42)`, so it does not test camera access or ARCore. It is package `org.fyld.toolchainsmoke`, version `0.1`, with SHA-256 `2a1f1f821408d637cbb8416e465b273245c5813013a73684f7f70dab45fc26e5`. Its test-signing certificate has SHA-256 `45e634374292b269842a381e50dc1bb08d6b30db388ed4572a880d9b1670e1c3`.
-
-Packaging took 27.34 seconds using the installed Android tools and cached libraries. A fresh dependency build stopped because the JPEG source archive was missing. No local Docker image matched the pinned tools, so no container build was run. No source or build image was downloaded. These results check APK packaging only; they do not show that it installs on a phone or can access a camera.
-
-## ARCore: what it gives, its terms, and an open-source replacement
-
-ARCore is Google's augmented-reality library on Android. On the phone it gives, live and in metres: the camera's position and direction for every frame (from the camera and motion sensors together), the direction of gravity, tracked 3D points, depth images made from the phone's motion, flat surfaces, and the camera calibration. How it works inside is in [learning/11_inside_arcore.md](learning/11_inside_arcore.md).
-
-**Can a product use it?** On a reading of Google's published terms (checked clause by clause on 14 October 2026), nothing forbids selling a product that uses ARCore's on-device features, and no fee is stated. The conditions: show the notice "This application runs on Google Play Services for AR (ARCore), which is provided by Google and governed by the Google Privacy Policy" and keep a privacy policy; do not resell ARCore itself or reverse engineer it; assess the clause that forbids uses where failure "could lead to death, personal injury, or environmental damage" against how site measurements will be used; accept that Google can change or withdraw ARCore and accepts no liability; and use phones that shipped with Google Play and are on Google's device list. The ARCore library is not open source. This is not legal advice; a qualified review is needed before launch. Details: [research/phone_ar_platforms/arcore_commercial_terms.md](research/phone_ar_platforms/arcore_commercial_terms.md).
-
-**What would replace it.** Each ARCore function has an open-source counterpart (licences checked from each project on 14 October 2026; details in [research/phone_ar_platforms/arcore_open_replacement.md](research/phone_ar_platforms/arcore_open_replacement.md)):
-
-| ARCore function | Open-source or hand-built replacement | Licence |
-|---|---|---|
-| Camera images and motion-sensor readings on one clock | Android Camera2 and SensorManager | Android platform |
-| Camera and motion-sensor calibration | Kalibr (offline, printed target) | BSD-3-Clause |
-| Camera path in metres with gravity | Basalt, Kimera-VIO or OKVIS2 visual-inertial odometry | BSD-3 / BSD-2 / BSD-style |
-| Camera path without motion sensors (fallback) | stella_vslam, measured here at 17-28 mm and 5-8 ms per frame | BSD-2-Clause |
-| Recognising revisits and correcting the path | DBoW2 or FBoW, with Ceres or g2o | BSD-style or MIT; BSD-3 or BSD |
-| Depth images | Learned depth (Depth Anything V2 Small or ZipDepth) resized to tracked points, run with ONNX Runtime or LiteRT | Apache-2.0 (Depth Anything); MIT or Apache-2.0 (runtimes) |
-| Flat surfaces, anchors | RANSAC plane fit (Task55 code, Open3D); positions stored relative to keyframes | Own code; MIT |
-
-GPL-licensed systems (ORB-SLAM3, OpenVINS, VINS-Mono) are used only as accuracy references. The hard parts of a rebuild are aligning camera and motion-sensor clocks on Android, per-phone calibration, rolling-shutter cameras, fast and reliable start-up, and porting desktop C++ to the phone. The rebuild must use published methods: reverse engineering ARCore is forbidden, and Google holds patents on ARCore's designs, so a patent check is needed before copying a specific design.
-
-## What is still unknown
-
-- **Phones.** ARCore runs on the Redmi (tracking, depth and streaming verified on 14 October), but its accuracy against tape-measured distances, battery use, heat, long walks, outdoor use and stairs are untested. Samsung availability is unconfirmed.
-- **Worksites.** All tests are indoors. The current depth reader ignores anything 4 m away or more. Street-scale and outdoor accuracy are untested.
-- **True object positions and sizes.** There is no surveyed reference for where the desk objects really are, or their full dimensions. A detected position is a point on the object's visible surface, not its centre. Visible size and full size are different measurements and need separate references.
-- **Confidence.** Detector scores, similarity scores and the spread of depth points are not probabilities. None has been calibrated against real errors.
-- **Independent labels.** The reference labels for the desk frames were reviewed by an AI agent, not by a person, and the same frames were inspected while building the methods. A blind, human-checked test set does not exist yet.
-- **Hard cases for counting.** Identical objects that are never seen together, objects that move, full occlusion, changed lighting and a return visit on a different day have not been tested with enough evidence.
-- **Tracked instead of reference camera paths.** The object results use the benchmark's reference camera path. Repeating them with the tracker's own path has not been done.
-
-## Data used for testing
-
-| Dataset | What it provides | Used for |
-|---|---|---|
-| [TUM RGB-D](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) (desk and xyz recordings) | Colour video, measured depth, calibration, timestamps and a motion-capture camera path | Camera tracking (layer 3) and object recognition (step 6) |
-| [ICL-NUIM](https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html) (living room) | Synthetic colour and depth, exact camera path and a separate 3D model of the room | Scoring the surface layer (layer 4) |
-| [Middlebury stereo](https://vision.middlebury.edu/stereo/submit3/) (version 3, quarter resolution) | Stereo image pairs, calibration and exact reference depth for 15 scenes | Depth estimation (layer 2) |
-
-Raw datasets, model weights and generated runs are kept on the local machine and are not in the repository. [data/README.md](data/README.md) records where each file came from and how it was checked. [experiments/datasets/README.md](experiments/datasets/README.md) explains which data suits which layer.
-
-These three datasets are all indoors, none is filmed on a phone, and none shows a worksite. A list of public datasets that close those gaps is in [research/README.md](research/README.md#candidate-test-datasets-5-october-2026). It includes phone recordings with ARCore paths (ADVIO), iPhone video with laser-scanned rooms and labelled objects (ScanNet++), construction sites with surveyed references (Hilti, ConSLAM) and road work zones with cones, barriers and signs (ROADWork). The current priority is diagnosing the available Redmi walk; further dataset acquisition needs a specific comparison gap.
-
-A reference used for scoring is never fed to the method being scored, unless a run is explicitly labelled as a control that uses it.
-
-## What comes next
-
-The owner ruled on 14 October 2026 that the system must be live (or update at least once per second) on the phone or a server, and that development splits into two streams. Both deliver the same per-frame data, so the processing side does not care which one produced it.
-
-**Capture first (owner, evening of 14 October 2026).** Until the methods are chosen, the phone only captures: one app records everything every method needs and delivers it to the PC, which stores it in one session format and runs every method from there. Running on the phone itself comes after, inside the same app. The focus shifts from measured dimensions to comparing the 3D reconstructions the different methods produce. The first test recording is a walk through the owner's house: start upstairs, go down, come back up.
-
-Before Task96 there were two phone apps with two formats: the Stream A check app supplied colour and ARCore outputs, while the Stream B recorder supplied lossless grey and motion sensors. The table records their earlier input gaps. The unified capture app now supplies the inputs for every row:
-
-| Method (3D path, then surface) | Licence | Reads | Check app (A) | Recorder (B) |
-|---|---|---|---|---|
-| ARCore's path, learned depth sized to ARCore's raw depth, fused ([src/live](src/live/README.md)) | ARCore terms; own code | colour frames, ARCore pose and intrinsics, raw depth with confidence, tracked points, anchor corrections | yes | no depth, points or colour |
-| ARCore's raw depth fused along ARCore's path | ARCore terms | raw depth with confidence, poses, depth intrinsics | yes | no |
-| Open visual-inertial tracking: Basalt, OKVIS2; OpenVINS as reference only ([experiments/open_vio](experiments/open_vio/README.md)) | BSD; GPL | every frame, grey, ideally lossless; uncalibrated gyroscope and accelerometer at the fastest rate on the camera's clock; per-frame exposure and readout; a Kalibr calibration from a target video and about 3 h at rest | no motion sensors; drops frames | yes |
-| Image-only live SLAM: stella_vslam; ORB-SLAM3 as reference only ([experiments/live_slam](experiments/live_slam/README.md)) | BSD-2; GPL | every frame, intrinsics | drops frames | yes |
-| Offline structure from motion, COLMAP, as the reference path ([experiments/sfm](experiments/sfm/README.md)). Its triangulation and bundle adjustment can also start from ARCore's path, to give real-size points beyond ARCore depth's range (proposed 8 November; [colmap note](research/structure_from_motion/colmap.md)) | BSD | sharp frames, intrinsics; ARCore poses for the known-pose parts | yes | yes (grey) |
-| Learned depth along any of the paths above, fused (chapter 5) | Apache-2.0 | colour frames, the path, points or depth for sizing | yes | grey only |
-| Multi-view stereo between keyframes along ARCore's path, combined with learned depth ([note](research/dense_surface_fusion/triangulation_and_learned_depth.md); proposed 8 November after [Mobile3DRecon](research/dense_surface_fusion/mobile3drecon.md)) | own code; the paper released none | frames (grey is enough), ARCore poses and intrinsics; keyframes 0.5-1 m apart | yes | yes (grey) |
-| Feed-forward 3D models that output cameras and depth together, such as Depth Anything 3 (Task74) | varies by model | colour frames | yes | grey only |
-
-The capture app (Task96, continuing Task95; updated by Task99) merges both apps. ARCore shares the camera with Camera2. Each frame is queued on phone storage with lossless grey, quality-90 colour JPEG, camera settings and the matching ARCore record when available. Uncalibrated motion sensors and telemetry accompany it. A windowed sender streams during capture and after Stop and resumes interrupted connections. The PC stores one v2 folder for live processing, replay and tracker export. Capture 1.2 passes 30 JVM tests; the current capture, reader, replay and hygiene checks pass 317 tests with 1 skipped. The Redmi completed 1,194 frames over 39.88 s with zero reported drops. This checks one recording; the 30-frame memory buffer can still overflow if writing falls behind. The 60 s rest and calibration recordings remain outstanding. Definition: [phone_session_v2.md](experiments/01_camera_capture_delivery/phone_session_v2.md); current APK: [deployment index](mobile_deployments/README.md). LAN only: the protocol has no authentication or encryption.
-
-**Stream A: the ARCore product route.**
-
-View the recorded Redmi scene in the local [interactive Gaussian-splat viewer](outputs/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) (Task100): orbit, zoom, top view and camera/photo bookmarks. It shows splats derived from the reconstructed surface, coloured by height; photographic Gaussian training has not been run. The HTML and household images stay local.
-
-**Next work, reviewed 15 October (Task101).** The owner judged the scene geometry poor and reported sideways photos in the HTML. [Task102](task_list/open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) first checks viewer versus model-input orientation, then compares raw and learned depth on identical frames, scale sources, camera conventions and anchor/fusion corrections. The 90° sensor mounting angle is recorded; orientation sensitivity is a hypothesis to test, not a diagnosed cause. [Task68](task_list/open/68_add_the_depth_and_area_tests_to_the_default_test_r.md) expands the default checks, and [Task52](task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns capture metadata/sustained-run gaps. The [reviewed task board](task_list/README.md) gives the full order and deferred work.
-
-**Redmi result, checked 15 October (Task99).** The 14 October session `20261014_220756_walk` completed normally with capture 1.2: 29.92 fps, zero reported drops or missing/duplicated frame numbers, motion sensors at 423.54 Hz, 10.22 MB/s received and 0.058 s sending after Stop. The PC stores 225 MB. All images parsed and CPU replay produced 63 updates at 1.58 updates/s with no gap over one second. EuRoC export wrote its files; its check flags one final frame without camera settings. There are 17 frames without ARCore records and 44 new depth maps. The estimated clock offset is -2.67 ms, with correlation 0.62, pending independent calibration. Earlier crashes were diagnosed through capture 1.1; version 1.2 filters invalid point projections and handles JSON serialization errors. [Evidence and limits](experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99). Android Studio/AVD remains proposed and uninstalled.
-
-1. The stream carries tracked points, raw depth with confidence, anchor corrections and tracking state under a shared definition. Task87 built [phone session v1](experiments/01_camera_capture_delivery/phone_session_v1.md); Tasks96/99 replaced the two apps with [v2 capture](experiments/01_camera_capture_delivery/phone_session_v2.md), checked on the Redmi. Task52 now owns unmatched metadata and sustained checks rather than building another recorder.
-2. A live processing entry point on the computer that reads the stream and updates the surface, map and object counts at least once per second (absorbs Tasks 76 and 77). **Built 14 October (Task89):** [src/live](src/live/README.md). On recorded data in the stream format, with true poses standing in for ARCore, it updates 1.9 (TUM xyz), 1.6 (TUM desk) and 1.2 (ICL) times a second on the CPU with no gap over 1 s; corrections from ARCore move the surface and objects through anchors. Object counts are far too high when live (14-15 chairs on TUM xyz). Task93 found why: about half the extra identities are the same object placed just past the 0.35 m matching distance, because learned depth moves large objects between views ([src/live](src/live/README.md)).
-3. Measure ARCore against tape-measured distances on real walks, including stairs and outdoors (Task75); show the required ARCore notice; agree field acceptance limits (Task61). **Prepared 14 October (Task92):** [capture guide and scorer](experiments/01_camera_capture_delivery/field_accuracy.md) for loop drift, 3D distance error and tracking loss. The app now has an ARCore notice screen with Google's privacy and terms links. The APK is built; measured walks, the offline COLMAP comparison and acceptance limits remain outstanding.
-
-**Stream B: the open-source route, replacing ARCore.**
-
-1. A recorder that saves raw frames and motion sensors on one clock, with ARCore alongside as a reference. Task88 built the original recorder; Task96 merged it into FYLD capture. Task99 verified a complete 1,194-frame Redmi session through the v2 reader, EuRoC export and clock check ([experiments/open_vio](experiments/open_vio/README.md)). One final frame lacks camera settings, so the checker still reports a metadata problem. The 60 s rest and calibration recordings remain needed.
-2. Calibrate the Redmi's camera and motion sensors (Kalibr). **Pipeline built 14 October 2026** (Task90): on TUM-VI it reproduces published calibration to 0.014 degrees, 1.0 mm and 0.13 ms. [Task103](task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) now owns the actual Redmi target/rest recordings and calibration. **Task91's public TUM-VI comparison** found Basalt 0.146 m, OKVIS2 0.505 m with its own noise settings, Kimera-VIO lost track and OpenVINS 0.064 m (reference only). [Task104](task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md) owns the unperformed calibrated Redmi path/surface comparison; ARCore is another estimate, not independent truth.
-3. After method selection, Task57 may port the selected processing into the same capture app. Phone inference is deferred by the capture-first decision; public-dataset ranking alone does not select a handset implementation.
-
-Both streams reuse the project's surface, measurement and counting components. `src/live` owns live/replay scheduling and `src/walkthrough` the six-stage runner; any comparison adapter must preserve their contracts rather than assume the inputs are already interchangeable. GPU use is still not allowed; all processing runs on the CPU for now.
-
-## Possible later output: a phone VR viewer
-
-The 3D model and objects could later be viewed on a phone placed in a cheap headset, such as the [TECKNET phone headset](https://www.amazon.co.uk/TECKNET-Headsets-Anti-Blue-Adjustable-Compatible-White/dp/B0F6NKP6W7). That headset holds a 4.7 to 7.2 inch phone behind two lenses. It has no tracked controllers or room tracking, so the first version would let the viewer look around by turning their head, not walk around.
-
-A small first version would:
-
-1. Export the environment as a simplified 3D scene file (glTF/GLB) in metres, separate from the full-detail version used for measurement.
-2. Export objects as a data file beside it: identity, class, 3D position, observed size when known, source frames, confidence and uncertainty.
-3. Draw the scene once per eye, with labels showing each object's name, distance and size.
-4. Package it as an Android app or a local web page, with tap or Bluetooth-remote selection and a "measurements are estimates" notice.
-5. Test load time, frame rate, memory, heat and label readability on both phones.
-
-The viewer would display the project's measurements. It would not prove they are accurate.
-
-## Repository layout and checks
-
-FYLD capture 1.2 has completed a Redmi recording, and the PC readers, export and live replay have processed it. Current APKs are listed in [mobile_deployments](mobile_deployments/README.md). The Redmi capability report advertises no concurrent camera sets; Samsung S23 access is not being pursued. The separate Camera2 diagnostic is retained for capability checks.
-
-```text
-experiments/
-  01_camera_capture_delivery/   layer 1: phone capture and delivery
-  02_stereo_depth/              layer 2: depth estimation
-  03_camera_pose_estimation/    layer 3: camera tracking
-  04_surface_reconstruction/    layer 4: building 3D surfaces
-  05_birds_eye_mapping/         layer 4: top-down map and areas
-  06_object_recognition/        step 6: detection, masks, similarity, tracking and counting
-  geometry_validation/          checks coordinate handling with known inputs
-  shared/                       common geometry, record formats and run export
-  datasets/                     which data suits which layer
-research/                       literature, source summaries and licences
-data/                           where each dataset came from and how it was checked
-archive/                        the earlier prototype, kept for reference
-mobile_deployments/              Current phone APKs; see its README for versions and installation
-tools/check.py                  runs the test suite
-```
-
-Each experiment folder has its own `src/`, `tests/` and `runs/`. Every run saves its inputs, outputs, diagnostic images and settings, so it can be inspected and repeated. Shared code lives in `experiments/shared`; code used by only one experiment stays in that experiment.
-
-To run the checks:
+Windows, from the repository root, with [uv](https://docs.astral.sh/uv/):
 
 ```powershell
-python -B tools/check.py -q
+uv sync --all-extras
 ```
 
-The runner uses an operating-system temporary directory and removes it after the tests. It accepts the current `task_list/open` and `task_list/done` layout. Use this runner rather than a repo-local `--basetemp`, and do not create `.test_*` scratch files or folders. Ruff uses `~/.cache/ruff/mobile_depth_estimation_tracking` through `ruff.toml`; `ruff check --no-cache` avoids caching entirely. Task99 removed old repo-local pytest, test and Ruff scratch. Passing tests check behavior, while the measured results above establish research progress.
+This builds `.venv` from `uv.lock` (Python 3.12, CPU-only PyTorch). Weights stay out of git:
+put them in `models/` as listed in [models/manifest.toml](models/manifest.toml)
+(Depth Anything V2 Metric Indoor Small; YOLO26x for objects).
 
-Costs are recorded for each step separately: model loading, detection, depth reading, feature extraction, matching, surface building, memory and storage. Desktop timings do not show phone speed. The licences of the YOLO26x model and any future models and datasets need review before use outside research ([research/licences.md](research/licences.md)).
+## Run it
 
-## Terms used in this project
+```text
+.venv/Scripts/python.exe -B -m apps.cli room   --session <recording> --out <new folder>
+.venv/Scripts/python.exe -B -m apps.cli replay --session <recording> --out <new folder>
+.venv/Scripts/python.exe -B -m apps.cli live   --port 8766 --out <new folder>
+```
+
+`room` writes `surface.ply`, `raw_surface.ply`, `frames.npz` and `summary.json` with the
+measurements. `replay` and `live` write `updates.jsonl`, `surface.ply` and `summary.json`.
+`live` receives from the capture app on the local network; type the address it prints into
+the app. Options and outputs: [apps/README.md](apps/README.md).
+
+A 20-frame public test recording is committed, so the room build runs on a fresh clone with
+only the depth weights added:
+
+```text
+.venv/Scripts/python.exe -B -m apps.cli room --session tests/fixtures/tum_desk_20 --out outputs/desk
+```
+
+It prints 51,962 cleaned points and a 4.45 × 3.15 m map.
+
+## Walkthrough notebook
+
+[notebooks/00_sitescan_walkthrough.ipynb](notebooks/00_sitescan_walkthrough.ipynb) runs each
+orchestrator on the committed test recording, then repeats its steps one stage call at a time,
+with a picture after each step, and checks that the unwrapped steps give the same numbers.
+
+## Repository map
+
+| Folder | Holds |
+|---|---|
+| [`sitescan/`](sitescan/README.md) | The product: one folder per stage, `pipelines/` for the two orchestrators, `io.py` for writing results |
+| [`apps/`](apps/README.md) | The command line and the phone receiver; no method code |
+| [`notebooks/`](notebooks/README.md) | The walkthrough notebook |
+| [`tests/`](tests/README.md) | Product tests, the golden-output check and the committed test recording |
+| [`evaluation/`](evaluation/README.md) | Scoring against references, stand-in recordings, the layer-by-layer runner and [measured results](evaluation/results.md) |
+| [`experiments/`](experiments/README.md) | Every trial, adopted or rejected, each with its README as the evidence record |
+| [`research/`](research/README.md) | Source reviews by topic |
+| [`learning/`](learning/README.md) | Chapters from first principles |
+| [`tools/`](tools/README.md) | Developer tools: the check runner, the function index, demo-page builders |
+| [`models/`](models/README.md) | Model weights (local) and their manifest (tracked) |
+| [`task_list/`](task_list/README.md) | One record per piece of work |
+| [`archive/`](archive/README.md) | Retired code and documents, read only |
+| `data/`, `outputs/`, `third_party/` | Local only, not in git |
+
+## Tests
+
+```text
+.venv/Scripts/python.exe -B -m pytest                        product lane, about 10 s
+.venv/Scripts/python.exe -B -m pytest -m golden              both orchestrators on the test recording
+.venv/Scripts/python.exe -B -m pytest -c pytest-full.ini     everything, about 1,600 tests, 6.5 min
+```
+
+The golden check compares every output number with the saved outputs in
+`tests/fixtures/tum_desk_20_golden.json`. See [tests/README.md](tests/README.md).
+
+## Future work
+
+In order. Each item changes one thing and is measured against the current output before it
+is kept; the saved golden outputs are updated only when a change is adopted.
+
+1. **Give live the room's rules.** Turn live images upright before depth (AbsRel against ARCore depth fell from 0.080 to 0.058 for the room), scale with the 8 × 6 grid, and drop stale ARCore depth. One checked change at a time.
+2. **Make far depth trustworthy.** Reject scale fits with too little support and let a held scale expire; trial far-depth triangulation from ARCore's tracked points, with region-aware scale as its control. ARCore depth rarely reaches past 2.5 m, and doorways repeat beyond it.
+3. **Measure the room against the truth.** Record a walk that returns to its start, with tape-measured distances under 2.5 m and between 3 and 8 m, two or more identical objects and a few small ones. Without this no accuracy number exists for the phone.
+4. **Fix object overcounting.** A matching distance that grows with object size and distance from the camera, then placement from a segmentation mask instead of the box median, scored against a counted inventory of a real room.
+5. **Keep the live map under a second.** Keep each finished fragment's thinned points instead of re-thinning the whole surface every update.
+6. **Frame selection.** Group similar frames and send only the sharpest of each group to depth and fusion, as an off/on experiment (DESIGN.md section 7.12).
+7. **RTAB-Map mapping and surface grouping.** Feed RTAB-Map the same frames, depth and poses so only the mapping changes; trial geometry-and-colour grouping beside the largest-pieces filter once small objects are labelled.
+8. **A depth model that runs on the phone.** LingBot-Map's depth, scaled by ARCore, had 38% lower error than Depth Anything V2 on the same frames but needs a 1.16-billion-parameter model on a GPU. Search for a model that runs at one frame per second on a phone or CPU.
+9. **One record type end to end.** Switch both orchestrators from wire records to `session.frames()`. This changes anchor axes, so the fused grid moves in floating point; it needs its own golden check.
+10. **Finish the move.** Put the Android app in `android/`; move the receiver's tests and the fake phone into `tests/`; move the dataset readers that `evaluation/` borrows from `experiments/` into `evaluation/`; turn `tools/demos` into `apps/viewer` once a viewer reads only pipeline outputs.
+11. **Clear the licences.** Settle Ultralytics' AGPL-3.0 or commercial terms, or replace the detector (an Apache-2.0 YOLOX path is a candidate), before any proprietary use.
+12. **Run stages on the phone.** Port a stage only with a parity test against the Python version on the same frames. Build a web API only when something will call it.
+
+## Licences and data
+
+- ARCore is Google's SDK under its own terms; the capture app uses it on the phone only.
+- The YOLO26x detector loads through Ultralytics (AGPL-3.0 or commercial), unresolved for proprietary use. Depth Anything V2 Small is Apache-2.0.
+- GPL tools such as ORB-SLAM3 appear only in experiments, as accuracy references.
+- The committed test recording is made from the public TUM RGB-D desk sequence (CC BY 4.0).
+- Household recordings, papers and model weights never enter git.
+
+## Function index
+
+Every public function and class in `sitescan/` and `apps/`, with its arguments and a link to
+its code. Generated by `python -B -m tools.function_index`; a test fails if it is out of date.
+
+<!-- function-index:start -->
+
+**`sitescan.cleanup.__init__`**
+
+| Function | What it does |
+|---|---|
+| [`Cleaned(voted, kept)`](sitescan/cleanup/__init__.py#L13) (class) | Input-order masks: points the vote kept, and points kept after the piece filter too. |
+| [`clean_room(points, views, *, cell, keep, min_points)`](sitescan/cleanup/__init__.py#L20) | Visibility vote, then keep the largest pieces of what the vote left. |
+
+**`sitescan.cleanup.pieces`**
+
+| Function | What it does |
+|---|---|
+| [`largest_pieces(points, cell, keep, min_points)`](sitescan/cleanup/pieces.py#L11) | A mask of points in the largest pieces meeting the minimum point count. |
+
+**`sitescan.cleanup.vote`**
+
+| Function | What it does |
+|---|---|
+| [`measurements(points, views)`](sitescan/cleanup/vote.py#L12) | Per-view camera depths and measured depths at rounded colour pixels. |
+| [`vote_tallies(points, views, *, margin_m, margin_share, min_depth_m)`](sitescan/cleanup/vote.py#L32) | Weighted support and see-through opposition for each point, in input order. |
+| [`visibility_vote(points, views)`](sitescan/cleanup/vote.py#L52) | Keep points with support at least equal to see-through opposition. |
+
+**`sitescan.depth.model`**
+
+| Function | What it does |
+|---|---|
+| [`metres(encoded, units_per_metre)`](sitescan/depth/model.py#L16) | Float64 camera-plane metres and a mask of finite, positive pixels. |
+| [`infer(image, *, processor, model, torch, device, max_depth_m)`](sitescan/depth/model.py#L23) | Depth and validity on the RGB image's pixel grid from loaded model components. |
+| [`load_model(checkpoint, *, threads, device, max_depth_m)`](sitescan/depth/model.py#L42) | An RGB-to-depth callable, loading local processor and weights once. |
+| [`predict(model, image, pose)`](sitescan/depth/model.py#L66) | Depth and validity on the recorded grid, using upright input when pose is given. |
+
+**`sitescan.depth.orientation`**
+
+| Function | What it does |
+|---|---|
+| [`upright(image, turns)`](sitescan/depth/orientation.py#L8) | The recorded array rotated clockwise by the requested quarter turns. |
+| [`recorded(image, turns)`](sitescan/depth/orientation.py#L13) | The upright array restored to its recorded pixel grid. |
+| [`quarter_turns(world_from_camera_cv)`](sitescan/depth/orientation.py#L18) | Clockwise turns that bring image down closest to world down. |
+| [`turned_camera(world_from_camera_cv, intrinsics, size, turns)`](sitescan/depth/orientation.py#L26) | Pose, intrinsics and dimensions for the rotated pixel grid. |
+
+**`sitescan.fusion.fragments`**
+
+| Function | What it does |
+|---|---|
+| [`Fragments(*, voxel_m, keyframes_per_fragment)`](sitescan/fusion/fragments.py#L24) (class) | Volumes, extracted surfaces and current anchors retained between frames. |
+| [`Fragments.set_anchor(keyframe, world_from_anchor)`](sitescan/fusion/fragments.py#L38) | Store the current anchor transform used to place a fragment in the world. |
+| [`Fragments.integrate(depth_m, colour, intrinsics, world_from_camera, keyframe)`](sitescan/fusion/fragments.py#L42) | Fuse one scaled depth image relative to its fragment's placing anchor. |
+| [`Fragments.placing_anchor(keyframe)`](sitescan/fusion/fragments.py#L72) | The current transform of the anchor placing this keyframe's fragment. |
+| [`Fragments.surface()`](sitescan/fusion/fragments.py#L77) | World surface points in fragment order, following current anchor corrections. |
+| [`Fragments.colours()`](sitescan/fusion/fragments.py#L94) | RGB values from 0 to 1 in the same order as surface points. |
+| [`Fragments.frames_per_fragment()`](sitescan/fusion/fragments.py#L101) | Integrated-frame counts keyed by fragment ID. |
+
+**`sitescan.io`**
+
+| Function | What it does |
+|---|---|
+| [`write_cloud(path, points, colours)`](sitescan/io.py#L9) | A PLY point cloud, with RGB colours from 0 to 1 when given. |
+| [`write_json(path, record, indent)`](sitescan/io.py#L19) | A JSON record, UTF-8. |
+| [`write_timeline(path, frames)`](sitescan/io.py#L24) | Each fused frame's camera, sampled learned-depth points with colours, and ARCore depth points. |
+
+**`sitescan.mapping.footprint`**
+
+| Function | What it does |
+|---|---|
+| [`onto_plane(chunk, point, normal)`](sitescan/mapping/footprint.py#L12) | Signed height and projected world points on the reference plane. |
+| [`signed_axes(axes)`](sitescan/mapping/footprint.py#L18) | Axes oriented so each largest-magnitude component is positive. |
+| [`grid_shape(coordinates, cell_size_m)`](sitescan/mapping/footprint.py#L23) | Grid origin coordinates and shape, retaining the existing allocation limit. |
+| [`fill_grid(cells, heights, shape, band_m)`](sitescan/mapping/footprint.py#L36) | Observed cells, plane-band cells and the highest signed height per cell. |
+| [`footprint(points, plane, up, *, cell_size_m, band_m)`](sitescan/mapping/footprint.py#L49) | A plane-aligned grid of observed area, dimensions and signed surface heights. |
+
+**`sitescan.mapping.plane`**
+
+| Function | What it does |
+|---|---|
+| [`ransac(points, rng, *, inlier_distance_m, iterations)`](sitescan/mapping/plane.py#L14) | The candidate point and normal with the largest sampled plane support. |
+| [`scatter_axes(reference, relative)`](sitescan/mapping/plane.py#L36) | Centre and principal axes of points given relative to a reference point. |
+| [`fit_dominant_plane(points, *, inlier_distance_m, iterations, sample_size, seed)`](sitescan/mapping/plane.py#L46) | The dominant sampled plane, refitted on all of its inliers. |
+
+**`sitescan.mapping.site`**
+
+| Function | What it does |
+|---|---|
+| [`measure_site(surface, cameras, *, cell_size_m, inlier_distance_m, iterations, sample_size, seed, min_points)`](sitescan/mapping/site.py#L17) | Area, extent and height measurements, or a reason to skip the surface. |
+
+**`sitescan.mapping.types`**
+
+| Function | What it does |
+|---|---|
+| [`Plane(point, normal, inlier_fraction, source)`](sitescan/mapping/types.py#L9) (class) | A point, normal and measured support for the reference plane. |
+| [`Footprint(plane, basis, grid_origin, cell_size_m, observed, on_plane, max_height_m, point_count)`](sitescan/mapping/types.py#L19) (class) | Observed cells and heights on a metric plane-aligned grid. |
+| [`Footprint.cell_area_m2()`](sitescan/mapping/types.py#L32) | The area covered by one square grid cell. |
+| [`Footprint.observed_area_m2()`](sitescan/mapping/types.py#L37) | Area under cells containing any observed surface. |
+| [`Footprint.plane_area_m2()`](sitescan/mapping/types.py#L42) | Area of cells with observations inside the reference plane band. |
+| [`Footprint.length_m()`](sitescan/mapping/types.py#L47) | Extent along the first grid axis, measured at cell edges. |
+| [`Footprint.width_m()`](sitescan/mapping/types.py#L52) | Extent along the second grid axis, measured at cell edges. |
+| [`Footprint.unknown_area_m2()`](sitescan/mapping/types.py#L57) | Unobserved cell area within the grid rectangle. |
+| [`Footprint.highest_m()`](sitescan/mapping/types.py#L62) | Largest observed signed height above the oriented reference plane. |
+| [`Footprint.lowest_m()`](sitescan/mapping/types.py#L67) | Smallest observed signed height above the oriented reference plane. |
+
+**`sitescan.objects.detect`**
+
+| Function | What it does |
+|---|---|
+| [`Detection(xyxy, label, class_id, confidence)`](sitescan/objects/detect.py#L29) (class) | One box in original image pixels, with its COCO class and score. |
+| [`detect(image, *, model, device)`](sitescan/objects/detect.py#L38) | Boxes found in one RGB image. |
+| [`load_detector(checkpoint, *, device)`](sitescan/objects/detect.py#L51) | An RGB-to-boxes callable, loading the verified local checkpoint once. |
+
+**`sitescan.objects.match`**
+
+| Function | What it does |
+|---|---|
+| [`placed(row)`](sitescan/objects/match.py#L10) | Whether a detection has a finite 3D position. |
+| [`candidates(position, class_id, tracks, max_distance_m)`](sitescan/objects/match.py#L19) | (distance, object id) for same-class objects within reach, nearest first. |
+| [`assign(rows, track_ids, max_distance_m, ambiguity_margin_m)`](sitescan/objects/match.py#L31) | Shortest one-to-one assignment of rows to objects within reach. |
+| [`associate_frame(detections, tracks, next_number, max_distance_m, ambiguity_margin_m)`](sitescan/objects/match.py#L68) | Match one frame's detections to counted objects; returns rows, updated objects and the next number. |
+
+**`sitescan.objects.place`**
+
+| Function | What it does |
+|---|---|
+| [`box_pixels(shape, xyxy)`](sitescan/objects/place.py#L8) | Pixels whose centres fall inside the box. |
+| [`box_position(depth, valid, camera, xyxy, world_from_camera)`](sitescan/objects/place.py#L15) | World position of the coordinate-wise median of the box's valid surface points. |
+
+**`sitescan.objects.tracks`**
+
+| Function | What it does |
+|---|---|
+| [`nearest_same_class(row, tracks)`](sitescan/objects/tracks.py#L15) | Distance from a placed detection to the closest object of its class; None if either is missing. |
+| [`Objects(*, max_distance_m, ambiguity_margin_m)`](sitescan/objects/tracks.py#L27) (class) | The objects counted so far. |
+| [`Objects.update(detections, depth, valid, camera, world_from_camera, keyframe, anchors, frame_index)`](sitescan/objects/tracks.py#L41) | Place, match and count one frame's detections; returns one log row per detection. |
+| [`Objects.counts()`](sitescan/objects/tracks.py#L76) | Objects counted so far, by class label. |
+
+**`sitescan.pipelines.live`**
+
+| Function | What it does |
+|---|---|
+| [`LiveSettings(voxel_m, keyframes_per_fragment, max_distance_m, ambiguity_margin_m)`](sitescan/pipelines/live.py#L33) (class) | Fusion voxel and fragment size, and the object matching distances. |
+| [`frame_scale(learned, valid, frame, previous)`](sitescan/pipelines/live.py#L42) | (scale, source) for one frame: ARCore depth, else tracked points, else the previous scale. |
+| [`LiveProcessor(depth_model, detector, settings)`](sitescan/pipelines/live.py#L56) (class) | Surface, map and counts updated from the newest frame, once per update. |
+| [`LiveProcessor.add(frame, image_path)`](sitescan/pipelines/live.py#L75) | Record a received wire frame and the path of its saved colour image. |
+| [`LiveProcessor.update()`](sitescan/pipelines/live.py#L92) | Process the newest pending frame; None when nothing new has arrived. |
+| [`LiveProcessor.surface()`](sitescan/pipelines/live.py#L143) | The fused surface so far, in world metres. |
+| [`wall_ms(record)`](sitescan/pipelines/live.py#L156) | An update's own time: the detection that runs alongside is already inside objects_wait. |
+| [`summarise(records, finished, processor)`](sitescan/pipelines/live.py#L161) | Update rate, gaps, stage times and scale sources over a run. |
+| [`run_live(processor, feed, out, about)`](sitescan/pipelines/live.py#L180) | Feed frames on a thread and update as often as possible until the feed ends. |
+
+**`sitescan.pipelines.room`**
+
+| Function | What it does |
+|---|---|
+| [`RoomSettings(far_m, voxel_m, piece_cell_m, supported_only)`](sitescan/pipelines/room.py#L31) (class) | Far limit and voxel for fusion, the piece-grid cell, and the supported-cells trial switch. |
+| [`FusableFrame(frame, keyframe, world_from_camera, colour, depth, valid, turns, uv, target, scale)`](sitescan/pipelines/room.py#L41) (class) | One frame ready to fuse: its pose, photo, upright-predicted depth and grid scale. |
+| [`Room(raw, raw_colours, cleaned, timeline, summary)`](sitescan/pipelines/room.py#L57) (class) | The fused room before and after clean-up, the per-frame timeline and the summary. |
+| [`Room.surface()`](sitescan/pipelines/room.py#L67) | The cleaned surface points. |
+| [`fresh_depth(frame)`](sitescan/pipelines/room.py#L72) | Whether the frame's ARCore depth was measured close enough in time to its image. |
+| [`world_points(uv, z, intrinsics, world_from_camera)`](sitescan/pipelines/room.py#L77) | World positions of pixels at the given camera-plane depths. |
+| [`fusable_frames(folder, model, outcome)`](sitescan/pipelines/room.py#L84) | Anchor events and the frames a room build fuses, in recording order. |
+| [`vote_views(fragments, placed)`](sitescan/pipelines/room.py#L113) | (camera_from_world, intrinsics, see-through evidence) per fused frame. |
+| [`timeline_entry(item, fused)`](sitescan/pipelines/room.py#L123) | A frame's camera, a sample of its fused points with colours, and a sample of its ARCore points. |
+| [`build_room(folder, model, settings)`](sitescan/pipelines/room.py#L133) | Fuse every frame with fresh ARCore depth, then clean the room and measure it. |
+| [`save_room(room, out)`](sitescan/pipelines/room.py#L174) | surface.ply (cleaned), raw_surface.ply, frames.npz (per-frame timeline) and summary.json. |
+
+**`sitescan.scale.fit`**
+
+| Function | What it does |
+|---|---|
+| [`pixel_rows_cols(uv, width, height)`](sitescan/scale/fit.py#L12) | Integer rows and columns of pixel positions, clipped to the image. |
+| [`fit_ratio(model_depth, target_depth)`](sitescan/scale/fit.py#L17) | Median target-to-learned ratio from at least two positive, finite depth pairs. |
+| [`fit_one(model, valid, uv, target, minimum)`](sitescan/scale/fit.py#L30) | One median scale for a frame, or None without enough valid target pixels. |
+| [`cell_index(uv, image_size, cells)`](sitescan/scale/fit.py#L46) | Row-major grid cell IDs for colour pixels, clipped to the image bounds. |
+| [`fit_grid(model, valid, uv, target, cells, fallback, *, minimum, min_cell_pixels)`](sitescan/scale/fit.py#L54) | Blended per-pixel scale, with cell medians fitted in log space. |
+| [`supported_pixels(uv, shape, cells, *, min_cell_pixels)`](sitescan/scale/fit.py#L85) | Pixels in grid cells with enough measured depth samples for their own scale. |
+
+**`sitescan.scale.targets`**
+
+| Function | What it does |
+|---|---|
+| [`depth_targets(depth, camera, *, min_confidence)`](sitescan/scale/targets.py#L11) | Colour pixels and measured depths from confident ARCore depth pixels. |
+| [`point_targets(points_world, points_pixel, world_from_camera)`](sitescan/scale/targets.py#L27) | Recorded pixels and camera-plane metres for tracked points in front of the camera. |
+| [`fresh_depth(depth_t_ns, camera_t_ns, *, max_age_s)`](sitescan/scale/targets.py#L39) | Whether measured depth is no more than the allowed age behind the camera frame. |
+
+**`sitescan.session.protocol`**
+
+| Function | What it does |
+|---|---|
+| [`write_message(stream, header, payload)`](sitescan/session/protocol.py#L18) | Write a header and payload with their big-endian byte lengths. |
+| [`read_message(stream)`](sitescan/session/protocol.py#L26) | The next message, or None when the sender closed the connection between messages. |
+| [`write_ack(stream, seq)`](sitescan/session/protocol.py#L38) | Write the sequence number acknowledged by a v1 receiver. |
+| [`read_ack(stream)`](sitescan/session/protocol.py#L43) | The sequence number acknowledged by a v1 receiver. |
+
+**`sitescan.session.read`**
+
+| Function | What it does |
+|---|---|
+| [`raw_header(header)`](sitescan/session/read.py#L16) | The header describing the lossless grey image saved on the host. |
+| [`frame_payload(folder, header)`](sitescan/session/read.py#L24) | The saved v2 image and depth bytes, in wire order. |
+| [`read_wire_session(folder)`](sitescan/session/read.py#L35) | Checked wire records for callers awaiting the pipeline migration. |
+| [`camera(record)`](sitescan/session/read.py#L53) | The colour image's camera of a wire record, if it has intrinsics. |
+| [`arcore_depth(depth)`](sitescan/session/read.py#L60) | A wire depth record as the shared depth type, with its own camera. |
+| [`frames(folder)`](sitescan/session/read.py#L66) | Frames in file order, with RGB arrays and world_from_camera matrices. |
+
+**`sitescan.session.replay`**
+
+| Function | What it does |
+|---|---|
+| [`replay(folder, deliver, *, speed, stop, reader)`](sitescan/session/replay.py#L11) | The number of frames delivered, paced by their camera timestamps. |
+
+**`sitescan.session.wire_v1`**
+
+| Function | What it does |
+|---|---|
+| [`Depth(t_ns, depth_m, confidence, intrinsics)`](sitescan/session/wire_v1.py#L18) (class) | A checked raw-depth message with its recorded intrinsics. |
+| [`Frame(seq, t_ns, sent_ms, tracking, failure, pose, intrinsics, image_jpeg, image_size, point_ids, points_world, points_pixel, points_confidence, depth, anchor_created, anchor_updates)`](sitescan/session/wire_v1.py#L28) (class) | A checked wire frame retaining JPEG bytes and ARCore quaternion poses. |
+| [`world_from_camera(pose)`](sitescan/session/wire_v1.py#L73) | Camera-to-world matrix with ARCore axes: x right, y up, looking along -z. |
+| [`world_from_camera_cv(pose)`](sitescan/session/wire_v1.py#L86) | World_from_camera in metres, with OpenCV camera axes in the ARCore world. |
+| [`corrected_world_from_camera(frame_pose, anchor_created, anchor_now)`](sitescan/session/wire_v1.py#L91) | The frame's ARCore pose moved by its anchor's correction. |
+| [`project(pose, intrinsics, points_world)`](sitescan/session/wire_v1.py#L100) | Pixels of world points seen from the recorded ARCore pose and intrinsics. |
+| [`check_session(header)`](sitescan/session/wire_v1.py#L108) | A checked v1 session-start header. |
+| [`parse_depth(header, payload)`](sitescan/session/wire_v1.py#L118) | Checked depth and confidence arrays from the binary message tail. |
+| [`parse_points(points, pose, intrinsics)`](sitescan/session/wire_v1.py#L138) | Checked tracked-point rows, including their agreement with the camera projection. |
+| [`parse_arcore(record, depth_payload)`](sitescan/session/wire_v1.py#L151) | Checked camera, tracked points, depth and anchor fields from an ARCore record. |
+| [`parse_frame(header, payload)`](sitescan/session/wire_v1.py#L182) | A checked v1 frame record from its header and its JPEG and depth bytes. |
+
+**`sitescan.session.wire_v2`**
+
+| Function | What it does |
+|---|---|
+| [`Frame(n, camera_t_ns, camera, grey, arcore_t_ns, device_pose, texture_intrinsics)`](sitescan/session/wire_v2.py#L47) (class) | A decoded v2 wire message; camera timestamps use the Camera2 clock. |
+| [`Frame.wall_ms()`](sitescan/session/wire_v2.py#L59) | The wall-clock send time from the wire envelope, in milliseconds. |
+| [`ImuBatch(n, t_ns, sensor, values, bias)`](sitescan/session/wire_v2.py#L65) (class) | Recorded inertial samples and Android bias estimates on the device clock. |
+| [`check_session_id(session)`](sitescan/session/wire_v2.py#L75) | A session id of 1-80 letters, digits, underscores or hyphens. |
+| [`check_queued(header, kind)`](sitescan/session/wire_v2.py#L84) | The envelope every queued message shares: type, version, session id and message number. |
+| [`check_hello(header)`](sitescan/session/wire_v2.py#L97) | A checked hello message: the session id and the phone, camera, clock and settings info. |
+| [`parse_images(header, payload)`](sitescan/session/wire_v2.py#L117) | Lossless grey, JPEG bytes and the remaining depth bytes from a frame message. |
+| [`parse_arcore(record, payload)`](sitescan/session/wire_v2.py#L150) | ARCore fields including device pose, or absent fields for camera-only recordings. |
+| [`parse_frame(header, payload)`](sitescan/session/wire_v2.py#L183) | Checked frame message retaining the wire fields for existing callers. |
+| [`parse_imu(header, payload)`](sitescan/session/wire_v2.py#L209) | A checked batch of gyroscope or accelerometer samples, 36 bytes each. |
+| [`check_telemetry(header)`](sitescan/session/wire_v2.py#L229) | A checked telemetry envelope with all phone counters present. |
+| [`check_end(header)`](sitescan/session/wire_v2.py#L236) | A checked end envelope with counts and the final phone clock reading. |
+| [`stream_stats(times)`](sitescan/session/wire_v2.py#L247) | Sample count, rate and gap counts, or None for fewer than two timestamps. |
+
+**`sitescan.types`**
+
+| Function | What it does |
+|---|---|
+| [`Camera(fx, fy, cx, cy, width, height)`](sitescan/types.py#L9) (class) | Pinhole intrinsics and image dimensions, in pixels. |
+| [`ArcoreDepth(t_ns, depth_m, confidence, camera)`](sitescan/types.py#L21) (class) | Camera-plane depth in metres and confidence from 0 to 255. |
+| [`Frame(seq, t_ns, image, camera, pose, depth, point_ids, points_world, points_pixel, points_confidence, anchor_created, anchor_updates, tracking, failure, arcore_t_ns)`](sitescan/types.py#L31) (class) | RGB image and OpenCV camera poses in the recording's world, in metres. |
+
+**`apps.cli`**
+
+| Function | What it does |
+|---|---|
+| [`add_room_options(parser)`](apps/cli.py#L36) | The options every room build shares; trial scripts add their own. |
+| [`room_parser(description)`](apps/cli.py#L46) | A parser with the room options, for trial scripts that build rooms their own way. |
+| [`parse_room_args(parser, argv)`](apps/cli.py#L51) | Parsed options, refusing an output folder that already exists. |
+| [`add_live_options(parser)`](apps/cli.py#L59) | The options the replay and live verbs share. |
+| [`room(args)`](apps/cli.py#L69) | Build, save and summarise the room for the room verb. |
+| [`live(args)`](apps/cli.py#L77) | Run the live processor on a replayed or received recording; returns the run summary. |
+| [`listen(folder, port, on_frame)`](apps/cli.py#L98) | Receive one capture session, passing each saved frame on, until the app ends it. |
+| [`main(argv)`](apps/cli.py#L108) | The command line: room, replay or live. |
+
+**`apps.receiver.capture_receiver`**
+
+| Function | What it does |
+|---|---|
+| [`Session(folder, info)`](apps/receiver/capture_receiver.py#L62) (class) | One session folder on the PC: stores messages in order and knows the last one held with no gap. |
+| [`Session.open(root, hello, *, host_ms)`](apps/receiver/capture_receiver.py#L87) | The stored session named in a hello message, resumed, or a new one. |
+| [`Session.hello(hello, *, host_ms)`](apps/receiver/capture_receiver.py#L109) | Record a reconnecting hello that matches this session. |
+| [`Session.store(header, payload, *, host_ms)`](apps/receiver/capture_receiver.py#L118) | Stores one message; returns the parsed frame for frame messages, else None. Raises ValueError to refuse. |
+| [`Session.summary()`](apps/receiver/capture_receiver.py#L185) | Counts, gaps and timing of what the session stored. |
+| [`Receiver(root, *, port, host, on_frame)`](apps/receiver/capture_receiver.py#L223) (class) | Accepts phone connections on their own threads; sessions survive dropped connections and PC restarts. |
+| [`Receiver.start()`](apps/receiver/capture_receiver.py#L238) | Start accepting connections on a background thread. |
+| [`Receiver.wait(timeout)`](apps/receiver/capture_receiver.py#L243) | The folder of the next session whose end message has been stored. |
+| [`Receiver.wait_reports(count, timeout)`](apps/receiver/capture_receiver.py#L247) | The next `count` check reports the app has sent. |
+| [`Receiver.close()`](apps/receiver/capture_receiver.py#L251) | Stop listening and close open phone connections. |
+| [`addresses()`](apps/receiver/capture_receiver.py#L350) | This PC's IPv4 addresses, the one on the default route first. |
+| [`main()`](apps/receiver/capture_receiver.py#L363) | Receive recordings until stopped. |
+
+<!-- function-index:end -->
+
+## Terms used
 
 | Term | Meaning |
 |---|---|
-| Depth | Distance from the camera to the surface at each pixel, in metres |
-| Camera pose | The camera's position and the direction it is pointing, for one frame |
-| Camera tracking | Working out the camera pose for every frame of a video. Different from object tracking. |
-| SLAM | Simultaneous localisation and mapping: tracking the camera while building a map. ORB-SLAM3 is a well-known example. |
-| Drift correction | Fixing slow build-up of camera-path error, usually when the camera returns somewhere it has been |
-| Point surface | A 3D model made of coloured points, one per valid depth pixel. It has no faces joining the points. |
-| Mesh | A 3D surface made of triangles joining points |
-| Gaussian splat | A 3D scene made of many small soft blobs, tuned so that rendered views look like the photos. Looks realistic but its size accuracy must be checked separately. |
-| Bird's-eye map | A top-down view of the 3D model, with heights and areas |
-| Detection | Finding an object in an image and drawing a labelled box round it |
-| Segmentation | Marking exactly which pixels belong to an object |
-| Template matching (ZNCC) | Comparing two image patches pixel by pixel, allowing for brightness changes |
-| Identity, re-identification | Recognising that a sighting is an object already seen |
-| Stand-in, control | A known-correct input used in place of a layer, so another layer can be tested alone |
-| Reference | Independent known-correct data used only to score a method |
-| IMU | The phone's motion sensors: accelerometer and gyroscope. They help tracking through fast motion and blur. |
-| ARCore | Google's augmented-reality toolkit for Android. It provides live camera position and, on supported phones, depth. |
-| Loop closure | Recognising a place seen earlier and using that to correct the camera path |
-| Hosted, edge, on-device | Hosted: runs on a cloud server. Edge: runs on a computer near the user, such as a small box on site. On-device: runs on the phone itself. |
-| Open-vocabulary detection | Finding objects named in plain text, such as "traffic cone", without training a model for that class |
-| Root-mean-square (RMS) error | A typical error size that weights large errors more heavily than an average does |
-
-## Canonical runner and current gaps
-
-Each of the six layers has one method choice with a written contract. Recorded TUM sensor depth and camera poses can be supplied as labelled reference controls to test later layers. Runs with controls never count as measurements. Development and accuracy work use training, test and pre-existing recordings. Deployment must use a phone capture app to record calibration per frame; the owner has ruled that the phone captures and the PC processes first; on-phone processing comes later.
-
-The [six-step runner](src/walkthrough/README.md) is implemented with software controls. Each run saves an offline stage visual index and manifest that name the method and source for every view, including depth maps, object overlays and point clouds. It imports the owning experiments and keeps independent references in scoring, after prediction files are saved and hashed. Real depth and mapping methods remain unavailable under Tasks54/55, so an ordinary recording cannot yet complete all six steps. Segmentation and appearance are optional and disabled by default. Counts remain provisional and separate for each estimated world/segment; no whole-site count is claimed. Frozen benchmark commands, historical runs and their source snapshots remain intact. Physical accuracy, complete latency, peak memory and sustained edge operation still need measured evidence in Tasks56/57.
+| AbsRel | Mean absolute relative error: the average of \|predicted − true\| / true |
+| Anchor | A point ARCore keeps and corrects over time; each fragment is stored relative to one |
+| ARCore | Google's phone tracking library: camera path, tracked points and raw depth |
+| Fragment | One TSDF volume holding the frames of 10 keyframes, tied to an anchor |
+| Golden output | A saved result from known-good code that a rewrite must reproduce |
+| Orchestrator | Code that decides which stages run, on which frames, in what order; also called a pipeline |
+| Piece | A set of filled 3D grid cells that touch each other; small pieces are floating debris |
+| Scale | The factor that turns learned depth into metres |
+| TSDF | Truncated signed distance function: a voxel grid that averages many depth maps into one surface |
+| Visibility vote | Drop a point when the views that see through it outweigh the views that see it there |

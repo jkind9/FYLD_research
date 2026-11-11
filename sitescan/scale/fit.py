@@ -9,6 +9,11 @@ MIN_CELL_PIXELS = 20
 MIN_POINTS = 20
 
 
+def pixel_rows_cols(uv: np.ndarray, width: int, height: int) -> tuple[np.ndarray, np.ndarray]:
+    """Integer rows and columns of pixel positions, clipped to the image."""
+    return np.clip(uv[:, 1].astype(int), 0, height - 1), np.clip(uv[:, 0].astype(int), 0, width - 1)
+
+
 def fit_ratio(model_depth: np.ndarray, target_depth: np.ndarray) -> float | None:
     """Median target-to-learned ratio from at least two positive, finite depth pairs."""
     good = (
@@ -31,8 +36,7 @@ def fit_one(
 ) -> float | None:
     """One median scale for a frame, or None without enough valid target pixels."""
     height, width = model.shape
-    cols = np.clip(uv[:, 0].astype(int), 0, width - 1)
-    rows = np.clip(uv[:, 1].astype(int), 0, height - 1)
+    rows, cols = pixel_rows_cols(uv, width, height)
     keep = valid[rows, cols]
     if np.count_nonzero(keep) < minimum:
         return None
@@ -43,8 +47,7 @@ def cell_index(uv: np.ndarray, image_size, cells: tuple[int, int] = CELLS) -> np
     """Row-major grid cell IDs for colour pixels, clipped to the image bounds."""
     width, height = image_size
     nx, ny = cells
-    cols = np.clip(uv[:, 0].astype(int), 0, width - 1)
-    rows = np.clip(uv[:, 1].astype(int), 0, height - 1)
+    rows, cols = pixel_rows_cols(uv, width, height)
     return np.minimum(rows * ny // height, ny - 1) * nx + np.minimum(cols * nx // width, nx - 1)
 
 
@@ -64,8 +67,7 @@ def fit_grid(
     Unsupported cells use the frame median log ratio or the supplied log-scale fallback.
     """
     height, width = model.shape
-    cols = np.clip(uv[:, 0].astype(int), 0, width - 1)
-    rows = np.clip(uv[:, 1].astype(int), 0, height - 1)
+    rows, cols = pixel_rows_cols(uv, width, height)
     keep = valid[rows, cols] & (model[rows, cols] > 0)
     if np.count_nonzero(keep) < minimum:
         return None

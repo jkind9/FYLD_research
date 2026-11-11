@@ -20,7 +20,7 @@
    "turns_0": 1,
    "turns_3": 6
   },
-  "size_median_min_median_max": [
+  "scale_min_median_max": [
    0.6849658378606459,
    0.8314521795657126,
    0.9598039480307797
@@ -43,8 +43,8 @@
   "updates": [
    {
     "frame_seq": 0,
-    "size": 0.8296312574621111,
-    "size_source": "arcore_depth",
+    "scale": 0.8296312574621111,
+    "scale_source": "arcore_depth",
     "surface_points": 9225,
     "map": {
      "observed_area_m2": 1.7875000000000003,
@@ -61,8 +61,8 @@
    },
    {
     "frame_seq": 1,
-    "size": 0.746747664365057,
-    "size_source": "tracked_points",
+    "scale": 0.746747664365057,
+    "scale_source": "tracked_points",
     "surface_points": 15026,
     "map": {
      "observed_area_m2": 1.9900000000000004,
@@ -79,8 +79,8 @@
    },
    {
     "frame_seq": 2,
-    "size": 0.7950850669102175,
-    "size_source": "tracked_points",
+    "scale": 0.7950850669102175,
+    "scale_source": "tracked_points",
     "surface_points": 18952,
     "map": {
      "observed_area_m2": 2.2125000000000004,
@@ -97,8 +97,8 @@
    },
    {
     "frame_seq": 3,
-    "size": 0.7747924821462076,
-    "size_source": "arcore_depth",
+    "scale": 0.7747924821462076,
+    "scale_source": "arcore_depth",
     "surface_points": 23817,
     "map": {
      "observed_area_m2": 2.8625000000000007,
@@ -115,8 +115,8 @@
    },
    {
     "frame_seq": 4,
-    "size": 0.7200734098578981,
-    "size_source": "tracked_points",
+    "scale": 0.7200734098578981,
+    "scale_source": "tracked_points",
     "surface_points": 26900,
     "map": {
      "observed_area_m2": 3.0825000000000005,
@@ -133,8 +133,8 @@
    },
    {
     "frame_seq": 5,
-    "size": 0.7915314363789983,
-    "size_source": "tracked_points",
+    "scale": 0.7915314363789983,
+    "scale_source": "tracked_points",
     "surface_points": 35202,
     "map": {
      "observed_area_m2": 3.9900000000000007,
@@ -151,8 +151,8 @@
    },
    {
     "frame_seq": 6,
-    "size": 0.7901293661440376,
-    "size_source": "arcore_depth",
+    "scale": 0.7901293661440376,
+    "scale_source": "arcore_depth",
     "surface_points": 44237,
     "map": {
      "observed_area_m2": 5.005000000000001,
@@ -169,8 +169,8 @@
    },
    {
     "frame_seq": 7,
-    "size": 0.8506716642476047,
-    "size_source": "tracked_points",
+    "scale": 0.8506716642476047,
+    "scale_source": "tracked_points",
     "surface_points": 51619,
     "map": {
      "observed_area_m2": 5.637500000000001,
@@ -187,8 +187,8 @@
    },
    {
     "frame_seq": 8,
-    "size": 0.8093668583366352,
-    "size_source": "tracked_points",
+    "scale": 0.8093668583366352,
+    "scale_source": "tracked_points",
     "surface_points": 58020,
     "map": {
      "observed_area_m2": 6.192500000000001,
@@ -205,8 +205,8 @@
    },
    {
     "frame_seq": 9,
-    "size": 0.7846882875630954,
-    "size_source": "arcore_depth",
+    "scale": 0.7846882875630954,
+    "scale_source": "arcore_depth",
     "surface_points": 59268,
     "map": {
      "observed_area_m2": 6.5150000000000015,
@@ -223,8 +223,8 @@
    },
    {
     "frame_seq": 10,
-    "size": 0.7052875054488562,
-    "size_source": "tracked_points",
+    "scale": 0.7052875054488562,
+    "scale_source": "tracked_points",
     "surface_points": 61013,
     "map": {
      "observed_area_m2": 6.707500000000001,
@@ -241,8 +241,8 @@
    },
    {
     "frame_seq": 11,
-    "size": 0.7101542386089194,
-    "size_source": "tracked_points",
+    "scale": 0.7101542386089194,
+    "scale_source": "tracked_points",
     "surface_points": 61918,
     "map": {
      "observed_area_m2": 6.860000000000001,
@@ -259,8 +259,8 @@
    },
    {
     "frame_seq": 12,
-    "size": 0.6885619634190734,
-    "size_source": "arcore_depth",
+    "scale": 0.6885619634190734,
+    "scale_source": "arcore_depth",
     "surface_points": 63844,
     "map": {
      "observed_area_m2": 7.007500000000001,
@@ -277,8 +277,8 @@
    },
    {
     "frame_seq": 13,
-    "size": 0.6727874738200859,
-    "size_source": "tracked_points",
+    "scale": 0.6727874738200859,
+    "scale_source": "tracked_points",
     "surface_points": 65698,
     "map": {
      "observed_area_m2": 7.082500000000001,
@@ -295,8 +295,8 @@
    },
    {
     "frame_seq": 14,
-    "size": 0.6570390999907673,
-    "size_source": "tracked_points",
+    "scale": 0.6570390999907673,
+    "scale_source": "tracked_points",
     "surface_points": 67113,
     "map": {
      "observed_area_m2": 7.100000000000001,
@@ -313,8 +313,8 @@
    },
    {
     "frame_seq": 15,
-    "size": 0.6693122915074409,
-    "size_source": "arcore_depth",
+    "scale": 0.6693122915074409,
+    "scale_source": "arcore_depth",
     "surface_points": 69037,
     "map": {
      "observed_area_m2": 7.192500000000002,
@@ -331,8 +331,8 @@
    },
    {
     "frame_seq": 16,
-    "size": 0.7353483665850522,
-    "size_source": "tracked_points",
+    "scale": 0.7353483665850522,
+    "scale_source": "tracked_points",
     "surface_points": 70460,
     "map": {
      "observed_area_m2": 7.115000000000001,
@@ -349,8 +349,8 @@
    },
    {
     "frame_seq": 17,
-    "size": 0.7983463392698465,
-    "size_source": "tracked_points",
+    "scale": 0.7983463392698465,
+    "scale_source": "tracked_points",
     "surface_points": 71874,
     "map": {
      "observed_area_m2": 7.337500000000001,
@@ -367,8 +367,8 @@
    },
    {
     "frame_seq": 18,
-    "size": 0.7390340026687843,
-    "size_source": "arcore_depth",
+    "scale": 0.7390340026687843,
+    "scale_source": "arcore_depth",
     "surface_points": 72510,
     "map": {
      "observed_area_m2": 7.342500000000001,
@@ -385,8 +385,8 @@
    },
    {
     "frame_seq": 19,
-    "size": 0.6860369180733183,
-    "size_source": "tracked_points",
+    "scale": 0.6860369180733183,
+    "scale_source": "tracked_points",
     "surface_points": 73191,
     "map": {
      "observed_area_m2": 7.377500000000001,

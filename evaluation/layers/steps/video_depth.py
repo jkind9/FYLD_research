@@ -54,7 +54,7 @@ class MetricVideoDepthAnything:
             from video_depth_anything.video_depth import VideoDepthAnything
         except ImportError as error:
             raise Unavailable(
-                "Video Depth Anything code is not importable; add data/models/Video-Depth-Anything to PYTHONPATH"
+                "Video Depth Anything code is not importable; add models/Video-Depth-Anything to PYTHONPATH"
             ) from error
         model = VideoDepthAnything(**SMALL_SETTINGS, metric=True)
         model.load_state_dict(_load_weights(self.checkpoint), strict=True)

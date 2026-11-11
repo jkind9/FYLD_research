@@ -4,9 +4,9 @@ import math
 
 import pytest
 
-from experiments.evaluation import compare, render, schema
-from experiments.evaluation.stages import camera, detection, identity, surface
-from experiments.evaluation.tests import fixtures
+from evaluation.stage_report import compare, render, schema
+from evaluation.stage_report.stages import camera, detection, identity, surface
+from evaluation.stage_report.tests import fixtures
 
 
 def _measure(
@@ -265,7 +265,7 @@ def test_provisional_reference_is_visible_in_table(tmp_path):
 def test_publish_writes_verified_run_with_rows_split_out(tmp_path):
     from pathlib import Path
 
-    from experiments.evaluation import run as runner
+    from evaluation.stage_report import run as runner
     from experiments.shared.runs import verify_run
 
     fixtures.camera_run(tmp_path / "camera")

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from src.live.landmark_probe import ray_split, red_mask
+from evaluation.landmark_probe import ray_split, red_mask
 
 
 def test_red_mask_keeps_the_largest_saturated_red_blob():

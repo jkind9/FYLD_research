@@ -286,7 +286,7 @@ The stream now follows one written definition, [phone_session_v1.md](phone_sessi
 | Side | Code | Checked by |
 |---|---|---|
 | Phone | `SessionFrame.java` (encoder, no Android types), `FrameCapture.java` (reads ARCore), `HostStream.java` | `SessionFrameTest.java`, 4 JVM tests run by the build script: the encoder must reproduce the fixture header and payload byte for byte, and project points to the fixture's pixels |
-| Computer | `host/session_v1.py` (reader and checks), `host/receiver.py` (saves `session.json`, `frames/`, `depth/`, `frames.jsonl`) | `tests/test_session_v1.py` and `tests/test_phonecheck_host.py`, 24 tests: the fixture parses to its written values, 9 kinds of bad frame are refused, a loopback session is saved and read back |
+| Computer | `sitescan/session/wire_v1.py` (reader and checks), `host/receiver.py` (saves `session.json`, `frames/`, `depth/`, `frames.jsonl`) | `tests/test_session_v1.py` and `tests/test_phonecheck_host.py`, 24 tests: the fixture parses to its written values, 9 kinds of bad frame are refused, a loopback session is saved and read back |
 | Both | the fixture, now in `tests/fixtures/session_v1/` | both test sets read the same two files (the Java side until Task96) |
 
 The receiver checks every frame and closes the connection on a bad one, so a fault in the phone code shows up at once rather than in later processing. Read a saved session with `session_v1.read_session(<session folder>)`; `world_from_camera_cv(pose)` gives the pose in the project's OpenCV camera axes.
@@ -325,10 +325,10 @@ Task96 continues Task95, which was closed as a hand-over on 14 October without b
 **PC receiver.**
 
 ```text
-python experiments/01_camera_capture_delivery/host/capture_receiver.py --out experiments/01_camera_capture_delivery/runs/capture --port 8766
+python -B -m apps.receiver.capture_receiver --out experiments/01_camera_capture_delivery/runs/capture --port 8766
 ```
 
-It prints this PC's address (192.168.68.123 on the owner's network) to type into the app, and writes one folder per session: `session.json`, `frames.jsonl`, `cam0/<seq>.png` (lossless grey), `frames/<seq>.jpg`, `depth/<seq>.bin`, `imu.csv`, `telemetry.jsonl`, and at the end `summary.json` (frames, missing frame numbers, IMU rates and gaps, a clock-base check, MB/s achieved, connections, and how long sending ran after Stop). It checks every message and refuses a bad one with an error message. `Receiver(..., on_frame=...)` calls back for each new frame, which is how `python -m src.live.run --listen 8766 --out <run>` processes a walk while it arrives. Use the repository's `.venv`. **Local network only:** the protocol has no authentication or encryption; sending over the internet needs a tunnel with authentication, which is out of scope.
+It prints this PC's address (192.168.68.123 on the owner's network) to type into the app, and writes one folder per session: `session.json`, `frames.jsonl`, `cam0/<seq>.png` (lossless grey), `frames/<seq>.jpg`, `depth/<seq>.bin`, `imu.csv`, `telemetry.jsonl`, and at the end `summary.json` (frames, missing frame numbers, IMU rates and gaps, a clock-base check, MB/s achieved, connections, and how long sending ran after Stop). It checks every message and refuses a bad one with an error message. `Receiver(..., on_frame=...)` calls back for each new frame, which is how `python -m apps.cli live --port 8766 --out <run>` processes a walk while it arrives. Use the repository's `.venv`. **Local network only:** the protocol has no authentication or encryption; sending over the internet needs a tunnel with authentication, which is out of scope.
 
 **Tests.**
 
@@ -336,7 +336,7 @@ It prints this PC's address (192.168.68.123 on the owner's network) to type into
 |---|---|---|
 | Phone (JVM, run by the build script) | `SessionV2Test.java` (9), `SendingTest.java` (11) | the encoders reproduce the shared fixture `capture/app/src/test/resources/session_v2/` (frame header and payload byte for byte, IMU batch, telemetry, end, hello and settings); points project like the host; deflate inflates back exactly; the deflate rule; the queue numbers, deletes only acknowledged files and continues numbering after a restart; image, capture result and ARCore record are matched out of order and released in order, with the 500 ms limit and drops when full; a fake PC that drops the connection without acknowledging two messages, then says where it is: the sender resumes with every message once and in order and deletes the delivered session; a PC that answers hello and then stops reading: the sender abandons the blocked connection after the no-progress limit and delivers on the next (with the limit removed this test fails); a refused session is kept and skipped |
 | PC | `tests/test_session_v2.py` (22), `tests/test_capture_receiver.py` (23) | the fixture parses to its written values; deflated grey reads back; 13 kinds of bad frame, 3 bad IMU batches and bad telemetry, end and hello are refused; a fake phone (`tests/fake_phone.py`) streams 40 frames with a window of 8, is cut off after message 25 and resumes: 40 frames, none missing or repeated, 2 connections; resends are acknowledged and not stored twice; a gap and a bad frame are refused; the speed check and report connections; the summary's IMU rates, clock base, MB/s and sending time after Stop |
-| Readers | `src/live/tests/test_stream.py`, `experiments/open_vio/tests` | a synthetic v2 folder written through the receiver's store is read by `session_v2.read_session`, replayed by `src/live`, and converted by `recording.py --euroc` |
+| Readers | `tests/test_sitescan_session.py`, `experiments/open_vio/tests` | a synthetic v2 folder written through the receiver's store is read by `session_v2.read_session`, replayed by `sitescan/pipelines`, and converted by `recording.py --euroc` |
 
 **Initial capture 1.0 build, 14 October:** the WSL build passed 20 JVM tests and produced a 914 KB APK, SHA-256 `d260cda55fa5cfe80f5f92b87bee55c1a1afb09b5c77f917c481961413c18f5d`. Version 1.2 supersedes it. The build script now publishes only into `mobile_deployments/capture_v<version>_<YYYYMMDDTHHMMSSZ>_<hash8>/`, with `.apk` and `.apk.bin` for email installation.
 
@@ -368,27 +368,27 @@ Checked 15 October 2026. The owner completed `20261014_220756_walk` with capture
 | Loss | 0 reported dropped, missing or repeated frames; no camera gaps over 1.5 times the median interval | `summary.json`, session end counts |
 | Gyroscope / accelerometer | 16,899 / 16,901 samples; 423.536 Hz each; no measured gaps | `imu.csv`, `summary.json` |
 | Received transfer | 407.00 MB; 10.216 MB/s; 0.058 s sending after Stop | `summary.json` |
-| PC storage | 225.04 MB, including lossless PNGs | `outputs/capture_task99_220756/validation.json` |
+| PC storage | 225.04 MB, including lossless PNGs | `outputs/capture/capture_task99_220756/validation.json` |
 | Phone queue, sampled once a second | peak 5 frames / 1.67 MB | `telemetry.jsonl`; peaks between samples are not measured |
 | ARCore | 1,177 matching records, all tracking; 17 camera frames without an ARCore record | `frames.jsonl` |
 | Raw depth | 44 new maps with confidence over the recording | `depth/`, `frames.jsonl`; distinct depth rate is about 1.10/s for this walk |
 | Clock base | camera and both motion sensors agree with elapsedRealtime | `clock_check.json` |
 | Estimated camera-to-IMU offset | -2.668 ms; peak correlation 0.618 | `clock_check.json`, after subtracting 25.392 ms for exposure/readout |
 
-The v2 reader and `src.live.stream.replay` read all 1,194 frames in order. Every stored grey PNG and colour JPEG decoded with the expected 640 x 480 dimensions. EuRoC export contains 1,194 PNGs and 16,899 IMU rows; `arcore_camera_tum.txt` has 1,177 poses. The checker and exporter return status 1 because final image 1193 has no Camera2 settings; export files were still written. The 17 missing ARCore records are at sequences 360-363, 600-603, 840-845, 960 and 1192-1193. No values were invented to fill these gaps.
+The v2 reader and `sitescan.session.replay` read all 1,194 frames in order. Every stored grey PNG and colour JPEG decoded with the expected 640 x 480 dimensions. EuRoC export contains 1,194 PNGs and 16,899 IMU rows; `arcore_camera_tum.txt` has 1,177 poses. The checker and exporter return status 1 because final image 1193 has no Camera2 settings; export files were still written. The 17 missing ARCore records are at sequences 360-363, 600-603, 840-845, 960 and 1192-1193. No values were invented to fill these gaps.
 
 The first recorded anchor id is 1, although the phone created 40 anchors. Initial replay failed because fusion assumed anchor 0 existed. Task99 binds each fragment to an available received anchor and keeps that binding for all later corrections. The regression test verifies the surface still moves with its anchor. CPU replay now completes with both cached models on 16 threads and 2 cm voxels: 63 updates at 1.580 updates/s, longest gap 0.856 s, no gaps over one second, median update 619.4 ms and latency 672.5 ms. It saved 845,428 surface points and applied 83 anchor corrections. Object counts and geometric accuracy remain unvalidated.
 
-Local outputs are `outputs/capture_task99_220756/{validation.json,euroc/,live_verified/}`.
+Local outputs are `outputs/capture/capture_task99_220756/{validation.json,euroc/,live_verified/}`.
 
-Task100's [interactive 3D scene](../../outputs/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) displays the saved surface as 78,328 Gaussian splats with height colours and eight source-photo bookmarks. It is a private, offline 1.58 MB HTML file; no household images are published. Its controls and Gaussian PLY download were tested offline in Chromium. This is a surface visualization, not photographic Gaussian training. [Exporter and settings](../../src/live/README.md#redmi-capture-12-result-task99).
+Task100's [interactive 3D scene](../../outputs/capture/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) displays the saved surface as 78,328 Gaussian splats with height colours and eight source-photo bookmarks. It is a private, offline 1.58 MB HTML file; no household images are published. Its controls and Gaussian PLY download were tested offline in Chromium. This is a surface visualization, not photographic Gaussian training. [Exporter and settings](https://github.com/jkind9/FYLD_research/blob/9bf3b51/src/live/README.md#redmi-capture-12-result-task99).
 
 Reproduce the capture checks with:
 
 ```text
 .venv\Scripts\python -B experiments/open_vio/host/clock_check.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk
 .venv\Scripts\python -B experiments/open_vio/host/recording.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --euroc <new output folder>
-.venv\Scripts\python -B -m src.live.run --replay experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --out <new output folder> --threads 16
+.venv\Scripts\python -B -m apps.cli replay --session experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --out <new output folder> --threads 16
 ```
 
 Capture 1.2's APK and identical email copy are in the [deployment index](../../mobile_deployments/README.md), with version and full UTC timestamp in their names. All 30 JVM tests pass. The combined capture, open_vio, live, shared-phone and hygiene suite passes 317 tests with 1 skipped. The 60 s rest, later calibration recordings, full frame/ARCore metadata coverage and independent accuracy remain open.
@@ -407,9 +407,9 @@ Task99 also fixed repository hygiene. `tools/check.py` now accepts `task_list/do
 
 ### 15 October walk through the live pipeline, 7 November 2026 (Task107)
 
-`20261015_093913_walk` passed both capture checks. `clock_check.py` exited 0 with an empty problem list: camera at 29.92 fps, motion sensors at 423.6 Hz, no gaps over 1.5 times the median interval, 0 frames dropped, ARCore tracking on every frame. The camera-to-motion-sensor clock offset was 0.98 ms, with peak correlation 0.991. `recording.py --euroc` exited 0, reported "no problems found" and wrote the export (images, motion samples and the ARCore camera path) to `outputs/capture_task107_093913/euroc`.
+`20261015_093913_walk` passed both capture checks. `clock_check.py` exited 0 with an empty problem list: camera at 29.92 fps, motion sensors at 423.6 Hz, no gaps over 1.5 times the median interval, 0 frames dropped, ARCore tracking on every frame. The camera-to-motion-sensor clock offset was 0.98 ms, with peak correlation 0.991. `recording.py --euroc` exited 0, reported "no problems found" and wrote the export (images, motion samples and the ARCore camera path) to `outputs/capture/capture_task107_093913/euroc`.
 
-Replayed with the unchanged Task99 settings, the live pipeline gave 47 updates at 1.70 per second, with no gap over 1 s. ARCore raw depth set the scale of learned depth for 32 updates. Tracked points set it for 12, the previous value was reused for 2, and the first update had no source and was skipped. On 14 October, ARCore depth set the scale for none of the 63 updates. The scale factor ranged from 0.34 to 1.28 (0.27 to 5.85 on 14 October). The final map's dominant plane is still within 4° of vertical in ARCore's gravity-aligned world, so the floor is still not the dominant plane. The highest point above that plane is 3.55 m (5.98 m on 14 October). The walks differ in route and length, so this shows that ARCore-depth sizing engages; it does not measure the size of any improvement. ARCore depth is not ground truth, and no accuracy is claimed. [Full before/after table](../../src/live/README.md#redmi-15-october-walk-task107).
+Replayed with the unchanged Task99 settings, the live pipeline gave 47 updates at 1.70 per second, with no gap over 1 s. ARCore raw depth set the scale of learned depth for 32 updates. Tracked points set it for 12, the previous value was reused for 2, and the first update had no source and was skipped. On 14 October, ARCore depth set the scale for none of the 63 updates. The scale factor ranged from 0.34 to 1.28 (0.27 to 5.85 on 14 October). The final map's dominant plane is still within 4° of vertical in ARCore's gravity-aligned world, so the floor is still not the dominant plane. The highest point above that plane is 3.55 m (5.98 m on 14 October). The walks differ in route and length, so this shows that ARCore-depth sizing engages; it does not measure the size of any improvement. ARCore depth is not ground truth, and no accuracy is claimed. [Full before/after table](https://github.com/jkind9/FYLD_research/blob/9bf3b51/src/live/README.md#redmi-15-october-walk-task107).
 
 ## Historical delivery ownership, 6 October 2026
 
@@ -419,4 +419,4 @@ Xiaomi's official guide identifies model `2201116TG` as Redmi Note 11 Pro, and G
 
 ## Walkthrough input boundary
 
-The current phone-export path uses `experiments.shared.phone_session.read_phone_session` with `app.capture_report.validate_phone_session_export`. It validates recorded images, hashes, calibration and clocks while preserving absent depth and pose. Phone capture/readiness remains Task52 work. The first integration pipeline adds a prerecorded-data input boundary; it does not run a camera or upload service. Each run also exports method-labelled stage views in an offline index for inspection. See [the six-step runner](../../src/walkthrough/README.md) for saved-input lifetimes and failure behavior.
+The current phone-export path uses `experiments.shared.phone_session.read_phone_session` with `app.capture_report.validate_phone_session_export`. It validates recorded images, hashes, calibration and clocks while preserving absent depth and pose. Phone capture/readiness remains Task52 work. The first integration pipeline adds a prerecorded-data input boundary; it does not run a camera or upload service. Each run also exports method-labelled stage views in an offline index for inspection. See [the six-step runner](../../evaluation/layers/README.md) for saved-input lifetimes and failure behavior.

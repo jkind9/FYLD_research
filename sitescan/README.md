@@ -1,28 +1,52 @@
 # sitescan
 
-Shared processing stages for room reconstruction from a phone recording.
+The product package: room surfaces, site measurements and object counts from a phone
+recording. Each stage is a folder of plain functions on arrays; the two orchestrators in
+`pipelines/` decide which stage runs on which frame. Only `session/` reads recordings and
+only `io.py` writes results.
+
 Install the locked environment from the repository root. It builds `.venv`, with CPU-only PyTorch:
 
 ```powershell
 uv sync --all-extras
 ```
 
+## Stages
+
 | Stage | Headline function | Takes | Gives |
 |---|---|---|---|
-| [Session](session/README.md) | `session.frames(folder)` | A recording folder | RGB frames, depth, tracked points and matrix poses |
-| [Depth](depth/README.md) | `depth.load_model(path)`, `depth.predict(model, image, pose)` | Local weights, RGB and optional pose | Depth and validity on the recorded grid |
+| [Session](session/README.md) | `session.frames(folder)`, `session.read_wire_session(folder)` | A recording folder | Frames with RGB, ARCore depth, tracked points, poses and anchor events |
+| [Depth](depth/README.md) | `depth.load_model(path)`, `depth.predict(model, image, pose)` | Local weights, RGB and optional pose | Depth and validity on the recorded grid, right shape and wrong scale |
 | [Scale](scale/README.md) | `scale.fit_one(...)`, `scale.fit_grid(...)` | Learned depth, validity and metric targets | One factor or a per-pixel scale field |
-| [Fusion](fusion/README.md) | `Fragments.integrate(...)` | Scaled depth, RGB and corrected anchors | World surface points and aligned colours |
-| [Cleanup](cleanup/README.md) | `cleanup.clean_room(points, views)` | Surface and depth evidence | Mask retaining supported large pieces |
-| [Mapping](mapping/README.md) | `mapping.measure_site(surface, cameras)` | Surface points and camera positions | Areas, dimensions, height and plane normal |
+| [Fusion](fusion/README.md) | `Fragments.integrate(...)`, `Fragments.surface()` | Scaled depth, RGB, pose and keyframe | World surface points that follow ARCore's anchor corrections |
+| [Cleanup](cleanup/README.md) | `cleanup.clean_room(points, views)` | Surface points and the views that made them | Masks after the visibility vote and after keeping the largest pieces |
+| [Mapping](mapping/README.md) | `mapping.measure_site(surface, cameras)` | Surface points and camera positions | Area, length, width, height and floor plane |
+| [Objects](objects/README.md) (experimental) | `objects.load_detector(path)`, `Objects.update(...)` | RGB, scaled depth, pose and anchors | Detections placed in 3D and counted |
 
-Objects move next, followed by the
-two pipelines. Until they move, run the existing entry points:
+Shared records (`Camera`, `Frame`, `ArcoreDepth`) are in [types.py](types.py). Every public
+function, with its arguments and a link to its code, is in the
+[function index](../README.md#function-index) in the root README.
+
+## Orchestrators
+
+| Orchestrator | Headline call | What it does |
+|---|---|---|
+| [Room](pipelines/README.md) | `pipelines.build_room(folder, model, settings)` | Every frame with fresh ARCore depth, fused, then cleaned and measured once |
+| [Live](pipelines/README.md) | `pipelines.LiveProcessor(model, detector, settings)`, `run_live(...)` | The newest frame once per update, under a second each |
+
+Run either from the command line (see [apps/README.md](../apps/README.md)):
 
 ```text
-python -B -m src.live.room_build --session <recording> --out <new folder>
-python -B -m src.live.run --replay <recording> --out <new folder>
+.venv/Scripts/python.exe -B -m apps.cli room   --session <recording> --out <new folder>
+.venv/Scripts/python.exe -B -m apps.cli replay --session <recording> --out <new folder>
 ```
 
-Run these commands with `.venv/Scripts/python.exe`. Object counting remains experimental. The package stages
-import no experiment or interface code. See [DESIGN.md](../DESIGN.md) for the move order.
+The [walkthrough notebook](../notebooks/00_sitescan_walkthrough.ipynb) runs both, then repeats
+their steps one stage call at a time on the committed test recording.
+
+## Rules
+
+Imports point down: `apps` imports `pipelines`, `pipelines` import stages and `io`, stages
+import other stages and `types`. No stage imports an experiment, reads a file other than
+model weights, or parses arguments. Inputs are checked where they enter (the session reader,
+the receiver, the command line, model files); inside, functions trust their types.

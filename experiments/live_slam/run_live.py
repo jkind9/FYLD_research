@@ -1,6 +1,6 @@
 """Run a live SLAM system in WSL on a recording, one frame at a time, and score the poses it reported.
 
-    python -m experiments.live_slam.run_live --system stella --recording tum:outputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
+    python -m experiments.live_slam.run_live --system stella --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
         --run-root experiments/live_slam/runs/stella_tum_xyz
 
 Needs the systems built by native/setup_wsl.sh and the runners built as in README.md. Uses the repository's `.venv`.

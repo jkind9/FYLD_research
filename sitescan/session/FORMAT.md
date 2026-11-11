@@ -1,10 +1,10 @@
 # Phone session v2: what the capture app records and how it reaches the PC
 
-This is the one written definition of what the capture app (`capture/`, package `org.fyld.capture`) records and sends, and what the PC receiver (`host/capture_receiver.py`) accepts and saves. Version 1 ([phone_session_v1.md](phone_session_v1.md)) was a live stream that skipped frames when Wi-Fi slowed; version 2 keeps every camera frame.
+This is the one written definition of what the capture app (`experiments/01_camera_capture_delivery/capture/`, package `org.fyld.capture`) records and sends, and what the PC receiver (`apps/receiver/capture_receiver.py`) accepts and saves. Version 1 ([phone_session_v1.md](../../experiments/01_camera_capture_delivery/phone_session_v1.md)) was a live stream that skipped frames when Wi-Fi slowed; version 2 keeps every camera frame.
 
 - Java encoder: `capture/app/src/main/java/org/fyld/capture/SessionFrame.java`, `ArcoreRecord.java` and `SessionMessages.java`. The sender is `Uploader.java`; the queue on the phone is `DiskQueue.java`.
-- Python reader: `host/session_v2.py`. Receiver: `host/capture_receiver.py`.
-- Shared fixture: `capture/app/src/test/resources/session_v2/`. The JVM tests (`SessionV2Test.java`, run by `build/build-capture.sh`) must produce it, and `tests/test_session_v2.py` must read it to the values written there. A change to this file needs a change to both sides and to the fixture, or a new version number.
+- Python reader: `sitescan/session/wire_v2.py` and `read.py`. Receiver: `apps/receiver/capture_receiver.py`.
+- Shared fixture: `experiments/01_camera_capture_delivery/capture/app/src/test/resources/session_v2/`. The JVM tests (`SessionV2Test.java`, run by `experiments/01_camera_capture_delivery/build/build-capture.sh`) must produce it, and `experiments/01_camera_capture_delivery/tests/test_session_v2.py` must read it to the values written there. A change to this file needs a change to both sides and to the fixture, or a new version number.
 
 ## How a recording travels
 
@@ -19,7 +19,7 @@ The link has no authentication or encryption. Use it on a local network only; se
 
 ## Connection and framing
 
-The phone opens a TCP connection to the PC, **port 8766** (8765 stays free for the old v1 live stream). Every message, in both directions, uses `host/protocol.py` framing: a 4-byte big-endian header length, the UTF-8 JSON header, a 4-byte big-endian payload length, the payload.
+The phone opens a TCP connection to the PC, **port 8766** (8765 stays free for the old v1 live stream). Every message, in both directions, uses `sitescan/session/protocol.py` framing: a 4-byte big-endian header length, the UTF-8 JSON header, a 4-byte big-endian payload length, the payload.
 
 | Direction | `type` | When | Payload |
 |---|---|---|---|
@@ -31,7 +31,7 @@ The phone opens a TCP connection to the PC, **port 8766** (8765 stays free for t
 | PC to phone | `ack` | answer to `hello`, then after each stored message | empty |
 | PC to phone | `error` | the PC refused a message and closes the connection | empty |
 | phone to PC | `speed` | link-speed check, on its own connection | test bytes |
-| phone to PC | `report` | check report, alone on its own connection | the report JSON (schema 1, `host/report.py`) |
+| phone to PC | `report` | check report, alone on its own connection | the report JSON (schema 1, `experiments/01_camera_capture_delivery/host/report.py`) |
 
 Every queued message (`frame`, `imu`, `telemetry`, `end`) has `"version": 2`, `"session"` (the session id) and `"n"` (its message number).
 
@@ -105,7 +105,7 @@ Missing capture-result values (a phone that does not report one) are `null`. Wid
 | `anchor` | object, optional | `{"id": k, "pose": [7]}` when this frame started a keyframe anchor, as in v1 |
 | `anchors` | list | anchor corrections `[id, tx, ty, tz, qx, qy, qz, qw]`, as in v1 |
 
-Coordinates, the projection of points to `u, v`, raw depth, keyframe anchors and corrections follow [phone_session_v1.md](phone_session_v1.md) word for word: world +Y up, ARCore camera +X right, +Y up, looking along -Z; a new anchor once every 1.0 s while tracking; a correction when an anchor moves more than 1 mm or 0.1 degrees. Anchor ids count from 0 per session.
+Coordinates, the projection of points to `u, v`, raw depth, keyframe anchors and corrections follow [phone_session_v1.md](../../experiments/01_camera_capture_delivery/phone_session_v1.md) word for word: world +Y up, ARCore camera +X right, +Y up, looking along -Z; a new anchor once every 1.0 s while tracking; a correction when an anchor moves more than 1 mm or 0.1 degrees. Anchor ids count from 0 per session.
 
 Capture 1.2 omits points whose projection or confidence is non-finite, as well as points behind the camera; it retains the image. JSON does not represent NaN or infinity. If another header value cannot serialize, recording stops through the existing `write_error` path. No fields or wire version changed. A saved session can miss an anchor-creation record when the associated ARCore image has no delivered Camera2 image; readers must not assume anchor 0 is present. The completed Redmi session's first recorded anchor is 1, so live fusion binds each fragment to a received anchor and keeps that binding for later corrections.
 
@@ -154,7 +154,7 @@ Link-speed check (in *Run all checks*): on its own connection the phone sends 50
 
 ## Checks the PC makes
 
-`host/session_v2.py` refuses a message, and the receiver answers `error` and closes the connection, when: `version` is not 2; the session id is not the one in `hello` or has other characters; `n` is more than one past the last stored message (a gap); a frame's `seq` is not one past the previous frame's; grey `bytes` is not `W*H` for `raw`, or a `deflate` grey does not inflate to `W*H`; the colour image is not JPEG (`FF D8`) or not the grey's size; the payload length is not the sum of its parts; any v1 ARCore check fails (pose exactly when tracking, unit quaternions, depth sizes, points within 0.5 px of their projection); a device pose is present while not tracking; an `imu` payload is not `36 * samples` bytes, has a sensor code other than 0 or 1, or a sensor's `t_ns` goes backwards; a `telemetry` field is missing, or an `end` message lacks `reason`, `clock.end` or `counts`. A message with `n` at or below the last stored one is a resend: it is acknowledged and not stored again.
+`sitescan/session/wire_v2.py` refuses a message, and the receiver answers `error` and closes the connection, when: `version` is not 2; the session id is not the one in `hello` or has other characters; `n` is more than one past the last stored message (a gap); a frame's `seq` is not one past the previous frame's; grey `bytes` is not `W*H` for `raw`, or a `deflate` grey does not inflate to `W*H`; the colour image is not JPEG (`FF D8`) or not the grey's size; the payload length is not the sum of its parts; any v1 ARCore check fails (pose exactly when tracking, unit quaternions, depth sizes, points within 0.5 px of their projection); a device pose is present while not tracking; an `imu` payload is not `36 * samples` bytes, has a sensor code other than 0 or 1, or a sensor's `t_ns` goes backwards; a `telemetry` field is missing, or an `end` message lacks `reason`, `clock.end` or `counts`. A message with `n` at or below the last stored one is a resend: it is acknowledged and not stored again.
 
 ## Session folder on the PC
 

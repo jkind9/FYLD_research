@@ -58,4 +58,4 @@ This is a small, previously inspected, provisional reference set. It supports wi
 
 ## Public identity scoring boundary
 
-The scorer is now `importlib.import_module("experiments.06_object_recognition.experiments.04_geometry_identity.validation").score_identity`. Its body and interpretation are unchanged; `run._score` remains the same compatibility import. The evaluation report calls the public validation owner. Experiment commands, settings, old runs and source snapshots stay intact. [Root sequencing and independent reference boundary](../../../../src/walkthrough/README.md).
+The scorer is now `importlib.import_module("experiments.06_object_recognition.experiments.04_geometry_identity.validation").score_identity`. Its body and interpretation are unchanged; `run._score` remains the same compatibility import. The evaluation report calls the public validation owner. Experiment commands, settings, old runs and source snapshots stay intact. [Root sequencing and independent reference boundary](../../../../evaluation/layers/README.md).

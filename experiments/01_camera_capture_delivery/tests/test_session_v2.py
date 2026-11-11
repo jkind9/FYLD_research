@@ -4,12 +4,13 @@ import copy
 import struct
 import zlib
 
+import fake_phone
 import numpy as np
 import pytest
-
-import fake_phone
-import session_v2
 from fake_phone import fixture
+
+from sitescan.session import read_wire_session
+from sitescan.session import wire_v2 as session_v2
 
 
 def frame_fixture():
@@ -115,7 +116,7 @@ def test_missing_fields_and_bad_session_ids_are_refused():
 
 def test_read_session_reads_a_saved_folder(tmp_path):
     folder = fake_phone.write_session(tmp_path, fake_phone.walk(6))
-    frames = list(session_v2.read_session(folder))
+    frames = list(read_wire_session(folder))
     assert [f.seq for f in frames] == list(range(6))
     assert frames[2].grey[0, 0] == 2 and frames[2].pose[0] == pytest.approx(0.02)
     assert frames[0].image_jpeg == fake_phone.JPEG

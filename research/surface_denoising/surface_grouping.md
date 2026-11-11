@@ -10,7 +10,7 @@ No grouping method, model or reconstruction was run for this note. Paper perform
 
 Our adopted cleanup first checks surface support against depth views. It then places points into 2 cm cells, joins occupied cells touching at faces, edges or corners, and keeps the 50 largest components with at least 5,000 points. Those settings removed 122,788 of 676,855 points on one room walk. They do not identify walls, materials or individual objects. [Implementation](../../sitescan/cleanup/pieces.py), [cleanup evidence](README.md#owners-setting-in-the-room-build-task126)
 
-Colour is already retained by fusion and exported with the points. It is not used by `largest_pieces` or the visibility vote. Our room recording also retains images and poses, so a trial can return to source views rather than treating the final coloured cloud as the only evidence. [Fusion stage](../../sitescan/fusion/README.md), [room build](../../src/live/room_build.py)
+Colour is already retained by fusion and exported with the points. It is not used by `largest_pieces` or the visibility vote. Our room recording also retains images and poses, so a trial can return to source views rather than treating the final coloured cloud as the only evidence. [Fusion stage](../../sitescan/fusion/README.md), [room build](../../sitescan/pipelines/room.py)
 
 Size/connectivity filtering has a task limitation: a valid small cone, tool or pipe can be a small disconnected component, while a false sheet can be large or connected to a wall through noise. Point count also depends on sampling and surface coverage. Replacing it with property-aware reasoning is a reasonable experiment even if the method itself is established.
 

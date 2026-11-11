@@ -32,7 +32,7 @@ DEPTH_CHOICES = ("sensor", "model", "model-frame-reference", "model-run-referenc
 HYPERPARAMETERS = {
     "tsdf_voxel_m": {"value": {"icl": 0.01, "tum": 0.02}, "source": "proposed by Claude 2026-10-13, not owner-ruled"},
     "tsdf_truncation_voxels": {"value": 4, "source": "Open3D tutorial convention; proposed by Claude 2026-10-13, not owner-ruled"},
-    "depth_range_m": {"value": [0.1, 4.0], "source": "inherited src/walkthrough/steps/contracts.py RGBD_MAX_DEPTH_M"},
+    "depth_range_m": {"value": [0.1, 4.0], "source": "inherited evaluation/layers/steps/contracts.py RGBD_MAX_DEPTH_M"},
     "score_threshold_m": {"value": 0.05, "source": "inherited experiment 04 reporting threshold"},
     "fusion_camera": {"value": {"tum": [525.0, 525.0, 319.5, 239.5], "icl": [481.2, 480.0, 319.5, 239.5]},
                       "source": "TUM page default for registered depth (inherited experiment 03 dataset.py:13); ICL conventions.json"},

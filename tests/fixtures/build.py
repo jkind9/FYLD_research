@@ -19,8 +19,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from src.live import stand_in
-from src.live.stream import session_v2
+from evaluation import stand_in
+from sitescan.session import wire_v2
 
 RECORDING = "tum:data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk"
 EVERY = 5
@@ -60,7 +60,7 @@ def build(out: Path = FIXTURE) -> Path:
                 header = v2_header(v1, jpeg, *grey.size)
                 payload = np.asarray(grey).tobytes() + jpeg + ((out / "depth" / f"{name}.bin").read_bytes()
                                                               if "depth" in v1 else b"")
-                session_v2.parse_frame(header, payload)
+                wire_v2.parse_frame(header, payload)
                 log.write(json.dumps(header) + "\n")
     return out
 

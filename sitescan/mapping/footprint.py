@@ -62,11 +62,7 @@ def footprint(
     oriented = Plane(plane.point, normal, plane.inlier_fraction, plane.source)
     heights, projected = onto_plane(points, plane.point, normal)
     local = projected[np.abs(heights) <= band_m] - plane.point
-    total = np.zeros(3)
-    outer = np.zeros((3, 3))
-    total += local.sum(axis=0)
-    outer += local.T @ local
-    _, axes = scatter_axes(plane.point, total, outer, len(local))
+    _, axes = scatter_axes(plane.point, local)
     basis = signed_axes(axes[:2])
     coordinates = projected @ basis.T
     minimum, shape = grid_shape(coordinates, cell_size_m)

@@ -54,26 +54,26 @@ All settings are proposals by Claude of 14 October 2026, not owner rulings.
 
 | Command | What it does |
 |---|---|
-| `python experiments/01_camera_capture_delivery/host/capture_receiver.py --out experiments/open_vio/runs/recordings --port 8766` | Prints the PC address, validates incoming messages, stores a v2 folder per session, acknowledges cumulatively and resumes after reconnect |
+| `python -B -m apps.receiver.capture_receiver --out experiments/open_vio/runs/recordings --port 8766` | Prints the PC address, validates incoming messages, stores a v2 folder per session, acknowledges cumulatively and resumes after reconnect |
 | `python experiments/open_vio/host/recording.py <recording> [--euroc <out>]` | Lists problems (missing files, timestamps not increasing, a stream on another clock, images without metadata, ARCore frames matching no image, a recording that did not stop cleanly); writes the EuRoC/ASL layout (`mav0/cam0/data/*.png`, `mav0/imu0/data.csv` at gyroscope times with the accelerometer interpolated) read by Basalt, Kimera-VIO, OKVIS2 and Kalibr's bag creator, and `arcore_camera_tum.txt` (ARCore's path in OpenCV camera axes, `time x y z qx qy qz qw`, the live-SLAM harness format) |
 | `python experiments/open_vio/host/clock_check.py <recording>` | Writes `clock_check.json`: rates and gaps per stream, whether all streams start on the same clock, the share of ARCore frames that match a saved image, and the camera-to-gyroscope offset |
 
 The offset is measured by cross-correlating the gyroscope's angular speed with the angular speed of ARCore's camera rotation (the Twist-n-Sync method family). Positive means the gyroscope stamps a motion later than the camera. ARCore places its pose at the centre of exposure of the middle image row, while Camera2 stamps the start of exposure of the first row, so even a perfectly aligned phone shows half the exposure plus half the readout time; `camera_imu_clock_offset_ms` is what remains after removing it. Published phones showed offsets up to 30 ms (MARS logger paper), so the offset is measured, not assumed. Kalibr measures it independently in step 2.
 
-Use the repository's `.venv` (see the root README). The receiver reuses experiment 01's `host/protocol.py` framing and offers an `on_frame` callback; `python -m src.live.run --listen 8766 --out <run>` uses it for live processing. Replay reads the same v2 folder. The protocol has no authentication or encryption: LAN only; internet use needs a tunnel and authentication, outside this task.
+Use the repository's `.venv` (see the root README). The receiver (`apps/receiver`) uses the `sitescan/session/protocol.py` framing and offers an `on_frame` callback; `python -m apps.cli live --port 8766 --out <run>` uses it for live processing. Replay reads the same v2 folder. The protocol has no authentication or encryption: LAN only; internet use needs a tunnel and authentication, outside this task.
 
 ### Build, install, record
 
 1. Build in WSL: `wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh`. This runs the JVM tests, builds the APK and stages `.apk` and `.apk.bin` in `mobile_deployments/capture_v<version>_<YYYYMMDDTHHMMSSZ>_<hash8>/`. APK filenames include the version and UTC time too. See the [deployment index](../../mobile_deployments/README.md) for the current version. The rawrecorder and phonecheck build scripts are retired.
-2. Install from email on the Redmi (MIUI blocks adb installs). Start `capture_receiver.py` on the PC; enter `192.168.68.123` and port `8766` in the app. Allow Python through the Windows firewall on private networks.
+2. Install from email on the Redmi (MIUI blocks adb installs). Start `python -B -m apps.receiver.capture_receiver` on the PC; enter `192.168.68.123` and port `8766` in the app. Allow Python through the Windows firewall on private networks.
 3. Run all checks: ARCore setup and tracking, a 50 MiB link-speed test and a timed compression check. The ARCore notice remains in the app.
 4. First walk: start upstairs, go downstairs, return upstairs, Stop. Leave the app open while the queue drains; sending continues after Stop.
 5. Rest: phone flat on a table, "Record motion sensors only", 60 s, Stop; wait until sending finishes. Use about 3 hours for the later calibration noise recording.
-6. Check: `clock_check.py <session>` and `recording.py <session> --euroc <out>`; then `python -m src.live.run --replay <walk session> --out <run>`. Report capture fps, dropped frames, IMU rates, Wi-Fi MB/s, sending time after Stop, storage used and `camera_imu_clock_offset_ms`.
+6. Check: `clock_check.py <session>` and `recording.py <session> --euroc <out>`; then `python -m apps.cli replay --session <walk session> --out <run>`. Report capture fps, dropped frames, IMU rates, Wi-Fi MB/s, sending time after Stop, storage used and `camera_imu_clock_offset_ms`.
 
 ### Tests
 
-`python -B tools/check.py experiments/open_vio/tests` needs no phone and keeps scratch outside the repo. Synthetic v2 sessions exercise validation, EuRoC images and IMU rows, ARCore reference paths, coordinate conversion and the clock-offset search. The offset search recovers synthetic shifts of +12 ms and -20 ms within 1 ms and reports no peak for a motionless signal. Experiment 01 tests the shared JVM/Python fixture and a fake phone disconnecting and resuming without missing or duplicate frames. `src/live/tests/test_stream.py` checks v2 replay.
+`python -B tools/check.py experiments/open_vio/tests` needs no phone and keeps scratch outside the repo. Synthetic v2 sessions exercise validation, EuRoC images and IMU rows, ARCore reference paths, coordinate conversion and the clock-offset search. The offset search recovers synthetic shifts of +12 ms and -20 ms within 1 ms and reports no peak for a motionless signal. Experiment 01 tests the shared JVM/Python fixture and a fake phone disconnecting and resuming without missing or duplicate frames. `tests/test_sitescan_session.py` checks v2 replay.
 
 ### Results
 

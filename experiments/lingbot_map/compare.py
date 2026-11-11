@@ -18,10 +18,9 @@ import numpy as np
 import open3d as o3d
 from PIL import Image
 
-from src.live import sizing
-from src.live.depth_check import BINS, summarise
-from src.live.orientation_control import quarter_turns
-from src.live.stream import read_session, session_v1
+from evaluation.depth_check import BINS, point_targets, summarise
+from sitescan.depth.orientation import quarter_turns
+from sitescan.session import read_wire_session, wire_v1
 
 SIDE = 518  # LingBot-Map's processed width and crop height (demo.py crop mode)
 PATCH = 14
@@ -84,11 +83,11 @@ def _apply(transform: np.ndarray, points: np.ndarray) -> np.ndarray:
 def _session_frames(session: Path, wanted: set[int]) -> dict:
     """ARCore centre, tracked-point pixels and depths, and turn count per wanted frame; image bytes are dropped."""
     frames = {}
-    for frame in read_session(session):
+    for frame in read_wire_session(session):
         if frame.seq in wanted and frame.pose is not None:
-            pixels, z = sizing.point_targets(frame)
-            frames[frame.seq] = {"centre": session_v1.world_from_camera(frame.pose)[:3, 3], "pixels": pixels, "z": z,
-                                 "turns": quarter_turns(session_v1.world_from_camera_cv(frame.pose)), "size": frame.image_size}
+            pixels, z = point_targets(frame)
+            frames[frame.seq] = {"centre": wire_v1.world_from_camera(frame.pose)[:3, 3], "pixels": pixels, "z": z,
+                                 "turns": quarter_turns(wire_v1.world_from_camera_cv(frame.pose)), "size": frame.image_size}
     return frames
 
 

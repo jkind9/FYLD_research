@@ -1,50 +1,42 @@
-"""Outputs of today's room build and live processor on a session, saved as the golden reference.
+"""Outputs of the room and live pipelines on a recording, saved as the golden reference.
 
     python -B -m tests.golden.run --session tests/fixtures/tum_desk_20 --out tests/fixtures/tum_desk_20_golden.json
 
 The live processor is fed every frame and updated after each one, without threads or timing, so the result
-does not depend on machine load. Objects are off: the detector needs Ultralytics, which the product
-environment does not hold yet. Timings are left out because they change from run to run.
+does not depend on machine load. Objects are off, so the golden lane needs no detector weights. Timings are
+left out because they change from run to run.
 """
-
-from __future__ import annotations
 
 import argparse
 import json
-import tempfile
 from pathlib import Path
 
 import torch
 
-from src.live import room_build
-from src.live.processor import LiveProcessor
-from src.live.run import DEPTH_CHECKPOINT, depth_anything
-from src.live.stream import read_session
+from sitescan.depth import load_model
+from sitescan.pipelines import DEPTH_MODEL, LiveProcessor, LiveSettings, build_room
+from sitescan.session import read_wire_session
 
 THREADS = 16
 VOXEL_M = 0.02
 
 
 def room(session: Path) -> dict:
-    with tempfile.TemporaryDirectory() as scratch:
-        out = Path(scratch) / "room"
-        room_build.main(["--session", str(session), "--out", str(out), "--threads", str(THREADS)])
-        summary = json.loads((out / "summary.json").read_text(encoding="utf-8"))
-    for timing in ("vote_s", "pieces_s"):
-        del summary["clean_up"][timing]
+    summary = build_room(session, load_model(DEPTH_MODEL, threads=THREADS)).summary
+    del summary["clean_up"]["clean_s"]
     del summary["session"]
-    return summary
+    return json.loads(json.dumps(summary))
 
 
 def live(session: Path) -> dict:
     torch.set_num_threads(THREADS)
-    processor = LiveProcessor(depth_anything(DEPTH_CHECKPOINT), None, voxel_m=VOXEL_M)
+    processor = LiveProcessor(load_model(DEPTH_MODEL, threads=None), None, LiveSettings(voxel_m=VOXEL_M))
     updates = []
-    for frame in read_session(session):
+    for frame in read_wire_session(session):
         processor.add(frame, Path(session) / "frames" / f"{frame.seq:06d}.jpg")
         record = processor.update()
         if record is not None:
-            updates.append({key: record.get(key) for key in ("frame_seq", "size", "size_source", "surface_points", "map")})
+            updates.append({key: record.get(key) for key in ("frame_seq", "scale", "scale_source", "surface_points", "map")})
     return {"updates": updates, "surface_points": len(processor.surface())}
 
 

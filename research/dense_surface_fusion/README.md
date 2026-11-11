@@ -5,13 +5,13 @@ Why one object can appear twice in a fused room, and what removes the extra copy
 Terms used here:
 
 - **Fusion**: merging many per-frame depth images, each placed by its camera pose, into one surface. This project uses Open3D's signed-distance volume (TSDF).
-- **Fragment**: one TSDF volume holding about 10 s of frames, moved as a unit when ARCore corrects its anchor (`src/live/fragments.py`).
-- **Sizing**: scaling learned depth to metres. `src/live/room_build.py` fits it to ARCore raw depth in an 8 × 6 grid of cells. A cell with fewer than 20 ARCore pixels takes the frame's median size (the **fallback**).
+- **Fragment**: one TSDF volume holding about 10 s of frames, moved as a unit when ARCore corrects its anchor (`sitescan/fusion/fragments.py`).
+- **Sizing**: scaling learned depth to metres. `sitescan/pipelines/room.py` fits it to ARCore raw depth in an 8 × 6 grid of cells. A cell with fewer than 20 ARCore pixels takes the frame's median size (the **fallback**).
 - **Stale depth**: an ARCore depth map whose timestamp is older than the image it is paired with.
 
 ## What the 15 October walk showed
 
-Measured with `python -B -m src.live.landmark_probe`. For each frame, it places the red cushion's pixels in the world with ARCore depth and with the fused learned depth.
+Measured with `python -B -m evaluation.landmark_probe`. For each frame, it places the red cushion's pixels in the world with ARCore depth and with the fused learned depth.
 
 1. **The two copies come from one standing spot, not two.** Only frames 669-728 see the cushion. The phone moved about 15 cm across them, and all of them fall in fragment 2.
 2. **Frames 669-691 carried depth maps 4.35-4.42 s old.** These are the only 9 of 147 depth maps more than 0.2 s old; the rest are 7-40 ms old. Learned depth sized to those maps put the cushion at about (0.50, 0.16, -1.00) m, 1.57 m from the camera.
@@ -20,9 +20,9 @@ Measured with `python -B -m src.live.landmark_probe`. For each frame, it places 
 5. **The fused surface keeps both copies:** 112 red points at the stale position and 1,684 near the fresh one.
 6. **The fallback is the normal case.** In the median fused frame, 66% of grid cells used the frame-median size, and 110 of 144 frames had at least half their cells on it. It did not cause this duplicate, but it is a likely source of smaller offsets: the fresh copy sits 0.2 m nearer than the tracked points, and ARCore depth had no pixels on the cushion in those frames.
 
-Nothing in `src/live` checked depth age before Task116. `room_build` now skips depth more than 0.1 s older than its image (`MAX_DEPTH_AGE_S`). The live processor (`src/live/processor.py`) still uses depth of any age.
+Nothing in the live code checked depth age before Task116. `room_build` now skips depth more than 0.1 s older than its image (`MAX_DEPTH_AGE_S`). The live processor (`sitescan/pipelines/live.py`) still uses depth of any age.
 
-The rebuild confirmed the cause. With the rule, 10 frames were skipped and 134 fused, against 144 before. Within 25 cm of the stale copy's centre, the surface went from 121 red points to 0, and from 1,294 points of any colour to 77. The fresh copy kept all 1,277 red points. Viewers: `outputs/capture_task115_093913/viewer/redmi-room-15oct-cutaway.html` (before) and `outputs/capture_task116_093913/viewer/redmi-room-15oct-fresh-depth.html` (after), both local only.
+The rebuild confirmed the cause. With the rule, 10 frames were skipped and 134 fused, against 144 before. Within 25 cm of the stale copy's centre, the surface went from 121 red points to 0, and from 1,294 points of any colour to 77. The fresh copy kept all 1,277 red points. Viewers: `outputs/capture/capture_task115_093913/viewer/redmi-room-15oct-cutaway.html` (before) and `outputs/capture/capture_task116_093913/viewer/redmi-room-15oct-fresh-depth.html` (after), both local only.
 
 ## The doors echo too (Task117)
 
@@ -32,7 +32,7 @@ After the stale-depth fix, the owner measured the hallway door repeated as four 
 - **The door is about 4.5 m from the first standing spot.** That distance comes from 13 ARCore tracked points on the doorway in frame 65. In every first-spot frame, the grid cells covering the door held 0 ARCore depth pixels.
 - **The far frames put the door too near, by different amounts.** Sampled points near the camera-to-door line (`frames.npz`) sit 0.5-2.2 m nearer than the door in first-spot frames (fragments 0 and 1). Frames taken while walking up to the door (450-510) sit 0.0-0.4 m nearer. Each frame's median comes from whatever near objects fill its view, so each puts the door at a different depth.
 
-`python -B -m src.live.depth_check` compares the fused depth (learned depth times grid size) with ARCore's tracked points over all 134 fused frames (11,821 point views). A ratio of 1.00 is right; below 1 is too near.
+`python -B -m evaluation.depth_check` compares the fused depth (learned depth times grid size) with ARCore's tracked points over all 134 fused frames (11,821 point views). A ratio of 1.00 is right; below 1 is too near.
 
 | Distance | Cells with their own ARCore size: median ratio (middle half) | Fallback cells: median ratio (middle half) |
 |---|---|---|

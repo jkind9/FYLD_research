@@ -1,8 +1,8 @@
 """Receive phone session v2 from the capture app: store every message, acknowledge it, resume after a dropped connection.
 
-    python experiments/01_camera_capture_delivery/host/capture_receiver.py --out <dir> [--port 8766]
+    python -m apps.receiver.capture_receiver --out <dir> [--port 8766]
 
-Messages follow phone_session_v2.md and use protocol.py framing. Each session becomes <out>/<session id>/ with
+Messages follow sitescan/session/FORMAT.md and use sitescan/session/protocol.py framing. Each session becomes <out>/<session id>/ with
 session.json, frames.jsonl, cam0/<seq>.png, frames/<seq>.jpg, depth/<seq>.bin, imu.csv, telemetry.jsonl,
 messages.jsonl, and summary.json once the end message arrives. A bad message is answered with an error and
 the connection is closed; a resent message is acknowledged and not stored again. Link-speed checks and check
@@ -84,7 +84,8 @@ class Session:
             self.info = self.info | {"clock": self.info["clock"] | end["clock"], "counts": end["counts"], "end_reason": end["reason"]}
 
     @classmethod
-    def open(cls, root: Path, hello: dict, *, host_ms: float) -> "Session":
+    def open(cls, root: Path, hello: dict, *, host_ms: float) -> Session:
+        """The stored session named in a hello message, resumed, or a new one."""
         session_v2.check_hello(hello)
         folder = Path(root) / hello["session"]
         info = hello["info"] | {"session": hello["session"], "version": session_v2.VERSION}
@@ -106,6 +107,7 @@ class Session:
         temporary.replace(path)
 
     def hello(self, hello: dict, *, host_ms: float) -> None:
+        """Record a reconnecting hello that matches this session."""
         session_v2.check_hello(hello)
         _require(hello["info"]["clock"]["start"] == self.info["clock"]["start"], "hello does not match the stored session")
         _append(self.folder / "hellos.jsonl", json.dumps({"host_received_ms": host_ms, "wall_ms": hello["wall_ms"]}))
@@ -181,6 +183,7 @@ class Session:
         self.last_imu_ns = last
 
     def summary(self) -> dict:
+        """Counts, gaps and timing of what the session stored."""
         frames = _lines(self.folder / "frames.jsonl")
         messages = _lines(self.folder / "messages.jsonl")
         hellos = _lines(self.folder / "hellos.jsonl")
@@ -232,7 +235,8 @@ class Receiver:
         self.reports: queue.Queue[Path] = queue.Queue()
         self._lock = threading.Lock()
 
-    def start(self) -> "Receiver":
+    def start(self) -> Receiver:
+        """Start accepting connections on a background thread."""
         threading.Thread(target=self._accept, daemon=True).start()
         return self
 
@@ -241,9 +245,11 @@ class Receiver:
         return self.finished.get(timeout=timeout)
 
     def wait_reports(self, count: int, timeout: float | None = None) -> list[Path]:
+        """The next `count` check reports the app has sent."""
         return [self.reports.get(timeout=timeout) for _ in range(count)]
 
     def close(self) -> None:
+        """Stop listening and close open phone connections."""
         self.listener.close()
         for session in self.sessions.values():
             if session.connection is not None:
@@ -355,6 +361,7 @@ def addresses() -> list[str]:
 
 
 def main() -> int:
+    """Receive recordings until stopped."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--port", type=int, default=PORT)

@@ -1,7 +1,7 @@
 """Every layer's contract: what its method receives and returns, and what the layer saves.
 
 Methods see only the method contract. Later layers see only the saved outputs.
-src/walkthrough/README.md, "Layer contracts", lists both with units and checks.
+evaluation/layers/README.md, "Layer contracts", lists both with units and checks.
 """
 
 import importlib

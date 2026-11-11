@@ -73,6 +73,7 @@ class ImuBatch:
 
 
 def check_session_id(session) -> str:
+    """A session id of 1-80 letters, digits, underscores or hyphens."""
     _require(
         isinstance(session, str) and SESSION_ID.fullmatch(session) is not None,
         f"bad session id {session!r}",
@@ -94,6 +95,7 @@ def check_queued(header: dict, kind: str) -> dict:
 
 
 def check_hello(header: dict) -> dict:
+    """A checked hello message: the session id and the phone, camera, clock and settings info."""
     _require(
         header.get("type") == "hello" and header.get("version") == VERSION,
         f"hello must be type hello, version {VERSION}",
@@ -205,6 +207,7 @@ def parse_frame(header: dict, payload: bytes) -> Frame:
 
 
 def parse_imu(header: dict, payload: bytes) -> ImuBatch:
+    """A checked batch of gyroscope or accelerometer samples, 36 bytes each."""
     check_queued(header, "imu")
     count = header.get("samples")
     _require(

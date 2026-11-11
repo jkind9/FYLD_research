@@ -1,6 +1,6 @@
 """One offline page for a clean-up trial: the room before clean-up, what the visibility vote removes, and the scores.
 
-python -B -m tools.demos.cleanup_scene --trial <src.live.denoise_trial folder> --session <v2 session> --out <viewer.html>
+python -B -m tools.demos.cleanup_scene --trial <experiments.surface_cleanup.denoise_trial folder> --session <v2 session> --out <viewer.html>
 
 The page embeds the walk's photos, so it stays local.
 """
@@ -12,7 +12,7 @@ import html
 import json
 from pathlib import Path
 
-from src.live.stream import session_v1
+from sitescan.session import wire_v1
 
 from .capture_scene import load_scene, scene_page, upright_view
 from .page import write_page
@@ -70,7 +70,7 @@ def focus_cameras(session: Path, seqs: list[int]) -> list[dict]:
     poses = {row["seq"]: row["arcore"] for row in rows if row.get("arcore") and row["arcore"].get("pose") is not None}
     cameras = []
     for seq in seqs:
-        view = upright_view(session, seq, session_v1.world_from_camera_cv(poses[seq]["pose"]), poses[seq]["intrinsics"])
+        view = upright_view(session, seq, wire_v1.world_from_camera_cv(poses[seq]["pose"]), poses[seq]["intrinsics"])
         cameras.append({"frame": seq, "label": f"Frame {seq}", "photo": view["photo"], "pose": view["pose"],
                         "fy": view["fy"], "height": view["height"], "width": view["width"]})
     return cameras
@@ -107,7 +107,7 @@ def report(results: dict, kept: str) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--trial", type=Path, required=True, help="src.live.denoise_trial output folder")
+    parser.add_argument("--trial", type=Path, required=True, help="experiments.surface_cleanup.denoise_trial output folder")
     parser.add_argument("--session", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--voxel", type=float, default=0.03, help="display cell size in metres (Task115 used 3 cm)")

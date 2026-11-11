@@ -26,7 +26,7 @@ existing surface thinning and camera-based height orientation used by live and r
 
 ## Run it
 
-Run in `.venv-sitescan` from the repository root:
+Run from the repository root with `.venv/Scripts/python.exe`:
 
 ```python
 from sitescan import mapping, session
@@ -44,12 +44,12 @@ print(plane.point.shape, grid.observed.ndim, grid.point_count)
 | Name | Default | Why | Evidence |
 |---|---|---|---|
 | `cell_size_m` | 0.05 m | Existing footprint resolution | [Mapping experiment](../../experiments/05_birds_eye_mapping/README.md) |
-| Surface thinning | Half a map cell | Preserve the live processor's cost and point order | [Live mapping caller](../../src/live/processor.py) |
+| Surface thinning | Half a map cell | Preserve the live processor's cost and point order | [Live pipeline](../pipelines/live.py) |
 | `inlier_distance_m`, `band_m` | 0.02 m | Existing plane fit and plane-cell tolerance | [Mapping experiment](../../experiments/05_birds_eye_mapping/README.md) |
 | `iterations` | 500 | Existing plane candidate count | [Mapping tests](../../experiments/05_birds_eye_mapping/tests/test_measurement.py) |
 | `sample_size` | 50,000 points | Existing bound on candidate scoring cost | [Mapping tests](../../experiments/05_birds_eye_mapping/tests/test_measurement.py) |
 | `seed` | 0 | Repeatable candidates and fitted plane | [Mapping tests](../../tests/test_sitescan_mapping.py) |
-| `min_points` | 1,000 | Preserve the live map's minimum surface support | [Live mapping caller](../../src/live/processor.py) |
+| `min_points` | 1,000 | Preserve the live map's minimum surface support | [Live pipeline](../pipelines/live.py) |
 | Grid allocation limit | 16,000,000 cells | Preserve the existing bound on grid allocation | [Mapping tests](../../experiments/05_birds_eye_mapping/tests/test_measurement.py) |
 
 ## Limits
@@ -70,5 +70,4 @@ arithmetic and projection while retaining their bounded reading behavior.
 `tests/test_sitescan_mapping.py` checks seeded fitting, sampling, normal orientation,
 unknown cells, summary fields and skipped geometry. Existing mapping tests check
 dimensions, rotation, heights, chunk/array parity, allocation limits and previews.
-The golden lane and full room rebuild check unchanged numerical summaries. A new
-offline page is checked in headless Chromium after this move.
+The golden lane and full room rebuild check unchanged numerical summaries.

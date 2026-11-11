@@ -9,19 +9,19 @@ import numpy as np
 import pytest
 from PIL import Image
 
+from evaluation.layers import validation
+from evaluation.layers.records import StepResult
+from evaluation.layers.steps import depth, mapping, tracking
+from evaluation.layers.steps.capture import TumSequence, pose_dataset
 from experiments.shared.contracts import Pose
 from experiments.shared.runs import write_json
-from src.walkthrough import validation
-from src.walkthrough.records import StepResult
-from src.walkthrough.steps import depth, mapping, tracking
-from src.walkthrough.steps.capture import TumSequence, pose_dataset
 
 
 def test_reference_choices_are_distinct_from_measurements(tmp_path: Path) -> None:
-    from src.walkthrough.config import PipelineSpec
-    from src.walkthrough.steps.capture import TumSequence
-    from src.walkthrough.steps.depth import RecordedSensorDepth
-    from src.walkthrough.steps.tracking import ReferencePoses
+    from evaluation.layers.config import PipelineSpec
+    from evaluation.layers.steps.capture import TumSequence
+    from evaluation.layers.steps.depth import RecordedSensorDepth
+    from evaluation.layers.steps.tracking import ReferencePoses
 
     spec = PipelineSpec(
         tmp_path / "runs",
@@ -177,8 +177,8 @@ def test_tum_capture_detaches_calibration_from_other_frames_and_runs(tmp_path):
 
 def test_rgbd_frames_drop_depth_beyond_the_tracking_range(tmp_path):
     """A real depth model may report 20 m; tracking's frames only accept depth below 4 m."""
-    from src.walkthrough.steps.capture import pose_dataset
-    from src.walkthrough.steps.contracts import RGBD_MAX_DEPTH_M, load_rgbd_frames
+    from evaluation.layers.steps.capture import pose_dataset
+    from evaluation.layers.steps.contracts import RGBD_MAX_DEPTH_M, load_rgbd_frames
 
     calibration = pose_dataset.CALIBRATION
     shape = (calibration.height, calibration.width)

@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.zip.Inflater;
 
-/** The encoders must produce exactly the shared fixture (phone_session_v2.md) that host/session_v2.py reads. */
+/** The encoders must produce exactly the shared fixture (phone_session_v2.md) that sitescan/session/wire_v2.py reads. */
 public class SessionV2Test {
     static final String SESSION = "20261014_201500_walk";
     private static final float[] POSE = {0.5f, 1.25f, -2f, 0.5f, 0.5f, 0.5f, 0.5f};

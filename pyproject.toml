@@ -28,10 +28,12 @@ eval = [
     "playwright>=1.59",
     "psutil>=7.2",
     "pyyaml>=6.0",
-    # LGPL-3.0; the Video Depth Anything trial in src/walkthrough needs it.
+    # LGPL-3.0; the Video Depth Anything trial in evaluation/layers needs it.
     "easydict>=1.13",
 ]
 dev = [
+    "ipykernel>=7.4.0",
+    "nbclient>=0.11.0",
     "pytest>=9.0",
     "ruff>=0.16",
 ]

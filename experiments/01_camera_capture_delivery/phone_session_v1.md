@@ -1,6 +1,6 @@
 # Phone session v1: the per-frame stream from the Redmi app to the computer
 
-This is the one written definition of what the old check app sent and what the computer (`host/`) accepts. Since Task96 (14 October 2026) the capture app sends [phone session v2](phone_session_v2.md) instead, which keeps every frame; v1 stays readable for saved sessions and for `src.live.stand_in`. The v1 Java encoder (`phonecheck/.../SessionFrame.java`) is in the Git history before Task96; the Python reader is `host/session_v1.py`, tested against the fixture in `tests/fixtures/session_v1/` (`frame_header.json` and `frame_payload.bin`). Version 2 reuses v1's ARCore fields, checks, coordinates, depth and anchor rules word for word (`session_v1.parse_arcore`).
+This is the one written definition of what the old check app sent and what the computer (`host/`) accepts. Since Task96 (14 October 2026) the capture app sends [phone session v2](phone_session_v2.md) instead, which keeps every frame; v1 stays readable for saved sessions and for `evaluation.stand_in`. The v1 Java encoder (`phonecheck/.../SessionFrame.java`) is in the Git history before Task96; the Python reader is `sitescan/session/wire_v1.py`, tested against the fixture in `tests/fixtures/session_v1/` (`frame_header.json` and `frame_payload.bin`). Version 2 reuses v1's ARCore fields, checks, coordinates, depth and anchor rules word for word (`session_v1.parse_arcore`).
 
 ## Connection and framing
 
@@ -39,7 +39,7 @@ The `session` header: `{"type": "session", "version": 1, "device": {...}, "start
 
 - **World:** ARCore's world frame, metres, +Y up (against gravity). Its origin and heading are wherever tracking started.
 - **Camera (ARCore, OpenGL axes):** +X right in the image, +Y up in the image, the camera looks along -Z. `pose` maps camera to world: `p_world = R(q) p_camera + t`. The pose is for the sensor's own orientation (the sent image is landscape, 640 x 480 on the Redmi), not the screen's.
-- **Project axes (OpenCV):** the rest of this repository uses +X right, +Y down, looking along +Z. `host/session_v1.py` gives `world_from_camera_cv(pose) = world_from_camera(pose) @ diag(1, -1, -1, 1)`.
+- **Project axes (OpenCV):** the rest of this repository uses +X right, +Y down, looking along +Z. `sitescan/session/wire_v1.py` gives `world_from_camera_cv(pose) = world_from_camera(pose) @ diag(1, -1, -1, 1)`.
 - **Pixel:** `u` across, `v` down, from the top-left of the sent image. A camera-frame point `(X, Y, Z)` with `Z < 0` appears at `u = cx + fx * X / -Z`, `v = cy - fy * Y / -Z`.
 
 ### Tracked points
@@ -66,7 +66,7 @@ ARCore can move its estimate of where the camera has been, for example when it r
 
 ## Checks the computer makes
 
-`host/session_v1.py` refuses a frame (and the receiver closes the connection) when: the version is not 1; `pose` is missing while tracking or present while not; the quaternion's length is not within 0.001 of 1; the image is not JPEG (does not start `FF D8`); the payload length is not `image.bytes + depth.bytes + depth.confidence_bytes`; `depth.bytes` is not `w*h*2` or `confidence_bytes` not `w*h`; a point has the wrong number of values or its pixel is more than 0.5 px from the projection.
+`sitescan/session/wire_v1.py` refuses a frame (and the receiver closes the connection) when: the version is not 1; `pose` is missing while tracking or present while not; the quaternion's length is not within 0.001 of 1; the image is not JPEG (does not start `FF D8`); the payload length is not `image.bytes + depth.bytes + depth.confidence_bytes`; `depth.bytes` is not `w*h*2` or `confidence_bytes` not `w*h`; a point has the wrong number of values or its pixel is more than 0.5 px from the projection.
 
 ## Settings (version 1)
 

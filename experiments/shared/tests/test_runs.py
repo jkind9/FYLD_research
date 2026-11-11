@@ -31,22 +31,22 @@ def test_stop_incomplete_keeps_files_and_refuses_verify(tmp_path):
 def test_snapshot_includes_dirty_untracked_walkthrough_and_hash_changes(tmp_path):
     from experiments.shared.runs import _snapshot
 
-    source = tmp_path / "src/walkthrough/pipeline.py"
+    source = tmp_path / "evaluation/layers/pipeline.py"
     source.parent.mkdir(parents=True)
     source.write_text("value = 1\n")
     experiment = tmp_path / "experiments/method.py"
     experiment.parent.mkdir()
     experiment.write_text("value = 2\n")
-    unrelated = tmp_path / "src/other.py"
+    unrelated = tmp_path / "evaluation/other.py"
     unrelated.write_text("value = 3\n")
     first = _snapshot(tmp_path, tmp_path / "snapshot-1", tmp_path / "runs")
-    assert set(first) == {"experiments/method.py", "src/walkthrough/pipeline.py"}
+    assert set(first) == {"experiments/method.py", "evaluation/layers/pipeline.py"}
     assert (
-        tmp_path / "snapshot-1/src/walkthrough/pipeline.py"
+        tmp_path / "snapshot-1/evaluation/layers/pipeline.py"
     ).read_text() == "value = 1\n"
     source.write_text("value = 4\n")
     second = _snapshot(tmp_path, tmp_path / "snapshot-2", tmp_path / "runs")
-    assert first["src/walkthrough/pipeline.py"] != second["src/walkthrough/pipeline.py"]
+    assert first["evaluation/layers/pipeline.py"] != second["evaluation/layers/pipeline.py"]
 
 
 @pytest.mark.parametrize(
@@ -54,10 +54,10 @@ def test_snapshot_includes_dirty_untracked_walkthrough_and_hash_changes(tmp_path
     [
         ".",
         "experiments",
-        "src",
-        "src/walkthrough",
-        "src/walkthrough/steps",
-        "src/walkthrough/pipeline.py",
+        "evaluation",
+        "evaluation/layers",
+        "evaluation/layers/steps",
+        "evaluation/layers/pipeline.py",
     ],
 )
 def test_source_snapshot_rejects_linked_roots_directories_and_files(
@@ -65,7 +65,7 @@ def test_source_snapshot_rejects_linked_roots_directories_and_files(
 ):
     from experiments.shared.runs import _snapshot
 
-    source = tmp_path / "src/walkthrough/pipeline.py"
+    source = tmp_path / "evaluation/layers/pipeline.py"
     source.parent.mkdir(parents=True)
     source.write_text("value = 1\n")
     (source.parent / "steps").mkdir()
@@ -91,7 +91,7 @@ def test_walkthrough_custom_run_root_excludes_prior_source_copies(
 ):
     from experiments.shared import runs
 
-    source = tmp_path / "src/walkthrough/pipeline.py"
+    source = tmp_path / "evaluation/layers/pipeline.py"
     source.parent.mkdir(parents=True)
     source.write_text("value = 1\n")
     monkeypatch.setattr(runs, "_git", lambda *_: "fake-test-repository")
@@ -99,7 +99,7 @@ def test_walkthrough_custom_run_root_excludes_prior_source_copies(
         with Run(source.parent / "custom-output", tmp_path, {}) as run:
             pass
         snapshot = json.loads((run.path / "metadata/source_snapshot.json").read_text())
-        assert list(snapshot["files"]) == ["src/walkthrough/pipeline.py"]
+        assert list(snapshot["files"]) == ["evaluation/layers/pipeline.py"]
 
 
 def test_public_artifact_inventory_reuses_manifest_contract(tmp_path):

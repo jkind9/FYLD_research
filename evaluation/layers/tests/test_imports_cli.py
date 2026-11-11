@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from src.walkthrough.tests.test_adapters import bundle
+from evaluation.layers.tests.test_adapters import bundle
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -28,7 +28,7 @@ def test_importing_root_has_no_models_or_output(tmp_path):
         [
             "-c",
             (
-                "import sys; from src.walkthrough import pipeline,cli; "
+                "import sys; from evaluation.layers import pipeline,cli; "
                 "assert not any(n in sys.modules for n in ('torch','ultralytics','open3d'))"
             ),
         ],
@@ -48,7 +48,7 @@ def test_methods_import_without_root_package(tmp_path):
                 "'experiments.04_surface_reconstruction.src.metric_surface',"
                 "'experiments.06_object_recognition.pilot.association'); "
                 "[importlib.import_module(n) for n in names]; "
-                "assert 'src.walkthrough' not in sys.modules"
+                "assert 'evaluation.layers' not in sys.modules"
             ),
         ],
         tmp_path,
@@ -60,7 +60,7 @@ def test_methods_import_without_root_package(tmp_path):
 @pytest.mark.parametrize(
     "module",
     [
-        "src.walkthrough.cli",
+        "evaluation.layers.cli",
         "experiments.03_camera_pose_estimation.src.run",
         "experiments.04_surface_reconstruction.src.run",
         "experiments.06_object_recognition.pilot.replay",
@@ -78,7 +78,7 @@ def test_cli_reports_real_depth_unavailable_and_returns_failure(tmp_path):
     result = invoke(
         [
             "-m",
-            "src.walkthrough.cli",
+            "evaluation.layers.cli",
             "--report",
             str(report),
             "--bundle",
@@ -102,7 +102,7 @@ def test_cli_reports_real_depth_unavailable_and_returns_failure(tmp_path):
 )
 def test_cli_refuses_incomplete_or_mixed_source_before_creating_run(tmp_path, flags):
     run_root = tmp_path / "runs"
-    result = invoke(["-m", "src.walkthrough.cli", *flags, "--run-root", str(run_root)])
+    result = invoke(["-m", "evaluation.layers.cli", *flags, "--run-root", str(run_root)])
     assert result.returncode == 2
     assert "error:" in result.stderr
     assert "--report and --bundle" in result.stderr
@@ -115,7 +115,7 @@ def test_cli_depth_choice_reaches_the_depth_layer(tmp_path):
     result = invoke(
         [
             "-m",
-            "src.walkthrough.cli",
+            "evaluation.layers.cli",
             "--report",
             str(report),
             "--bundle",
@@ -140,7 +140,7 @@ def test_cli_refuses_recorded_depth_without_a_dataset(tmp_path):
     result = invoke(
         [
             "-m",
-            "src.walkthrough.cli",
+            "evaluation.layers.cli",
             "--report",
             "report.json",
             "--bundle",
@@ -174,9 +174,9 @@ def _depth_args(**overrides):
     ],
 )
 def test_cli_depth_scale_wraps_depth_anything_on_the_cpu(scale, source, control):
-    from src.walkthrough.cli import depth_choice
-    from src.walkthrough.steps.depth import DepthAnythingV2Metric
-    from src.walkthrough.steps.depth_scale import ScaleCorrected
+    from evaluation.layers.cli import depth_choice
+    from evaluation.layers.steps.depth import DepthAnythingV2Metric
+    from evaluation.layers.steps.depth_scale import ScaleCorrected
 
     method = depth_choice(_depth_args(depth_scale=scale))
 
@@ -187,8 +187,8 @@ def test_cli_depth_scale_wraps_depth_anything_on_the_cpu(scale, source, control)
 
 
 def test_cli_chain_anchored_to_poses_combines_the_two_sources():
-    from src.walkthrough.cli import depth_choice
-    from src.walkthrough.steps.depth_scale import (
+    from evaluation.layers.cli import depth_choice
+    from evaluation.layers.steps.depth_scale import (
         AnchoredScale,
         OverlapChainScale,
         PoseTriangulatedScale,
@@ -203,7 +203,7 @@ def test_cli_chain_anchored_to_poses_combines_the_two_sources():
 
 
 def test_cli_pose_triangulated_reads_the_datasets_groundtruth():
-    from src.walkthrough.cli import depth_choice
+    from evaluation.layers.cli import depth_choice
 
     method = depth_choice(_depth_args(depth_scale="pose-triangulated"))
 
@@ -211,7 +211,7 @@ def test_cli_pose_triangulated_reads_the_datasets_groundtruth():
 
 
 def test_cli_pose_noise_and_chain_smoothing_reach_their_scale_sources():
-    from src.walkthrough.cli import depth_choice
+    from evaluation.layers.cli import depth_choice
 
     noisy = depth_choice(_depth_args(depth_scale="pose-triangulated", pose_noise_m=0.0))
     smoothed = depth_choice(_depth_args(depth_scale="overlap-chain", chain_smoothing_frames=5))
@@ -224,7 +224,7 @@ def test_cli_pose_noise_and_chain_smoothing_reach_their_scale_sources():
 
 def test_cli_refuses_scale_settings_without_their_scale_source(tmp_path):
     run_root = tmp_path / "runs"
-    result = invoke(["-m", "src.walkthrough.cli", "--dataset", "tum", "--run-root", str(run_root),
+    result = invoke(["-m", "evaluation.layers.cli", "--dataset", "tum", "--run-root", str(run_root),
                      "--depth", "depth-anything", "--depth-scale", "overlap-chain", "--pose-noise-m", "0"])
     assert result.returncode == 2
     assert "--pose-noise-m applies only to --depth-scale pose-triangulated" in result.stderr
@@ -233,7 +233,7 @@ def test_cli_refuses_scale_settings_without_their_scale_source(tmp_path):
 
 def test_cli_refuses_depth_scale_on_other_depth_choices(tmp_path):
     run_root = tmp_path / "runs"
-    result = invoke(["-m", "src.walkthrough.cli", "--dataset", "tum", "--run-root", str(run_root),
+    result = invoke(["-m", "evaluation.layers.cli", "--dataset", "tum", "--run-root", str(run_root),
                      "--depth", "recorded", "--depth-scale", "overlap-chain"])
     assert result.returncode == 2
     assert "--depth-scale applies only to" in result.stderr
@@ -242,7 +242,7 @@ def test_cli_refuses_depth_scale_on_other_depth_choices(tmp_path):
 
 def test_cli_refuses_reference_scale_without_a_dataset(tmp_path):
     run_root = tmp_path / "runs"
-    result = invoke(["-m", "src.walkthrough.cli", "--report", "report.json", "--bundle", "bundle",
+    result = invoke(["-m", "evaluation.layers.cli", "--report", "report.json", "--bundle", "bundle",
                      "--run-root", str(run_root), "--depth", "depth-anything", "--depth-scale", "pose-triangulated"])
     assert result.returncode == 2
     assert "--depth-scale pose-triangulated needs --dataset" in result.stderr

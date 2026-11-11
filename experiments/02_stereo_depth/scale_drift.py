@@ -3,7 +3,7 @@
 Two jobs, both reading only files:
 
     python -m experiments.02_stereo_depth.scale_drift clip --source data/tum --sequence rgbd_dataset_freiburg1_desk \
-        --output outputs/task65_clips/rgbd_dataset_freiburg1_desk_every2
+        --output outputs/inputs/task65_clips/rgbd_dataset_freiburg1_desk_every2
     python -m experiments.02_stereo_depth.scale_drift summarise --run "Depth Anything=<run folder>" ... \
         --output experiments/02_stereo_depth/runs/task65/scale_drift.json
     python -m experiments.02_stereo_depth.scale_drift check-space --path outputs --minimum-gb 30
@@ -37,11 +37,11 @@ from .run import _resolve_sequence_root
 pose_dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
 pose_evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
 pose_tracking = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
-consistency = importlib.import_module("src.walkthrough.consistency")
-contracts = importlib.import_module("src.walkthrough.steps.contracts")
+consistency = importlib.import_module("evaluation.layers.consistency")
+contracts = importlib.import_module("evaluation.layers.steps.contracts")
 
 HYPERPARAMETERS = {
-    "clip_every": {"value": 2, "source": "inherited outputs/task51_real_clips/*/CLIP_SOURCE.txt"},
+    "clip_every": {"value": 2, "source": "inherited outputs/inputs/task51_real_clips/*/CLIP_SOURCE.txt"},
     "clip_depth_tolerance_s": {"value": 0.02, "source": "inherited experiment 03 dataset.py:79"},
     "clip_max_gap_s": {"value": 0.1, "source": "inherited experiments/03_camera_pose_estimation/src/tracking.py:70"},
     "gap_lags_frames": {"value": [1, 5, 10, 20, 29], "source": "proposed by Claude 2026-10-08, not owner-ruled"},
@@ -225,7 +225,7 @@ def _best_fit_camera(run: dict[str, Any]) -> dict[str, Any] | None:
     records = []
     for row in run["tracking"]["records"]:
         pose = contracts.read_pose(row["pose"])
-        # Same segment key as the walkthrough scorer (src/walkthrough/validation.py:53-54).
+        # Same segment key as the walkthrough scorer (evaluation/layers/validation.py:53-54).
         keyed = Pose(pose.matrix, pose.world_id, json.dumps([pose.world_id, pose.segment_id]), pose.source)
         records.append(pose_tracking.Record(row["frame_id"], row["timestamp_s"], row["status"], keyed, row["reason"]))
     result = pose_evaluation.evaluate(records, pose_evaluation.read_references(root / "groundtruth.txt"))

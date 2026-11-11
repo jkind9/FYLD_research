@@ -1,6 +1,6 @@
 """Score a live run's surface against the ICL living-room reference, as experiments/sfm/run_dense.py does.
 
-    python -m src.live.score --run <live run folder> --icl data/icl_nuim
+    python -m evaluation.score --run <live run folder> --icl data/icl_nuim
 """
 
 from __future__ import annotations

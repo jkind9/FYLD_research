@@ -1,6 +1,6 @@
 """Why a live run counted the objects it did: new identities split by distance, confidence and sightings.
 
-    python -m src.live.count_report <live run folder>/updates.jsonl
+    python -m evaluation.count_report <live run folder>/updates.jsonl
 
 A new identity just past the matching distance (0.35 m) from an object of the same class suggests the same
 object placed in a different spot; one far from any suggests a separate object or a false detection. An identity

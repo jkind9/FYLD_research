@@ -37,7 +37,7 @@ A model that claims to output metres is "metric" only if that claim is checked. 
 
 > **Project result: the most accurate model was too slow.** Marigold V2 (a diffusion model) gave the best shape, AbsRel 0.036, but took 16.6 s per frame on the GPU and crashed on desk. The owner ruled that anything slower than 1 frame per second is not worth using, so it was dropped.
 
-> **Project result: a sideways image costs the model accuracy.** Phone cameras record in the sensor's landscape orientation, so a phone held upright produces images on their side. On 20 frames of a Redmi walk, Depth Anything V2 Metric Small scored median AbsRel 0.080 against the phone's ARCore depth when fed sideways images, and 0.058 when each image was turned upright first and the depth turned back. That is 27% lower, better in 17 of 20 frames. Against ARCore's tracked points the figures were 0.106 and 0.090. ARCore depth is a reference, not ground truth. (Task109, `src/live/README.md`.)
+> **Project result: a sideways image costs the model accuracy.** Phone cameras record in the sensor's landscape orientation, so a phone held upright produces images on their side. On 20 frames of a Redmi walk, Depth Anything V2 Metric Small scored median AbsRel 0.080 against the phone's ARCore depth when fed sideways images, and 0.058 when each image was turned upright first and the depth turned back. That is 27% lower, better in 17 of 20 frames. Against ARCore's tracked points the figures were 0.106 and 0.090. ARCore depth is a reference, not ground truth. (Task109, `https://github.com/jkind9/FYLD_research/blob/9bf3b51/src/live/README.md`.)
 
 ### Why a drifting size is so damaging
 
@@ -55,10 +55,10 @@ None made the old tracker accurate. The real fix came from changing the tracker 
 
 ## Try it
 
-Score Depth Anything against Kinect depth on TUM (needs the checkpoint in `data/models/`):
+Score Depth Anything against Kinect depth on TUM (needs the checkpoint in `models/`):
 
 ```text
-python -m experiments.02_stereo_depth.run --method depth-anything --checkpoint data/models/depth_anything_v2_metric_indoor_small --tum-root data/tum --output experiments/02_stereo_depth/runs/<new> --device cpu
+python -m experiments.02_stereo_depth.run --method depth-anything --checkpoint models/depth_anything_v2_metric_indoor_small --tum-root data/tum --output experiments/02_stereo_depth/runs/<new> --device cpu
 ```
 
 Then look at `results.json` in the run folder: compare the raw AbsRel with the shape (aligned) AbsRel.

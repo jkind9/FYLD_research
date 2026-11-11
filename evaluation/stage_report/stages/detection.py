@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from experiments.evaluation import schema
-from experiments.evaluation.stages.common import (
+from evaluation.stage_report import schema
+from evaluation.stage_report.stages.common import (
     file_sha256,
     owner,
     read_json,

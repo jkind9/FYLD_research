@@ -18,8 +18,12 @@ comes from `sitescan.cleanup.vote.measurements`; experiments import the product 
 Trial defaults and arithmetic are preserved. Their evidence and reasons for rejection
 are in [surface denoising](../../research/surface_denoising/README.md).
 
-Existing entry points remain `src.live.denoise_trial`, `src.live.cleanup_attributes`,
-`tools.demos.cleanup_scene` and `tools.demos.cleanup_tuner`. `src.live.clean` forwards the
-old names. Their input and output file formats are unchanged.
+| Script | What it does | Run it |
+|---|---|---|
+| [`denoise_trial.py`](denoise_trial.py) | Fuses the room-build frames several ways and scores each against held-out ARCore tracked points | `python -B -m experiments.surface_cleanup.denoise_trial --session <recording> --out <folder>` |
+| [`cleanup_attributes.py`](cleanup_attributes.py) | The raw fused room and, per point, the evidence each clean-up stage tests, for the tuner page | `python -B -m experiments.surface_cleanup.cleanup_attributes --session <recording> --out <folder>` |
 
-Run `python -B -m pytest -q src/live/tests/test_clean.py` to check the retained methods.
+`tools.demos.cleanup_scene` and `tools.demos.cleanup_tuner` turn their outputs into offline
+pages. The adopted vote and piece filter are imported from `sitescan.cleanup`.
+
+Run `python -B -m pytest -c pytest-full.ini experiments/surface_cleanup` to check the retained methods and the trials.

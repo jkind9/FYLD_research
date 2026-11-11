@@ -7,8 +7,6 @@ from collections.abc import Callable, Iterator, Sequence
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from sitescan.mapping.plane import scatter_axes
-
 
 class PointChunks:
     """Nx3 metre points held as chunks and loaded one at a time by their loaders."""
@@ -72,7 +70,11 @@ class _Scatter:
 
     def principal_axes(self) -> tuple[NDArray, NDArray]:
         """Centre and unit axes as rows: largest spread first, smallest (the normal) last."""
-        return scatter_axes(self.reference, self._sum, self._outer, self.count)
+        if self.count < 3:
+            raise ValueError("Fewer than 3 points lie on the plane")
+        mean = self._sum / self.count
+        _, vectors = np.linalg.eigh(self._outer / self.count - np.outer(mean, mean))
+        return self.reference + mean, vectors[:, ::-1].T
 
 
 def _as_chunks(points: ArrayLike | PointChunks) -> PointChunks:

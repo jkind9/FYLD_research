@@ -28,7 +28,7 @@ Choosing a source, borrowing an earlier scale and selecting frames remain pipeli
 
 ## Run it
 
-Run in `.venv-sitescan` from the repository root:
+Run from the repository root with `.venv/Scripts/python.exe`:
 
 ```python
 import numpy as np
@@ -48,12 +48,12 @@ print(scale.fit_grid(learned, valid, uv, target).shape)
 
 | Name | Default | Why | Evidence |
 |---|---|---|---|
-| `min_confidence` | 128 | Adopted confidence cutoff on ARCore's 0–255 scale | [Raw-depth settings](../../src/live/README.md) |
-| `minimum` | 50 pixels | Required support for the adopted raw-depth fit | [Scale tests](../../src/live/tests/test_sizing.py) |
-| Tracked-point minimum | 20 points | Existing live source requirement, passed by its caller | [Scale tests](../../src/live/tests/test_sizing.py) |
+| `min_confidence` | 128 | Adopted confidence cutoff on ARCore's 0–255 scale | [Scale tests](../../tests/test_sitescan_scale.py) |
+| `minimum` | 50 pixels | Required support for the adopted raw-depth fit | [Pipeline tests](../../tests/test_pipelines.py) |
+| Tracked-point minimum | 20 points | Existing live source requirement, passed by its caller | [Pipeline tests](../../tests/test_pipelines.py) |
 | `cells` | 8 × 6 | Held-out AbsRel 0.044 against 0.065 for one scale per frame | [Adopted chain](../../DESIGN.md#2-where-the-project-is) |
-| `min_cell_pixels` | 20 pixels | Existing support rule for each grid cell | [Grid tests](../../src/live/tests/test_room_build.py) |
-| `fallback` | None | Use the frame's median log ratio in unsupported cells | [Grid tests](../../src/live/tests/test_room_build.py) |
+| `min_cell_pixels` | 20 pixels | Existing support rule for each grid cell | [Scale tests](../../tests/test_sitescan_scale.py) |
+| `fallback` | None | Use the frame's median log ratio in unsupported cells | [Scale tests](../../tests/test_sitescan_scale.py) |
 | `max_age_s` | 0.1 s | Exclude repeated old depth from room reconstruction | [Freshness evidence](../../DESIGN.md#713-learning-from-sceneview-and-open3dmap) |
 
 ## Limits
@@ -64,14 +64,15 @@ measure one. Both fits clip target pixel indices as the original implementation 
 The freshness helper retains the existing one-sided age check, including timestamps
 ahead of the camera clock. It is not a clock alignment or scale-expiry rule.
 
-Live still tries raw depth, tracked points, then its last scale. Room still chooses
-fresh depth and a grid fit. These choices have not moved into this stage. The optional
+Live tries raw depth, tracked points, then its last scale (`frame_scale` in the live
+pipeline). Room chooses fresh depth and a grid fit. These choices belong to the
+orchestrators, not this stage. The optional
 scale-and-shift experiment remains in `experiments/sfm`.
 
 ## Tests
 
-`python -B -m pytest -q tests/test_sitescan_scale.py src/live/tests/test_sizing.py
-src/live/tests/test_room_build.py experiments/sfm/tests/test_dense.py` checks confidence,
+`python -B -m pytest -q tests/test_sitescan_scale.py tests/test_pipelines.py
+experiments/sfm/tests/test_dense.py` checks confidence,
 camera projection, image bounds, point depth, invalid pairs, support thresholds, grid
 blending and fallback, source fallback, freshness and the retained shift experiment.
 Golden room and live outputs check the combined numerical result.

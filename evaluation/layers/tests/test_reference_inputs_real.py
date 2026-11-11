@@ -8,12 +8,12 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from src.walkthrough import pipeline
-from src.walkthrough.config import PipelineSpec
-from src.walkthrough.steps.capture import TumSequence, pose_dataset
-from src.walkthrough.steps.contracts import nearest_references
-from src.walkthrough.steps.depth import RecordedSensorDepth
-from src.walkthrough.steps.tracking import ReferencePoses
+from evaluation.layers import pipeline
+from evaluation.layers.config import PipelineSpec
+from evaluation.layers.steps.capture import TumSequence, pose_dataset
+from evaluation.layers.steps.contracts import nearest_references
+from evaluation.layers.steps.depth import RecordedSensorDepth
+from evaluation.layers.steps.tracking import ReferencePoses
 
 REPO = Path(__file__).resolve().parents[3]
 DATASET = REPO / "data/tum/rgbd_dataset_freiburg1_xyz"

@@ -1,0 +1,373 @@
+---
+id: "150"
+title: Finish the refactor: objects stage, pipelines, apps, evaluation, root tidy, docs and walkthrough notebook
+status: done
+session: 7adb44ef-36d5-4dd2-b054-3155e1351cda
+files:
+  - sitescan/objects/__init__.py
+  - sitescan/objects/detect.py
+  - sitescan/objects/place.py
+  - sitescan/objects/match.py
+  - sitescan/objects/tracks.py
+  - sitescan/pipelines/__init__.py
+  - sitescan/pipelines/live.py
+  - sitescan/pipelines/room.py
+  - sitescan/io.py
+  - sitescan/cleanup/__init__.py
+  - sitescan/mapping/plane.py
+  - sitescan/mapping/footprint.py
+  - sitescan/scale/fit.py
+  - apps/__init__.py
+  - apps/cli.py
+  - tests/test_sitescan_objects.py
+  - tests/test_pipelines.py
+  - tests/golden/run.py
+  - tests/golden/test_golden.py
+  - src/live/run.py
+  - src/live/room_build.py
+  - src/live/processor.py
+  - experiments/06_object_recognition/pilot/association.py
+  - experiments/06_object_recognition/pilot/detector.py
+  - pytest.ini
+  - pyproject.toml
+  - sitescan/session/read.py
+  - sitescan/session/__init__.py
+  - sitescan/types.py
+  - tests/test_sitescan_session.py
+  - tests/test_sitescan_cleanup.py
+  - experiments/05_birds_eye_mapping/chunks.py
+  - tests/fixtures/tum_desk_20_golden.json
+  - apps/receiver/__init__.py
+  - apps/receiver/capture_receiver.py
+  - experiments/01_camera_capture_delivery/host/capture_receiver.py
+  - experiments/01_camera_capture_delivery/tests/fake_phone.py
+  - experiments/01_camera_capture_delivery/tests/conftest.py
+  - experiments/01_camera_capture_delivery/tests/test_capture_receiver.py
+  - experiments/02_stereo_depth/run.py
+  - experiments/06_object_recognition/experiments/01_detection/jitter_run.py
+  - experiments/06_object_recognition/experiments/01_detection/placement_run.py
+  - experiments/06_object_recognition/experiments/03_appearance/run.py
+  - experiments/06_object_recognition/experiments/03_appearance/tests/test_publication.py
+  - experiments/06_object_recognition/experiments/04_geometry_identity/inputs.py
+  - experiments/06_object_recognition/experiments/04_geometry_identity/run.py
+  - experiments/06_object_recognition/experiments/05_replay/automatic.py
+  - experiments/06_object_recognition/experiments/05_replay/generation.py
+  - experiments/06_object_recognition/pilot/replay.py
+  - experiments/06_object_recognition/pilot/run.py
+  - experiments/sfm/dump_depth.py
+  - src/walkthrough/cli.py
+  - src/walkthrough/steps/depth.py
+  - src/walkthrough/steps/video_depth.py
+  - src/walkthrough/tests/test_scaled_depth.py
+  - evaluation/__init__.py
+  - evaluation/stand_in.py
+  - evaluation/score.py
+  - evaluation/depth_check.py
+  - evaluation/count_report.py
+  - evaluation/landmark_probe.py
+  - evaluation/orientation_control.py
+  - evaluation/tests/test_stand_in.py
+  - evaluation/tests/test_depth_check.py
+  - evaluation/tests/test_count_report.py
+  - evaluation/tests/test_landmark_probe.py
+  - evaluation/tests/test_orientation_control.py
+  - experiments/surface_cleanup/denoise_trial.py
+  - experiments/surface_cleanup/cleanup_attributes.py
+  - experiments/surface_cleanup/tests/test_denoise_trial.py
+  - experiments/surface_cleanup/tests/test_cleanup_attributes.py
+  - experiments/surface_cleanup/tests/test_filters.py
+  - experiments/lingbot_map/compare.py
+  - tools/demos/capture_scene.py
+  - tools/demos/cleanup_scene.py
+  - tools/demos/cleanup_tuner.py
+  - tests/fixtures/build.py
+  - experiments/01_camera_capture_delivery/host/receiver.py
+  - experiments/01_camera_capture_delivery/host/accuracy.py
+  - experiments/01_camera_capture_delivery/host/session_v1.py
+  - experiments/01_camera_capture_delivery/host/session_v2.py
+  - experiments/01_camera_capture_delivery/host/protocol.py
+  - experiments/01_camera_capture_delivery/tests/test_phonecheck_host.py
+  - experiments/01_camera_capture_delivery/tests/test_session_v1.py
+  - experiments/01_camera_capture_delivery/tests/test_session_v2.py
+  - evaluation/layers/steps/contracts.py
+  - evaluation/layers/tests/providers.py
+  - evaluation/layers/tests/test_adapters.py
+  - evaluation/layers/tests/test_consistency.py
+  - evaluation/layers/tests/test_contracts.py
+  - evaluation/layers/tests/test_depth_scale.py
+  - evaluation/layers/tests/test_depth_score.py
+  - evaluation/layers/tests/test_imports_cli.py
+  - evaluation/layers/tests/test_layers.py
+  - evaluation/layers/tests/test_mapping.py
+  - evaluation/layers/tests/test_pipeline.py
+  - evaluation/layers/tests/test_reference_inputs.py
+  - evaluation/layers/tests/test_reference_inputs_real.py
+  - evaluation/layers/tests/test_scaled_depth.py
+  - evaluation/layers/tests/test_video_depth.py
+  - evaluation/stage_report/compare.py
+  - evaluation/stage_report/run.py
+  - evaluation/stage_report/stages/camera.py
+  - evaluation/stage_report/stages/detection.py
+  - evaluation/stage_report/stages/identity.py
+  - evaluation/stage_report/stages/surface.py
+  - evaluation/stage_report/tests/fixtures.py
+  - evaluation/stage_report/tests/test_accepted_runs.py
+  - evaluation/stage_report/tests/test_stage_report.py
+  - evaluation/stage_report/tests/test_stages.py
+  - experiments/02_stereo_depth/scale_drift.py
+  - experiments/sfm/run_dense.py
+  - experiments/shared/runs.py
+  - experiments/shared/tests/test_runs.py
+  - tools/check.py
+  - tools/demos/run_report.py
+  - tools/demos/tests/test_run_report.py
+  - experiments/open_vio/host/clock_check.py
+  - tests/test_sitescan_depth_orientation.py
+  - tests/test_sitescan_fusion.py
+  - tests/test_sitescan_scale.py
+  - pytest-full.ini
+  - tools/demos/build.py
+  - tools/demos/screenshot.py
+  - experiments/live_slam/run_live.py
+  - experiments/sfm/dump_prompt_depth.py
+  - experiments/sfm/run_metric_points.py
+  - experiments/sfm/run_sfm.py
+  - tools/function_index.py
+  - tools/tests/test_function_index.py
+  - ruff.toml
+  - experiments/06_object_recognition/experiments/07_spatial_uncertainty/tests/test_spatial_association.py
+created: 2026-11-11
+---
+# Finish the refactor: objects stage, pipelines, apps, evaluation, root tidy, docs and walkthrough notebook
+
+## Goal
+
+Fixes 2-7 of DESIGN section 15 done with golden outputs unchanged, one README per folder, a function index, a future-work section and a walkthrough notebook; pushed
+
+## Plan
+
+1. Objects stage in sitescan/objects. 2. Live and room orchestrators in sitescan/pipelines with sitescan/io.py and apps/cli.py. 3. Findings 6-8. 4. Move src/ trials and walkthrough to evaluation/, receiver and viewer to apps/. 5. Weights to models/, root and outputs tidy. 6. READMEs, function index, future work, notebook. 7. Golden, full-room and live checks; commit and push.
+
+## Files
+
+- .gitignore (+0 -4, 111 lines)
+- README.md (+3 -3, 423 lines)
+- apps/README.md (+43 -0, 43 lines)
+- apps/__init__.py (+1 -0, 1 lines)
+- apps/cli.py (+126 -0, 126 lines)
+- apps/receiver/README.md (+35 -0, 35 lines)
+- apps/receiver/__init__.py (+1 -0, 1 lines)
+- apps/receiver/capture_receiver.py (+4 -4, 377 lines)
+- demo_outputs/00_overview.html (+0 -163, 0 lines)
+- demo_outputs/01_depth_to_3d.html (+0 -630, 0 lines)
+- demo_outputs/02_camera_tracking.html (+0 -655, 0 lines)
+- demo_outputs/03_surface_accuracy.html (+0 -626, 0 lines)
+- demo_outputs/04_gaussian_splats.html (+0 -678, 0 lines)
+- demo_outputs/05_birds_eye_map.html (+0 -686, 0 lines)
+- demo_outputs/06_objects_in_3d.html (+0 -733, 0 lines)
+- demo_outputs/README.md (+0 -67, 0 lines)
+- evaluation/README.md (+25 -0, 25 lines)
+- evaluation/__init__.py (+1 -0, 1 lines)
+- evaluation/count_report.py (+1 -1, 57 lines)
+- evaluation/depth_check.py (+20 -12, 87 lines)
+- evaluation/landmark_probe.py (+18 -15, 89 lines)
+- evaluation/layers/README.md (+17 -17, 277 lines)
+- evaluation/layers/cli.py (+3 -3, 186 lines)
+- evaluation/layers/steps/contracts.py (+1 -1, 244 lines)
+- evaluation/layers/steps/depth.py (+1 -1, 289 lines)
+- evaluation/layers/steps/video_depth.py (+1 -1, 86 lines)
+- evaluation/layers/tests/providers.py (+2 -2, 81 lines)
+- evaluation/layers/tests/test_adapters.py (+17 -14, 597 lines)
+- evaluation/layers/tests/test_consistency.py (+1 -1, 116 lines)
+- evaluation/layers/tests/test_contracts.py (+10 -10, 202 lines)
+- evaluation/layers/tests/test_depth_scale.py (+3 -3, 335 lines)
+- evaluation/layers/tests/test_depth_score.py (+3 -3, 123 lines)
+- evaluation/layers/tests/test_imports_cli.py (+18 -18, 249 lines)
+- evaluation/layers/tests/test_layers.py (+8 -8, 305 lines)
+- evaluation/layers/tests/test_mapping.py (+4 -4, 198 lines)
+- evaluation/layers/tests/test_pipeline.py (+6 -6, 172 lines)
+- evaluation/layers/tests/test_reference_inputs.py (+3 -3, 334 lines)
+- evaluation/layers/tests/test_reference_inputs_real.py (+6 -6, 75 lines)
+- evaluation/layers/tests/test_scaled_depth.py (+6 -6, 208 lines)
+- evaluation/layers/tests/test_video_depth.py (+5 -5, 116 lines)
+- evaluation/orientation_control.py (+18 -12, 122 lines)
+- evaluation/results.md (+91 -0, 91 lines)
+- evaluation/score.py (+1 -1, 38 lines)
+- evaluation/stage_report/README.md (+5 -5, 69 lines)
+- evaluation/stage_report/compare.py (+1 -1, 132 lines)
+- evaluation/stage_report/run.py (+4 -4, 148 lines)
+- evaluation/stage_report/stages/README.md (+35 -0, 35 lines)
+- evaluation/stage_report/stages/camera.py (+2 -2, 143 lines)
+- evaluation/stage_report/stages/detection.py (+2 -2, 109 lines)
+- evaluation/stage_report/stages/identity.py (+2 -2, 87 lines)
+- evaluation/stage_report/stages/surface.py (+2 -2, 127 lines)
+- evaluation/stage_report/tests/fixtures.py (+2 -2, 169 lines)
+- evaluation/stage_report/tests/test_accepted_runs.py (+2 -2, 84 lines)
+- evaluation/stage_report/tests/test_stage_report.py (+4 -4, 392 lines)
+- evaluation/stage_report/tests/test_stages.py (+2 -2, 28 lines)
+- evaluation/stand_in.py (+5 -5, 118 lines)
+- evaluation/tests/test_count_report.py (+1 -1, 32 lines)
+- evaluation/tests/test_depth_check.py (+1 -1, 15 lines)
+- evaluation/tests/test_landmark_probe.py (+1 -1, 23 lines)
+- evaluation/tests/test_orientation_control.py (+1 -1, 73 lines)
+- evaluation/tests/test_stand_in.py (+5 -5, 41 lines)
+- experiments/01_camera_capture_delivery/README.md (+5 -5, 422 lines)
+- experiments/01_camera_capture_delivery/app/README.md (+30 -0, 30 lines)
+- experiments/01_camera_capture_delivery/build/README.md (+47 -0, 47 lines)
+- experiments/01_camera_capture_delivery/capture/README.md (+40 -0, 40 lines)
+- experiments/01_camera_capture_delivery/host/README.md (+27 -0, 27 lines)
+- experiments/01_camera_capture_delivery/host/accuracy.py (+4 -3, 108 lines)
+- experiments/01_camera_capture_delivery/host/protocol.py (+0 -4, 0 lines)
+- experiments/01_camera_capture_delivery/host/receiver.py (+3 -4, 95 lines)
+- experiments/01_camera_capture_delivery/host/session_v1.py (+0 -10, 0 lines)
+- experiments/01_camera_capture_delivery/host/session_v2.py (+0 -5, 0 lines)
+- experiments/01_camera_capture_delivery/native/README.md (+28 -0, 28 lines)
+- experiments/01_camera_capture_delivery/tests/fake_phone.py (+3 -6, 146 lines)
+- experiments/01_camera_capture_delivery/tests/test_capture_receiver.py (+3 -4, 231 lines)
+- experiments/01_camera_capture_delivery/tests/test_phonecheck_host.py (+3 -3, 124 lines)
+- experiments/01_camera_capture_delivery/tests/test_session_v1.py (+1 -1, 130 lines)
+- experiments/01_camera_capture_delivery/tests/test_session_v2.py (+5 -4, 122 lines)
+- experiments/02_stereo_depth/README.md (+8 -8, 312 lines)
+- experiments/02_stereo_depth/run.py (+5 -5, 543 lines)
+- experiments/02_stereo_depth/scale_drift.py (+5 -5, 466 lines)
+- experiments/03_camera_pose_estimation/README.md (+1 -1, 225 lines)
+- experiments/03_camera_pose_estimation/src/README.md (+37 -0, 37 lines)
+- experiments/04_surface_reconstruction/README.md (+1 -1, 234 lines)
+- experiments/04_surface_reconstruction/src/README.md (+40 -0, 40 lines)
+- experiments/05_birds_eye_mapping/README.md (+2 -2, 136 lines)
+- experiments/05_birds_eye_mapping/chunks.py (+5 -3, 95 lines)
+- experiments/06_object_recognition/README.md (+2 -2, 236 lines)
+- experiments/06_object_recognition/experiments/01_detection/README.md (+3 -3, 103 lines)
+- experiments/06_object_recognition/experiments/01_detection/jitter_run.py (+1 -1, 413 lines)
+- experiments/06_object_recognition/experiments/01_detection/placement_run.py (+1 -1, 200 lines)
+- experiments/06_object_recognition/experiments/02_segmentation/README.md (+1 -1, 53 lines)
+- experiments/06_object_recognition/experiments/03_appearance/README.md (+1 -1, 72 lines)
+- experiments/06_object_recognition/experiments/03_appearance/run.py (+2 -2, 408 lines)
+- experiments/06_object_recognition/experiments/03_appearance/tests/test_publication.py (+2 -2, 242 lines)
+- experiments/06_object_recognition/experiments/04_geometry_identity/README.md (+1 -1, 61 lines)
+- experiments/06_object_recognition/experiments/04_geometry_identity/inputs.py (+1 -1, 352 lines)
+- experiments/06_object_recognition/experiments/04_geometry_identity/run.py (+1 -1, 349 lines)
+- experiments/06_object_recognition/experiments/05_replay/automatic.py (+1 -1, 159 lines)
+- experiments/06_object_recognition/experiments/05_replay/generation.py (+1 -1, 230 lines)
+- experiments/06_object_recognition/experiments/06_identity_policy/README.md (+1 -1, 47 lines)
+- experiments/06_object_recognition/experiments/07_spatial_uncertainty/README.md (+29 -0, 29 lines)
+- experiments/06_object_recognition/experiments/README.md (+30 -0, 30 lines)
+- experiments/06_object_recognition/pilot/README.md (+2 -2, 88 lines)
+- experiments/06_object_recognition/pilot/association.py (+4 -161, 27 lines)
+- experiments/06_object_recognition/pilot/replay.py (+1 -1, 491 lines)
+- experiments/06_object_recognition/pilot/run.py (+1 -1, 355 lines)
+- experiments/06_object_recognition/src/README.md (+27 -0, 27 lines)
+- experiments/README.md (+2 -2, 259 lines)
+- experiments/geometry_validation/src/README.md (+33 -0, 33 lines)
+- experiments/lingbot_map/README.md (+3 -3, 145 lines)
+- experiments/lingbot_map/compare.py (+7 -8, 175 lines)
+- experiments/lingbot_map/run.py (+1 -1, 130 lines)
+- experiments/lingbot_map/tests/test_compare.py (+6 -1, 44 lines)
+- experiments/live_slam/README.md (+1 -1, 83 lines)
+- experiments/live_slam/native/README.md (+36 -0, 36 lines)
+- experiments/live_slam/run_live.py (+1 -1, 111 lines)
+- experiments/live_slam/src/README.md (+21 -0, 21 lines)
+- experiments/open_vio/calibration/README.md (+39 -0, 39 lines)
+- experiments/open_vio/host/README.md (+27 -0, 27 lines)
+- experiments/open_vio/host/clock_check.py (+2 -5, 125 lines)
+- experiments/open_vio/vio/README.md (+41 -0, 41 lines)
+- experiments/open_vio/vio/docker/README.md (+25 -0, 25 lines)
+- experiments/sfm/README.md (+3 -3, 267 lines)
+- experiments/sfm/dump_depth.py (+3 -3, 58 lines)
+- experiments/sfm/dump_prompt_depth.py (+1 -1, 83 lines)
+- experiments/sfm/run_dense.py (+1 -1, 338 lines)
+- experiments/sfm/run_metric_points.py (+1 -1, 120 lines)
+- experiments/sfm/run_sfm.py (+1 -1, 135 lines)
+- experiments/sfm/src/README.md (+37 -0, 37 lines)
+- experiments/shared/README.md (+1 -1, 105 lines)
+- experiments/shared/runs.py (+2 -2, 274 lines)
+- experiments/shared/tests/test_runs.py (+12 -12, 288 lines)
+- experiments/surface_cleanup/cleanup_attributes.py (+14 -9, 56 lines)
+- experiments/surface_cleanup/denoise_trial.py (+49 -36, 320 lines)
+- experiments/surface_cleanup/tests/test_cleanup_attributes.py (+1 -1, 21 lines)
+- experiments/surface_cleanup/tests/test_denoise_trial.py (+1 -1, 46 lines)
+- experiments/surface_cleanup/tests/test_filters.py (+32 -21, 149 lines)
+- learning/02_depth.md (+2 -2, 70 lines)
+- learning/04_structure_from_motion.md (+1 -1, 97 lines)
+- learning/05_dense_surfaces.md (+1 -1, 199 lines)
+- learning/07_objects_and_counting.md (+1 -1, 33 lines)
+- learning/README.md (+1 -1, 58 lines)
+- models/manifest.toml (+3 -3, 23 lines)
+- pyproject.toml (+1 -1, 76 lines)
+- pytest-full.ini (+8 -0, 8 lines)
+- pytest.ini (+3 -3, 7 lines)
+- research/dense_surface_fusion/README.md (+1 -1, 108 lines)
+- research/surface_denoising/README.md (+6 -6, 381 lines)
+- ruff.toml (+4 -0, 5 lines)
+- sitescan/README.md (+36 -12, 52 lines)
+- sitescan/cleanup/README.md (+5 -6, 71 lines)
+- sitescan/cleanup/__init__.py (+17 -7, 33 lines)
+- sitescan/depth/README.md (+4 -4, 71 lines)
+- sitescan/fusion/README.md (+3 -3, 69 lines)
+- sitescan/io.py (+42 -0, 42 lines)
+- sitescan/mapping/README.md (+4 -5, 73 lines)
+- sitescan/mapping/footprint.py (+1 -5, 74 lines)
+- sitescan/mapping/plane.py (+6 -11, 65 lines)
+- sitescan/objects/README.md (+78 -0, 78 lines)
+- sitescan/objects/__init__.py (+8 -1, 8 lines)
+- sitescan/objects/detect.py (+61 -0, 61 lines)
+- sitescan/objects/match.py (+139 -0, 139 lines)
+- sitescan/objects/place.py (+29 -0, 29 lines)
+- sitescan/objects/tracks.py (+78 -0, 78 lines)
+- sitescan/pipelines/README.md (+95 -0, 95 lines)
+- sitescan/pipelines/__init__.py (+21 -0, 22 lines)
+- sitescan/pipelines/live.py (+211 -0, 211 lines)
+- sitescan/pipelines/room.py (+175 -0, 175 lines)
+- sitescan/scale/README.md (+11 -10, 78 lines)
+- sitescan/scale/fit.py (+8 -6, 94 lines)
+- sitescan/session/FORMAT.md (+4 -4, 201 lines)
+- sitescan/session/README.md (+5 -5, 70 lines)
+- sitescan/session/__init__.py (+2 -2, 6 lines)
+- sitescan/session/read.py (+15 -11, 93 lines)
+- src/README.md (+0 -13, 0 lines)
+- src/live/README.md (+0 -199, 0 lines)
+- src/live/clean.py (+0 -14, 0 lines)
+- src/live/fragments.py (+0 -7, 0 lines)
+- src/live/processor.py (+0 -166, 0 lines)
+- src/live/room_build.py (+0 -211, 0 lines)
+- src/live/run.py (+0 -133, 0 lines)
+- src/live/sizing.py (+0 -43, 0 lines)
+- src/live/stream.py (+0 -14, 0 lines)
+- src/live/tests/test_fragments.py (+0 -74, 0 lines)
+- src/live/tests/test_processor.py (+0 -85, 0 lines)
+- src/live/tests/test_room_build.py (+0 -77, 0 lines)
+- src/live/tests/test_sizing.py (+0 -50, 0 lines)
+- src/live/tests/test_stream.py (+0 -19, 0 lines)
+- tests/README.md (+19 -0, 19 lines)
+- tests/fixtures/README.md (+1 -1, 39 lines)
+- tests/fixtures/build.py (+3 -3, 69 lines)
+- tests/fixtures/tum_desk_20_golden.json (+41 -41, 407 lines)
+- tests/golden/README.md (+15 -0, 15 lines)
+- tests/golden/run.py (+12 -20, 54 lines)
+- tests/golden/test_golden.py (+3 -3, 52 lines)
+- tests/test_pipelines.py (+130 -0, 130 lines)
+- tests/test_sitescan_cleanup.py (+6 -6, 70 lines)
+- tests/test_sitescan_fusion.py (+67 -0, 123 lines)
+- tests/test_sitescan_objects.py (+74 -0, 74 lines)
+- tests/test_sitescan_scale.py (+24 -0, 107 lines)
+- tools/check.py (+1 -19, 90 lines)
+- tools/demos/build.py (+2 -2, 212 lines)
+- tools/demos/capture_scene.py (+9 -9, 256 lines)
+- tools/demos/cleanup_scene.py (+4 -4, 126 lines)
+- tools/demos/cleanup_tuner.py (+4 -4, 205 lines)
+- tools/demos/run_report.py (+3 -3, 332 lines)
+- tools/demos/screenshot.py (+2 -2, 67 lines)
+- tools/demos/tests/test_run_report.py (+3 -3, 95 lines)
+
+## Checked
+
+- `pytest -m golden -> 3 passed; apps.cli room on the 15 Oct walk -> 554,067 cleaned points, every summary number equal to baseline d859867; apps.cli replay on the 15 Oct walk -> 1.23 updates/s, old code 9bf3b51 under the same load 1.24; matcher parity on 2,000 random sequences -> 0 differences; detector array vs path on 12 frames -> 47 identical boxes; pytest -> 90 passed; pytest -c pytest-full.ini -> 1606 passed, 2 failed, 8 errors, three causes fixed and their folders rerun -> 550 + 25 passed; ruff -> clean`
+- cost: 43 min from begin to finish; Claude tokens 58,272,798 (fresh input 466,373, cache read 57,593,977, output 212,448; 1 session)
+- new duplicate blocks: 0
+- complexity share (functions over 10): 0.23 (was 0.25)
+- dead code on added lines: not checked (vulture not installed)
+- prose patterns: 8 in 8336 words: same-opening "it", same-opening "covers", same-opening "the", one-line-closer "re-scores saved runs with   and  .", one-line-closer "[ ] imports  ,   and   from here."
+
+## Left over
+
+Root README rewrite, function index, walkthrough notebook, DESIGN and PROJECT_PLAN status, final full-suite run, commit and push continue in the next record. The task gate reads only the first 2,000 characters of a record, so files added late to a long record are not seen. The 69 file moves are their own commit (6c25802) so this check and git history see moves, not new code.

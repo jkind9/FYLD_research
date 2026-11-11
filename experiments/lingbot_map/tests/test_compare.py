@@ -1,7 +1,12 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from experiments.lingbot_map.compare import nearest_rotations, processed_geometry, processed_pixels, similarity
+from experiments.lingbot_map.compare import (
+    nearest_rotations,
+    processed_geometry,
+    processed_pixels,
+    similarity,
+)
 
 
 def test_redmi_frame_geometry_matches_demo_crop():

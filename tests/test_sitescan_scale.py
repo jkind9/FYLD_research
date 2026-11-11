@@ -81,3 +81,27 @@ def test_grid_cells_without_support_take_frame_or_supplied_log_scale(fallback, e
 @pytest.mark.parametrize("age_ns,fresh", [(100_000_000, True), (100_000_001, False), (-1, True)])
 def test_fresh_depth_retains_the_existing_one_sided_age_rule(age_ns, fresh):
     assert scale.fresh_depth(1_000_000_000, 1_000_000_000 + age_ns) is fresh
+
+
+def targets(w=80, h=60, step=2):
+    u, v = np.meshgrid(np.arange(0, w, step), np.arange(0, h, step))
+    return np.c_[u.ravel(), v.ravel()].astype(float)
+
+
+def test_too_few_targets_give_no_scale():
+    model = np.ones((60, 80))
+    uv = targets()[:10]
+    assert scale.fit_grid(model, np.ones_like(model, bool), uv, np.ones(10)) is None
+
+
+def test_cell_index_numbers_cells_row_by_row():
+    uv = np.array([[0, 0], [79, 0], [0, 59], [79, 59]], float)
+    assert scale.cell_index(uv, (80, 60), cells=(2, 1)).tolist() == [0, 1, 0, 1]
+    assert scale.cell_index(uv, (80, 60), cells=(1, 2)).tolist() == [0, 0, 1, 1]
+
+
+def test_only_cells_with_enough_arcore_pixels_are_supported():
+    uv = targets()
+    uv = uv[uv[:, 0] < 40]  # ARCore depth covers only the left half
+    mask = scale.supported_pixels(uv, (60, 80), cells=(2, 1))
+    assert mask[:, :40].all() and not mask[:, 40:].any()

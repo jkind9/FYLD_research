@@ -33,7 +33,7 @@ CALIBRATION = Calibration(640, 480, 525, 525, 319.5, 239.5, "x-right_y-down_z-fo
 
 def extract(repo: Path, frames: list[dict], proposal_frames: list[dict]) -> dict:
     """Return actual-box vectors, locations, decisions and GPU cost receipts."""
-    checkpoint = repo / "checkpoints/yolo26x.pt"
+    checkpoint = repo / "models/yolo26x.pt"
     if detector_api.sha256(checkpoint) != detector_api.CHECKPOINT_SHA256:
         raise ValueError("Existing YOLO26x checkpoint hash differs")
     extractor = feature_api.FeatureExtractor(checkpoint)

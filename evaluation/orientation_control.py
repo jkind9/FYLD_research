@@ -4,7 +4,7 @@ The Redmi camera reports sensor_orientation_deg 90: turning the recorded image 9
 upright in portrait. The upright prediction is turned back, so pose, intrinsics and raw-depth pixels stay on
 the recorded grid.
 
-    python -B -m src.live.orientation_control --session <v2 session> --out <folder>
+    python -B -m evaluation.orientation_control --session <v2 session> --out <folder>
 """
 
 from __future__ import annotations
@@ -17,17 +17,24 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from sitescan import scale, session
+from sitescan.depth import load_model
 from sitescan.depth.orientation import (  # noqa: F401
     quarter_turns,
     recorded,
     turned_camera,
     upright,
 )
-
-from . import sizing
-from .stream import read_session, session_v1
+from sitescan.pipelines import DEPTH_MODEL
+from sitescan.scale.fit import MIN_DEPTH_PIXELS, MIN_POINTS
+from sitescan.session import wire_v1
 
 PORTRAIT = 0.7  # |camera x . world up| above this: the image's long edge is vertical, so one turn applies
+
+
+def point_targets(frame) -> tuple[np.ndarray, np.ndarray]:
+    """ARCore's tracked points in a wire frame, as pixel positions and camera-plane depths."""
+    return scale.point_targets(frame.points_world, frame.points_pixel, wire_v1.world_from_camera_cv(frame.pose))
 
 
 def score(model: np.ndarray, valid: np.ndarray, uv: np.ndarray, target: np.ndarray, minimum: int) -> dict | None:
@@ -44,8 +51,8 @@ def score(model: np.ndarray, valid: np.ndarray, uv: np.ndarray, target: np.ndarr
             "delta_1_25": float(np.mean(np.maximum(ratio, 1 / ratio) < 1.25)), "pixels": int(keep.sum())}
 
 
-def is_portrait(frame: session_v1.Frame) -> bool:
-    return abs(session_v1.world_from_camera(frame.pose)[1, 0]) > PORTRAIT
+def is_portrait(frame: wire_v1.Frame) -> bool:
+    return abs(wire_v1.world_from_camera(frame.pose)[1, 0]) > PORTRAIT
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -60,10 +67,10 @@ def main(argv: list[str] | None = None) -> int:
     args.out.mkdir(parents=True)
 
     eligible, flat = [], 0
-    for frame in read_session(args.session):
+    for frame in session.read_wire_session(args.session):
         if frame.pose is None or frame.depth is None:
             continue
-        if len(sizing.depth_targets(frame.depth, frame.intrinsics, frame.image_size)[1]) < sizing.MIN_DEPTH_PIXELS:
+        if len(scale.depth_targets(session.arcore_depth(frame.depth), session.camera(frame))[1]) < MIN_DEPTH_PIXELS:
             continue
         if is_portrait(frame):
             eligible.append(frame)
@@ -75,9 +82,8 @@ def main(argv: list[str] | None = None) -> int:
 
     import torch
 
-    from .run import DEPTH_CHECKPOINT, depth_anything
     torch.set_num_threads(args.threads)
-    model = depth_anything(DEPTH_CHECKPOINT)
+    model = load_model(DEPTH_MODEL, threads=None)
     rows = []
     for i, frame in enumerate(chosen):
         colour = np.asarray(Image.open(io.BytesIO(frame.image_jpeg)).convert("RGB"))
@@ -88,8 +94,8 @@ def main(argv: list[str] | None = None) -> int:
         up_depth, up_valid = model(np.ascontiguousarray(upright(colour)))
         up_depth, up_valid = recorded(up_depth), recorded(up_valid)
         assert up_depth.shape == side_depth.shape, (up_depth.shape, side_depth.shape)
-        targets = {"arcore_depth": (*sizing.depth_targets(frame.depth, frame.intrinsics, frame.image_size), sizing.MIN_DEPTH_PIXELS),
-                   "tracked_points": (*sizing.point_targets(frame), sizing.MIN_POINTS)}
+        targets = {"arcore_depth": (*scale.depth_targets(session.arcore_depth(frame.depth), session.camera(frame)), MIN_DEPTH_PIXELS),
+                   "tracked_points": (*point_targets(frame), MIN_POINTS)}
         row = {"seq": frame.seq}
         for name, (uv, target, minimum) in targets.items():
             row[name] = {"sideways": score(side_depth, side_valid, uv, target, minimum),

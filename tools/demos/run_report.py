@@ -22,9 +22,9 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
+from evaluation.layers import consistency
+from evaluation.layers.steps.contracts import read_pose
 from experiments.shared.contracts import Calibration
-from src.walkthrough import consistency
-from src.walkthrough.steps.contracts import read_pose
 
 from .pack import colormap, encode_array, encode_positions, image_data_url
 
@@ -298,7 +298,7 @@ def _reference_reader(run: dict[str, Any]) -> Any:
         root = Path(run["configuration"].get("repo", ".")) / root
     if not (root / "depth.txt").is_file():
         return None
-    depth_step = importlib.import_module("src.walkthrough.steps.depth")
+    depth_step = importlib.import_module("evaluation.layers.steps.depth")
     return depth_step.RecordedSensorDepth(root).load()
 
 

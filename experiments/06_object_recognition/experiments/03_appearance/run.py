@@ -141,7 +141,7 @@ HYPERPARAMETERS = {
 
 def output_root(repo: Path, output: Path) -> Path:
     resolved = source_api.output_root(output)
-    for protected in (repo / "data", repo / "checkpoints"):
+    for protected in (repo / "data", repo / "models"):
         if resolved.is_relative_to(protected.resolve()):
             raise ValueError(
                 "Output must not be inside protected input or checkpoint trees"
@@ -319,7 +319,7 @@ def _publish(
     output = output_root(repo, output)
     if not synthetic and manifest != preflight(repo):
         raise ValueError("Production requires the frozen verified sources")
-    checkpoint = repo / "checkpoints/yolo26x.pt"
+    checkpoint = repo / "models/yolo26x.pt"
     with Run(
         output,
         repo,

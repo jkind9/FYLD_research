@@ -10,10 +10,10 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "host"))
-import protocol
 import receiver
 import report
-import session_v1
+
+from sitescan.session import protocol, read_wire_session
 
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "session_v1"
 
@@ -75,7 +75,7 @@ def test_receiver_saves_v1_frames_and_acknowledges_in_order(tmp_path):
     assert len(list((session / "depth").glob("*.bin"))) == 3
     assert json.loads((session / "session.json").read_text())["version"] == 1
     assert server.summary["frames"] == 5 and server.summary["depth_frames"] == 3
-    saved = list(session_v1.read_session(session))
+    saved = list(read_wire_session(session))
     assert [f.seq for f in saved] == [0, 1, 2, 3, 4]
     assert saved[0].depth.depth_m[0, 1] == 1.0 and saved[1].depth is None
 

@@ -69,7 +69,7 @@ More background: [HiMoDepth](../../research/depth_estimation/himodepth.md) on ke
 - The Middlebury version 3 quarter-resolution training data is downloaded and checked at `data/middlebury/dataset/MiddEval3/trainingQ/`. It has 15 indoor scenes with left and right images, calibration, reference disparity and masks. [Download records](../../data/README.md).
 - TUM Freiburg1 `xyz` and `desk` recordings are available under `data/tum/`. The existing timestamp reader in experiment 03 finds 792 paired frames in `xyz` and 573 in `desk`. Every-tenth-frame samples loaded successfully: 80 and 58 frames, respectively.
 - `geometry.py` converts metric maps and aligns metric, relative, inverse-relative and affine-invariant log-depth maps to the sensor reference for a clearly labelled shape score. Invalid metric pixels do not enter the alignment fit. `scoring.py` keeps raw metric accuracy separate from reference-aligned shape scores and reports AbsRel, RMSE, δ1, coverage, distance bands and the share of aligned values that are non-positive.
-- `src/walkthrough/steps/depth.py` has an offline-only Depth Anything V2 metric adapter. It requires a local checkpoint folder and sets `local_files_only=True`; it cannot download weights.
+- `evaluation/layers/steps/depth.py` has an offline-only Depth Anything V2 metric adapter. It requires a local checkpoint folder and sets `local_files_only=True`; it cannot download weights.
 - Depth Anything V2 Metric Small and ZipDepth have each run on the same 138 TUM color frames on CPU and GPU. The score table in [Task54 measurements](#task54-measurements-on-tum) separates raw metric depth from shape scores aligned to the sensor reference.
 - Checkpoint hashes, run outputs, CPU/GPU timing details and per-frame depth maps are stored under the ignored `experiments/02_stereo_depth/runs/task54*` directories. They are local research artifacts and are not committed.
 - Marigold V2 uses the official WSL inference program. The first frame failed in VAE `conv3d` with cuDNN "GET was unable to find an engine to execute this computation" while the active game and desktop used 15,910 of 16,303 MiB of GPU memory. The owner asked to keep the game open and record this result. One CPU retry failed before inference because bitsandbytes requires a GPU for 4-bit quantization. Task62 reran it with the GPU free: xyz completed (shape AbsRel 0.0356, 16.6 s per frame), and the model was then dropped for being under 1 frame per second.
@@ -145,8 +145,8 @@ Run either tested model from the repository root after installing `requirements-
 $env:PYTHONPATH = "$PWD;$PWD\data\models\ZipDepth"
 python -m experiments.02_stereo_depth.run --method depth-anything --checkpoint <local-metric-checkpoint> --tum-root data/tum --output experiments/02_stereo_depth/runs/task54 --device cuda
 python -m experiments.02_stereo_depth.run --method depth-anything --checkpoint <local-metric-checkpoint> --tum-root data/tum --output experiments/02_stereo_depth/runs/task54_cpu --device cpu
-python -m experiments.02_stereo_depth.run --method zipdepth --checkpoint data/models/ZipDepth/checkpoints/zipdepth_base.pth --tum-root data/tum --output experiments/02_stereo_depth/runs/task54 --device cuda --zip-build gpu
-python -m experiments.02_stereo_depth.run --method zipdepth --checkpoint data/models/ZipDepth/checkpoints/zipdepth_base.pth --tum-root data/tum --output experiments/02_stereo_depth/runs/task54_cpu --device cpu --zip-build gpu
+python -m experiments.02_stereo_depth.run --method zipdepth --checkpoint models/ZipDepth/checkpoints/zipdepth_base.pth --tum-root data/tum --output experiments/02_stereo_depth/runs/task54 --device cuda --zip-build gpu
+python -m experiments.02_stereo_depth.run --method zipdepth --checkpoint models/ZipDepth/checkpoints/zipdepth_base.pth --tum-root data/tum --output experiments/02_stereo_depth/runs/task54_cpu --device cpu --zip-build gpu
 ```
 
 Each sequence writes native predictions and `results.json` under a new method folder. Existing results are never overwritten. If Windows denies the final directory rename, the runner copies the finished staging folder and checks the published file list and sizes before removing staging.
@@ -256,7 +256,7 @@ The useful part of the idea is consensus across several overlapping frames. The 
 
 ### Camera path comparison: raw depth and overlap chain
 
-The [offline camera-path report](../../outputs/task65_runs/camera_path_comparison.html) compares Depth Anything V2 Metric Small with the same depth method corrected by the RGB-only overlap chain. It plots the top-down camera path against TUM motion-capture ground truth and the per-frame position error. Lower RMSE means a closer camera path.
+The [offline camera-path report](../../outputs/task_runs/task65_runs/camera_path_comparison.html) compares Depth Anything V2 Metric Small with the same depth method corrected by the RGB-only overlap chain. It plots the top-down camera path against TUM motion-capture ground truth and the per-frame position error. Lower RMSE means a closer camera path.
 
 | TUM recording sample | Frames matched | Raw depth camera RMSE | Overlap-chain RMSE | Change |
 |---|---:|---:|---:|---:|
@@ -298,9 +298,9 @@ Sources: [TUM RGB-D benchmark and trajectory evaluation](https://cvg.cit.tum.de/
 
 ### Code and model files
 
-- `src/walkthrough/steps/depth_scale.py`: `ScaleCorrected(base, scale)` with four scale sources (`OverlapChainScale`, `PoseTriangulatedScale`, and the reference controls `ReferenceFrameScale` and `ReferenceGlobalScale`); `--depth-scale` on the walkthrough command line.
-- `src/walkthrough/steps/video_depth.py`: `MetricVideoDepthAnything`; `--depth video-depth-anything`. It needs the upstream code cloned at commit `4f5ae23172ba60fd7bc11ef671cca678842c7072` (7 October 2025) into `data/models/Video-Depth-Anything` and that folder on `PYTHONPATH`. The weights are `checkpoints/metric_video_depth_anything_vits.pth`: 116,444,063 bytes, SHA-256 `3c28432b4e1f0d7bb31cad5151b6313b49457db5aa58d82e85bfb0f8b1311b33`, from `depth-anything/Metric-Video-Depth-Anything-Small`. One extra package went into the environment used then (`.venv-yolo`, now merged into `.venv`): `easydict==1.13` (LGPL-3.0, used once upstream to hold settings). The upstream pins (PyTorch 2.1.1, NumPy 1.24) were not installed, and the optional `xformers` is not used.
-- `src/walkthrough/consistency.py`: the surface-gap measure. It moves frame B's points into frame A's camera with the run's poses and compares them with A's depth along A's view, nearest point per pixel only. The report's surface page now shows it per frame and by frame separation. The depth page now shows each frame's scale ratio.
+- `evaluation/layers/steps/depth_scale.py`: `ScaleCorrected(base, scale)` with four scale sources (`OverlapChainScale`, `PoseTriangulatedScale`, and the reference controls `ReferenceFrameScale` and `ReferenceGlobalScale`); `--depth-scale` on the walkthrough command line.
+- `evaluation/layers/steps/video_depth.py`: `MetricVideoDepthAnything`; `--depth video-depth-anything`. It needs the upstream code cloned at commit `4f5ae23172ba60fd7bc11ef671cca678842c7072` (7 October 2025) into `models/Video-Depth-Anything` and that folder on `PYTHONPATH`. The weights are `checkpoints/metric_video_depth_anything_vits.pth`: 116,444,063 bytes, SHA-256 `3c28432b4e1f0d7bb31cad5151b6313b49457db5aa58d82e85bfb0f8b1311b33`, from `depth-anything/Metric-Video-Depth-Anything-Small`. One extra package went into the environment used then (`.venv-yolo`, now merged into `.venv`): `easydict==1.13` (LGPL-3.0, used once upstream to hold settings). The upstream pins (PyTorch 2.1.1, NumPy 1.24) were not installed, and the optional `xformers` is not used.
+- `evaluation/layers/consistency.py`: the surface-gap measure. It moves frame B's points into frame A's camera with the run's poses and compares them with A's depth along A's view, nearest point per pixel only. The report's surface page now shows it per frame and by frame separation. The depth page now shows each frame's scale ratio.
 - `scale_drift.py`: `clip` makes full-length every-2nd-frame clips that the tracker can follow; `summarise` reads finished runs into one table; `check-space` stops a queue below 30 GB free.
 
 ## Current delivery ownership, 6 October 2026
@@ -309,4 +309,4 @@ Sources: [TUM RGB-D benchmark and trajectory evaluation](https://cvg.cit.tum.de/
 
 ## Walkthrough depth boundary
 
-The offline experiment runner and a local Depth Anything V2 metric adapter are implemented. The recorded walkthrough still has no selected real depth method in its default run, and its other layers remain incomplete. Deterministic test providers stay labelled as software controls; they do not count as physical measurements. See [the six-step runner](../../src/walkthrough/README.md).
+The offline experiment runner and a local Depth Anything V2 metric adapter are implemented. The recorded walkthrough still has no selected real depth method in its default run, and its other layers remain incomplete. Deterministic test providers stay labelled as software controls; they do not count as physical measurements. See [the six-step runner](../../evaluation/layers/README.md).

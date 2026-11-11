@@ -156,7 +156,7 @@ class ScaledZipDepth:
         except ModuleNotFoundError as error:
             if (error.name or "").split(".")[0] == "zipdepth":
                 raise Unavailable(
-                    "ZipDepth code is not importable; add data/models/ZipDepth to PYTHONPATH"
+                    "ZipDepth code is not importable; add models/ZipDepth to PYTHONPATH"
                 ) from error
             raise Unavailable(
                 f"ZipDepth needs the Python package {error.name!r}; "
