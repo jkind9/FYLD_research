@@ -8,7 +8,7 @@ Notes of 14 October 2026 for Task90. An open visual-inertial tracker needs, per 
 |---|---|---|---|
 | Kalibr ([GitHub](https://github.com/ethz-asl/kalibr), commit 1f60227 of 8 March 2024) | Camera intrinsics and distortion (`kalibr_calibrate_cameras`); camera-to-IMU rotation, translation and time offset (`kalibr_calibrate_imu_camera`); rolling-shutter camera intrinsics (`kalibr_calibrate_rs_cameras`) | BSD-3-Clause | Needs ROS 1; run here from its own `Dockerfile_ros1_20_04`. Method: Furgale, Rehder, Siegwart, "Unified Temporal and Spatial Calibration for Multi-Sensor Systems", IROS 2013, pp. 1280-1286 (continuous-time B-spline trajectory; the time offset is estimated with the transform). Rehder et al., "Extending kalibr", ICRA 2016, adds IMU axis misalignment and scale |
 | Basalt calibration (`basalt_calibrate`, `basalt_calibrate_imu`, [GitLab](https://gitlab.com/VladyslavUsenko/basalt)) | Camera intrinsics (including the double-sphere fisheye model) and camera-IMU calibration | BSD-3-Clause | No ROS needed; Basalt is also a tracker candidate for step 3. Double-sphere model: Usenko, Demmel, Cremers, 3DV 2018, saved as [papers/double_sphere_usenko_2018_1807.08957.pdf](papers/double_sphere_usenko_2018_1807.08957.pdf) |
-| Allan deviation (own code, `experiments/open_vio/calibration/allan.py`) | IMU white noise (noise density) and bias random walk from a recording at rest | Own code | Method of IEEE Std 952-1997; derivation in the TUM-VI paper's appendix |
+| Allan deviation (own code, `research/experiments/open_vio/calibration/allan.py`) | IMU white noise (noise density) and bias random walk from a recording at rest | Own code | Method of IEEE Std 952-1997; derivation in the TUM-VI paper's appendix |
 
 ## What the Kalibr documentation says
 

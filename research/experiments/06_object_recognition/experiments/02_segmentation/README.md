@@ -11,7 +11,7 @@ No learned segmentation weights are acquired. The existing YOLO26x checkpoint su
 Use the existing installed environment:
 
 ```powershell
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.02_segmentation.run
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.experiments.02_segmentation.run
 ```
 
 The command verifies Task17's frozen publication and original archive-member hashes. It also verifies the accepted Task28 cache when available. `--cache` can name its offline copy. An explicit missing or invalid cache path fails before publication. If the default optional cache is absent, the receipt marks the predicted condition unavailable. `--output` selects a new run root; destinations inside an existing run are rejected before mutation. Each publication captures source code, environment, settings, masks, original images, overlays and completion hashes. Interrupted runs remain incomplete; restart creates a fresh directory.
@@ -38,16 +38,16 @@ Final verification: 28 focused tests pass with 92% production statement coverage
 
 ## Next question, without reopening Task19
 
-[Task34](../../../../task_list/stale/34_evaluate_segmentation_for_position_and_observed_dimensions.md) owns a planned comparison of the existing rectangle, GrabCut and Canny methods on already acquired inputs. The 5 October authorization covers this classical-mask comparison only. Learned models, new data, new captures and phone tests are outside its scope. Its paired COCO box and polygon support oracle-prompt mask agreement, not independent held-out accuracy. Task19's coordinate differences and cost ledger remain historical evidence; they do not prove improved location or size accuracy. Whole-object dimensions require separate coverage/reference evidence.
+[Task34](../../../../../task_list/stale/34_evaluate_segmentation_for_position_and_observed_dimensions.md) owns a planned comparison of the existing rectangle, GrabCut and Canny methods on already acquired inputs. The 5 October authorization covers this classical-mask comparison only. Learned models, new data, new captures and phone tests are outside its scope. Its paired COCO box and polygon support oracle-prompt mask agreement, not independent held-out accuracy. Task19's coordinate differences and cost ledger remain historical evidence; they do not prove improved location or size accuracy. Whole-object dimensions require separate coverage/reference evidence.
 
 Task34 is not ready to start. Task31 must complete first, and the independent review records for Tasks21, 22, 32 and 48 must satisfy the gates in its task file. `task.js start` does not check those gates, so its status alone is not a prerequisite check. After the gates clear and the task receives a fresh plan-review PASS, the planned runner invocation is:
 
 ```powershell
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.02_segmentation.run_task34 --coco-root data/coco2017 --task22-run experiments/06_object_recognition/experiments/05_replay/runs/20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66 --task46-run experiments/06_object_recognition/experiments/06_identity_policy/runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16f0f3d53b --output experiments/06_object_recognition/experiments/02_segmentation/runs/<new-run-id>
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.experiments.02_segmentation.run_task34 --coco-root data/coco2017 --task22-run research/experiments/06_object_recognition/experiments/05_replay/runs/20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66 --task46-run research/experiments/06_object_recognition/experiments/06_identity_policy/runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16f0f3d53b --output research/experiments/06_object_recognition/experiments/02_segmentation/runs/<new-run-id>
 ```
 
 Replace `<new-run-id>` with a directory confirmed not to exist. Restore COCO, Task22 and Task46 inputs from authorized offline copies first. The command does not download missing inputs.
 
 ## Optional walkthrough masks and validation
 
-Segmentation is an optional part of step 6 and is disabled by default. Existing `masks.segment` and `mask_pipeline.run_methods` remain independently callable. `importlib.import_module("experiments.06_object_recognition.experiments.02_segmentation.validation")` exports the existing `mask_scores` and `instance_events` for compatible inputs; their synthetic-reference limitations remain unchanged. Disabled root components do not import validation or load references. [Runner contract](../../../../evaluation/layers/README.md).
+Segmentation is an optional part of step 6 and is disabled by default. Existing `masks.segment` and `mask_pipeline.run_methods` remain independently callable. `importlib.import_module("research.experiments.06_object_recognition.experiments.02_segmentation.validation")` exports the existing `mask_scores` and `instance_events` for compatible inputs; their synthetic-reference limitations remain unchanged. Disabled root components do not import validation or load references. [Runner contract](../../../../evaluation/layers/README.md).

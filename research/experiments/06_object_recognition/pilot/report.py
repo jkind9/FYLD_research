@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 
-from experiments.shared.visualization import sample_points
+from research.experiments.shared.visualization import sample_points
 
 
 def annotate(image: Path, detections: list[dict], output: Path) -> None:

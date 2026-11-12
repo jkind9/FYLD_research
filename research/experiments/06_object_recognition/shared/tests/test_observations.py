@@ -6,13 +6,13 @@ from dataclasses import FrozenInstanceError, replace
 import numpy as np
 import pytest
 
-from experiments.shared.contracts import Calibration, Pose
+from research.experiments.shared.contracts import Calibration, Pose
 
 observations = importlib.import_module(
-    "experiments.06_object_recognition.shared.observations"
+    "research.experiments.06_object_recognition.shared.observations"
 )
 revisions = importlib.import_module(
-    "experiments.06_object_recognition.shared.pose_revisions"
+    "research.experiments.06_object_recognition.shared.pose_revisions"
 )
 ObjectObservation = observations.ObjectObservation
 PoseRevision = revisions.PoseRevision

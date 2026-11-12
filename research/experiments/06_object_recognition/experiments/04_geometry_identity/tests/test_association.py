@@ -5,7 +5,7 @@ import importlib
 import numpy as np
 
 associate_frame = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.association"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.association"
 ).associate_frame
 
 

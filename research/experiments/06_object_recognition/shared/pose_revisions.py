@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
-from experiments.shared.contracts import Pose
+from research.experiments.shared.contracts import Pose
 
 from .validation import identifier, pairs, sha256_value
 

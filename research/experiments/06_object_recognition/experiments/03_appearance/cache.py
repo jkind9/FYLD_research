@@ -5,10 +5,10 @@ import importlib
 import json
 from pathlib import Path
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run
 
-detector = importlib.import_module("experiments.06_object_recognition.pilot.detector")
+detector = importlib.import_module("research.experiments.06_object_recognition.pilot.detector")
 ACCEPTED_MANIFEST_SHA256: str | None = (
     "f2b2e47803f160354fff1080a6a94164dc7790b39994bcd2b704c81ca50d27c4"
 )

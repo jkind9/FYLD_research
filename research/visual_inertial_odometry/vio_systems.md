@@ -1,6 +1,6 @@
 # Open visual-inertial systems compared for the ARCore replacement
 
-Notes of 14 October 2026 for Task91. Four open systems were cloned, built in Docker under WSL, and run offline on one camera plus IMU. The plain-language chapter is [learning/12_rebuilding_arcore.md](../../learning/12_rebuilding_arcore.md); the code is [experiments/open_vio/vio](../../experiments/open_vio/README.md).
+Notes of 14 October 2026 for Task91. Four open systems were cloned, built in Docker under WSL, and run offline on one camera plus IMU. The plain-language chapter is [learning/12_rebuilding_arcore.md](../../learning/12_rebuilding_arcore.md); the code is [research/experiments/open_vio/vio](../experiments/open_vio/README.md).
 
 ## The systems
 
@@ -17,14 +17,14 @@ TUM-VI paper, Table IV, RMSE ATE on room1 (146 m walk, full motion-capture cover
 
 ## How they were run here
 
-- Images: `experiments/open_vio/vio/docker/*.Dockerfile`, built by `build_all.sh`. Basalt from its published binary; OKVIS2 with RealSense, the neural sky mask and ROS 2 switched off; Kimera on its own dependency Dockerfile (GTSAM 4.2, OpenGV, DBoW2, Kimera-RPGO); OpenVINS in ROS 1 Noetic with `ov_eval` for its trajectory file.
+- Images: `research/experiments/open_vio/vio/docker/*.Dockerfile`, built by `build_all.sh`. Basalt from its published binary; OKVIS2 with RealSense, the neural sky mask and ROS 2 switched off; Kimera on its own dependency Dockerfile (GTSAM 4.2, OpenGV, DBoW2, Kimera-RPGO); OpenVINS in ROS 1 Noetic with `ov_eval` for its trajectory file.
 - Configs: each project's own TUM-VI (or EuRoC) config as the template, with the camera, `T_cam_imu`, time shift and IMU noise swapped in from one Kalibr calibration (`vio/configs.py`). The same writers take the Redmi calibration from Task90.
 - Calibration for TUM-VI: TUM-VI's published camchain (cam0 only) and its inflated IMU noise file.
 - Scoring: rigid ATE (no scale fit; visual-inertial systems report metres), scaled ATE and 1 s RPE from experiment 03's evaluation, against TUM-VI's motion capture in the IMU frame.
 
 ## Results here (14 October 2026)
 
-TUM-VI room1, one camera plus IMU, TUM-VI's calibration and inflated noise, rigid ATE against motion capture: Basalt 0.146 m (100% of frames, scale 0.993, 44 ms per frame); OKVIS2 0.505 m with its own TUM-VI noise values, diverged after 47.7 s with TUM-VI's; Kimera-VIO diverged after about 23% of frames with either noise setting (its IMU initialisation assumes a device at rest); OpenVINS 0.064 m (95% of frames placed, 12 ms per frame). Full table and run commands: [experiments/open_vio/README.md](../../experiments/open_vio/README.md#step-3-offline-comparison-of-open-trackers-task91).
+TUM-VI room1, one camera plus IMU, TUM-VI's calibration and inflated noise, rigid ATE against motion capture: Basalt 0.146 m (100% of frames, scale 0.993, 44 ms per frame); OKVIS2 0.505 m with its own TUM-VI noise values, diverged after 47.7 s with TUM-VI's; Kimera-VIO diverged after about 23% of frames with either noise setting (its IMU initialisation assumes a device at rest); OpenVINS 0.064 m (95% of frames placed, 12 ms per frame). Full table and run commands: [research/experiments/open_vio/README.md](../experiments/open_vio/README.md#step-3-offline-comparison-of-open-trackers-task91).
 
 ## Patent caution
 

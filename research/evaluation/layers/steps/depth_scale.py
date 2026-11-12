@@ -26,7 +26,7 @@ import cv2
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.shared.runs import Run
+from research.experiments.shared.runs import Run
 
 from .contracts import (
     RGBD_MAX_DEPTH_M,
@@ -39,8 +39,8 @@ from .contracts import (
 )
 from .depth import DepthMethod, RecordedSensorDepth
 
-depth_geometry = importlib.import_module("experiments.02_stereo_depth.geometry")
-pose_evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
+depth_geometry = importlib.import_module("research.experiments.02_stereo_depth.geometry")
+pose_evaluation = importlib.import_module("research.experiments.03_camera_pose_estimation.src.evaluation")
 read_reference_poses = pose_evaluation.read_references
 
 

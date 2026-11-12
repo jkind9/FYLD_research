@@ -1,6 +1,6 @@
 # LingBot-Map: streaming 3D reconstruction from video
 
-**Take-away:** one network turns an ordinary video into a camera pose and a depth map per frame as frames arrive, at 12 fps on an RTX 4090. Placed along its own path, those depth maps form the multi-room map with a walked camera path that this project is aiming for. Code is Apache-2.0. It is built for an NVIDIA GPU, gives no real-world size, and has no loop closure, so ARCore would supply metres. Added 8 November 2026 from an owner-supplied link; cloned and tested on the CPU in Task128 ([experiment](../../experiments/lingbot_map/README.md)).
+**Take-away:** one network turns an ordinary video into a camera pose and a depth map per frame as frames arrive, at 12 fps on an RTX 4090. Placed along its own path, those depth maps form the multi-room map with a walked camera path that this project is aiming for. Code is Apache-2.0. It is built for an NVIDIA GPU, gives no real-world size, and has no loop closure, so ARCore would supply metres. Added 8 November 2026 from an owner-supplied link; cloned and tested on the CPU in Task128 ([experiment](../experiments/lingbot_map/README.md)).
 
 ## Citation and sources
 
@@ -41,7 +41,7 @@ Why it could fix the door echoes: the current pipeline sizes each frame's learne
 
 ## Result on this project's walk (Task128, CPU)
 
-Run on the 15 October Redmi walk, every third frame (274 frames), on the CPU with a 16-frame window instead of the default 64, to stay under an 18 GB RAM limit. Inference took 50 minutes (0.09 frames per second). Against ARCore ([full table](../../experiments/lingbot_map/README.md#full-walk-every-third-frame-16-frame-window-8-november-2026)):
+Run on the 15 October Redmi walk, every third frame (274 frames), on the CPU with a 16-frame window instead of the default 64, to stay under an 18 GB RAM limit. Inference took 50 minutes (0.09 frames per second). Against ARCore ([full table](../experiments/lingbot_map/README.md#full-walk-every-third-frame-16-frame-window-8-november-2026)):
 
 - One size per walk works: the size fitted to ARCore's path (1.353) and to its tracked points (1.397) agree within 3%.
 - The camera path follows ARCore's to 0.118 m RMSE over 6.7 m.

@@ -2,7 +2,7 @@
 
 **Follow-up ownership, 15 October 2026.** The [reviewed board](../task_list/README.md) separates built tooling from unperformed handset work. Task52 owns capture metadata and sustained checks; [Task103](../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) owns the Redmi target video, long rest and calibration; [Task104](../task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md) owns calibrated same-walk tracker/surface comparisons. Tasks90/91 remain completed public-dataset results. Task102 first checks image orientation and geometry conventions. Phone inference remains deferred inside the same capture app; the current PC work is CPU only.
 
-Chapter 11 explained what ARCore does inside. This chapter follows the project's second development stream (Stream B, started 14 October 2026): replacing each of ARCore's functions with open-source or hand-built parts, so the product does not depend on Google. It starts with the part everything else rests on: getting camera images and motion-sensor readings onto one clock. Sources are in [research/visual_inertial_odometry/](../research/visual_inertial_odometry/README.md); the code is [experiments/open_vio/](../experiments/open_vio/README.md).
+Chapter 11 explained what ARCore does inside. This chapter follows the project's second development stream (Stream B, started 14 October 2026): replacing each of ARCore's functions with open-source or hand-built parts, so the product does not depend on Google. It starts with the part everything else rests on: getting camera images and motion-sensor readings onto one clock. Sources are in [research/visual_inertial_odometry/](../research/visual_inertial_odometry/README.md); the code is [research/experiments/open_vio/](../research/experiments/open_vio/README.md).
 
 ## What has to be rebuilt
 
@@ -43,7 +43,7 @@ The project's recorder app (Task88) saved, during one walk, what the capture app
 - the gyroscope and accelerometer at the fastest rate the phone allows, in their *uncalibrated* form (Android's own bias correction can jump mid-walk, which a tracker would read as motion);
 - ARCore's camera pose for each frame, as the reference answer, and the pose of the phone's motion-sensor frame (the *device pose*), for the calibration cross-check.
 
-Since Task96 the recorder's parts live inside one capture app with the check app's ARCore outputs (points, raw depth, anchor corrections) and a colour JPEG of every frame, so the open trackers and the ARCore-based methods read the same walk ([phone_session_v2.md](../experiments/01_camera_capture_delivery/phone_session_v2.md)). The phone writes every frame to its own storage first and streams it to the PC as Wi-Fi allows; nothing is dropped because the link is slow.
+Since Task96 the recorder's parts live inside one capture app with the check app's ARCore outputs (points, raw depth, anchor corrections) and a colour JPEG of every frame, so the open trackers and the ARCore-based methods read the same walk ([phone_session_v2.md](../research/experiments/01_camera_capture_delivery/phone_session_v2.md)). The phone writes every frame to its own storage first and streams it to the PC as Wi-Fi allows; nothing is dropped because the link is slow.
 
 ARCore and the app share the camera through ARCore's *shared-camera mode*: ARCore runs normally, and the same capture session sends a copy of every image to the app. The recording therefore holds both the inputs an open tracker needs and ARCore's answer for the same walk, without any extra equipment. A second mode records the motion sensors alone with the phone at rest, for calibration.
 
@@ -53,7 +53,7 @@ The gyroscope measures how fast the phone turns. ARCore's poses also show how fa
 
 Because ARCore's pose already depends on ARCore's own internal calibration, this measurement is a check, not the final number. Kalibr (next section) measures the offset independently, from the camera images and the gyroscope alone.
 
-> **Project result (15 October 2026).** Capture 1.2 completed a 39.88 s Redmi walk with 1,194 frames at 29.92 fps and no reported drops. Both motion sensors ran at 423.54 Hz without gaps. The reader verified all images and the EuRoC converter wrote the camera and IMU files. The estimated camera-to-IMU clock offset is -2.67 ms after correcting for exposure/readout, with peak correlation 0.62; calibration must verify it independently. The final image has no camera settings and 17 frames have no ARCore record, so the check still flags incomplete metadata. [Evidence and limits](../experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99).
+> **Project result (15 October 2026).** Capture 1.2 completed a 39.88 s Redmi walk with 1,194 frames at 29.92 fps and no reported drops. Both motion sensors ran at 423.54 Hz without gaps. The reader verified all images and the EuRoC converter wrote the camera and IMU files. The estimated camera-to-IMU clock offset is -2.67 ms after correcting for exposure/readout, with peak correlation 0.62; calibration must verify it independently. The final image has no camera settings and 17 frames have no ARCore record, so the check still flags incomplete metadata. [Evidence and limits](../research/experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99).
 
 ## Calibration
 
@@ -89,9 +89,9 @@ Two lessons carry over to the phone. The noise settings matter as much as the me
 Install the current FYLD capture APK from the [deployment index](../mobile_deployments/README.md). It replaces the standalone raw recorder and check app. Capture 1.2 completed the Redmi walk; the 60 s rest and calibration recordings remain to be collected.
 
 ```text
-python -B tools/check.py experiments/open_vio/tests
-python experiments/open_vio/host/clock_check.py <recording folder>
-python experiments/open_vio/host/recording.py <recording folder> --euroc <output folder>
+python -B tools/check.py research/experiments/open_vio/tests
+python research/experiments/open_vio/host/clock_check.py <recording folder>
+python research/experiments/open_vio/host/recording.py <recording folder> --euroc <output folder>
 ```
 
 ## Further reading

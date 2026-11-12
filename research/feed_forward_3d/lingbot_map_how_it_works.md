@@ -1,6 +1,6 @@
 # How LingBot-Map works, and which parts this project can use
 
-Written 8 November 2026 from LingBot-Map's code (commit b9dd1b1, `third_party/lingbot-map`), its checkpoint and its paper ([saved PDF](papers/lingbot_map_2604.14141.pdf)), plus measurements on the 15 October Redmi walk. What the model is and its benchmark claims are in [lingbot_map.md](lingbot_map.md); the runs are in [experiments/lingbot_map](../../experiments/lingbot_map/README.md).
+Written 8 November 2026 from LingBot-Map's code (commit b9dd1b1, `third_party/lingbot-map`), its checkpoint and its paper ([saved PDF](papers/lingbot_map_2604.14141.pdf)), plus measurements on the 15 October Redmi walk. What the model is and its benchmark claims are in [lingbot_map.md](lingbot_map.md); the runs are in [research/experiments/lingbot_map](../experiments/lingbot_map/README.md).
 
 **Take-away:** LingBot-Map is a VGGT-style transformer that keeps a structured memory of earlier frames. Used whole, its map looked no better than this project's cleaned room build (owner's judgement from the viewer, 8 November). Its depth works better as a part. Sized frame by frame to ARCore depth, as this project's pipeline already does, it had 38% lower error than Depth Anything V2 on the same 72 frames. Its confidence map marks its worst pixels.
 
@@ -39,7 +39,7 @@ The same structure appears in classical SLAM: fixed reference frames, a window o
 | Memory per frame in the window | About 0.2 GB of GPU memory with PyTorch's attention (keys and values for 1,375 tokens × 24 layers) |
 | Default window on a 16 GB card | Does not fit this way: 2.8 GB model + 68 frames × 0.2 GB ≈ 16.4 GB. The authors fit it in 13.3 GB with FlashInfer's paged cache (Linux) |
 | Speed | 1.27 frames per second on an RTX 5070 Ti under Windows (48-frame window); 0.09 on the CPU (16-frame window). The authors report 12 on an RTX 4090 |
-| Code problems found | An all-true attention mask that blocked fast attention; a loader that puts the 32-bit checkpoint on the GPU; frames read twice on Windows. Fixes in the [experiment](../../experiments/lingbot_map/README.md) |
+| Code problems found | An all-true attention mask that blocked fast attention; a loader that puts the 32-bit checkpoint on the GPU; frames read twice on Windows. Fixes in the [experiment](../experiments/lingbot_map/README.md) |
 
 ## Which parts this project can take
 

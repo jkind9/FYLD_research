@@ -19,7 +19,7 @@ live = [
 ]
 # Ultralytics is AGPL-3.0 or commercial; kept apart until its terms are settled (DESIGN.md 7.5).
 objects = ["ultralytics>=8.4"]
-# Structure from motion, used by experiments/sfm only.
+# Structure from motion, used by research/experiments/sfm only.
 sfm = ["pycolmap>=4.2"]
 # Scoring, viewers and experiment reports outside the product.
 eval = [
@@ -28,7 +28,7 @@ eval = [
     "playwright>=1.59",
     "psutil>=7.2",
     "pyyaml>=6.0",
-    # LGPL-3.0; the Video Depth Anything trial in evaluation/layers needs it.
+    # LGPL-3.0; the Video Depth Anything trial in research/evaluation/layers needs it.
     "easydict>=1.13",
 ]
 dev = [

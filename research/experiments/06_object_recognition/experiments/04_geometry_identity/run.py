@@ -7,7 +7,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from . import inputs
 from .association import CONDITIONS, Track, associate_frame
@@ -16,7 +16,7 @@ from .persistence import read_generation, write_condition
 from .report import write_report
 from .validation import score_identity as _score
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[5]
 RUN_ROOT = Path(__file__).parent / "runs"
 HYPERPARAMETERS = {
     "reference": {

@@ -6,10 +6,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from evaluation.layers import validation
-from evaluation.layers.records import StepResult
-from evaluation.layers.steps.contracts import DepthPrediction
-from experiments.shared.runs import write_json
+from research.evaluation.layers import validation
+from research.evaluation.layers.records import StepResult
+from research.evaluation.layers.steps.contracts import DepthPrediction
+from research.experiments.shared.runs import write_json
 
 SHAPE = (4, 5)
 TRUE_M = np.linspace(0.5, 3.5, SHAPE[0] * SHAPE[1]).reshape(SHAPE)

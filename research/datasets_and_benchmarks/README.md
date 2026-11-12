@@ -1,6 +1,6 @@
 # Datasets and benchmarks
 
-Recordings with reference answers used to score depth, camera paths and surfaces. The full inventory is in experiments/datasets/README.md.
+Recordings with reference answers used to score depth, camera paths and surfaces. The full inventory is in research/experiments/datasets/README.md.
 
 ## Notes
 

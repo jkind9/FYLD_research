@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from evaluation.stage_report import run as runner
-from evaluation.stage_report import schema
+from research.evaluation.stage_report import run as runner
+from research.evaluation.stage_report import schema
 
 ROOT = os.environ.get("EVAL_RUNS_ROOT")
 pytestmark = pytest.mark.skipif(

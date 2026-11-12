@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-PACKAGE = "experiments.06_object_recognition.pilot"
+PACKAGE = "research.experiments.06_object_recognition.pilot"
 
 
 def test_method_import_does_not_load_replay_or_detector():

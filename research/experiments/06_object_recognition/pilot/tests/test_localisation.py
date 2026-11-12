@@ -5,12 +5,12 @@ import importlib
 import numpy as np
 import pytest
 
-from experiments.shared.contracts import Calibration, Pose
+from research.experiments.shared.contracts import Calibration, Pose
 
 localisation = importlib.import_module(
-    "experiments.06_object_recognition.pilot.localisation"
+    "research.experiments.06_object_recognition.pilot.localisation"
 )
-dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
+dataset = importlib.import_module("research.experiments.03_camera_pose_estimation.src.dataset")
 
 
 def frame(depth=None):

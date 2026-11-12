@@ -7,11 +7,11 @@ from copy import deepcopy
 import pytest
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, write_json
 
 cache = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.cache"
+    "research.experiments.06_object_recognition.experiments.01_detection.cache"
 )
 
 

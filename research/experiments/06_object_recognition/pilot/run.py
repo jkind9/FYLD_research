@@ -13,20 +13,20 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.contracts import Pose
-from experiments.shared.geometry import associate_times, backproject, transform_points
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared import geometry
+from research.experiments.shared.contracts import Pose
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from .detector import PREDICT_SETTINGS, YoloDetector
 from .localisation import Detection, localise_detection
 from .report import annotate, write_cloud_review
 
-dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
+dataset = importlib.import_module("research.experiments.03_camera_pose_estimation.src.dataset")
 evaluation = importlib.import_module(
-    "experiments.03_camera_pose_estimation.src.evaluation"
+    "research.experiments.03_camera_pose_estimation.src.evaluation"
 )
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 HYPERPARAMETERS = {
     "model": {
         "value": "YOLO26x COCO",
@@ -117,7 +117,7 @@ def _capture(
 
 
 def _members(repo: Path, root: Path) -> dict:
-    return _read(repo / "experiments/datasets/tum_freiburg1_member_hashes.json")[
+    return _read(repo / "research/experiments/datasets/tum_freiburg1_member_hashes.json")[
         "sequences"
     ][root.name]["members"]
 
@@ -149,7 +149,7 @@ def detect(
         "package": "ultralytics==8.4.172",
     }
     with Run(
-        repo / "experiments/06_object_recognition/pilot/runs", repo, config
+        repo / "research/experiments/06_object_recognition/pilot/runs", repo, config
     ) as run:
         with run.measure("input_capture"):
             members = _members(repo, source)
@@ -215,7 +215,7 @@ def map_detection(repo: Path, detection_run: Path, reviewed: bool) -> Path:
         "pose_input": "supplied TUM motion capture integration control",
     }
     with Run(
-        repo / "experiments/06_object_recognition/pilot/runs", repo, config
+        repo / "research/experiments/06_object_recognition/pilot/runs", repo, config
     ) as run:
         with run.measure("input_capture"):
             source = Path(parent_config["source"])
@@ -251,7 +251,7 @@ def map_detection(repo: Path, detection_run: Path, reviewed: bool) -> Path:
             references = evaluation.read_references(
                 run.path / "input/reference_poses.txt"
             )
-            matches = associate_times(
+            matches = geometry.associate_times(
                 [frame.timestamp_s], [r[0] for r in references], 0.02
             )
             if not matches:
@@ -276,8 +276,8 @@ def map_detection(repo: Path, detection_run: Path, reviewed: bool) -> Path:
                 "proposals"
             ]
         with run.measure("backprojection_and_localisation"):
-            camera, pixels = backproject(frame.depth, frame.valid, frame.calibration)
-            world = transform_points(camera, pose.matrix)
+            camera, pixels = geometry.backproject(frame.depth, frame.valid, frame.calibration)
+            world = geometry.transform_points(camera, pose.matrix)
             colours = frame.colour[pixels[:, 0], pixels[:, 1]]
             locations = [
                 {

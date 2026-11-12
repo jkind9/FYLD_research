@@ -2,7 +2,7 @@
 # Verify the calibration pipeline on TUM-VI's calibration recordings (camera, then camera-IMU), from the repository root in WSL.
 # Inputs come from prepare.py --mav0 (see README); TUM-VI's own IMU noise file is used, as published.
 set -euo pipefail
-ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 RUNS="${RUNS:-$ROOT/experiments/open_vio/runs/kalibr_tumvi}"
 DATA="${DATA:-$ROOT/data/tumvi}"
 KALIBR="$(dirname "$0")/run_kalibr.sh"

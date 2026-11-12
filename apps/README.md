@@ -39,5 +39,5 @@ port through the Windows firewall for private networks the first time.
 ## Tests
 
 `tests/test_pipelines.py` checks the command's refusal to overwrite a run.
-The receiver's tests are in [experiments/01_camera_capture_delivery/tests](../experiments/01_camera_capture_delivery/tests/),
+The receiver's tests are in [research/experiments/01_camera_capture_delivery/tests](../research/experiments/01_camera_capture_delivery/tests/),
 with the fake phone that writes test recordings.

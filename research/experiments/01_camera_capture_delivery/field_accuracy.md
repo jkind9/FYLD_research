@@ -1,6 +1,6 @@
 # Stream A: measure the Redmi on real walks
 
-Task92 prepared the v1 capture and scoring for Task75. There are no tape-measured phone results yet. The phonecheck APK is retired; current APKs are listed in the [deployment index](../../mobile_deployments/README.md). FYLD capture uses v2; the receiver commands and scoring steps below describe historical v1 sessions. The accuracy scorer still needs v2 support before applying this procedure to a new capture. Task61 owns the acceptance limits, so these scores do not label a walk as passing or failing.
+Task92 prepared the v1 capture and scoring for Task75. There are no tape-measured phone results yet. The phonecheck APK is retired; current APKs are listed in the [deployment index](../../../mobile_deployments/README.md). FYLD capture uses v2; the receiver commands and scoring steps below describe historical v1 sessions. The accuracy scorer still needs v2 support before applying this procedure to a new capture. Task61 owns the acceptance limits, so these scores do not label a walk as passing or failing.
 
 ## Install and receive
 
@@ -9,7 +9,7 @@ For a new recording, install FYLD capture from the deployment index and follow t
 Start the host in the repository root:
 
 ```text
-.venv\Scripts\python experiments/01_camera_capture_delivery/host/receiver.py --out outputs/field_accuracy/indoor-01 --sessions 1
+.venv\Scripts\python research/experiments/01_camera_capture_delivery/host/receiver.py --out outputs/field_accuracy/indoor-01 --sessions 1
 ```
 
 Use the computer address printed by the receiver, on the same Wi-Fi as the phone. Press **Stream to computer**. Press **Stop streaming** after the walk. The receiver writes one session subfolder containing `session.json`, `frames.jsonl`, JPEGs and available raw depth. Keep that folder intact. A stream saved before Task87 has no versioned session header or depth and cannot be scored by this tool.
@@ -52,7 +52,7 @@ Save a JSON file beside each session. The numbers below are an example, not meas
 ```
 
 ```text
-.venv\Scripts\python experiments/01_camera_capture_delivery/host/accuracy.py --session outputs/field_accuracy/indoor-01/<received-session> --measurements outputs/field_accuracy/indoor-01/measurements.json --out outputs/field_accuracy/indoor-01/scores.json
+.venv\Scripts\python research/experiments/01_camera_capture_delivery/host/accuracy.py --session outputs/field_accuracy/indoor-01/<received-session> --measurements outputs/field_accuracy/indoor-01/measurements.json --out outputs/field_accuracy/indoor-01/scores.json
 ```
 
 The scorer refuses missing or untracked checkpoints, reversed loop endpoints, repeated or decreasing timestamps/sequences, nonfinite poses, and nonpositive or nonfinite tape lengths. It preserves the measurements and session header, including any `control: reference` label from stand-in data. Such data does not establish phone accuracy.

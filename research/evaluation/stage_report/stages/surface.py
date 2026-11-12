@@ -4,8 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
-from evaluation.stage_report import schema
-from evaluation.stage_report.stages.common import (
+from research.evaluation.stage_report import schema
+from research.evaluation.stage_report.stages.common import (
     file_sha256,
     owner,
     read_json,
@@ -15,7 +15,7 @@ from evaluation.stage_report.stages.common import (
     verified_run,
 )
 
-EVALUATION = "experiments.04_surface_reconstruction.src.evaluation"
+EVALUATION = "research.experiments.04_surface_reconstruction.src.evaluation"
 METHOD = "layer4_point_surface"
 REPORTED = (
     "threshold_m",

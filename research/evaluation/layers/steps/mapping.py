@@ -10,12 +10,12 @@ from typing import Any, Protocol
 
 import numpy as np
 
-from experiments.shared.runs import Run, write_json
+from research.experiments.shared.runs import Run, write_json
 
 from ..records import StepResult, Unavailable, failed_step
 from .contracts import MappingOutput, MethodChoice, SurfaceOutput, method_label
 
-footprint_owner = importlib.import_module("experiments.05_birds_eye_mapping.measure")
+footprint_owner = importlib.import_module("research.experiments.05_birds_eye_mapping.measure")
 
 
 @dataclass(frozen=True)

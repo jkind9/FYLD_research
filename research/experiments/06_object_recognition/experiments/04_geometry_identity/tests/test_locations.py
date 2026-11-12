@@ -7,10 +7,10 @@ import numpy as np
 import pytest
 
 locations = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.locations"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.locations"
 )
 revision = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.revision"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.revision"
 )
 add, estimate = locations.add, locations.estimate
 recompute_generation = revision.recompute_generation

@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-zipdepth = importlib.import_module("experiments.02_stereo_depth.zipdepth")
+zipdepth = importlib.import_module("research.experiments.02_stereo_depth.zipdepth")
 
 
 def test_zipdepth_declares_relative_inverse_depth_convention():

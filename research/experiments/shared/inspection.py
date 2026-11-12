@@ -71,7 +71,7 @@ def aligned_tracking(records: list[dict], references: list, tolerance: float) ->
 
 def tracking_view(root: Path) -> dict:
     evaluation = importlib.import_module(
-        "experiments.03_camera_pose_estimation.src.evaluation"
+        "research.experiments.03_camera_pose_estimation.src.evaluation"
     )
     records = read_json(root / "output/poses.json")["records"]
     rows = read_json(root / "output/associations.json")["rows"]
@@ -292,7 +292,7 @@ def surface_view(root: Path, cap: int = 20000) -> dict:
         )
     )
     reader = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.dataset"
+        "research.experiments.04_surface_reconstruction.src.dataset"
     )
     reference = reader.read_reference(root / "input/evaluation/living-room.ply")
     reference_sample = sample_points(

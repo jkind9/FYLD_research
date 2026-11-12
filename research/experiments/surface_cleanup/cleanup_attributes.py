@@ -1,6 +1,6 @@
 """The raw fused room and, per point, the evidence each clean-up stage tests, for the clean-up tuner page.
 
-    python -B -m experiments.surface_cleanup.cleanup_attributes --session <v2 session> --out <folder>
+    python -B -m research.experiments.surface_cleanup.cleanup_attributes --session <v2 session> --out <folder>
 
 Writes raw.ply (room pipeline rules, no clean-up) and attributes.npz. The page applies the thresholds itself, so
 moving a slider needs no depth maps. Chain linking and radius outliers depend on which points remain, so the page
@@ -14,8 +14,8 @@ import open3d as o3d
 from scipy.spatial import cKDTree
 
 from apps.cli import parse_room_args, room_parser
-from experiments.surface_cleanup.filters import SOR_NEIGHBOURS
-from experiments.surface_cleanup.support import spot_evidence, views_measuring
+from research.experiments.surface_cleanup.filters import SOR_NEIGHBOURS
+from research.experiments.surface_cleanup.support import spot_evidence, views_measuring
 from sitescan.cleanup import vote_tallies
 from sitescan.depth import load_model
 from sitescan.pipelines import DEPTH_MODEL

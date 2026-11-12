@@ -6,20 +6,20 @@ imports anything here. Measured results of the pipelines are in [results.md](res
 
 | Path | What it does | Run it |
 |---|---|---|
-| [`stand_in.py`](stand_in.py) | Writes a TUM or ICL clip as a phone recording, with the clip's true path and depth sensor standing in for ARCore. Its `session.json` says `control: reference` | `python -B -m evaluation.stand_in --recording tum:data/tum/rgbd_dataset_freiburg1_xyz --out <folder>` |
-| [`score.py`](score.py) | Scores a live run's surface against the ICL living-room reference model | `python -B -m evaluation.score --run <live run> --icl data/icl_nuim` |
-| [`count_report.py`](count_report.py) | Splits a live run's new object identities by distance to the nearest same-class object, confidence and sightings | `python -B -m evaluation.count_report <live run>/updates.jsonl` |
-| [`depth_check.py`](depth_check.py) | Fused learned depth against ARCore's tracked points, by distance and by whether the grid cell had its own ARCore depth | `python -B -m evaluation.depth_check --session <recording> --out <check.json>` |
-| [`orientation_control.py`](orientation_control.py) | Learned depth from the image as recorded against the image turned upright, both scored on ARCore depth | `python -B -m evaluation.orientation_control --session <recording> --out <folder>` |
-| [`landmark_probe.py`](landmark_probe.py) | Where each frame puts one red object, from ARCore depth and from learned depth; finds doubled surfaces | `python -B -m evaluation.landmark_probe --session <recording> --first 660 --last 730 --out <probe.json>` |
-| [`layers/`](layers/README.md) | The layer-by-layer runner: each layer fed known-correct inputs, so its error is its own | `python -B -m evaluation.layers.cli --help` |
-| [`stage_report/`](stage_report/README.md) | One accuracy report per run, stage by stage, and a comparison of two reports | `python -B -m evaluation.stage_report.run --help` |
+| [`stand_in.py`](stand_in.py) | Writes a TUM or ICL clip as a phone recording, with the clip's true path and depth sensor standing in for ARCore. Its `session.json` says `control: reference` | `python -B -m research.evaluation.stand_in --recording tum:data/tum/rgbd_dataset_freiburg1_xyz --out <folder>` |
+| [`score.py`](score.py) | Scores a live run's surface against the ICL living-room reference model | `python -B -m research.evaluation.score --run <live run> --icl data/icl_nuim` |
+| [`count_report.py`](count_report.py) | Splits a live run's new object identities by distance to the nearest same-class object, confidence and sightings | `python -B -m research.evaluation.count_report <live run>/updates.jsonl` |
+| [`depth_check.py`](depth_check.py) | Fused learned depth against ARCore's tracked points, by distance and by whether the grid cell had its own ARCore depth | `python -B -m research.evaluation.depth_check --session <recording> --out <check.json>` |
+| [`orientation_control.py`](orientation_control.py) | Learned depth from the image as recorded against the image turned upright, both scored on ARCore depth | `python -B -m research.evaluation.orientation_control --session <recording> --out <folder>` |
+| [`landmark_probe.py`](landmark_probe.py) | Where each frame puts one red object, from ARCore depth and from learned depth; finds doubled surfaces | `python -B -m research.evaluation.landmark_probe --session <recording> --first 660 --last 730 --out <probe.json>` |
+| [`layers/`](layers/README.md) | The layer-by-layer runner: each layer fed known-correct inputs, so its error is its own | `python -B -m research.evaluation.layers.cli --help` |
+| [`stage_report/`](stage_report/README.md) | One accuracy report per run, stage by stage, and a comparison of two reports | `python -B -m research.evaluation.stage_report.run --help` |
 | [`tests/`](tests/) | Tests of the scripts above | `python -B -m pytest -c pytest-full.ini evaluation` |
 
 ## Known debt
 
 Some of these still import experiment code: `stand_in.py` reads clips through
-`experiments.sfm.src.sequences`, `score.py` uses the ICL reader in `experiments/sfm` and the
-surface scorer in `experiments/04_surface_reconstruction`, and `layers/` uses the shared
-contracts in `experiments/shared`. Moving those readers here is listed under Future work in the
-[root README](../README.md#future-work).
+`research.experiments.sfm.src.sequences`, `score.py` uses the ICL reader in `research/experiments/sfm` and the
+surface scorer in `research/experiments/04_surface_reconstruction`, and `layers/` uses the shared
+contracts in `research/experiments/shared`. Moving those readers here is listed under Future work in the
+[root README](../../README.md#future-work).

@@ -4,9 +4,9 @@ import math
 
 import pytest
 
-from evaluation.stage_report import compare, render, schema
-from evaluation.stage_report.stages import camera, detection, identity, surface
-from evaluation.stage_report.tests import fixtures
+from research.evaluation.stage_report import compare, render, schema
+from research.evaluation.stage_report.stages import camera, detection, identity, surface
+from research.evaluation.stage_report.tests import fixtures
 
 
 def _measure(
@@ -265,14 +265,14 @@ def test_provisional_reference_is_visible_in_table(tmp_path):
 def test_publish_writes_verified_run_with_rows_split_out(tmp_path):
     from pathlib import Path
 
-    from evaluation.stage_report import run as runner
-    from experiments.shared.runs import verify_run
+    from research.evaluation.stage_report import run as runner
+    from research.experiments.shared.runs import verify_run
 
     fixtures.camera_run(tmp_path / "camera")
     report = schema.build_report(
         [camera.camera_section(tmp_path / "camera", dataset="fixture")]
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     published = runner.publish(report, repo, tmp_path / "reports")
     assert verify_run(published)["status"] == "complete"
     stored = fixtures.read(published / "output/report.json")

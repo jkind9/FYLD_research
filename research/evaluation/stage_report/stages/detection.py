@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from evaluation.stage_report import schema
-from evaluation.stage_report.stages.common import (
+from research.evaluation.stage_report import schema
+from research.evaluation.stage_report.stages.common import (
     file_sha256,
     owner,
     read_json,
@@ -12,7 +12,7 @@ from evaluation.stage_report.stages.common import (
     verified_run,
 )
 
-SCORING = "experiments.06_object_recognition.experiments.01_detection.scoring"
+SCORING = "research.experiments.06_object_recognition.experiments.01_detection.scoring"
 EMPTY = "empty_prediction_software_control"
 THRESHOLDS = (0.3, 0.5, 0.7)
 COUNTS = (

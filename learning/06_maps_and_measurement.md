@@ -14,7 +14,7 @@ Viewed straight down with no perspective, the result is an *orthographic* map: a
 
 ## How the project's method works
 
-`experiments/05_birds_eye_mapping/measure.py`, `GridFootprint` in the walkthrough:
+`research/experiments/05_birds_eye_mapping/measure.py`, `GridFootprint` in the walkthrough:
 
 - **Ground plane by RANSAC**: try 500 random three-point planes on a 50,000-point sample, keep the one with the most points within 2 cm, then refit by least squares on all points near it.
 - **Grid axes from the plane's own points**, so furniture standing on it cannot rotate the grid.
@@ -31,14 +31,14 @@ It is checked against 20 shapes with answers written from the shape definitions:
 - **Outlier points** (a reflection, a mismatched feature) can create false walls or holes.
 - **The fitted plane may not be the floor.** On a desk recording it is the desk top.
 
-> **Project result: learned depth inflates areas three to four times.** On 30 frames of TUM xyz, the desk-top plane measured 2.21 m² with Kinect depth and 7.44 m² with Depth Anything; the seen footprint 4.09 against 16.37 m². Neither is checked against a tape measure yet. Only 17% of Depth Anything's points lay on the plane, against 51% for the Kinect, because the wrong per-frame size smears the desk into a thick slab. (`experiments/05_birds_eye_mapping/README.md`.)
+> **Project result: learned depth inflates areas three to four times.** On 30 frames of TUM xyz, the desk-top plane measured 2.21 m² with Kinect depth and 7.44 m² with Depth Anything; the seen footprint 4.09 against 16.37 m². Neither is checked against a tape measure yet. Only 17% of Depth Anything's points lay on the plane, against 51% for the Kinect, because the wrong per-frame size smears the desk into a thick slab. (`research/experiments/05_birds_eye_mapping/README.md`.)
 
 This is why chapters 2-5 matter: area is the end of a chain, and every error upstream reaches it, multiplied.
 
 ## Try it
 
 ```text
-python -m pytest experiments/05_birds_eye_mapping/tests -q
+python -m pytest research/experiments/05_birds_eye_mapping/tests -q
 ```
 
 Each test builds a known shape and checks the measured area, unknown area and rectangle against hand-written answers.

@@ -16,8 +16,8 @@ The images are tagged `vio-basalt`, `vio-okvis2`, `vio-kimera` and `vio-openvins
 Do not call `docker build` directly: `okvis2`, `kimera` and `openvins` copy a source folder from the build context, which `build_images.sh` sets to `~/open_vio/src`. Build from WSL with Docker, from the repository root:
 
 ```text
-wsl -- bash experiments/open_vio/vio/build_images.sh <basalt|okvis2|kimera|openvins>
-wsl -- bash experiments/open_vio/vio/build_all.sh
+wsl -- bash research/experiments/open_vio/vio/build_images.sh <basalt|okvis2|kimera|openvins>
+wsl -- bash research/experiments/open_vio/vio/build_all.sh
 ```
 
 ## Where results are recorded

@@ -12,11 +12,15 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.contracts import Calibration, Pose
-from experiments.shared.geometry import associate_times, backproject, transform_points
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.contracts import Calibration, Pose
+from research.experiments.shared.geometry import (
+    associate_times,
+    backproject,
+    transform_points,
+)
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[5]
 ORIGINAL_SHA256 = "a786adc5f814ad9773712397f46ba79d8d40dc5c174fe17045336440cdffd920"
 PUBLICATION_SHA256 = "eb30954d32b56778d55ac4a1858dd933ddec7550d2aa4da5bfb9e9ae1b5d57e3"
 PUBLISHED_SHA256 = "27fe047dac254161ea823d6c55aeb28e16bd88cd993f1e4bf8fbdee40d4741d3"
@@ -24,27 +28,27 @@ TASK20_MANIFEST_SHA256 = (
     "f2b2e47803f160354fff1080a6a94164dc7790b39994bcd2b704c81ca50d27c4"
 )
 TASK20_RUN_RELATIVE = Path(
-    "experiments/06_object_recognition/experiments/03_appearance/runs/20261004T135203.039973Z_fd481f16c8374ca2a0f04d6f0703a16d"
+    "research/experiments/06_object_recognition/experiments/03_appearance/runs/20261004T135203.039973Z_fd481f16c8374ca2a0f04d6f0703a16d"
 )
 WORLD_ID = "tum_freiburg1_desk_mocap"
 SEGMENT_ID = "continuous_capture"
 TIME_TOLERANCE_S = 0.02
 
 source_api = importlib.import_module(
-    "experiments.06_object_recognition.experiments.02_segmentation.run"
+    "research.experiments.06_object_recognition.experiments.02_segmentation.run"
 )
 appearance_run = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.run"
+    "research.experiments.06_object_recognition.experiments.03_appearance.run"
 )
 appearance_cache = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.cache"
+    "research.experiments.06_object_recognition.experiments.03_appearance.cache"
 )
-dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
+dataset = importlib.import_module("research.experiments.03_camera_pose_estimation.src.dataset")
 evaluation = importlib.import_module(
-    "experiments.03_camera_pose_estimation.src.evaluation"
+    "research.experiments.03_camera_pose_estimation.src.evaluation"
 )
 localisation = importlib.import_module(
-    "experiments.06_object_recognition.pilot.localisation"
+    "research.experiments.06_object_recognition.pilot.localisation"
 )
 
 
@@ -89,7 +93,7 @@ def output_root(repo: Path, destination: Path) -> Path:
     protected.extend(
         (
             repo / "data/object_revisits/desk_smoke_v1",
-            repo / "experiments/06_object_recognition/datasets",
+            repo / "research/experiments/06_object_recognition/datasets",
         )
     )
     for path in protected:
@@ -112,7 +116,7 @@ def preflight(repo: Path) -> tuple[dict, Path, dict]:
     manifest = source_api.preflight(repo)
     publication = repo / "data/object_revisits/desk_smoke_v1"
     if (
-        sha256(repo / "experiments/06_object_recognition/datasets/desk_smoke_v1.json")
+        sha256(repo / "research/experiments/06_object_recognition/datasets/desk_smoke_v1.json")
         != ORIGINAL_SHA256
     ):
         raise ValueError("Task17 original annotation pin differs")

@@ -1,8 +1,8 @@
 # Structure from motion (standalone)
 
-This folder answers one question: **can the camera path and the scene's 3D structure be recovered from the images alone, more accurately than the walkthrough's depth-based tracker?** It runs established structure-from-motion software on recordings we already have and scores the result against their true camera paths and surfaces. It does not change the six-layer walkthrough in `evaluation/layers`; its saved outputs are files that later tasks read.
+This folder answers one question: **can the camera path and the scene's 3D structure be recovered from the images alone, more accurately than the walkthrough's depth-based tracker?** It runs established structure-from-motion software on recordings we already have and scores the result against their true camera paths and surfaces. It does not change the six-layer walkthrough in `research/evaluation/layers`; its saved outputs are files that later tasks read.
 
-The owner asked for this on 13 October 2026: standalone SfM experiments in their own folder, on existing data, with speed and edge deployment in mind but not the focus. Tasks: [67](../../task_list/done/67_track_the_camera_without_depth_so_depth_scale_erro.md) (camera path), [71](../../task_list/done/71_rebuild_surfaces_from_the_recorded_camera_poses_to.md) (surfaces from true poses), [72](../../task_list/done/72_scale_learned_depth_to_the_image_only_tracker_s_3d.md) (dense structure from the SfM path), [76](../../task_list/archive/76_read_saved_sfm_camera_paths_and_points_into_the_wa.md) (walkthrough readers). Background: [the tracking review](../../research/camera_tracking_and_slam/tracking_review_2026-10-13.md).
+The owner asked for this on 13 October 2026: standalone SfM experiments in their own folder, on existing data, with speed and edge deployment in mind but not the focus. Tasks: [67](../../../task_list/done/67_track_the_camera_without_depth_so_depth_scale_erro.md) (camera path), [71](../../../task_list/done/71_rebuild_surfaces_from_the_recorded_camera_poses_to.md) (surfaces from true poses), [72](../../../task_list/done/72_scale_learned_depth_to_the_image_only_tracker_s_3d.md) (dense structure from the SfM path), [76](../../../task_list/archive/76_read_saved_sfm_camera_paths_and_points_into_the_wa.md) (walkthrough readers). Background: [the tracking review](../../camera_tracking_and_slam/tracking_review_2026-10-13.md).
 
 ## How it works
 
@@ -22,8 +22,8 @@ COLMAP is the official 4.2.1 Windows build without CUDA, downloaded on 2026-10-1
 
 ```text
 uv sync --all-extras
-.venv\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 ^
-    --features sift --run-root experiments/sfm/runs/tum_desk ^
+.venv\Scripts\python -m research.experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 ^
+    --features sift --run-root research/experiments/sfm/runs/tum_desk ^
     --depth-run outputs/task_runs/task65_runs/desk/depth-anything/20261008T160022.468281Z_86f38337bb0b4db9ad2a2126b3a0b646
 .venv\Scripts\python -m pytest experiments\sfm\tests -p no:cacheprovider --import-mode=importlib
 ```
@@ -58,7 +58,7 @@ Each run folder holds `input/sequence.json` (images with SHA-256), `debug/colmap
 
 Camera path error on the same every-2nd-frame clips as Task65. "Best fit with size" lines up the whole path and fits one overall size: the score published for image-only methods, and the fairest comparison of path shape. "Depth-model size" sets the size from Depth Anything instead (deployable without other sensors) and then lines up the path; it inherits Depth Anything's overall bias.
 
-### All runs (from `python -m experiments.sfm.report`)
+### All runs (from `python -m research.experiments.sfm.report`)
 
 | Recording | Camera | Features | Mapper | Placed (largest model) | Models | Best fit with size | Fitted size | Depth-model size, error | Seconds | Frames per second |
 |---|---|---|---|---:|---:|---:|---:|---|---:|---:|
@@ -109,7 +109,7 @@ What this shows:
 
 ## Surfaces from the true camera poses (Task71)
 
-Each recording's frames are fused along its true camera path (Open3D TSDF, 1 cm voxels on ICL, 2 cm on TUM, depth 0.1-4 m) and scored against a reference with experiment 04's scorer at 5 cm. ICL's reference is the publisher's surface model; TUM's is Kinect depth fused along the motion-capture path with the same settings, so it carries the Kinect's own error and the motion-capture timing error (about 30 mm on the 30-frame clip), and TUM has no separate sensor row. Run with `python -m experiments.sfm.run_dense`; table from `python -m experiments.sfm.report --dense`.
+Each recording's frames are fused along its true camera path (Open3D TSDF, 1 cm voxels on ICL, 2 cm on TUM, depth 0.1-4 m) and scored against a reference with experiment 04's scorer at 5 cm. ICL's reference is the publisher's surface model; TUM's is Kinect depth fused along the motion-capture path with the same settings, so it carries the Kinect's own error and the motion-capture timing error (about 30 mm on the 30-frame clip), and TUM has no separate sensor row. Run with `python -m research.experiments.sfm.run_dense`; table from `python -m research.experiments.sfm.report --dense`.
 
 | Recording | Depth | Poses | Mean distance to reference | RMSE | Points within 5 cm | Reference covered within 5 cm | Points |
 |---|---|---|---:|---:|---:|---:|---:|
@@ -172,7 +172,7 @@ The SfM world has no real-world size. A phone can supply some from ARCore depth 
 - **Per run**: N readings drawn from the whole run. N is the total the phone must take.
 - **Per frame**: N readings drawn in every frame; each frame gets a median and the run size is the median over frames. The total is about N times the frame count.
 
-100 random draws per setting (one for "all"). The SfM runs are Task72's. Run with `python -m experiments.sfm.run_metric_points`. No noise is added to the depth camera readings, so ARCore's own error is not simulated.
+100 random draws per setting (one for "all"). The SfM runs are Task72's. Run with `python -m research.experiments.sfm.run_metric_points`. No noise is added to the depth camera readings, so ARCore's own error is not simulated.
 
 Camera path after sizing (best-fit rigid error, median over draws, 10th-90th percentile in brackets) and size error against the best-fit size:
 

@@ -13,7 +13,7 @@ This folder holds the smallest Android app the build route can package, and the 
 - `validate_export(report, bundle_root)` also requires `status` to be `complete`, then checks that every listed file exists inside `bundle_root` with the recorded size and SHA-256 hash.
 - `validate_phone_session_export(report, bundle_root)` also requires at least one image, a passing `single_camera_control` check, and that this check's details match every exported image.
 
-`experiments/shared/phone_session.py` takes `validate_phone_session_export` as an argument when it reads an export. `src/walkthrough/steps/capture.py` imports the module by its path.
+`research/experiments/shared/phone_session.py` takes `validate_phone_session_export` as an argument when it reads an export. `src/walkthrough/steps/capture.py` imports the module by its path.
 
 The report format here is the Camera2 diagnostic report (`schema_version`, checks with `id`). The FYLD capture app writes a different check report (`schema`, checks with `name`), which [`host/report.py`](../host/README.md) validates.
 
@@ -22,7 +22,7 @@ The report format here is the Camera2 diagnostic report (`schema_version`, check
 Neither file has a command line. `main.py` runs only inside the APK, built by [`build/`](../build/README.md). Check the validator with:
 
 ```text
-.venv/Scripts/python.exe -m pytest experiments/01_camera_capture_delivery/tests/test_capture_report.py
+.venv/Scripts/python.exe -m pytest research/experiments/01_camera_capture_delivery/tests/test_capture_report.py
 ```
 
 ## Where results are recorded

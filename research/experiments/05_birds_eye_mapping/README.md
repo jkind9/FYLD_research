@@ -1,6 +1,6 @@
 # Layer 4b: bird's-eye map and area measurement
 
-This folder is part of layer 4, environment visualisation, in the five-layer pipeline described in the [root README](../../README.md). The other part of layer 4, building the 3D surface, lives in [experiments/04_surface_reconstruction](../04_surface_reconstruction/README.md).
+This folder is part of layer 4, environment visualisation, in the five-layer pipeline described in the [root README](../../../README.md). The other part of layer 4, building the 3D surface, lives in [research/experiments/04_surface_reconstruction](../04_surface_reconstruction/README.md).
 
 This folder answers: **given a 3D model of the site, can we produce a top-down map that gives correct heights, boundaries and areas in metres, and shows clearly what was never seen?** This is where the brief's "estimate the size of the worksite" becomes a number.
 
@@ -52,7 +52,7 @@ Points can be passed as one array or as `PointChunks`, one chunk per frame. Chun
 | Noisy floor (2 mm) with 30% clutter | normal within 1°, identical for the same seed |
 | Empty, non-finite, wrong-shape or non-metre input; bad cell size | refused with a clear error |
 
-Run them with `python -m pytest experiments/05_birds_eye_mapping/tests -q`.
+Run them with `python -m pytest research/experiments/05_birds_eye_mapping/tests -q`.
 
 ### First real runs
 
@@ -81,11 +81,11 @@ Learned depth inflates every area three to four times. The desk has no tape-meas
 
 | Source | What it is | Why it matters here |
 |---|---|---|
-| [Construction progress from top-down images](../../research/construction_site_context/construction_orthographic_progress.md) | Research using orthographic views to track construction work | Shows top-down views are useful on real sites. Its completion results do not measure geometry accuracy. |
+| [Construction progress from top-down images](../../construction_site_context/construction_orthographic_progress.md) | Research using orthographic views to track construction work | Shows top-down views are useful on real sites. Its completion results do not measure geometry accuracy. |
 | [OctoMap](https://octomap.github.io/octomap/doc/index.html) | A widely used 3D mapping library | Its occupied, free and unknown states are the model for keeping unseen areas visible. |
 | [ANYbotics elevation_mapping](https://github.com/ANYbotics/elevation_mapping) | Height mapping for walking robots | Handles uneven ground and carries position uncertainty into heights. |
 | [ARCore planes](https://developers.google.com/ar/reference/java/com/google/ar/core/Plane) | Android's live plane detection | The cheapest on-phone area estimate on both test phones. |
-| [Apple RoomPlan](../../research/phone_ar_platforms/apple_roomplan.md) | Apple's room-scanning API | Shows a finished floor-plan product. It needs Apple hardware with a laser sensor, which our phones lack, and it models rooms as boxes rather than measured surfaces. |
+| [Apple RoomPlan](../../phone_ar_platforms/apple_roomplan.md) | Apple's room-scanning API | Shows a finished floor-plan product. It needs Apple hardware with a laser sensor, which our phones lack, and it models rooms as boxes rather than measured surfaces. |
 
 ## How this layer will be tested
 
@@ -93,7 +93,7 @@ Learned depth inflates every area three to four times. The desk has no tape-meas
 
 The first tests use simple made-up shapes defined in advance: a flat plane, steps, a rectangular pit, holes and an overhang. Their true dimensions, heights, areas and visibility masks come from the shape definitions, written separately from the projection code. This way a bug in the projection cannot also produce the "expected" answer. Record dimensions, coordinate frames and grid settings before generating them. No download is needed.
 
-The real ICL-NUIM living-room model at `data/icl_nuim/reference_surface/living-room.ply` can be used later as a realistic input. It cannot replace the test shapes, because its true floor areas and heights are not independently given. [ICL acquisition record](../../data/README.md#icl-acquisition-and-verified-contents). After that come reconstructed surfaces from layer 4 and then phone captures.
+The real ICL-NUIM living-room model at `data/icl_nuim/reference_surface/living-room.ply` can be used later as a realistic input. It cannot replace the test shapes, because its true floor areas and heights are not independently given. [ICL acquisition record](../../../data/README.md#icl-acquisition-and-verified-contents). After that come reconstructed surfaces from layer 4 and then phone captures.
 
 ### Inputs and outputs
 
@@ -125,12 +125,12 @@ Recognising whether work is finished is a separate task. It needs its own defini
 - **Handle multi-level sites**, such as trenches and stacked materials, with height slices rather than one highest surface.
 - **Combine repeated visits.** Align maps from different days only after their coordinate frames are linked by a checked transform.
 
-Projection code will move to [experiments/shared](../shared/README.md) once its tests pass, so any geometry source can use it. See the [experiment guide](../README.md) for how the layers connect.
+Projection code will move to [research/experiments/shared](../shared/README.md) once its tests pass, so any geometry source can use it. See the [experiment guide](../README.md) for how the layers connect.
 
 ## Current delivery ownership, 7 October 2026
 
-[Task55](../../task_list/closed/55_implement_site_dimensions_and_area_measurement.md) built the first dimensions/area component, its known-shape tests and its walkthrough method. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns the complete walkthrough benchmark. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) supplies the physical reference measurements that real areas still need.
+[Task55](../../../task_list/closed/55_implement_site_dimensions_and_area_measurement.md) built the first dimensions/area component, its known-shape tests and its walkthrough method. [Task56](../../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns the complete walkthrough benchmark. [Task53](../../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) supplies the physical reference measurements that real areas still need.
 
 ## Walkthrough measurement boundary
 
-Step 5 of the walkthrough uses `GridFootprint` (`evaluation/layers/steps/mapping.py`) when `--mapping grid-footprint` is passed. It measures each tracking origin separately, never joining separate worlds, saves each origin's grids under `output/predictions/mapping/`, and the visual index shows one top-down map per origin. It does not infer area from sampled viewer points or fill unseen space. See [the six-step runner](../../evaluation/layers/README.md).
+Step 5 of the walkthrough uses `GridFootprint` (`research/evaluation/layers/steps/mapping.py`) when `--mapping grid-footprint` is passed. It measures each tracking origin separately, never joining separate worlds, saves each origin's grids under `output/predictions/mapping/`, and the visual index shows one top-down map per origin. It does not infer area from sampled viewer points or fill unseen space. See [the six-step runner](../../evaluation/layers/README.md).

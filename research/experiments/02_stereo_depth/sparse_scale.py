@@ -7,10 +7,10 @@ The chosen points are exact Kinect values, so the result is still optimistic: re
 points carry their own error.
 
 Usage, from the repository root:
-    python -m experiments.02_stereo_depth.sparse_scale \
-        --set "Depth Anything V2=experiments/02_stereo_depth/runs/task54/depth-anything" \
-        --set "ZipDepth phone=experiments/02_stereo_depth/runs/task62/zipdepth" \
-        --output experiments/02_stereo_depth/runs/task62/sparse_scale.json
+    python -m research.experiments.02_stereo_depth.sparse_scale \
+        --set "Depth Anything V2=research/experiments/02_stereo_depth/runs/task54/depth-anything" \
+        --set "ZipDepth phone=research/experiments/02_stereo_depth/runs/task62/zipdepth" \
+        --output research/experiments/02_stereo_depth/runs/task62/sparse_scale.json
 Each --set path holds one folder per sequence with a results.json that lists the saved
 prediction files and their output convention (runner and Marigold scorer outputs both do).
 """

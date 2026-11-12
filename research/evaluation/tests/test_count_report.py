@@ -2,7 +2,7 @@
 
 import json
 
-from evaluation import count_report
+from research.evaluation import count_report
 
 
 def detection(label, confidence, outcome, object_id, nearest):

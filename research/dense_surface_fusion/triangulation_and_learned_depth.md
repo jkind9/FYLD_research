@@ -55,7 +55,7 @@ So there are two ways to combine:
    - Triangulate features along the recorded ARCore path with pycolmap's known-pose triangulator, pairing frames 0.3-1 m apart.
    - Keep COLMAP's checks: two-view geometry, at least 3 views, a minimum angle between rays and a small reprojection error.
    - Use the points as sizing targets with a size that varies with distance, for example a scale and shift per frame as the 2025 SfM-guided paper fits.
-   - Score beyond 3 m against held-out ARCore tracked points with `python -B -m evaluation.depth_check`, and look at the hallway door.
+   - Score beyond 3 m against held-out ARCore tracked points with `python -B -m research.evaluation.depth_check`, and look at the hallway door.
 2. **Dense next (way B).**
    - Plane sweep with Census costs and SGM between keyframes about 0.6 m apart, as in Mobile3DRecon.
    - Keep the confident pixels, fill the rest with sized learned depth, and fuse.

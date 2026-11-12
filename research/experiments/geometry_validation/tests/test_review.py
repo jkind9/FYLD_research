@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-review = importlib.import_module("experiments.geometry_validation.src.review")
+review = importlib.import_module("research.experiments.geometry_validation.src.review")
 
 
 def saved_frames(root: Path, positions: list[list[float]]) -> list[dict]:

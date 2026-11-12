@@ -5,8 +5,8 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.shared.exporting import _cloud_preview
-from experiments.shared.inspection import surface_view
+from research.experiments.shared.exporting import _cloud_preview
+from research.experiments.shared.inspection import surface_view
 
 
 def build_review(path: Path, metrics: dict, frames: list[dict]) -> None:

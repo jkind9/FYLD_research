@@ -5,10 +5,10 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from experiments.geometry_validation.src.control import Stages
-from experiments.geometry_validation.src.icl import Frame
-from experiments.shared.exporting import _raster
-from experiments.shared.runs import write_json
+from research.experiments.geometry_validation.src.control import Stages
+from research.experiments.geometry_validation.src.icl import Frame
+from research.experiments.shared.exporting import _raster
+from research.experiments.shared.runs import write_json
 
 
 def export_shard(

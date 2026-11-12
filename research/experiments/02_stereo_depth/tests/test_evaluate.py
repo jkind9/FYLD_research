@@ -8,8 +8,8 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-dataset = importlib.import_module("experiments.02_stereo_depth.dataset")
-evaluation = importlib.import_module("experiments.02_stereo_depth.evaluate")
+dataset = importlib.import_module("research.experiments.02_stereo_depth.dataset")
+evaluation = importlib.import_module("research.experiments.02_stereo_depth.evaluate")
 
 
 @pytest.fixture

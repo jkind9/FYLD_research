@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.shared.geometry import validate_transform
+from research.experiments.shared.geometry import validate_transform
 
 from .dataset import RGBDFrame
 

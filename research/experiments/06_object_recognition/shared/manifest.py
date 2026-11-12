@@ -7,8 +7,8 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.contracts import Calibration
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.contracts import Calibration
 
 from .validation import finite, identifier, pixel_support, sha256_value
 

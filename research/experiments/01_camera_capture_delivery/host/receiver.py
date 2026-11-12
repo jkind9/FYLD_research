@@ -2,7 +2,7 @@
 
 The capture app sends phone session v2 to capture_receiver.py instead; this receiver stays for v1 senders.
 
-    python experiments/01_camera_capture_delivery/host/receiver.py --out experiments/01_camera_capture_delivery/runs/phonecheck
+    python research/experiments/01_camera_capture_delivery/host/receiver.py --out research/experiments/01_camera_capture_delivery/runs/phonecheck
 
 Messages follow phone_session_v1.md: a stream connection starts with a session message, and session_v1.parse_frame
 checks every frame; a bad frame closes the connection. Each connection becomes one session folder: session.json,

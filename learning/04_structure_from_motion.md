@@ -38,7 +38,7 @@ It is the core of accurate 3D from images: every measurement constrains everythi
 
 Multiply every point and every camera position by 2: every reprojection error stays exactly the same. The photos cannot tell a model from one twice its size. SfM therefore returns a world in arbitrary "SfM units". To get metres you need one extra measurement: a known distance, a depth sensor, or the phone's IMU (via ARCore).
 
-> **Project result: 20 metric depth readings fix the size.** The project simulated a phone supplying a few depth readings at SfM points, using the Kinect (TUM) or rendered depth (ICL) as the stand-in. With 20 readings in total, drawn at random over the whole walk, the camera path error was 13.7 mm on xyz, 24.2 mm on desk and 34.1 mm on ICL, against 11.9, 21.5 and 34.1 mm with the size fitted to the true path. More readings did not help: with every reading the size was still 3.7% small on xyz, the Kinect's own bias. Five readings worked on a typical draw but the spread was wider. (Task78, `experiments/sfm/README.md`.)
+> **Project result: 20 metric depth readings fix the size.** The project simulated a phone supplying a few depth readings at SfM points, using the Kinect (TUM) or rendered depth (ICL) as the stand-in. With 20 readings in total, drawn at random over the whole walk, the camera path error was 13.7 mm on xyz, 24.2 mm on desk and 34.1 mm on ICL, against 11.9, 21.5 and 34.1 mm with the size fitted to the true path. More readings did not help: with every reading the size was still 3.7% small on xyz, the Kinect's own bias. Five readings worked on a typical draw but the spread was wider. (Task78, `research/experiments/sfm/README.md`.)
 
 > **Project result: Depth Anything's own size is unusable.** Taking SfM's size from Depth Anything gives 1.3-1.4 times too large, so the path misses by 58 mm (xyz) and 357-361 mm (desk) from size alone. (Task67.)
 
@@ -81,11 +81,11 @@ Learned methods solve the same problem differently: DROID-SLAM and DPVO (learned
 
 ## Try it
 
-Run COLMAP on the TUM xyz clip and score it (needs the repository's `.venv` and the COLMAP build in `third_party/`; see `experiments/sfm/README.md`, "Running"):
+Run COLMAP on the TUM xyz clip and score it (needs the repository's `.venv` and the COLMAP build in `third_party/`; see `research/experiments/sfm/README.md`, "Running"):
 
 ```text
-.venv\Scripts\python -m experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --features sift --run-root experiments/sfm/runs/tum_xyz
-.venv\Scripts\python -m experiments.sfm.report experiments/sfm/runs/tum_xyz/*
+.venv\Scripts\python -m research.experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --features sift --run-root research/experiments/sfm/runs/tum_xyz
+.venv\Scripts\python -m research.experiments.sfm.report research/experiments/sfm/runs/tum_xyz/*
 ```
 
 Open `debug/colmap/` in the run folder to see the database, the models and COLMAP's own logs.
@@ -94,4 +94,4 @@ Open `debug/colmap/` in the run folder to see the database, the models and COLMA
 
 - Lectures 3 (features), 5 (epipolar geometry, why size is unknown), 8 (SfM and bundle adjustment) in [research/3d_vision_fundamentals](../research/3d_vision_fundamentals/README.md).
 - [research/structure_from_motion](../research/structure_from_motion/README.md): COLMAP note, GLOMAP and newer papers.
-- `experiments/sfm/README.md`: method, settings and every result table.
+- `research/experiments/sfm/README.md`: method, settings and every result table.

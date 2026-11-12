@@ -5,7 +5,7 @@ size, 4.0 m far limit). Each variant is then fused and scored. Tracked points wi
 odd ids score it, so no variant is scored on points it was fitted to. Tracked points come from ARCore's tracking,
 not its depth maps, so they check depth beyond ARCore depth's reach. Sources: research/surface_denoising.
 
-    python -B -m experiments.surface_cleanup.denoise_trial --session <v2 session> --out <folder>
+    python -B -m research.experiments.surface_cleanup.denoise_trial --session <v2 session> --out <folder>
 """
 
 from __future__ import annotations
@@ -22,17 +22,17 @@ import open3d as o3d
 from scipy.spatial import cKDTree
 
 from apps.cli import parse_room_args, room_parser
-from experiments.surface_cleanup.filters import (
+from research.experiments.surface_cleanup.filters import (
     CLUSTER_EPS_M,
     keep_after,
     piece_majority,
 )
-from experiments.surface_cleanup.masks import (
+from research.experiments.surface_cleanup.masks import (
     edge_mask,
     near_first_passes,
     view_angle_mask,
 )
-from experiments.surface_cleanup.support import (
+from research.experiments.surface_cleanup.support import (
     MEASURED_M,
     WIDE_ANGLE_DEG,
     views_measuring,

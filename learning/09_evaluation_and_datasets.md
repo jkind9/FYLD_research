@@ -29,7 +29,7 @@ Lining up comes first, because an estimated path lives in its own coordinate fra
 | **Best fit with size** | Same, plus one overall scale factor | Image-only methods, which have no size. The score published for monocular SLAM. |
 | **Relative pose error, 1 s** | Error of each 1-second motion | Drift, independent of where the path started |
 
-> **Project result: the first-frame score roughly doubled the error and hid the path's size.** Rescoring the same saved paths: Kinect-depth tracker on xyz 67 mm first-frame against 34 mm best fit; on desk 220 mm against 112 mm. Raw Depth Anything's xyz path was about 16 times too long (fitted size 0.06), which first-frame scoring did not show. All camera results in these chapters use best fit. (Task70, `experiments/03_camera_pose_estimation/src/evaluation.py`.)
+> **Project result: the first-frame score roughly doubled the error and hid the path's size.** Rescoring the same saved paths: Kinect-depth tracker on xyz 67 mm first-frame against 34 mm best fit; on desk 220 mm against 112 mm. Raw Depth Anything's xyz path was about 16 times too long (fitted size 0.06), which first-frame scoring did not show. All camera results in these chapters use best fit. (Task70, `research/experiments/03_camera_pose_estimation/src/evaluation.py`.)
 
 The fitted size itself is informative: well below 1 means the estimated path is too long, above 1 too short.
 
@@ -52,7 +52,7 @@ Say what was timed. "Frames per second" can mean the model alone, or the whole r
 
 ## Habits worth copying
 
-- **Seal every run.** Each run folder records its inputs (with hashes), settings, code snapshot, timing and outputs, and is never overwritten (`experiments/shared/runs.py`).
+- **Seal every run.** Each run folder records its inputs (with hashes), settings, code snapshot, timing and outputs, and is never overwritten (`research/experiments/shared/runs.py`).
 - **Write settings down with their source.** Every script has a `HYPERPARAMETERS` table saying where each value came from: inherited, owner ruling, or "proposed, not ruled".
 - **Pick the setting before seeing the score it is judged on.** Task72 chose each recording's SfM run by camera score before any surface was scored.
 - **Keep negative results.** Prompt Depth Anything (Task79) and the failed fr1 calibration are recorded with their numbers.
@@ -60,5 +60,5 @@ Say what was timed. "Frames per second" can mean the model alone, or the whole r
 ## Further reading
 
 - [TUM RGB-D note](../research/datasets_and_benchmarks/tum_rgbd.md), [ICL-NUIM note](../research/datasets_and_benchmarks/icl_nuim.md), [dataset catalogue](../research/datasets_and_benchmarks/dataset_catalog.md).
-- `experiments/datasets/README.md` for download status and permissions.
+- `research/experiments/datasets/README.md` for download status and permissions.
 - `research/start_here.md`, "Five different things to measure".

@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.spatial import cKDTree
 
-from experiments.surface_cleanup import denoise_trial
+from research.experiments.surface_cleanup import denoise_trial
 
 
 def test_surface_on_a_sight_line_counts_as_blocked():

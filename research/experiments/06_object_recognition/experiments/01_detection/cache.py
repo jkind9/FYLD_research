@@ -5,19 +5,19 @@ import json
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run
 
 from .scoring import validate_predictions
 
-detector = importlib.import_module("experiments.06_object_recognition.pilot.detector")
+detector = importlib.import_module("research.experiments.06_object_recognition.pilot.detector")
 ACCEPTED_MANIFEST_SHA256 = (
     "e07af81930e80fe7400c0a0b12b26138c3fea6f7533b1b8137b5186a587267a3"
 )
 ACCEPTED_ANNOTATIONS_SHA256 = (
     "a786adc5f814ad9773712397f46ba79d8d40dc5c174fe17045336440cdffd920"
 )
-ACCEPTED_RELATIVE = "experiments/06_object_recognition/pilot/runs/20261003T200418.845966Z_f20e5b1de3744f47a850ffa3b3ba396b"
+ACCEPTED_RELATIVE = "research/experiments/06_object_recognition/pilot/runs/20261003T200418.845966Z_f20e5b1de3744f47a850ffa3b3ba396b"
 SELECTION_INDEXES = (0, 9, 27, 37, 42, 59)
 
 

@@ -19,7 +19,7 @@ Steps 3 and 5 rely on positions. If the camera path drifts (chapter 3) or depth 
 
 ## Where the project stands
 
-> **Project result: a small recorded proof of concept, not a count accuracy.** With supplied camera poses and Kinect depth on TUM desk frames, YOLO26x found four of five reference cups. Identity rules were compared on eleven provisional observations: geometry-only and geometry-plus-appearance resolved all eleven; appearance-only left four unresolved. A 60-frame replay exposed a rule bug: once one book had an identity, later new books were refused one, leaving 90 of 95 book sightings unresolved. Fixing that rule gave 6 provisional book identities and 5 unresolved. No independently reviewed inventory exists yet, so fewer unresolved sightings does not prove a better count. (`experiments/06_object_recognition/README.md`.)
+> **Project result: a small recorded proof of concept, not a count accuracy.** With supplied camera poses and Kinect depth on TUM desk frames, YOLO26x found four of five reference cups. Identity rules were compared on eleven provisional observations: geometry-only and geometry-plus-appearance resolved all eleven; appearance-only left four unresolved. A 60-frame replay exposed a rule bug: once one book had an identity, later new books were refused one, leaving 90 of 95 book sightings unresolved. Fixing that rule gave 6 provisional book identities and 5 unresolved. No independently reviewed inventory exists yet, so fewer unresolved sightings does not prove a better count. (`research/experiments/06_object_recognition/README.md`.)
 
 Cost is the other half of the brief ("SAM works but is very heavy"). The experiments test whether cheap boxes and simple masks are enough before reaching for a heavy segmentation model, and record the time of every step.
 
@@ -29,5 +29,5 @@ Open the published object demo in a browser: `outputs/demo_pages/06_objects_in_3
 
 ## Further reading
 
-- `experiments/06_object_recognition/README.md`: methods table, what is established, and the proposed comparison protocol.
+- `research/experiments/06_object_recognition/README.md`: methods table, what is established, and the proposed comparison protocol.
 - [research/products](../research/products/README.md) for commercial context.

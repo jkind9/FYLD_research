@@ -2,7 +2,7 @@
 
 This folder reads a session recorded by the FYLD capture app, checks it, and converts it for the open tracking and calibration tools. It belongs to the [open visual-inertial tracking experiment](../README.md).
 
-A recording is a phone session v2 folder, as written by the PC capture receiver (now in `apps/receiver/`; the readers for the same format are in [`sitescan/session/`](../../../sitescan/session/README.md)). Every camera and motion-sensor time is an integer in nanoseconds on the phone's `elapsedRealtime` clock.
+A recording is a phone session v2 folder, as written by the PC capture receiver (now in `apps/receiver/`; the readers for the same format are in [`sitescan/session/`](../../../../sitescan/session/README.md)). Every camera and motion-sensor time is an integer in nanoseconds on the phone's `elapsedRealtime` clock.
 
 | File | What it does |
 |---|---|
@@ -16,8 +16,8 @@ The offset in `camera_imu_clock_offset_ms` is what remains after removing half t
 Run from the repository root with the project environment. CPU only, no phone needed once a session folder exists.
 
 ```text
-.venv/Scripts/python.exe experiments/open_vio/host/recording.py <session folder> [--euroc <output folder>]
-.venv/Scripts/python.exe experiments/open_vio/host/clock_check.py <session folder>
+.venv/Scripts/python.exe research/experiments/open_vio/host/recording.py <session folder> [--euroc <output folder>]
+.venv/Scripts/python.exe research/experiments/open_vio/host/clock_check.py <session folder>
 ```
 
 `recording.py` prints the problems it finds and exits with status 1 when there are any. `clock_check.py` writes `clock_check.json` into the session folder. The calibration scripts in [`../calibration/`](../calibration/README.md) import `recording.py` from here.

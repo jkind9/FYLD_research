@@ -1,10 +1,10 @@
 """Run one open visual-inertial system on a EuRoC/ASL recording in Docker (WSL) and score its trajectory.
 
-    python experiments/open_vio/vio/run.py --system okvis2 --dataset <folder containing mav0> \
+    python research/experiments/open_vio/vio/run.py --system okvis2 --dataset <folder containing mav0> \
         --camchain <Kalibr camchain> --imu <Kalibr imu.yaml> --reference <file> --reference-format euroc|tum \
         --reference-frame imu|camera --profile tumvi|phone --run <run folder>
 
-Images: experiments/open_vio/vio/build_all.sh. One camera (cam0) plus IMU. The configs are written into
+Images: research/experiments/open_vio/vio/build_all.sh. One camera (cam0) plus IMU. The configs are written into
 <run>/config from each system's own template (cloned under ~/open_vio/src) with this calibration swapped in.
 Writes <run>/log.txt (START/END lines and the system's output), the system's trajectory, and scores.json.
 """

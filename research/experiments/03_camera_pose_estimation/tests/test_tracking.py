@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-package = "experiments.03_camera_pose_estimation.src"
+package = "research.experiments.03_camera_pose_estimation.src"
 dataset = importlib.import_module(package + ".dataset")
 backend = importlib.import_module(package + ".backend")
 tracking = importlib.import_module(package + ".tracking")
@@ -21,7 +21,7 @@ supervisor = importlib.import_module(package + ".supervisor")
 
 
 def frame(index, depth=True):
-    from experiments.shared.contracts import Calibration
+    from research.experiments.shared.contracts import Calibration
 
     calibration = Calibration(80, 60, 70, 70, 39.5, 29.5, "x-right_y-down_z-forward")
     rng = np.random.default_rng(12)
@@ -183,7 +183,7 @@ def test_publisher_rounded_quaternion_is_normalized_without_mutating_input(tmp_p
 def test_pipeline_reference_separation_and_required_artifacts(tmp_path, monkeypatch):
     from PIL import Image
 
-    from experiments.shared.runs import verify_run
+    from research.experiments.shared.runs import verify_run
 
     runner = importlib.import_module(package + ".run")
     root = tmp_path / "rgbd_dataset_freiburg1_desk"
@@ -307,7 +307,7 @@ def test_cli_accepts_full_sequence_counts(monkeypatch, tmp_path, dataset_name, f
     assert call["dataset_path"] == dataset_root
     assert call["run_root"] == run_root
     assert call["frames"] == int(frames)
-    assert call["repo"] == Path(__file__).resolve().parents[3]
+    assert call["repo"] == Path(__file__).resolve().parents[4]
     identity = call["sequence_identity"]
     assert identity["sequence"] == dataset_name
     assert identity["status"].startswith("archive provenance checked")
@@ -379,7 +379,7 @@ def test_archive_provenance_binds_receipts_to_archive_bytes(
     secondary_path = repo / relative_secondary
     secondary_path.parent.mkdir(parents=True, exist_ok=True)
     secondary_path.write_text(json.dumps(secondary))
-    member_manifest = repo / "experiments/datasets/tum_freiburg1_member_hashes.json"
+    member_manifest = repo / "research/experiments/datasets/tum_freiburg1_member_hashes.json"
     member_manifest.parent.mkdir(parents=True, exist_ok=True)
     member_manifest.write_text(
         json.dumps(
@@ -444,14 +444,14 @@ def test_selected_observation_hash_must_match_archive_member_manifest(tmp_path):
             }
         },
     }
-    manifest_path = tmp_path / "experiments/datasets/tum_freiburg1_member_hashes.json"
+    manifest_path = tmp_path / "research/experiments/datasets/tum_freiburg1_member_hashes.json"
     manifest_path.parent.mkdir(parents=True)
     manifest_path.write_text(json.dumps(member_document))
     identity = {
         "sequence": root.name,
         "archive_sha256": "d" * 64,
         "archive_bytes": "123",
-        "member_manifest": "experiments/datasets/tum_freiburg1_member_hashes.json",
+        "member_manifest": "research/experiments/datasets/tum_freiburg1_member_hashes.json",
         "member_manifest_sha256": hashlib.sha256(
             manifest_path.read_bytes()
         ).hexdigest(),
@@ -637,7 +637,7 @@ def test_all_failed_and_empty_tracking():
 
 
 def test_independent_runs_have_distinct_origins():
-    from experiments.shared.contracts import require_same_origin
+    from research.experiments.shared.contracts import require_same_origin
 
     first = tracking.track([frame(0)], FakeBackend([]))
     second = tracking.track([frame(0)], FakeBackend([]))

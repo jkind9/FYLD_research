@@ -10,7 +10,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-runner = importlib.import_module("experiments.02_stereo_depth.run")
+runner = importlib.import_module("research.experiments.02_stereo_depth.run")
 
 
 @pytest.fixture

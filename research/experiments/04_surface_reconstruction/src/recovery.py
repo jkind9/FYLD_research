@@ -8,21 +8,21 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run
 
 from .dataset import copy_checked
 from .run import HYPERPARAMETERS
 
 SAME_SOURCE = (
-    "experiments/04_surface_reconstruction/src/validation/controls.py",
-    "experiments/04_surface_reconstruction/src/backend.py",
-    "experiments/04_surface_reconstruction/src/run.py",
-    "experiments/geometry_validation/src/control.py",
-    "experiments/shared/geometry.py",
-    "experiments/shared/contracts.py",
+    "research/experiments/04_surface_reconstruction/src/validation/controls.py",
+    "research/experiments/04_surface_reconstruction/src/backend.py",
+    "research/experiments/04_surface_reconstruction/src/run.py",
+    "research/experiments/geometry_validation/src/control.py",
+    "research/experiments/shared/geometry.py",
+    "research/experiments/shared/contracts.py",
 )
-EVALUATION = "experiments/04_surface_reconstruction/src/evaluation.py"
+EVALUATION = "research/experiments/04_surface_reconstruction/src/evaluation.py"
 
 
 def _query_signature(path: Path) -> list[str]:

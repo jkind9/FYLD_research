@@ -13,16 +13,16 @@ import time
 from collections import Counter
 from pathlib import Path
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, verify_run, write_json
 
-replay = importlib.import_module("experiments.06_object_recognition.pilot.replay")
-ROOT = Path(__file__).resolve().parents[4]
+replay = importlib.import_module("research.experiments.06_object_recognition.pilot.replay")
+ROOT = Path(__file__).resolve().parents[5]
 RUNS_RELATIVE = Path(
-    "experiments/06_object_recognition/experiments/06_identity_policy/runs"
+    "research/experiments/06_object_recognition/experiments/06_identity_policy/runs"
 )
 DEFAULT_SOURCE_RELATIVE = Path(
-    "experiments/06_object_recognition/experiments/05_replay/runs/"
+    "research/experiments/06_object_recognition/experiments/05_replay/runs/"
     "20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66"
 )
 DEFAULT_LEDGER_SHA256 = (

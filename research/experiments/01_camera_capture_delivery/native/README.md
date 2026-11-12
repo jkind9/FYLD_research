@@ -18,7 +18,7 @@ This app is separate from the FYLD capture app in [`../capture/`](../capture/REA
 Nothing here runs on its own. The Python build compiles `smoke.c` and, with `--camera`, packages the Java files into the APK:
 
 ```text
-bash experiments/01_camera_capture_delivery/build/build-apk.sh --camera --run-id <id> --p4a-env <path> --sdk <path> --predecessor-root <path> --gradle-cache <path> --scratch <path> --output-root <path>
+bash research/experiments/01_camera_capture_delivery/build/build-apk.sh --camera --run-id <id> --p4a-env <path> --sdk <path> --predecessor-root <path> --gradle-cache <path> --scratch <path> --output-root <path>
 ```
 
 This needs WSL with the pinned Android toolchain. See [`../build/`](../build/README.md).

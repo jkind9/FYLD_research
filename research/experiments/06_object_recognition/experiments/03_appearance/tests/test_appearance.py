@@ -6,13 +6,13 @@ import numpy as np
 import pytest
 
 adapter = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.adapter"
+    "research.experiments.06_object_recognition.experiments.03_appearance.adapter"
 )
 compare = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.compare"
+    "research.experiments.06_object_recognition.experiments.03_appearance.compare"
 )
 evaluator = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.evaluator"
+    "research.experiments.06_object_recognition.experiments.03_appearance.evaluator"
 )
 
 

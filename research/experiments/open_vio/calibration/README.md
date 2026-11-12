@@ -19,17 +19,17 @@ This folder measures what a tracker needs to know about the phone: the camera mo
 Python scripts run from the repository root with the project environment, on the CPU:
 
 ```text
-.venv/Scripts/python.exe experiments/open_vio/calibration/prepare.py --recording <calibration walk> --out <folder> --tag-size <measured metres> [--rest <rest recording>]
-.venv/Scripts/python.exe experiments/open_vio/calibration/allan.py <rest recording>
-.venv/Scripts/python.exe experiments/open_vio/calibration/compare.py <data-camchain-imucam.yaml> [--reference <camchain.yaml>] [--recording <walk>] [--out compare.json]
+.venv/Scripts/python.exe research/experiments/open_vio/calibration/prepare.py --recording <calibration walk> --out <folder> --tag-size <measured metres> [--rest <rest recording>]
+.venv/Scripts/python.exe research/experiments/open_vio/calibration/allan.py <rest recording>
+.venv/Scripts/python.exe research/experiments/open_vio/calibration/compare.py <data-camchain-imucam.yaml> [--reference <camchain.yaml>] [--recording <walk>] [--out compare.json]
 ```
 
 The shell scripts need WSL and Docker, because Kalibr needs ROS 1, which WSL's Ubuntu 24.04 does not have. Run them with WSL paths:
 
 ```text
-wsl -- bash experiments/open_vio/calibration/run_kalibr.sh image
-wsl -- bash experiments/open_vio/calibration/run_kalibr.sh cameras <kalibr folder> <target.yaml> <model> <out>
-wsl -- bash experiments/open_vio/calibration/run_kalibr.sh imu <kalibr folder> <target.yaml> <camchain.yaml> <imu.yaml> <out> [offset search, s]
+wsl -- bash research/experiments/open_vio/calibration/run_kalibr.sh image
+wsl -- bash research/experiments/open_vio/calibration/run_kalibr.sh cameras <kalibr folder> <target.yaml> <model> <out>
+wsl -- bash research/experiments/open_vio/calibration/run_kalibr.sh imu <kalibr folder> <target.yaml> <camchain.yaml> <imu.yaml> <out> [offset search, s]
 ```
 
 From Git Bash, set `MSYS_NO_PATHCONV=1` first, or Git Bash rewrites `/mnt/c/...` arguments before `wsl` sees them. `tumvi_check.sh` takes `RUNS` and `DATA` as environment variables. The scripts read recordings through [`../host/recording.py`](../host/README.md).

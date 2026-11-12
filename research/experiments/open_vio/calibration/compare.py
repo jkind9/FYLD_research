@@ -1,6 +1,6 @@
 """Compare a Kalibr camera-IMU result with a reference calibration and, for a phone recording, with ARCore's.
 
-    python experiments/open_vio/calibration/compare.py <data-camchain-imucam.yaml> \
+    python research/experiments/open_vio/calibration/compare.py <data-camchain-imucam.yaml> \
         [--reference <camchain.yaml>] [--recording <walk recording>] [--out compare.json]
 
 Rotation in degrees, translation in metres, time shift in milliseconds (Kalibr: t_imu = t_cam + shift).

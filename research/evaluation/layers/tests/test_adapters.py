@@ -13,14 +13,18 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from evaluation.layers import pipeline, validation
-from evaluation.layers.config import STEP_NAMES, PipelineSpec
-from evaluation.layers.records import StepResult, Unavailable
-from evaluation.layers.steps import depth as depth_step
-from evaluation.layers.steps.capture import calibration_for
-from evaluation.layers.steps.contracts import Calibration, ColourFrame, DepthPrediction
-from evaluation.layers.tests import providers
-from experiments.shared.runs import verify_run
+from research.evaluation.layers import pipeline, validation
+from research.evaluation.layers.config import STEP_NAMES, PipelineSpec
+from research.evaluation.layers.records import StepResult, Unavailable
+from research.evaluation.layers.steps import depth as depth_step
+from research.evaluation.layers.steps.capture import calibration_for
+from research.evaluation.layers.steps.contracts import (
+    Calibration,
+    ColourFrame,
+    DepthPrediction,
+)
+from research.evaluation.layers.tests import providers
+from research.experiments.shared.runs import verify_run
 
 
 def bundle(root, timestamps=(1_700_000_000, 1_720_000_000, 1_900_000_000)):
@@ -100,8 +104,8 @@ def bundle(root, timestamps=(1_700_000_000, 1_720_000_000, 1_900_000_000)):
 
 @pytest.fixture
 def config(tmp_path):
-    from evaluation.layers.steps.capture import PhoneExport
-    from evaluation.layers.steps.objects import ObjectSettings
+    from research.evaluation.layers.steps.capture import PhoneExport
+    from research.evaluation.layers.steps.objects import ObjectSettings
 
     report = bundle(tmp_path / "bundle")
     return providers.with_controls(
@@ -202,7 +206,7 @@ def test_tracking_refuses_frames_with_no_depth_inside_its_range(config):
 
 
 def test_fixture_marks_run_as_control(config):
-    from evaluation.layers.tests.test_imports_cli import invoke
+    from research.evaluation.layers.tests.test_imports_cli import invoke
 
     result = pipeline.run(config)
     assert result.controls == {
@@ -212,7 +216,7 @@ def test_fixture_marks_run_as_control(config):
         "objects": "software",
     }
     assert not result.is_measurement
-    help_result = invoke(["-m", "evaluation.layers.cli", "--help"])
+    help_result = invoke(["-m", "research.evaluation.layers.cli", "--help"])
     assert help_result.returncode == 0
     assert (
         "flat_depth" not in help_result.stdout
@@ -254,7 +258,7 @@ def test_tracking_score_reads_truth_after_seal_and_uses_validation(config):
 
 
 def test_enabled_optional_evidence_does_not_change_counts(config):
-    from evaluation.layers.steps.objects import (
+    from research.evaluation.layers.steps.objects import (
         ClassicalAppearance,
         ClassicalSegmentation,
     )
@@ -316,7 +320,7 @@ def test_configuration_rejects_unsupported_values(config, requested):
 
 
 def test_segmentation_rejects_unknown_method():
-    from evaluation.layers.steps.objects import ClassicalSegmentation
+    from research.evaluation.layers.steps.objects import ClassicalSegmentation
 
     with pytest.raises(ValueError):
         ClassicalSegmentation("unknown")
@@ -575,7 +579,7 @@ def test_depth_anything_v2_output_passes_the_depth_layer(tmp_path, monkeypatch):
 
 def test_depth_preview_uses_one_fixed_labelled_colour_scale(tmp_path):
     """Every depth preview shares a 0-4 m scale, so colours compare across frames and methods."""
-    from evaluation.layers import visualization
+    from research.evaluation.layers import visualization
 
     shape = (4, 6)
     Image.fromarray(np.zeros((*shape, 3), dtype=np.uint8), mode="RGB").save(tmp_path / "rgb.png")

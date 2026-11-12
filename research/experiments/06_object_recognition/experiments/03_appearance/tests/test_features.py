@@ -8,10 +8,10 @@ import numpy as np
 import pytest
 
 features = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.features"
+    "research.experiments.06_object_recognition.experiments.03_appearance.features"
 )
 adapter = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.adapter"
+    "research.experiments.06_object_recognition.experiments.03_appearance.adapter"
 )
 
 

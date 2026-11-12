@@ -4,7 +4,7 @@ A tracked point comes from ARCore's tracking, not its depth maps, so it checks b
 by their own ARCore depth ("supported") and cells that took the frame-median fallback. One physical point is
 counted once per frame that sees it.
 
-    python -B -m evaluation.depth_check --session <v2 session> --out <check.json>
+    python -B -m research.evaluation.depth_check --session <v2 session> --out <check.json>
 """
 
 import argparse

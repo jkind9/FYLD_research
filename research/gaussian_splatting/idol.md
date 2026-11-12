@@ -36,4 +36,4 @@ The following judgments are project assessments, not measured Idol results.
 | Rotatable object previews | Possible fit for displaying a detected cone, barrier or tool. Generated surfaces would need to be identified as such. |
 | Extra views for recognition experiments | Possible research use. Generated markings and shapes might change identity cues; any benefit needs an independent recognition test. |
 
-Keep Idol alongside the other deferred splatting methods. Revisit if object previews become a requirement. The current priority remains observed geometry, dimensional accuracy and distinct-object counts, as recorded in the [splatting index](README.md) and [object recognition experiments](../../experiments/06_object_recognition/README.md).
+Keep Idol alongside the other deferred splatting methods. Revisit if object previews become a requirement. The current priority remains observed geometry, dimensional accuracy and distinct-object counts, as recorded in the [splatting index](README.md) and [object recognition experiments](../experiments/06_object_recognition/README.md).

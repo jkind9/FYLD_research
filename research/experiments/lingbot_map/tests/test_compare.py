@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from experiments.lingbot_map.compare import (
+from research.experiments.lingbot_map.compare import (
     nearest_rotations,
     processed_geometry,
     processed_pixels,

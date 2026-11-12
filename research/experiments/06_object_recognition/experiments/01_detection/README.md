@@ -11,7 +11,7 @@ At all three overlap thresholds, 0.3, 0.5 and 0.7, four of five cup references m
 ## Reproduce offline
 
 ```powershell
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.01_detection.run
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.experiments.01_detection.run
 ```
 
 The production entry pins Task17's annotation SHA256 and the exact accepted Task28 completion manifest, `e07af81930e80fe7400c0a0b12b26138c3fea6f7533b1b8137b5186a587267a3`. A transferred copy may be supplied with `--cache`; every artifact must still verify. No substituted predictions, model loader or alternate expected hash can be passed to this entry. Missing source images or cache fail before publication. No weights are downloaded.
@@ -92,12 +92,12 @@ A 5 px wobble at 1 m is about 1 cm sideways. The 72.8 mm spread in the desk cup'
 Commands (detector environment, GPU only when free):
 
 ```bash
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.01_detection.placement_run --data-root <checkout>/data --checkpoint <checkout>/models/yolo26x.pt
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.01_detection.jitter_run --data-root <checkout>/data --checkpoint <checkout>/models/yolo26x.pt
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.experiments.01_detection.placement_run --data-root <checkout>/data --checkpoint <checkout>/models/yolo26x.pt
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.experiments.01_detection.jitter_run --data-root <checkout>/data --checkpoint <checkout>/models/yolo26x.pt
 ```
 
 Both refuse to run unless OpenCV 5.0.0 is the version loaded, and Part A refuses unless the COCO extraction matches its recorded archive hashes (see `data/README.md`).
 
 ## Independent validation import
 
-The public analysis boundary is `importlib.import_module("experiments.06_object_recognition.experiments.01_detection.validation").evaluate`. It forwards the existing scorer and its compatible frame/proposal schemas without copying scoring mathematics. The six-step runner saves and hashes predictions before scoring. Complete phone-survey adaptation remains Task56 work. [Runner contract](../../../../evaluation/layers/README.md).
+The public analysis boundary is `importlib.import_module("research.experiments.06_object_recognition.experiments.01_detection.validation").evaluate`. It forwards the existing scorer and its compatible frame/proposal schemas without copying scoring mathematics. The six-step runner saves and hashes predictions before scoring. Complete phone-survey adaptation remains Task56 work. [Runner contract](../../../../evaluation/layers/README.md).

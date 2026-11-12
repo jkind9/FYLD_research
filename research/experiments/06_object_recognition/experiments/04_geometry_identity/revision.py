@@ -9,11 +9,11 @@ from typing import Any
 
 import numpy as np
 
-from experiments.shared.contracts import Pose
-from experiments.shared.geometry import transform_points
+from research.experiments.shared.contracts import Pose
+from research.experiments.shared.geometry import transform_points
 
 pose_revisions = importlib.import_module(
-    "experiments.06_object_recognition.shared.pose_revisions"
+    "research.experiments.06_object_recognition.shared.pose_revisions"
 )
 PoseRevision = pose_revisions.PoseRevision
 validate_pose_revisions = pose_revisions.validate_pose_revisions

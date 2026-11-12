@@ -43,14 +43,14 @@ print(plane.point.shape, grid.observed.ndim, grid.point_count)
 
 | Name | Default | Why | Evidence |
 |---|---|---|---|
-| `cell_size_m` | 0.05 m | Existing footprint resolution | [Mapping experiment](../../experiments/05_birds_eye_mapping/README.md) |
+| `cell_size_m` | 0.05 m | Existing footprint resolution | [Mapping experiment](../../research/experiments/05_birds_eye_mapping/README.md) |
 | Surface thinning | Half a map cell | Preserve the live processor's cost and point order | [Live pipeline](../pipelines/live.py) |
-| `inlier_distance_m`, `band_m` | 0.02 m | Existing plane fit and plane-cell tolerance | [Mapping experiment](../../experiments/05_birds_eye_mapping/README.md) |
-| `iterations` | 500 | Existing plane candidate count | [Mapping tests](../../experiments/05_birds_eye_mapping/tests/test_measurement.py) |
-| `sample_size` | 50,000 points | Existing bound on candidate scoring cost | [Mapping tests](../../experiments/05_birds_eye_mapping/tests/test_measurement.py) |
+| `inlier_distance_m`, `band_m` | 0.02 m | Existing plane fit and plane-cell tolerance | [Mapping experiment](../../research/experiments/05_birds_eye_mapping/README.md) |
+| `iterations` | 500 | Existing plane candidate count | [Mapping tests](../../research/experiments/05_birds_eye_mapping/tests/test_measurement.py) |
+| `sample_size` | 50,000 points | Existing bound on candidate scoring cost | [Mapping tests](../../research/experiments/05_birds_eye_mapping/tests/test_measurement.py) |
 | `seed` | 0 | Repeatable candidates and fitted plane | [Mapping tests](../../tests/test_sitescan_mapping.py) |
 | `min_points` | 1,000 | Preserve the live map's minimum surface support | [Live pipeline](../pipelines/live.py) |
-| Grid allocation limit | 16,000,000 cells | Preserve the existing bound on grid allocation | [Mapping tests](../../experiments/05_birds_eye_mapping/tests/test_measurement.py) |
+| Grid allocation limit | 16,000,000 cells | Preserve the existing bound on grid allocation | [Mapping tests](../../research/experiments/05_birds_eye_mapping/tests/test_measurement.py) |
 
 ## Limits
 
@@ -61,7 +61,7 @@ are measured at 5 cm cell edges with the default grid. No real-site accuracy sco
 exists yet. The preserved 15 October room result is 6.35 × 3.30 m.
 
 Product functions take arrays and trust their units and shape. The experiment's
-`PointChunks` loaders and input checks remain in `experiments/05_birds_eye_mapping`.
+`PointChunks` loaders and input checks remain in `research/experiments/05_birds_eye_mapping`.
 Its array callers use these functions; chunk callers share candidate fitting, scatter
 arithmetic and projection while retaining their bounded reading behavior.
 

@@ -83,7 +83,7 @@ The command line wraps both: see [apps/README.md](../../apps/README.md).
 ## Limits
 
 - The room build is offline: the 15 October walk (134 fused frames) took 51 s on a 32-thread CPU with the model on 16 threads.
-- Live updates meet the floor of one per second on public recordings at a 2 cm voxel (1.61–1.90 updates/s), and on the 14 October Redmi walk (1.58 updates/s). The whole-surface map grows with the room, so a large room will cross one second. Measured runs: [evaluation/results.md](../../evaluation/results.md).
+- Live updates meet the floor of one per second on public recordings at a 2 cm voxel (1.61–1.90 updates/s), and on the 14 October Redmi walk (1.58 updates/s). The whole-surface map grows with the room, so a large room will cross one second. Measured runs: [research/evaluation/results.md](../../research/evaluation/results.md).
 - Live depth is predicted sideways on the Redmi and scaled with one factor per frame; the room uses upright images and the grid. Bringing live to the room's rules is the first behaviour change on the list.
 
 ## Tests

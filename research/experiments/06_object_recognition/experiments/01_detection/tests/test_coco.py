@@ -7,9 +7,9 @@ import zipfile
 import pytest
 
 coco = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.coco"
+    "research.experiments.06_object_recognition.experiments.01_detection.coco"
 )
-from experiments.datasets.acquisition import sha256
+from research.experiments.datasets.acquisition import sha256
 
 
 def _archives(tmp_path, images=2):

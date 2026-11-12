@@ -7,9 +7,9 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
-from experiments.shared.contracts import Pose
+from research.experiments.shared.contracts import Pose
 
-package = "experiments.03_camera_pose_estimation.src"
+package = "research.experiments.03_camera_pose_estimation.src"
 tracking = importlib.import_module(package + ".tracking")
 evaluation = importlib.import_module(package + ".evaluation")
 

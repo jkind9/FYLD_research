@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from experiments.shared import geometry
-from experiments.shared.contracts import Calibration
+from research.experiments.shared import geometry
+from research.experiments.shared.contracts import Calibration
 
 
 @pytest.mark.parametrize("fault", ["shape", "mask", "zero", "nan"])

@@ -3,7 +3,7 @@
 # recording wall time, process peak memory and whole-GPU memory for each sequence.
 #
 # Usage (from WSL, repository root on /mnt/c):
-#   bash experiments/02_stereo_depth/marigold_wsl_run.sh <input_root> <output_root>
+#   bash research/experiments/02_stereo_depth/marigold_wsl_run.sh <input_root> <output_root>
 # <input_root> holds one folder of PNGs per sequence (marigold.py export-rgb).
 # <output_root> must not exist yet; results are never overwritten.
 set -euo pipefail

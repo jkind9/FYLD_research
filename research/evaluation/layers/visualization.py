@@ -11,10 +11,10 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from PIL.PngImagePlugin import PngInfo
 
-from experiments.shared.runs import write_json
-from experiments.shared.visualization import depth_preview, sample_points
+from research.experiments.shared.runs import write_json
+from research.experiments.shared.visualization import depth_preview, sample_points
 
-map_preview = importlib.import_module("experiments.05_birds_eye_mapping.preview")
+map_preview = importlib.import_module("research.experiments.05_birds_eye_mapping.preview")
 
 from .records import StepResult
 from .steps.artifacts import (
@@ -294,7 +294,7 @@ def _depth_frame(
         maximum=maximum,
     )
     legend["producer_method"] = methods["depth"]
-    legend["display_method"] = "experiments.shared.visualization.depth_preview"
+    legend["display_method"] = "research.experiments.shared.visualization.depth_preview"
     legend["source_frame_id"] = frame["frame_id"]
     write_json(preview_path.with_suffix(".json"), legend)
     _label_png(
@@ -324,7 +324,7 @@ def _depth_frame(
             f"Predicted depth · {frame['frame_id']}",
             frame["arrays"],
             methods["depth"],
-            "experiments.shared.visualization.depth_preview",
+            "research.experiments.shared.visualization.depth_preview",
             {"units": "metres", "minimum_m": 0, "display_maximum_m": maximum},
         ),
         _artifact(
@@ -333,7 +333,7 @@ def _depth_frame(
             f"Valid depth pixels · {frame['frame_id']}",
             frame["arrays"],
             methods["depth"],
-            "experiments.shared.visualization.depth_preview",
+            "research.experiments.shared.visualization.depth_preview",
             {"valid_pixels": valid_count, "total_pixels": total_count},
         ),
         _artifact(
@@ -463,7 +463,7 @@ def _surface_frames(
     depth_output: DepthOutput,
     methods: dict[str, str],
 ) -> list[dict[str, Any]]:
-    from experiments.shared.exporting import _cloud_preview
+    from research.experiments.shared.exporting import _cloud_preview
 
     capture_by_id = {frame["frame_id"]: frame for frame in capture_output["frames"]}
     depth_by_id = {frame["frame_id"]: frame for frame in depth_output["frames"]}
@@ -533,7 +533,7 @@ def _surface_frames(
                 f"Point cloud preview - world {world_id}, segment {segment_id}",
                 ", ".join(sources),
                 methods["surface"],
-                "experiments.shared.exporting._cloud_preview; evenly spaced display sample",
+                "research.experiments.shared.exporting._cloud_preview; evenly spaced display sample",
                 {
                     "full_point_count": sum(
                         shard["point_count"]
@@ -631,7 +631,7 @@ def _map_image(run_path: Path, record: dict[str, Any], methods: dict[str, str]) 
         f"Top-down map · origin {record['origin']} ({record['world_id']}, segment {record['segment_id']})",
         record["arrays"],
         methods["mapping"],
-        "experiments.05_birds_eye_mapping.preview.footprint_preview",
+        "research.experiments.05_birds_eye_mapping.preview.footprint_preview",
         {**scale, "plane_source": record["plane_source"]},
     )
 

@@ -16,8 +16,8 @@ from types import TracebackType
 from typing import Literal, Self
 from uuid import uuid4
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.timing import TimingLedger
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.timing import TimingLedger
 
 EXCLUDED = {"metadata/status.json", "metadata/manifest.json"}
 
@@ -86,10 +86,10 @@ def _git(repo: Path, *arguments: str) -> str:
 def _snapshot(repo: Path, destination: Path, run_root: Path) -> dict:
     files = {}
     sources: list[Path] = []
-    for root in (repo, repo / "experiments", repo / "evaluation", repo / "evaluation/layers"):
+    for root in (repo, repo / "research/experiments", repo / "research/evaluation", repo / "research/evaluation/layers"):
         if root.is_symlink():
             raise ValueError(f"Source snapshot refuses symbolic link: {root}")
-    for root in (repo / "experiments", repo / "evaluation/layers"):
+    for root in (repo / "research/experiments", repo / "research/evaluation/layers"):
         for directory, children, names in os.walk(root):
             for name in children:
                 child = Path(directory) / name

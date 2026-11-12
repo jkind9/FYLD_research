@@ -3,8 +3,8 @@
 Poses come from the recording's ground truth (`--poses true`, Task71 controls) or from a saved
 SfM run (`--poses sfm:<run>/output/<mapper>`, Task72). Example (`.venv`):
 
-    python -m experiments.sfm.run_dense --recording icl:data/icl_nuim/trajectory2 --every 2 \
-        --depth sensor --poses true --run-root experiments/sfm/runs/dense_icl
+    python -m research.experiments.sfm.run_dense --recording icl:data/icl_nuim/trajectory2 --every 2 \
+        --depth sensor --poses true --run-root research/experiments/sfm/runs/dense_icl
 """
 
 from __future__ import annotations
@@ -18,14 +18,14 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from experiments.shared.runs import Run, write_json
+from research.experiments.shared.runs import Run, write_json
 
 from .src import dense, references, scoring, sequences
 
-evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
-surface_evaluation = importlib.import_module("experiments.04_surface_reconstruction.src.evaluation")
+evaluation = importlib.import_module("research.experiments.03_camera_pose_estimation.src.evaluation")
+surface_evaluation = importlib.import_module("research.experiments.04_surface_reconstruction.src.evaluation")
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 DEPTH_CHOICES = ("sensor", "model", "model-frame-reference", "model-run-reference", "model-sfm-size",
                  "model-sfm-size-shift", "sparse")
 

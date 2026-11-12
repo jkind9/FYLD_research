@@ -6,10 +6,10 @@ import numpy as np
 import pytest
 
 api = importlib.import_module(
-    "experiments.06_object_recognition.experiments.02_segmentation.masks"
+    "research.experiments.06_object_recognition.experiments.02_segmentation.masks"
 )
 scorer = importlib.import_module(
-    "experiments.06_object_recognition.experiments.02_segmentation.scoring"
+    "research.experiments.06_object_recognition.experiments.02_segmentation.scoring"
 )
 
 
@@ -87,9 +87,9 @@ def test_split_merge_touching_and_empty_controls():
 
 def test_depth_support_holes_range_and_component_statistics():
     support = importlib.import_module(
-        "experiments.06_object_recognition.experiments.02_segmentation.support"
+        "research.experiments.06_object_recognition.experiments.02_segmentation.support"
     )
-    from experiments.shared.contracts import Calibration
+    from research.experiments.shared.contracts import Calibration
 
     calibration = Calibration(4, 4, 2, 2, 1.5, 1.5, "x-right_y-down_z-forward")
     raw = np.full((4, 4), 5000, np.uint16)

@@ -1,6 +1,6 @@
 # Layer 4a: surface reconstruction
 
-This folder (experiment 04) is the main part of layer 4, environment visualisation, in the five-layer pipeline described in the [root README](../../README.md). It answers: **can depth images and camera positions be combined into one 3D model of the visible site that is accurate in metres?** The top-down map and area measurement built from this model live in [experiments/05_birds_eye_mapping](../05_birds_eye_mapping/README.md).
+This folder (experiment 04) is the main part of layer 4, environment visualisation, in the five-layer pipeline described in the [root README](../../../README.md). It answers: **can depth images and camera positions be combined into one 3D model of the visible site that is accurate in metres?** The top-down map and area measurement built from this model live in [research/experiments/05_birds_eye_mapping](../05_birds_eye_mapping/README.md).
 
 This model is what the site is measured from. It is also the shared 3D space that the object layer places objects into.
 
@@ -38,7 +38,7 @@ From there, there are several ways to build a model:
 | [MapAnything](https://arxiv.org/abs/2509.13414), [Depth Anything 3](https://arxiv.org/abs/2511.10647) | Hosted | Feed-forward 3D points and cameras | Check checkpoint terms. |
 | ARCore depth points and planes | On the phone | Rough live point cloud plus floor and wall planes | Quick coverage and size preview on site. |
 | [RTAB-Map for Android](https://github.com/introlab/rtabmap) | On the phone | Live mesh built on ARCore's position and depth | BSD-3 core. |
-| [Mobile3DRecon](../../research/dense_surface_fusion/mobile3drecon.md) (IEEE TVCG 2020) | On the phone | Live mesh from one camera: depth triangulated between keyframes, a growing TSDF volume that deletes voxels a new view sees through, and re-meshing of only the parts that changed. 101 ms per keyframe on a 2018 phone CPU | Paper only; no code released. |
+| [Mobile3DRecon](../../dense_surface_fusion/mobile3drecon.md) (IEEE TVCG 2020) | On the phone | Live mesh from one camera: depth triangulated between keyframes, a growing TSDF volume that deletes voxels a new view sees through, and re-meshing of only the parts that changed. 101 ms per keyframe on a 2018 phone CPU | Paper only; no code released. |
 | [SuperSplat](https://github.com/playcanvas/supersplat) or a glTF viewer | Viewing on the phone | Shows a model built on the server in a phone browser | Display only; does not measure anything. |
 
 ## Top 5 sources
@@ -49,9 +49,9 @@ From there, there are several ways to build a model:
 | [nvblox](https://arxiv.org/abs/2311.00626) | GPU fused mapping (ICRA 2024) | The realistic route to live meshes on an edge computer. |
 | [3D Gaussian splatting](https://arxiv.org/abs/2308.04079) | The 2023 paper behind splat scenes | The leading way to make realistic, navigable views. |
 | [2D Gaussian splatting](https://arxiv.org/abs/2403.17888) | A splat variant designed for accurate surfaces | Closes some of the gap between realistic and measurable. |
-| [COLMAP](https://colmap.github.io/) and the [project note](../../research/structure_from_motion/colmap.md) | The standard photogrammetry toolkit | Image-only reconstruction and final camera refinement. |
+| [COLMAP](https://colmap.github.io/) and the [project note](../../structure_from_motion/colmap.md) | The standard photogrammetry toolkit | Image-only reconstruction and final camera refinement. |
 
-More background: [Open3D RGB-D note](../../research/camera_tracking_and_slam/open3d_rgbd.md), [ICL-NUIM note](../../research/datasets_and_benchmarks/icl_nuim.md), [ElasticFusion](https://thomaswhelan.ie/Whelan16ijrr.pdf) for patches with drift correction, and the [edge mapping products review](../../research/products/edge_products/README.md).
+More background: [Open3D RGB-D note](../../camera_tracking_and_slam/open3d_rgbd.md), [ICL-NUIM note](../../datasets_and_benchmarks/icl_nuim.md), [ElasticFusion](https://thomaswhelan.ie/Whelan16ijrr.pdf) for patches with drift correction, and the [edge mapping products review](../../products/edge_products/README.md).
 
 ## What can be improved
 
@@ -61,7 +61,7 @@ More background: [Open3D RGB-D note](../../research/camera_tracking_and_slam/ope
 - **Compare splats and meshes fairly.** Same capture, geometry scored against the reference, realism scored on held-out views, as separate numbers.
 - **Scale up.** Run whole sequences and record memory and time growth.
 - **Export for viewing.** A simplified GLB scene for phones and headsets, kept separate from the full-detail measurement model.
-- **Add a clean-up stage.** Remove flying pixels, side-on depth and floaters before, during and after fusion, and score what each step removes against what it keeps. Methods, sources and order: [research/surface_denoising](../../research/surface_denoising/README.md) (8 November 2026).
+- **Add a clean-up stage.** Remove flying pixels, side-on depth and floaters before, during and after fusion, and score what each step removes against what it keeps. Methods, sources and order: [research/surface_denoising](../../surface_denoising/README.md) (8 November 2026).
 
 The sections below are the detailed experiment record.
 
@@ -96,13 +96,13 @@ Build the environment, then run from the repository root:
 ```powershell
 uv sync --all-extras
 python -B tools/check.py
-python -B -m experiments.04_surface_reconstruction.src.run --dataset data/icl_nuim --frame-ids <explicit IDs> --threshold-m <reporting distance in metres>
+python -B -m research.experiments.04_surface_reconstruction.src.run --dataset data/icl_nuim --frame-ids <explicit IDs> --threshold-m <reporting distance in metres>
 ```
 
 Selection and distance are required arguments. There is no implicit stride, frame cap, depth clipping, filtering, voxel size or acceptance limit. The inspected run uses the nine IDs above with a 0.05 m reporting distance, authorised on 2 October 2026. All execution is CPU-only. Every GPU run needs separate permission. The sequential command above performs full per-frame reverse scoring and distant fault queries; these can take hours. For a small repeat inspection from the saved completed run, use the equivalent desktop batch scorer:
 
 ```powershell
-python -B -m experiments.04_surface_reconstruction.src.inspection --dataset data/icl_nuim --frame-ids 1 101 201 301 401 501 601 701 801 --threshold-m 0.05 --recover-run experiments/04_surface_reconstruction/runs/20261002T145103.184769Z_000165ef2e044376baf54b675172a64e
+python -B -m research.experiments.04_surface_reconstruction.src.inspection --dataset data/icl_nuim --frame-ids 1 101 201 301 401 501 601 701 801 --threshold-m 0.05 --recover-run research/experiments/04_surface_reconstruction/runs/20261002T145103.184769Z_000165ef2e044376baf54b675172a64e
 ```
 
 Recovery requires matching inputs, reference, settings and scoring code. Completed prior records must pass manifest verification; each reused score record must match the captured manifest hash, and the prior is verified again before publication. Incomplete prior fault summaries are excluded. Normal geometry and surface distances are recomputed. A later code or dependency change can require a fresh control instead of recovery.
@@ -124,7 +124,7 @@ Observed-point error is weighted by observations, so duplicate views count repea
 
 The reconstruction backend processes one frame at a time. The sequential scorer also updates coverage frame by frame; the faster desktop inspection joins selected points for its final coverage query and preview, so that evaluator's memory grows with selected-frame count. Both hold the reference and its search index. Neither desktop memory nor timing establishes mobile performance. Windows receipts record the process's lifetime peak working set and end-of-run resident memory, including scoring and preview. On other platforms the peak field is null if unavailable. The backend uses the ICL Frame adapter and checked geometry; a phone adapter must supply equivalent metric observations before reuse. Mobile viability remains untested.
 
-Tests independently specify translated points, prove depth doubling and inverse poses worsen distance, and show that removing the only observations of a reference patch halves coverage. They also cover duplicate views, exact distance boundaries, invalid inputs, empty geometry, origin resets, truncated PLYs, copied originals, tampering and failed runs. Failed runs retain a failed receipt; abrupt termination can leave running status. `experiments.shared.runs.verify_run` rejects incomplete or modified runs. Restart uses a new directory. CPU Open3D fusion remains a separately configured comparison after the direct baseline.
+Tests independently specify translated points, prove depth doubling and inverse poses worsen distance, and show that removing the only observations of a reference patch halves coverage. They also cover duplicate views, exact distance boundaries, invalid inputs, empty geometry, origin resets, truncated PLYs, copied originals, tampering and failed runs. Failed runs retain a failed receipt; abrupt termination can leave running status. `research.experiments.shared.runs.verify_run` rejects incomplete or modified runs. Restart uses a new directory. CPU Open3D fusion remains a separately configured comparison after the direct baseline.
 
 ## Shared implementation available
 
@@ -148,9 +148,9 @@ Begin with supplied poses and depth from datasets. This needs neither a phone no
 
 ## Development dataset and reference
 
-Develop against acquired clean ICL-NUIM living-room trajectory 2 at `data/icl_nuim/trajectory2/`. Use colour/depth pairs and supplied poses with matching IDs 1 through 880; preserve raw frame 0 but exclude it from supplied-pose runs because it has no pose. All 881 raw colour/depth pairs decoded successfully, and all 880 pose rows contain finite values. [Inspection receipt](../../data/icl_nuim/inspection.json).
+Develop against acquired clean ICL-NUIM living-room trajectory 2 at `data/icl_nuim/trajectory2/`. Use colour/depth pairs and supplied poses with matching IDs 1 through 880; preserve raw frame 0 but exclude it from supplied-pose runs because it has no pose. All 881 raw colour/depth pairs decoded successfully, and all 880 pose rows contain finite values. [Inspection receipt](../../../data/icl_nuim/inspection.json).
 
-Evaluation uses the separately acquired `data/icl_nuim/reference_surface/living-room.ply`, containing 9,982,296 reference points with colour and normals. It stays outside reconstruction inputs. Calibration, depth units and the fixed conversion are recorded in [conventions.json](../../data/icl_nuim/conventions.json). Task 03 verified geometry conventions; the nine-frame surface result above now supplies the independent score. Acquisition-time readiness flags remain historical records. No additional dataset was needed.
+Evaluation uses the separately acquired `data/icl_nuim/reference_surface/living-room.ply`, containing 9,982,296 reference points with colour and normals. It stays outside reconstruction inputs. Calibration, depth units and the fixed conversion are recorded in [conventions.json](../../../data/icl_nuim/conventions.json). Task 03 verified geometry conventions; the nine-frame surface result above now supplies the independent score. Acquisition-time readiness flags remain historical records. No additional dataset was needed.
 
 ## Input and output agreement
 
@@ -184,11 +184,11 @@ Use a desktop CPU control first. Candidate versions observed in the archived env
 
 The [official Open3D0.19 RGB-D integration tutorial](https://www.open3d.org/docs/0.19.0/tutorial/pipelines/rgbd_integration.html) supplies the volume-integration reference. Verify its extrinsic direction against the shared contract; do not copy settings without provenance. Direct accumulation is the simpler first control. ICL's separate reference surface is essential for measuring surface accuracy.
 
-[Task 02: standard references](../../task_list/closed/02_verify_standard_tracking_and_reconstruction_refere.md), [Task 03: geometry contracts](../../task_list/closed/03_define_observation_and_pose_contracts_with_known_g.md) and [Task 04: reference-pose reconstruction](../../task_list/closed/04_evaluate_reconstruction_with_supplied_depth_and_po.md) are complete. [Task 05: tracking](../../task_list/closed/05_evaluate_tracking_with_supplied_benchmark_depth.md) can now supply independently evaluated estimated poses for matched comparisons.
+[Task 02: standard references](../../../task_list/closed/02_verify_standard_tracking_and_reconstruction_refere.md), [Task 03: geometry contracts](../../../task_list/closed/03_define_observation_and_pose_contracts_with_known_g.md) and [Task 04: reference-pose reconstruction](../../../task_list/closed/04_evaluate_reconstruction_with_supplied_depth_and_po.md) are complete. [Task 05: tracking](../../../task_list/closed/05_evaluate_tracking_with_supplied_benchmark_depth.md) can now supply independently evaluated estimated poses for matched comparisons.
 
 ## Research and reuse
 
-[ICL-NUIM](../../research/datasets_and_benchmarks/icl_nuim.md) supplies controlled surface comparison. [Open3D](../../research/camera_tracking_and_slam/open3d_rgbd.md) informs fusion choices. [COLMAP](../../research/structure_from_motion/colmap.md) offers an image-based comparison whose scale needs separate establishment. [Construction capture guidance](../../research/construction_site_context/construction_capture_guidance.md) explains viewpoint limitations.
+[ICL-NUIM](../../datasets_and_benchmarks/icl_nuim.md) supplies controlled surface comparison. [Open3D](../../camera_tracking_and_slam/open3d_rgbd.md) informs fusion choices. [COLMAP](../../structure_from_motion/colmap.md) offers an image-based comparison whose scale needs separate establishment. [Construction capture guidance](../../construction_site_context/construction_capture_guidance.md) explains viewpoint limitations.
 
 Promote a surface agreement when Experiment 05 consumes it alongside synthetic geometry independently of the reconstructor. Check dataset, tool and weight permissions separately. Fixture results establish implementation checks, not acquired-scene accuracy. See the [experiment guide](../README.md).
 
@@ -203,7 +203,7 @@ The viewer is a point surface, with no triangles, hole filling or duplicate fusi
 
 ## Reconciled research boundary, 4 October 2026
 
-The measured ICL control above remains a point-surface reconstruction with supplied depth/poses. The [desk replay](../06_object_recognition/experiments/05_replay/README.md) also accumulates measured points using supplied TUM poses, but has no acquired independent dense reference surface. Its visual coverage cannot inherit ICL's accuracy score. Following the 15 October board review, Task102 owns the immediate Redmi orientation/depth/pose/fusion diagnosis. [Task36](../../task_list/stale/36_compare_surface_representations_and_visual_realism.md) remains deferred for representation comparisons; Task35's broader error study and Task25's separate camera corrections also remain deferred. Task100 supplies interactive display splats and supersedes Task23's viewer plan; photographic training is unperformed.
+The measured ICL control above remains a point-surface reconstruction with supplied depth/poses. The [desk replay](../06_object_recognition/experiments/05_replay/README.md) also accumulates measured points using supplied TUM poses, but has no acquired independent dense reference surface. Its visual coverage cannot inherit ICL's accuracy score. Following the 15 October board review, Task102 owns the immediate Redmi orientation/depth/pose/fusion diagnosis. [Task36](../../../task_list/stale/36_compare_surface_representations_and_visual_realism.md) remains deferred for representation comparisons; Task35's broader error study and Task25's separate camera corrections also remain deferred. Task100 supplies interactive display splats and supersedes Task23's viewer plan; photographic training is unperformed.
 
 ```mermaid
 flowchart TD
@@ -231,4 +231,4 @@ Geometry proximity, observed coverage, missing/false surfaces and cost are separ
 
 ## Metric walkthrough geometry and recovery
 
-Step 4 calls `importlib.import_module("experiments.04_surface_reconstruction.src.metric_surface").reconstruct_metric(depth, valid, calibration, pose)`. It returns all valid points in metres and requires an estimated pose. It does not convert benchmark units or align to a reference model. Independent scoring imports `src.validation`; the existing evaluation implementation stays in place. Deliberate faults live in `src.validation.controls`, with `backend.fault_points` retained for compatibility. Recovery checks and copies that source too; historical snapshots missing it are explicitly refused and retained. Standalone control commands remain unchanged. See [the runner](../../evaluation/layers/README.md).
+Step 4 calls `importlib.import_module("research.experiments.04_surface_reconstruction.src.metric_surface").reconstruct_metric(depth, valid, calibration, pose)`. It returns all valid points in metres and requires an estimated pose. It does not convert benchmark units or align to a reference model. Independent scoring imports `src.validation`; the existing evaluation implementation stays in place. Deliberate faults live in `src.validation.controls`, with `backend.fault_points` retained for compatibility. Recovery checks and copies that source too; historical snapshots missing it are explicitly refused and retained. Standalone control commands remain unchanged. See [the runner](../../evaluation/layers/README.md).

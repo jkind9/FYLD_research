@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from experiments.shared.runs import Run, verify_run
-from experiments.shared.timing import TimingLedger
+from research.experiments.shared.runs import Run, verify_run
+from research.experiments.shared.timing import TimingLedger
 
 
 def clock(values):
@@ -81,7 +81,7 @@ def test_summary_refuses_active_scope_and_blank_stage():
 
 
 def test_run_publishes_timing_before_manifest(tmp_path, monkeypatch):
-    from experiments.shared import runs
+    from research.experiments.shared import runs
 
     monkeypatch.setattr(runs, "_git", lambda *_: "test-repository")
     with Run(tmp_path / "runs", tmp_path, {}) as run:
@@ -100,7 +100,7 @@ def test_run_publishes_timing_before_manifest(tmp_path, monkeypatch):
 
 
 def test_failed_run_keeps_timing_but_has_no_end_to_end_fps(tmp_path, monkeypatch):
-    from experiments.shared import runs
+    from research.experiments.shared import runs
 
     monkeypatch.setattr(runs, "_git", lambda *_: "test-repository")
     with pytest.raises(RuntimeError, match="injected"), Run(
@@ -121,7 +121,7 @@ def test_failed_run_keeps_timing_but_has_no_end_to_end_fps(tmp_path, monkeypatch
 
 
 def test_legacy_run_without_wrapper_has_no_invented_frame_count(tmp_path, monkeypatch):
-    from experiments.shared import runs
+    from research.experiments.shared import runs
 
     monkeypatch.setattr(runs, "_git", lambda *_: "test-repository")
     with Run(tmp_path / "runs", tmp_path, {}) as run:
@@ -133,7 +133,7 @@ def test_legacy_run_without_wrapper_has_no_invented_frame_count(tmp_path, monkey
 
 
 def test_deferred_scope_cannot_start_after_run_completion(tmp_path, monkeypatch):
-    from experiments.shared import runs
+    from research.experiments.shared import runs
 
     monkeypatch.setattr(runs, "_git", lambda *_: "test-repository")
     with Run(tmp_path / "runs", tmp_path, {}) as run:
@@ -144,7 +144,7 @@ def test_deferred_scope_cannot_start_after_run_completion(tmp_path, monkeypatch)
 
 
 def test_timing_write_failure_cannot_leave_run_running(tmp_path, monkeypatch):
-    from experiments.shared import runs
+    from research.experiments.shared import runs
 
     monkeypatch.setattr(runs, "_git", lambda *_: "test-repository")
     original_write = runs.write_json
@@ -166,7 +166,7 @@ def test_timing_write_failure_cannot_leave_run_running(tmp_path, monkeypatch):
 
 
 def test_unclosed_scope_cannot_leave_run_running(tmp_path, monkeypatch):
-    from experiments.shared import runs
+    from research.experiments.shared import runs
 
     monkeypatch.setattr(runs, "_git", lambda *_: "test-repository")
     with pytest.raises(ValueError, match="active"), Run(
@@ -193,19 +193,19 @@ def test_unrepresentable_fps_is_unavailable(frames, seconds):
     json.dumps(result, allow_nan=False)
 
 
-@pytest.mark.parametrize("output_relative", [".", "experiments", "experiments/example"])
+@pytest.mark.parametrize("output_relative", [".", "research/experiments", "research/experiments/example"])
 def test_source_snapshot_survives_output_root_containing_source(
     tmp_path, monkeypatch, output_relative
 ):
-    from experiments.shared import runs
+    from research.experiments.shared import runs
 
     monkeypatch.setattr(runs, "_git", lambda *_: "test-repository")
-    source = tmp_path / "experiments/example/module.py"
+    source = tmp_path / "research/experiments/example/module.py"
     source.parent.mkdir(parents=True)
     source.write_text("value = 1\n")
     for _ in range(2):
         with Run(tmp_path / output_relative, tmp_path, {}) as run:
             pass
         receipt = json.loads((run.path / "metadata/source_snapshot.json").read_text())
-        assert list(receipt["files"]) == ["experiments/example/module.py"]
+        assert list(receipt["files"]) == ["research/experiments/example/module.py"]
         assert verify_run(run.path)["status"] == "complete"

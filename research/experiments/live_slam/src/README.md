@@ -1,6 +1,6 @@
 # SLAM file exchange
 
-This folder converts between the files the native SLAM runners read and write, and the per-frame rows that [`experiments/sfm/src/scoring.py`](../../sfm/src/README.md) scores. It belongs to [live SLAM on recorded data](../README.md).
+This folder converts between the files the native SLAM runners read and write, and the per-frame rows that [`research/experiments/sfm/src/scoring.py`](../../sfm/src/README.md) scores. It belongs to [live SLAM on recorded data](../README.md).
 
 | File | What it does |
 |---|---|
@@ -13,7 +13,7 @@ A segment is one map. A SLAM system that loses tracking and restarts begins a ne
 Nothing here is a script. [`../run_live.py`](../README.md) imports it. Test it from the repository root:
 
 ```text
-.venv/Scripts/python.exe -m pytest experiments/live_slam/tests -p no:cacheprovider --import-mode=importlib
+.venv/Scripts/python.exe -m pytest research/experiments/live_slam/tests -p no:cacheprovider --import-mode=importlib
 ```
 
 ## Where results are recorded

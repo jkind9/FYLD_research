@@ -1,6 +1,6 @@
 # Stage scorers for the accuracy report
 
-This folder holds one wrapper per pipeline stage. Each wrapper re-scores a finished run's saved outputs and returns one section of the per-stage report built by [`experiments/evaluation`](../README.md).
+This folder holds one wrapper per pipeline stage. Each wrapper re-scores a finished run's saved outputs and returns one section of the per-stage report built by [`research/evaluation/stage_report`](../README.md).
 
 A wrapper does three things. It checks that the run is complete and unchanged, and optionally that its manifest hash matches a pinned value. It re-scores the saved outputs with the owning experiment's own scorer. It refuses to return a section if the new score differs from the score the run stored. No model is run again.
 
@@ -21,13 +21,13 @@ Segmentation, depth support, 3D position and count have no wrapper yet.
 The wrappers are not run alone. [`../run.py`](../run.py) calls them with the pinned run folders:
 
 ```text
-.venv/Scripts/python.exe -B -m experiments.evaluation.run --runs-root <checkout holding the run folders>
+.venv/Scripts/python.exe -B -m research.evaluation.stage_report.run --runs-root <checkout holding the run folders>
 ```
 
 Run folders are not in Git, so `--runs-root` names a checkout that has them. Tests:
 
 ```text
-.venv/Scripts/python.exe -B -m pytest experiments/evaluation/tests
+.venv/Scripts/python.exe -B -m pytest research/evaluation/stage_report/tests
 ```
 
 ## Where results are recorded

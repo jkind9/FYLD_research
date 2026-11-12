@@ -4,7 +4,7 @@ Keeps surface points supported by the depth views, then retains the largest touc
 pieces. The visibility vote compares weighted support with views that see through a
 point. `clean_room` returns a boolean mask in input order so points, colours and other
 attributes remain aligned. These are the two adopted filters; trials live in
-[`experiments/surface_cleanup`](../../experiments/surface_cleanup/README.md).
+[`research/experiments/surface_cleanup`](../../research/experiments/surface_cleanup/README.md).
 
 ## Inputs and outputs
 
@@ -67,5 +67,5 @@ expects a nonempty cloud; `clean_room` skips it when voting leaves no points.
 
 `tests/test_sitescan_cleanup.py` checks vote evidence, equal votes, capped weights,
 missing observations, piece size/count limits, ordered masks and empty results. The
-rejected filters' tests are in `experiments/surface_cleanup/tests`. The golden lane and
+rejected filters' tests are in `research/experiments/surface_cleanup/tests`. The golden lane and
 full-room rebuild check unchanged numerical outputs.

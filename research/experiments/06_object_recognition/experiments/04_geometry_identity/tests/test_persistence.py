@@ -7,20 +7,20 @@ from pathlib import Path
 
 import pytest
 
-from experiments.shared.runs import Run
+from research.experiments.shared.runs import Run
 
 association = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.association"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.association"
 )
 persistence = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.persistence"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.persistence"
 )
 
 
 def test_completed_generation_reader_checks_full_membership_and_resume_copy(
     tmp_path, observation_factory
 ):
-    repo = Path(__file__).resolve().parents[5]
+    repo = Path(__file__).resolve().parents[6]
     observations = [
         observation_factory("a", "f1", 1.0, 0.0),
         observation_factory("b", "f2", 2.0, 0.1),
@@ -60,7 +60,7 @@ def test_completed_generation_reader_checks_full_membership_and_resume_copy(
 def test_checked_reader_rejects_mutated_artifact_after_completion(
     tmp_path, observation_factory
 ):
-    repo = Path(__file__).resolve().parents[5]
+    repo = Path(__file__).resolve().parents[6]
     observation = observation_factory("a", "f1", 1.0, 0.0)
     _, decisions, state = association.associate_frame(
         [observation], (), "geometry-last"
@@ -87,7 +87,7 @@ def test_database_replay_is_exact_and_conflicting_evidence_fails(
 ):
     IdentityStore = importlib.import_module("identity_store").IdentityStore
 
-    repo = Path(__file__).resolve().parents[5]
+    repo = Path(__file__).resolve().parents[6]
     observation = observation_factory("a", "f1", 1.0, 0.0)
     _, decisions, state = association.associate_frame(
         [observation], (), "geometry-last"

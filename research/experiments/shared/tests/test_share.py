@@ -10,9 +10,9 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run, write_json
-from experiments.shared.visualization import write_viewer
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run, write_json
+from research.experiments.shared.visualization import write_viewer
 
 
 def seal(root: Path) -> None:
@@ -88,7 +88,7 @@ def scene_from(page: str) -> dict:
 
 
 def test_portable_export_preserves_source_and_geometry(tmp_path):
-    from experiments.shared.share import export_share
+    from research.experiments.shared.share import export_share
 
     source = tmp_path / "source"
     original = make_source(source)
@@ -137,7 +137,7 @@ def test_portable_export_preserves_source_and_geometry(tmp_path):
     ],
 )
 def test_invalid_image_paths_do_not_replace_output(tmp_path, path):
-    from experiments.shared.share import export_share
+    from research.experiments.shared.share import export_share
 
     source = tmp_path / "source"
     scene = make_source(source)
@@ -155,7 +155,7 @@ def test_invalid_image_paths_do_not_replace_output(tmp_path, path):
     "damage", ["image", "missing", "extra", "manifest", "incomplete"]
 )
 def test_damaged_source_is_rejected(tmp_path, damage):
-    from experiments.shared.share import export_share
+    from research.experiments.shared.share import export_share
 
     source = tmp_path / "source"
     make_source(source)
@@ -176,7 +176,7 @@ def test_damaged_source_is_rejected(tmp_path, damage):
 
 @pytest.mark.parametrize("edge", [0, -1, True, 1.5])
 def test_invalid_preview_edge(tmp_path, edge):
-    from experiments.shared.share import export_share
+    from research.experiments.shared.share import export_share
 
     with pytest.raises(ValueError):
         export_share(tmp_path, tmp_path / "shared.html", edge)
@@ -184,7 +184,7 @@ def test_invalid_preview_edge(tmp_path, edge):
 
 @pytest.mark.parametrize("relative", ["new.html", "metadata/status.json"])
 def test_export_never_changes_source(tmp_path, relative):
-    from experiments.shared.share import export_share
+    from research.experiments.shared.share import export_share
 
     source = tmp_path / "source"
     make_source(source)
@@ -195,7 +195,7 @@ def test_export_never_changes_source(tmp_path, relative):
 
 @pytest.mark.parametrize("failure", ["replace", "fsync"])
 def test_atomic_failure_keeps_previous_edition(tmp_path, monkeypatch, failure):
-    from experiments.shared.share import export_share
+    from research.experiments.shared.share import export_share
 
     source = tmp_path / "source"
     make_source(source)
@@ -208,7 +208,7 @@ def test_atomic_failure_keeps_previous_edition(tmp_path, monkeypatch, failure):
     if failure == "replace":
         monkeypatch.setattr(Path, "replace", fail_replace)
     else:
-        monkeypatch.setattr("experiments.shared.share.os.fsync", fail_replace)
+        monkeypatch.setattr("research.experiments.shared.share.os.fsync", fail_replace)
     with pytest.raises(OSError, match="injected"):
         export_share(source, output)
     assert output.read_text() == "previous"
@@ -216,7 +216,7 @@ def test_atomic_failure_keeps_previous_edition(tmp_path, monkeypatch, failure):
 
 
 def test_conversion_mutation_rejected_before_publication(tmp_path, monkeypatch):
-    from experiments.shared import share
+    from research.experiments.shared import share
 
     source = tmp_path / "source"
     make_source(source)
@@ -234,7 +234,7 @@ def test_conversion_mutation_rejected_before_publication(tmp_path, monkeypatch):
 
 
 def test_distance_legend_scales_are_embedded(tmp_path):
-    from experiments.shared.share import export_share
+    from research.experiments.shared.share import export_share
 
     source = tmp_path / "source"
     scene = make_source(source)
@@ -271,7 +271,7 @@ def test_distance_legend_scales_are_embedded(tmp_path):
 
 
 def test_missing_required_legend_rejected(tmp_path):
-    from experiments.shared.share import export_share
+    from research.experiments.shared.share import export_share
 
     source = tmp_path / "source"
     scene = make_source(source)
@@ -285,7 +285,7 @@ def test_missing_required_legend_rejected(tmp_path):
 
 
 def test_cli_overwrites_previous_complete_edition(tmp_path, monkeypatch):
-    from experiments.shared.share import main
+    from research.experiments.shared.share import main
 
     source = tmp_path / "source"
     make_source(source)

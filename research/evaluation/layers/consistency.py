@@ -13,8 +13,8 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.shared.contracts import Calibration, Pose
-from experiments.shared.geometry import backproject, transform_points
+from research.experiments.shared.contracts import Calibration, Pose
+from research.experiments.shared.geometry import backproject, transform_points
 
 # Points closer than this to camera A are not projected (they would explode in u, v).
 MIN_PROJECTED_DEPTH_M = 0.05

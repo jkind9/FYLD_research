@@ -1,6 +1,6 @@
 # Layer 5: object isolation and counting
 
-This folder (experiment 06) is layer 5 of the five-layer pipeline described in the [root README](../../README.md). It answers: **which objects are in the scene, where are they in 3D, and how many distinct ones are there, even when one leaves the camera view and comes back?**
+This folder (experiment 06) is layer 5 of the five-layer pipeline described in the [root README](../../../README.md). It answers: **which objects are in the scene, where are they in 3D, and how many distinct ones are there, even when one leaves the camera view and comes back?**
 
 This is the brief's object-counting problem. Counting detections in 2D video over-counts, because a cone that leaves the frame and returns looks like a new cone. Giving each object a 3D position, using depth (layer 2) and the camera path (layer 3), lets a returning object be matched to the one already counted. The brief also notes that SAM, Meta's segmentation model, works but is heavy; this layer tests where cheaper steps are good enough.
 
@@ -55,7 +55,7 @@ Phone models run through [LiteRT](https://ai.google.dev/edge/litert), [ONNX Runt
 | [ByteTrack](https://arxiv.org/abs/2110.06864) | Short-term multi-object tracking | The light frame-to-frame tracker; shows why short-term tracks alone re-count returning objects. |
 | [DINOv2](https://arxiv.org/abs/2304.07193) | Self-supervised image features | The main learned option for comparing object appearance across views. |
 
-More background: [mobile mapping and counting review](../../research/products/edge_products/README.md), [Fusion++](https://arxiv.org/abs/1808.08378) for persistent object maps, [Deep SORT](https://arxiv.org/abs/1703.07402), and the [ranked model shortlist](../../research/README.md#ranked-shortlist) with versions and licences.
+More background: [mobile mapping and counting review](../../products/edge_products/README.md), [Fusion++](https://arxiv.org/abs/1808.08378) for persistent object maps, [Deep SORT](https://arxiv.org/abs/1703.07402), and the [ranked model shortlist](../../README.md#ranked-shortlist) with versions and licences.
 
 ## What can be improved
 
@@ -170,11 +170,11 @@ flowchart TD
     S -.-> E
 ```
 
-Uncertainty about an anchor, geometry of its visible surface and hypotheses about complete dimensions are different records. Detector confidence, cosine scores and raw point spread are not calibrated probabilities. Task32 has a reusable descriptive support component at `experiments/06_object_recognition/experiments/04_geometry_identity/spatial_support.py` and an isolated handoff at `experiments/06_object_recognition/experiments/07_spatial_uncertainty/association.py`. The handoff keeps depth layers as separate candidates, reports visible extent separately from unavailable calibrated location uncertainty, preserves pose revision lineage, and returns per-decision diagnostics and processing time. It does not change current association, claim calibrated uncertainty or select a matching threshold. Task49 compared the frozen association source with exact within-frame index reuse on 60 frames and 457 proposals. The paired run's median full-call times were 120.481 s for the frozen source and 114.268 s with cached indexes. Task48's earlier single pass was 80.049 s; the cause of the difference across runs is unknown, so only the paired timing is used for the comparison. The paired-repeat reduction was 1.83%, and one repeat was marginally slower. Every association output matched. There is no independent physical reference, so this supports no accuracy or count claim. See the [latency experiment](experiments/08_spatial_uncertainty_latency/README.md) for run hashes and limits.
+Uncertainty about an anchor, geometry of its visible surface and hypotheses about complete dimensions are different records. Detector confidence, cosine scores and raw point spread are not calibrated probabilities. Task32 has a reusable descriptive support component at `research/experiments/06_object_recognition/experiments/04_geometry_identity/spatial_support.py` and an isolated handoff at `research/experiments/06_object_recognition/experiments/07_spatial_uncertainty/association.py`. The handoff keeps depth layers as separate candidates, reports visible extent separately from unavailable calibrated location uncertainty, preserves pose revision lineage, and returns per-decision diagnostics and processing time. It does not change current association, claim calibrated uncertainty or select a matching threshold. Task49 compared the frozen association source with exact within-frame index reuse on 60 frames and 457 proposals. The paired run's median full-call times were 120.481 s for the frozen source and 114.268 s with cached indexes. Task48's earlier single pass was 80.049 s; the cause of the difference across runs is unknown, so only the paired timing is used for the comparison. The paired-repeat reduction was 1.83%, and one repeat was marginally slower. Every association output matched. There is no independent physical reference, so this supports no accuracy or count claim. See the [latency experiment](experiments/08_spatial_uncertainty_latency/README.md) for run hashes and limits.
 
 ## Scoped next investigations
 
-The [task board](../../task_list/README.md#next-execution-sequence) owns priorities and dependencies. The 15 October review keeps Tasks31, 33, 34 and 35 deferred; Task102 first checks geometric scatter, and Tasks53/56 own independent references and complete scoring. The table below is the 4 October plan, kept for reference. [Research coverage](../../research/README.md#research-agenda-4-october-2026) provides sources and platform distinctions.
+The [task board](../../../task_list/README.md#next-execution-sequence) owns priorities and dependencies. The 15 October review keeps Tasks31, 33, 34 and 35 deferred; Task102 first checks geometric scatter, and Tasks53/56 own independent references and complete scoring. The table below is the 4 October plan, kept for reference. [Research coverage](../../README.md#research-agenda-4-october-2026) provides sources and platform distinctions.
 
 | Workstream | Owner | Isolated comparison and decision |
 |---|---|---|
@@ -209,7 +209,7 @@ The later acceptance review should answer whether a reviewer can trace a selecte
 
 ## Proposed comparison protocol
 
-Task16's [broader shortlist/protocol](../../task_list/closed/16_research_segmentation_recognition_and_camera_corre.md) remains pending review. Its RF-DETR/YOLO nano, compact learned masks, DINO and camera-loop comparisons were not all executed. The [research shortlist](../../research/README.md#ranked-shortlist) is a dated source review, not a new model acquisition instruction. ResNet50 is an additional proposed appearance control, not a Task20 result.
+Task16's [broader shortlist/protocol](../../../task_list/closed/16_research_segmentation_recognition_and_camera_corre.md) remains pending review. Its RF-DETR/YOLO nano, compact learned masks, DINO and camera-loop comparisons were not all executed. The [research shortlist](../../README.md#ranked-shortlist) is a dated source review, not a new model acquisition instruction. ResNet50 is an additional proposed appearance control, not a Task20 result.
 
 Freeze source-session splits before tuning. Keep nearby frames, derivatives and augmentations together. Independent human-checked labels/reference measurements score the methods after predictions; an independently checked foreground mask used as a method input is an explicitly labelled oracle control. Use separate validation and held-out sessions for threshold selection and calibration. A single inspected session supports only a narrow descriptive claim.
 
@@ -229,7 +229,7 @@ Phone capture/energy/thermal behaviour, construction-site accuracy and longer-ra
 
 ## Current goal and ownership, 15 October 2026
 
-The existing identity store and Task46 counting baseline remain in use. [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) collects independent physical identities and measurements. [Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns complete count/measurement scoring. Task93 logged live overcounts; Task102 first checks orientation and geometric scatter before changing matching rules. Task61 owns remaining acceptance limits. Task51's integration umbrella and Task09's count umbrella are archived; [Task57](../../task_list/stale/57_deploy_and_measure_the_useful_edge_workload.md) phone processing and optional Tasks31-35 refinements are deferred. No independent Redmi inventory has been received.
+The existing identity store and Task46 counting baseline remain in use. [Task53](../../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) collects independent physical identities and measurements. [Task56](../../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns complete count/measurement scoring. Task93 logged live overcounts; Task102 first checks orientation and geometric scatter before changing matching rules. Task61 owns remaining acceptance limits. Task51's integration umbrella and Task09's count umbrella are archived; [Task57](../../../task_list/stale/57_deploy_and_measure_the_useful_edge_workload.md) phone processing and optional Tasks31-35 refinements are deferred. No independent Redmi inventory has been received.
 
 ## Walkthrough counting boundary
 

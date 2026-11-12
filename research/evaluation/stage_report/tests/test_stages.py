@@ -2,14 +2,14 @@
 
 import importlib
 
-from evaluation.stage_report.stages import identity
-from evaluation.stage_report.tests import fixtures
+from research.evaluation.stage_report.stages import identity
+from research.evaluation.stage_report.tests import fixtures
 
 
 def test_identity_report_uses_public_validation_without_private_runner(tmp_path, monkeypatch):
     fixtures.identity_run(tmp_path)
     validation = importlib.import_module(
-        "experiments.06_object_recognition.experiments.04_geometry_identity.validation"
+        "research.experiments.06_object_recognition.experiments.04_geometry_identity.validation"
     )
     original = validation.score_identity
     calls = []

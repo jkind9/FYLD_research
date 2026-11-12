@@ -45,9 +45,9 @@ print(learned.shape, learned.dtype, valid.shape, valid.dtype)
 | Model | Depth Anything V2 Metric Indoor Small | Adopted CPU model; local weights only | [Model manifest](../../models/manifest.toml) |
 | `device` | `cpu` | Current live target; the GPU is reserved for other work | [Project plan](../../PROJECT_PLAN.md) |
 | `threads` | 16 | About 250 ms per depth frame on the desktop CPU; None preserves the caller's thread setting | [Measured chain](../../DESIGN.md#2-where-the-project-is) |
-| `max_depth_m` | 20 m | Preserve the adopted model adapter's validity range | [Adapter tests](../../evaluation/layers/tests/test_adapters.py) |
+| `max_depth_m` | 20 m | Preserve the adopted model adapter's validity range | [Adapter tests](../../research/evaluation/layers/tests/test_adapters.py) |
 | `pose` | None | Preserve recorded input for existing live callers; room callers supply a pose | [Current pipeline differences](../../DESIGN.md#3-what-the-code-looks-like-today) |
-| Upright rule | World down | Upright input reduced ARCore AbsRel from 0.080 to 0.058 on 20 frames | [Orientation experiment](../../experiments/01_camera_capture_delivery/README.md#depth-and-orientation-probe-7-november-2026-task106) |
+| Upright rule | World down | Upright input reduced ARCore AbsRel from 0.080 to 0.058 on 20 frames | [Orientation experiment](../../research/experiments/01_camera_capture_delivery/README.md#depth-and-orientation-probe-7-november-2026-task106) |
 
 ## Limits
 
@@ -63,7 +63,7 @@ The old walkthrough keeps only record adaptation and experiment input checks.
 
 ## Tests
 
-`python -B -m pytest -q tests/test_sitescan_depth.py` (the full lane adds `evaluation/tests/test_orientation_control.py`)
+`python -B -m pytest -q tests/test_sitescan_depth.py` (the full lane adds `research/evaluation/tests/test_orientation_control.py`)
 checks all four rotations, restoring the recorded grid, camera projections under rotation,
 recorded input without a pose, contiguous model input, masking, interpolation and local
 model loading. Walkthrough adapter tests check its retained record contract. The golden

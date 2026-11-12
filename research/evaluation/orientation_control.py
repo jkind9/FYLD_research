@@ -4,7 +4,7 @@ The Redmi camera reports sensor_orientation_deg 90: turning the recorded image 9
 upright in portrait. The upright prediction is turned back, so pose, intrinsics and raw-depth pixels stay on
 the recorded grid.
 
-    python -B -m evaluation.orientation_control --session <v2 session> --out <folder>
+    python -B -m research.evaluation.orientation_control --session <v2 session> --out <folder>
 """
 
 from __future__ import annotations

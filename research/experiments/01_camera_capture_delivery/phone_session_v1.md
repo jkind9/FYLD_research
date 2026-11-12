@@ -1,6 +1,6 @@
 # Phone session v1: the per-frame stream from the Redmi app to the computer
 
-This is the one written definition of what the old check app sent and what the computer (`host/`) accepts. Since Task96 (14 October 2026) the capture app sends [phone session v2](phone_session_v2.md) instead, which keeps every frame; v1 stays readable for saved sessions and for `evaluation.stand_in`. The v1 Java encoder (`phonecheck/.../SessionFrame.java`) is in the Git history before Task96; the Python reader is `sitescan/session/wire_v1.py`, tested against the fixture in `tests/fixtures/session_v1/` (`frame_header.json` and `frame_payload.bin`). Version 2 reuses v1's ARCore fields, checks, coordinates, depth and anchor rules word for word (`session_v1.parse_arcore`).
+This is the one written definition of what the old check app sent and what the computer (`host/`) accepts. Since Task96 (14 October 2026) the capture app sends [phone session v2](phone_session_v2.md) instead, which keeps every frame; v1 stays readable for saved sessions and for `research.evaluation.stand_in`. The v1 Java encoder (`phonecheck/.../SessionFrame.java`) is in the Git history before Task96; the Python reader is `sitescan/session/wire_v1.py`, tested against the fixture in `tests/fixtures/session_v1/` (`frame_header.json` and `frame_payload.bin`). Version 2 reuses v1's ARCore fields, checks, coordinates, depth and anchor rules word for word (`session_v1.parse_arcore`).
 
 ## Connection and framing
 

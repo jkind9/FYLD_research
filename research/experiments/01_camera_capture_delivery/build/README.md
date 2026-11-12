@@ -1,6 +1,6 @@
 # APK build and export scripts
 
-This folder builds the Android packages for [experiment 01, camera capture and delivery](../README.md), checks the finished APK bytes, and copies the APK into the repository's handoff folder, [`mobile_deployments/`](../../../mobile_deployments/README.md).
+This folder builds the Android packages for [experiment 01, camera capture and delivery](../README.md), checks the finished APK bytes, and copies the APK into the repository's handoff folder, [`mobile_deployments/`](../../../../mobile_deployments/README.md).
 
 There are two build routes:
 
@@ -29,7 +29,7 @@ Both routes need WSL (Ubuntu) with the Android SDK, Java 17 and Gradle 8.14.3 in
 Capture app, from the repository root:
 
 ```text
-wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh
+wsl -d Ubuntu -- bash research/experiments/01_camera_capture_delivery/build/build-capture.sh
 ```
 
 Gradle downloads the ARCore library from Google's Maven repository on the first build. The script builds in `~/capture-build` (set `CAPTURE_WORK` to change it) because Gradle is slow on `/mnt/c`.
@@ -39,9 +39,9 @@ Python route: `build-apk.sh` takes `--p4a-env`, `--sdk`, `--predecessor-root`, `
 Tests, which need no Android tools:
 
 ```text
-.venv/Scripts/python.exe -m pytest experiments/01_camera_capture_delivery/tests/test_build_recipe.py experiments/01_camera_capture_delivery/tests/test_warm_build.py experiments/01_camera_capture_delivery/tests/test_deployment.py
+.venv/Scripts/python.exe -m pytest research/experiments/01_camera_capture_delivery/tests/test_build_recipe.py research/experiments/01_camera_capture_delivery/tests/test_warm_build.py research/experiments/01_camera_capture_delivery/tests/test_deployment.py
 ```
 
 ## Where results are recorded
 
-Build results, APK hashes and the warm-build run are in the [experiment 01 README](../README.md). Current installable APKs are listed in [`mobile_deployments/README.md`](../../../mobile_deployments/README.md).
+Build results, APK hashes and the warm-build run are in the [experiment 01 README](../README.md). Current installable APKs are listed in [`mobile_deployments/README.md`](../../../../mobile_deployments/README.md).

@@ -41,7 +41,7 @@ each part from first principles.
 | Surface accuracy (control) | 46–52 mm mean distance to the reference model of the public ICL living room, with the true camera path standing in for ARCore | Not a phone result |
 | Object counts | Detected, placed in 3D and matched | Overcounts: 51 identities on a public desk recording with far fewer objects |
 
-All results, with dates and commands, are in [evaluation/results.md](evaluation/results.md).
+All results, with dates and commands, are in [research/evaluation/results.md](research/evaluation/results.md).
 
 ## How it works
 
@@ -119,15 +119,20 @@ with a picture after each step, and checks that the unwrapped steps give the sam
 | [`apps/`](apps/README.md) | The command line and the phone receiver; no method code |
 | [`notebooks/`](notebooks/README.md) | The walkthrough notebook |
 | [`tests/`](tests/README.md) | Product tests, the golden-output check and the committed test recording |
-| [`evaluation/`](evaluation/README.md) | Scoring against references, stand-in recordings, the layer-by-layer runner and [measured results](evaluation/results.md) |
-| [`experiments/`](experiments/README.md) | Every trial, adopted or rejected, each with its README as the evidence record |
-| [`research/`](research/README.md) | Source reviews by topic |
+| [`research/`](research/README.md) | Everything outside the product. Source reviews by topic sit at its top level |
+| [`research/experiments/`](research/experiments/README.md) | Every trial, adopted or rejected, each with its README as the evidence record |
+| [`research/evaluation/`](research/evaluation/README.md) | Scoring against references, stand-in recordings, the layer-by-layer runner and [measured results](research/evaluation/results.md) |
 | [`learning/`](learning/README.md) | Chapters from first principles |
 | [`tools/`](tools/README.md) | Developer tools: the check runner, the function index, demo-page builders |
 | [`models/`](models/README.md) | Model weights (local) and their manifest (tracked) |
+| [`data/`](data/README.md) | Public datasets (local) and their acquisition records (tracked) |
+| [`mobile_deployments/`](mobile_deployments/README.md) | Phone app builds (local) and how to install them |
 | [`task_list/`](task_list/README.md) | One record per piece of work |
-| [`archive/`](archive/README.md) | Retired code and documents, read only |
-| `data/`, `outputs/`, `third_party/` | Local only, not in git |
+| `outputs/`, `third_party/` | Local only, not in git |
+
+`sitescan/` and `apps/` never import from `research/`. The first prototype and retired
+documents left the tree on 12 November 2026; they are kept at commit `d064d5f`
+([archive README](https://github.com/jkind9/FYLD_research/blob/d064d5f/archive/README.md)).
 
 ## Tests
 
@@ -154,7 +159,7 @@ is kept; the saved golden outputs are updated only when a change is adopted.
 7. **RTAB-Map mapping and surface grouping.** Feed RTAB-Map the same frames, depth and poses so only the mapping changes; trial geometry-and-colour grouping beside the largest-pieces filter once small objects are labelled.
 8. **A depth model that runs on the phone.** LingBot-Map's depth, scaled by ARCore, had 38% lower error than Depth Anything V2 on the same frames but needs a 1.16-billion-parameter model on a GPU. Search for a model that runs at one frame per second on a phone or CPU.
 9. **One record type end to end.** Switch both orchestrators from wire records to `session.frames()`. This changes anchor axes, so the fused grid moves in floating point; it needs its own golden check.
-10. **Finish the move.** Put the Android app in `android/`; move the receiver's tests and the fake phone into `tests/`; move the dataset readers that `evaluation/` borrows from `experiments/` into `evaluation/`; turn `tools/demos` into `apps/viewer` once a viewer reads only pipeline outputs.
+10. **Finish the move.** Put the Android app in `android/`; move the receiver's tests and the fake phone into `tests/`; move the dataset readers that `research/evaluation/` borrows from `research/experiments/` into `research/evaluation/`; turn `tools/demos` into `apps/viewer` once a viewer reads only pipeline outputs.
 11. **Clear the licences.** Settle Ultralytics' AGPL-3.0 or commercial terms, or replace the detector (an Apache-2.0 YOLOX path is a candidate), before any proprietary use.
 12. **Run stages on the phone.** Port a stage only with a parity test against the Python version on the same frames. Build a web API only when something will call it.
 

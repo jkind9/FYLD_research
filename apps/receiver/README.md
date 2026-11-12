@@ -31,5 +31,5 @@ No authentication or encryption: local network only.
 
 ## Tests
 
-`experiments/01_camera_capture_delivery/tests/test_capture_receiver.py` sends recordings from a
+`research/experiments/01_camera_capture_delivery/tests/test_capture_receiver.py` sends recordings from a
 fake phone and checks storage, acknowledgements, resends and resumption.

@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from experiments.live_slam.src import trajectory
+from research.experiments.live_slam.src import trajectory
 
 
 def line(t, segment, matrix):
@@ -55,7 +55,7 @@ def test_final_trajectory_files_without_segments_read_as_one_map(tmp_path):
 
 
 def test_camera_file_gets_this_recordings_pinhole_and_no_distortion():
-    from experiments.live_slam import run_live
+    from research.experiments.live_slam import run_live
     stella = "Camera:\n  fx: 517.3\n  fy: 516.4\n  cx: 318.6\n  cy: 255.3\n  k1: 0.26\n  k3: 1.16\n  fps: 30.0\n"
     got = run_live.config_text(stella, run_live.SYSTEMS["stella"]["key"], (525.0, 525.0, 319.5, 239.5))
     assert "  fx: 525.0" in got and "  cy: 239.5" in got and "  k1: 0.0" in got and "  k3: 0.0" in got and "fps: 30.0" in got
@@ -65,7 +65,7 @@ def test_camera_file_gets_this_recordings_pinhole_and_no_distortion():
 
 
 def test_report_takes_the_median_and_range_over_repeats():
-    from experiments.live_slam import report
+    from research.experiments.live_slam import report
     runs = [{"live_mm": v, "final_mm": v - 1, "placed": 0.9, "models": 1, "median_ms": 8.0, "p95_ms": 20.0} for v in (10.0, 30.0, 20.0)]
     row = report.combine(runs)
     assert row["live_mm"] == (20.0, 10.0, 30.0)

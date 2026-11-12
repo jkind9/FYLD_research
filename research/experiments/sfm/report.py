@@ -1,7 +1,7 @@
 """Markdown tables of finished runs: SfM runs (one row per mapper) or surface runs (`--dense`).
 
-    python -m experiments.sfm.report experiments/sfm/runs/tum_desk/* experiments/sfm/runs/tum_xyz/*
-    python -m experiments.sfm.report --dense experiments/sfm/runs/dense_icl/*
+    python -m research.experiments.sfm.report research/experiments/sfm/runs/tum_desk/* research/experiments/sfm/runs/tum_xyz/*
+    python -m research.experiments.sfm.report --dense research/experiments/sfm/runs/dense_icl/*
 """
 
 from __future__ import annotations

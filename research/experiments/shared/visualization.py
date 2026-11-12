@@ -160,7 +160,7 @@ def write_viewer(root: Path, scene: dict) -> None:
     (root / "viewer.html").write_text(page, encoding="utf-8")
     import shutil
 
-    from experiments.datasets.acquisition import sha256
+    from research.experiments.datasets.acquisition import sha256
 
     sources = {}
     for name in ("viewer.html", "viewer.js"):

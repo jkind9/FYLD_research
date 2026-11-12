@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from evaluation import stand_in
+from research.evaluation import stand_in
 from sitescan.session import wire_v2
 
 RECORDING = "tum:data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk"

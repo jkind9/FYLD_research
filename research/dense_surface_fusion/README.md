@@ -11,7 +11,7 @@ Terms used here:
 
 ## What the 15 October walk showed
 
-Measured with `python -B -m evaluation.landmark_probe`. For each frame, it places the red cushion's pixels in the world with ARCore depth and with the fused learned depth.
+Measured with `python -B -m research.evaluation.landmark_probe`. For each frame, it places the red cushion's pixels in the world with ARCore depth and with the fused learned depth.
 
 1. **The two copies come from one standing spot, not two.** Only frames 669-728 see the cushion. The phone moved about 15 cm across them, and all of them fall in fragment 2.
 2. **Frames 669-691 carried depth maps 4.35-4.42 s old.** These are the only 9 of 147 depth maps more than 0.2 s old; the rest are 7-40 ms old. Learned depth sized to those maps put the cushion at about (0.50, 0.16, -1.00) m, 1.57 m from the camera.
@@ -32,7 +32,7 @@ After the stale-depth fix, the owner measured the hallway door repeated as four 
 - **The door is about 4.5 m from the first standing spot.** That distance comes from 13 ARCore tracked points on the doorway in frame 65. In every first-spot frame, the grid cells covering the door held 0 ARCore depth pixels.
 - **The far frames put the door too near, by different amounts.** Sampled points near the camera-to-door line (`frames.npz`) sit 0.5-2.2 m nearer than the door in first-spot frames (fragments 0 and 1). Frames taken while walking up to the door (450-510) sit 0.0-0.4 m nearer. Each frame's median comes from whatever near objects fill its view, so each puts the door at a different depth.
 
-`python -B -m evaluation.depth_check` compares the fused depth (learned depth times grid size) with ARCore's tracked points over all 134 fused frames (11,821 point views). A ratio of 1.00 is right; below 1 is too near.
+`python -B -m research.evaluation.depth_check` compares the fused depth (learned depth times grid size) with ARCore's tracked points over all 134 fused frames (11,821 point views). A ratio of 1.00 is right; below 1 is too near.
 
 | Distance | Cells with their own ARCore size: median ratio (middle half) | Fallback cells: median ratio (middle half) |
 |---|---|---|

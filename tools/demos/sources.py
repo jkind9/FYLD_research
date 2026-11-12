@@ -13,8 +13,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run
 from tools.demos.geometry import (
     Intrinsics,
     backproject,
@@ -24,10 +24,10 @@ from tools.demos.geometry import (
     voxel_fuse,
 )
 
-REPLAY_RUN = "experiments/06_object_recognition/experiments/05_replay/runs/20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66"
-IDENTITY_RUN: str | None = "experiments/06_object_recognition/experiments/06_identity_policy/runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16f0f3d53b"
-TRACKING_RUN = "experiments/03_camera_pose_estimation/runs/20261002T164601.734717Z_befb0ccd27ab44daba6d9ac41f9b9ae0"
-SURFACE_RUN = "experiments/04_surface_reconstruction/runs/20261002T145103.184769Z_000165ef2e044376baf54b675172a64e"
+REPLAY_RUN = "research/experiments/06_object_recognition/experiments/05_replay/runs/20261004T152704.023370Z_84abb8b3b9594dcea8a1e5b2c8aced66"
+IDENTITY_RUN: str | None = "research/experiments/06_object_recognition/experiments/06_identity_policy/runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16f0f3d53b"
+TRACKING_RUN = "research/experiments/03_camera_pose_estimation/runs/20261002T164601.734717Z_befb0ccd27ab44daba6d9ac41f9b9ae0"
+SURFACE_RUN = "research/experiments/04_surface_reconstruction/runs/20261002T145103.184769Z_000165ef2e044376baf54b675172a64e"
 ICL_REFERENCE = "data/icl_nuim/reference_surface/living-room.ply"
 SURFACE_FRAMES = ["1", "101", "201", "301", "401", "501", "601", "701", "801"]
 
@@ -84,7 +84,7 @@ def load_replay(root: Path, identity_run: Path | None = None) -> dict:
         ):
             raise ValueError("Identity overlay does not match the demo source")
         policy = importlib.import_module(
-            "experiments.06_object_recognition.experiments.06_identity_policy.cached_replay"
+            "research.experiments.06_object_recognition.experiments.06_identity_policy.cached_replay"
         )
         policy.validate_overlay(ledger, corrected)
         ledger = corrected
@@ -196,7 +196,7 @@ def load_surface(root: Path, per_frame: int, seed: int) -> dict:
     }
 
 
-CUP_RECORD = "experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_repeatability.json"
+CUP_RECORD = "research/experiments/06_object_recognition/experiments/05_replay/runs/shareable/task22_20261004/cup_repeatability.json"
 
 
 def load_cup_spread(root: Path) -> dict:

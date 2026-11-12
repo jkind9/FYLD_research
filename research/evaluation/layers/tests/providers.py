@@ -10,17 +10,17 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
-from evaluation.layers.config import PipelineSpec
-from evaluation.layers.steps.contracts import ColourFrame, DepthPrediction
+from research.evaluation.layers.config import PipelineSpec
+from research.evaluation.layers.steps.contracts import ColourFrame, DepthPrediction
 
 pose_backends = importlib.import_module(
-    "experiments.03_camera_pose_estimation.src.backend"
+    "research.experiments.03_camera_pose_estimation.src.backend"
 )
 pose_tracking = importlib.import_module(
-    "experiments.03_camera_pose_estimation.src.tracking"
+    "research.experiments.03_camera_pose_estimation.src.tracking"
 )
 localisation = importlib.import_module(
-    "experiments.06_object_recognition.pilot.localisation"
+    "research.experiments.06_object_recognition.pilot.localisation"
 )
 
 

@@ -5,12 +5,12 @@ import importlib
 import numpy as np
 import pytest
 
-from experiments.shared.contracts import Calibration, Pose
+from research.experiments.shared.contracts import Calibration, Pose
 
 
 def method():
     return importlib.import_module(
-        "experiments.04_surface_reconstruction.src.metric_surface"
+        "research.experiments.04_surface_reconstruction.src.metric_surface"
     ).reconstruct_metric
 
 

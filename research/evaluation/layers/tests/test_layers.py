@@ -8,16 +8,16 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from evaluation.layers import pipeline
-from evaluation.layers.steps import mapping, objects, tracking
-from evaluation.layers.steps.capture import TumSequence
-from evaluation.layers.steps.depth import RecordedSensorDepth
-from evaluation.layers.steps.tracking import ReferencePoses
-from evaluation.layers.tests import providers
-from evaluation.layers.tests.test_adapters import (
+from research.evaluation.layers import pipeline
+from research.evaluation.layers.steps import mapping, objects, tracking
+from research.evaluation.layers.steps.capture import TumSequence
+from research.evaluation.layers.steps.depth import RecordedSensorDepth
+from research.evaluation.layers.steps.tracking import ReferencePoses
+from research.evaluation.layers.tests import providers
+from research.evaluation.layers.tests.test_adapters import (
     config as config,  # noqa: PLC0414 - pytest fixture export
 )
-from evaluation.layers.tests.test_adapters import read
+from research.evaluation.layers.tests.test_adapters import read
 
 
 def timing(result):

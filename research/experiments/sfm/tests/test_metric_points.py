@@ -5,8 +5,8 @@ import argparse
 import numpy as np
 import pytest
 
-from experiments.sfm import run_dense
-from experiments.sfm.src import metric_points
+from research.experiments.sfm import run_dense
+from research.experiments.sfm.src import metric_points
 
 
 def readings(ratios_by_frame):

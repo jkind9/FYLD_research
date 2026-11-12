@@ -12,9 +12,9 @@ from pathlib import Path
 
 import psutil
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.geometry import validate_transform
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.geometry import validate_transform
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from . import dataset, evaluation, reporting, tracking
 from .backend import CPUOdometry
@@ -93,7 +93,7 @@ HYPERPARAMETERS = {
 }
 
 copy_checked = importlib.import_module(
-    "experiments.04_surface_reconstruction.src.dataset"
+    "research.experiments.04_surface_reconstruction.src.dataset"
 ).copy_checked
 
 
@@ -196,7 +196,7 @@ def execute(
     run_path: Path | None = None,
     supervised: bool = False,
 ) -> Path:
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     selected_rows, selected_counts = dataset.associations(root, count)
     sequence = root.name
     member_hashes = None
@@ -376,7 +376,7 @@ def _archive_provenance(root: Path, repo: Path) -> dict[str, str]:
         ):
             raise ValueError("Dataset archive and acquisition receipts do not match")
         member_manifest_path = (
-            repo / "experiments/datasets/tum_freiburg1_member_hashes.json"
+            repo / "research/experiments/datasets/tum_freiburg1_member_hashes.json"
         )
         member_manifest = json.loads(member_manifest_path.read_text(encoding="utf-8"))
         member_sequence = member_manifest.get("sequences", {}).get(sequence)
@@ -400,9 +400,9 @@ def _archive_provenance(root: Path, repo: Path) -> dict[str, str]:
             "secondary_receipt_sha256": sha256(secondary_path),
             "archive_bytes": str(actual_bytes),
             "archive_sha256": actual_sha256,
-            "member_manifest": "experiments/datasets/tum_freiburg1_member_hashes.json",
+            "member_manifest": "research/experiments/datasets/tum_freiburg1_member_hashes.json",
             "member_manifest_sha256": sha256(
-                repo / "experiments/datasets/tum_freiburg1_member_hashes.json"
+                repo / "research/experiments/datasets/tum_freiburg1_member_hashes.json"
             ),
         }
     raise ValueError(
@@ -496,7 +496,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     if args.frames < 1:
         parser.error("--frames must be a positive integer")
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     if args._worker:
         if (
             args._run_path is None

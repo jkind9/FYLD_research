@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-PACKAGE = "experiments.06_object_recognition.experiments"
+PACKAGE = "research.experiments.06_object_recognition.experiments"
 
 
 @pytest.mark.parametrize(

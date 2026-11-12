@@ -5,9 +5,11 @@ import re
 
 import numpy as np
 
-from evaluation.layers import pipeline, validation
-from evaluation.layers.steps.contracts import DepthPrediction
-from evaluation.layers.tests.test_adapters import config  # noqa: F401  (fixture)
+from research.evaluation.layers import pipeline, validation
+from research.evaluation.layers.steps.contracts import DepthPrediction
+from research.evaluation.layers.tests.test_adapters import (
+    config,  # noqa: F401  (fixture)
+)
 from tools.demos import run_pages
 from tools.demos.page import EXTERNAL_RESOURCE
 

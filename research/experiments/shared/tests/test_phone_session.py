@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from experiments.shared.phone_session import read_phone_session
+from research.experiments.shared.phone_session import read_phone_session
 
 APP = Path(__file__).resolve().parents[2] / "01_camera_capture_delivery" / "app"
 sys.path.insert(0, str(APP))

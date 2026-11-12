@@ -3,8 +3,8 @@
 One run = one recording and one feature type; the matches feed both the incremental and the
 global mapper. Example (repository root, `.venv`):
 
-    python -m experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
-        --features sift --run-root experiments/sfm/runs/tum_xyz
+    python -m research.experiments.sfm.run_sfm --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
+        --features sift --run-root research/experiments/sfm/runs/tum_xyz
 """
 
 from __future__ import annotations
@@ -18,11 +18,11 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.shared.runs import Run, write_json
+from research.experiments.shared.runs import Run, write_json
 
 from .src import export, reconstruct, scoring, sequences
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 DEFAULT_COLMAP = REPO / "third_party/colmap-4.2.1-windows-nocuda/bin/colmap.exe"
 
 HYPERPARAMETERS = {

@@ -6,7 +6,7 @@ from copy import deepcopy
 import pytest
 
 scoring = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.scoring"
+    "research.experiments.06_object_recognition.experiments.01_detection.scoring"
 )
 
 

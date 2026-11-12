@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from evaluation.stage_report import schema
-from evaluation.stage_report.stages.common import (
+from research.evaluation.stage_report import schema
+from research.evaluation.stage_report.stages.common import (
     file_sha256,
     owner,
     read_json,
@@ -12,7 +12,7 @@ from evaluation.stage_report.stages.common import (
     verified_run,
 )
 
-VALIDATION = "experiments.06_object_recognition.experiments.04_geometry_identity.validation"
+VALIDATION = "research.experiments.06_object_recognition.experiments.04_geometry_identity.validation"
 SCORES = (
     # Any assignment counts as matched, right or wrong, so neither count has a
     # better direction; correctness lives in the other three measures.

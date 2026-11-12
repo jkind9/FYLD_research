@@ -15,11 +15,11 @@ from uuid import uuid4
 
 from PIL import Image, ImageDraw
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import write_json
 
-contracts = importlib.import_module("experiments.06_object_recognition.shared.manifest")
-ROOT = Path(__file__).resolve().parents[3]
+contracts = importlib.import_module("research.experiments.06_object_recognition.shared.manifest")
+ROOT = Path(__file__).resolve().parents[4]
 ANNOTATIONS = Path(__file__).with_name("desk_smoke_v1.json")
 HYPERPARAMETERS: dict[str, dict[str, Any]] = {
     "selection_indexes": {

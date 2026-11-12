@@ -8,10 +8,10 @@ import pytest
 from scipy.ndimage import gaussian_filter
 from scipy.spatial.transform import Rotation
 
-from experiments.shared.contracts import Calibration
+from research.experiments.shared.contracts import Calibration
 
 jitter = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.jitter"
+    "research.experiments.06_object_recognition.experiments.01_detection.jitter"
 )
 CAMERA = Calibration(640, 480, 525.0, 525.0, 319.5, 239.5, "x-right_y-down_z-forward")
 SEED = 20261005
@@ -221,7 +221,7 @@ def test_track_bootstrap_is_reproducible():
 
 
 floor = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.floor"
+    "research.experiments.06_object_recognition.experiments.01_detection.floor"
 )
 
 
@@ -277,7 +277,7 @@ def test_floor_splits_outliers_and_needs_thirty_residuals():
 
 
 jitter_tracks = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.jitter_tracks"
+    "research.experiments.06_object_recognition.experiments.01_detection.jitter_tracks"
 )
 
 
@@ -346,7 +346,7 @@ def test_detection_without_depth_cannot_join_a_track():
 
 
 jitter_run = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.jitter_run"
+    "research.experiments.06_object_recognition.experiments.01_detection.jitter_run"
 )
 
 

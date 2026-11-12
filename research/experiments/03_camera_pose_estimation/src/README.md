@@ -16,20 +16,20 @@ The tracker is Open3D's hybrid odometry on the CPU. Each new frame is matched to
 | `reporting.py` | `thumbnail` and `report` write the colour and depth previews and an HTML page. They do not change the estimated path. |
 | `validation/__init__.py` | Public entry to the scorer: re-exports `evaluate` and `read_references`. |
 
-Other experiments reuse the scorer. `experiments/open_vio/vio/score.py` and `experiments/sfm/src/scoring.py` call `evaluate`, and `experiments/evaluation/stages/camera.py` re-scores saved runs with it.
+Other experiments reuse the scorer. `research/experiments/open_vio/vio/score.py` and `research/experiments/sfm/src/scoring.py` call `evaluate`, and `research/evaluation/stage_report/stages/camera.py` re-scores saved runs with it.
 
 ## How to run it
 
 Run from the repository root on Windows, CPU only. The memory limit needs Windows Job Objects, and the Open3D CPU wheel (version 0.19.0) must be installed:
 
 ```text
-.venv/Scripts/python.exe -B -m experiments.03_camera_pose_estimation.src.run --dataset data/tum/rgbd_dataset_freiburg1_xyz --frames 30
+.venv/Scripts/python.exe -B -m research.experiments.03_camera_pose_estimation.src.run --dataset data/tum/rgbd_dataset_freiburg1_xyz --frames 30
 ```
 
 `--dataset` is a TUM sequence folder, `--frames` is how many associated frames to use (default 30), and `--runs` changes where run folders are written (default `../runs`). Tests:
 
 ```text
-.venv/Scripts/python.exe -B tools/check.py -q experiments/03_camera_pose_estimation/tests
+.venv/Scripts/python.exe -B tools/check.py -q research/experiments/03_camera_pose_estimation/tests
 ```
 
 ## Where results are recorded

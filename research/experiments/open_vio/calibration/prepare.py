@@ -1,8 +1,8 @@
 """Prepare Kalibr's inputs from a raw recording (or any EuRoC/ASL folder).
 
-    python experiments/open_vio/calibration/prepare.py --recording <calibration walk> --out <folder> \
+    python research/experiments/open_vio/calibration/prepare.py --recording <calibration walk> --out <folder> \
         --tag-size 0.024 [--rest <recording at rest>]
-    python experiments/open_vio/calibration/prepare.py --mav0 <EuRoC mav0 folder> --out <folder> \
+    python research/experiments/open_vio/calibration/prepare.py --mav0 <EuRoC mav0 folder> --out <folder> \
         --cols 6 --rows 6 --tag-size 0.088
 
 Writes <out>/kalibr (the bag-creator folder), <out>/target.yaml and, with --rest, <out>/imu.yaml from an Allan fit

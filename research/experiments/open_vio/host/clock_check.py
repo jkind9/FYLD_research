@@ -1,6 +1,6 @@
 """Check that a capture session's camera, gyroscope and accelerometer share one clock, and measure the offset.
 
-    python experiments/open_vio/host/clock_check.py <recording folder>
+    python research/experiments/open_vio/host/clock_check.py <recording folder>
 
 Writes clock_check.json in the recording folder. The offset is found the way gyroscope-based phone
 synchronisation does it (Twist-n-Sync, Faizullin et al. 2021): the angular speed seen by one source is

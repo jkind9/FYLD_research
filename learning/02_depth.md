@@ -31,7 +31,7 @@ A model that claims to output metres is "metric" only if that claim is checked. 
 
 ## What the project found
 
-> **Project result: learned "metric" depth is the wrong size, and the size changes every frame.** Depth Anything V2 Metric Small (25M parameters) reads distances 1.34 times too far on TUM xyz and 1.41 times too far on desk (median over frames). Raw AbsRel is 0.345 and 0.450. The factor moves between 0.86 and 2.09 from frame to frame, so one fixed correction cannot fix it. (`experiments/02_stereo_depth/README.md`, Task54.)
+> **Project result: learned "metric" depth is the wrong size, and the size changes every frame.** Depth Anything V2 Metric Small (25M parameters) reads distances 1.34 times too far on TUM xyz and 1.41 times too far on desk (median over frames). Raw AbsRel is 0.345 and 0.450. The factor moves between 0.86 and 2.09 from frame to frame, so one fixed correction cannot fix it. (`research/experiments/02_stereo_depth/README.md`, Task54.)
 
 > **Project result: the shape is good; a few known points fix the size.** With each frame's scale and shift fitted, Depth Anything's AbsRel drops to 0.066 (xyz) and 0.082 (desk); ZipDepth's phone build reaches 0.070 and 0.068. Fitting from only 50 known points per frame reaches the same score as fitting to every pixel; 10 points cost about 0.01 AbsRel. (Task62, `sparse_scale.py`.)
 
@@ -51,14 +51,14 @@ The project tried three fixes (Task65):
 
 None made the old tracker accurate. The real fix came from changing the tracker (chapters 3 and 4) and sizing depth to the tracker's own points (chapter 5).
 
-> **Project result: depth prompted with sparse points did not help.** Prompt Depth Anything takes a low-resolution metric depth map as a second input. Fed with the few hundred SfM points per frame (chapter 4), it was no better than Depth Anything resized to the same points: 168 against 166 mm surface error on xyz, 217 against 156 mm on desk, 147 against 93 mm on ICL. It was trained on dense iPhone lidar maps, and a sparse prompt is far from that. (Task79, `experiments/sfm/README.md`.)
+> **Project result: depth prompted with sparse points did not help.** Prompt Depth Anything takes a low-resolution metric depth map as a second input. Fed with the few hundred SfM points per frame (chapter 4), it was no better than Depth Anything resized to the same points: 168 against 166 mm surface error on xyz, 217 against 156 mm on desk, 147 against 93 mm on ICL. It was trained on dense iPhone lidar maps, and a sparse prompt is far from that. (Task79, `research/experiments/sfm/README.md`.)
 
 ## Try it
 
 Score Depth Anything against Kinect depth on TUM (needs the checkpoint in `models/`):
 
 ```text
-python -m experiments.02_stereo_depth.run --method depth-anything --checkpoint models/depth_anything_v2_metric_indoor_small --tum-root data/tum --output experiments/02_stereo_depth/runs/<new> --device cpu
+python -m research.experiments.02_stereo_depth.run --method depth-anything --checkpoint models/depth_anything_v2_metric_indoor_small --tum-root data/tum --output research/experiments/02_stereo_depth/runs/<new> --device cpu
 ```
 
 Then look at `results.json` in the run folder: compare the raw AbsRel with the shape (aligned) AbsRel.
@@ -67,4 +67,4 @@ Then look at `results.json` in the run folder: compare the raw AbsRel with the s
 
 - Lecture 6 (depth estimation) in [research/3d_vision_fundamentals](../research/3d_vision_fundamentals/README.md).
 - [research/depth_estimation](../research/depth_estimation/README.md): phone stereo (MobiDepth, HiMoDepth, BANet), Video Depth Anything, Prompt Depth Anything.
-- The full survey of how other systems keep depth size consistent: `experiments/02_stereo_depth/README.md`, "What existing systems do".
+- The full survey of how other systems keep depth size consistent: `research/experiments/02_stereo_depth/README.md`, "What existing systems do".

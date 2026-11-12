@@ -2,7 +2,7 @@
 
 These records keep original image evidence separate from the answers used to
 score object recognition. They use the existing camera calibration and pose
-records in `experiments/shared`.
+records in `research/experiments/shared`.
 
 `observations.ObjectObservation` is a frozen record keyed by source, session,
 frame and observation identifiers. It copies pixel polygons, boxes, source

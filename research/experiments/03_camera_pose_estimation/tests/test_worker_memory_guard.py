@@ -8,8 +8,8 @@ import sys
 
 import pytest
 
-runner = importlib.import_module("experiments.03_camera_pose_estimation.src.run")
-memory_limits = importlib.import_module("experiments.03_camera_pose_estimation.src.memory_limits")
+runner = importlib.import_module("research.experiments.03_camera_pose_estimation.src.run")
+memory_limits = importlib.import_module("research.experiments.03_camera_pose_estimation.src.memory_limits")
 
 
 @pytest.mark.parametrize(
@@ -97,7 +97,7 @@ def test_current_process_memory_limit_reads_configured_job_limit(tmp_path):
         "exec('while not os.path.exists(sys.argv[1]) and time.monotonic()<deadline: "
         "time.sleep(0.01)'); "
         "limit=importlib.import_module("
-        "'experiments.03_camera_pose_estimation.src.memory_limits')"
+        "'research.experiments.03_camera_pose_estimation.src.memory_limits')"
         ".WindowsProcessMemoryLimit.current_process_memory_limit(); "
         "print(limit,flush=True); "
         "raise SystemExit(0 if limit==int(sys.argv[2]) else 1)"

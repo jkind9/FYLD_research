@@ -1,6 +1,6 @@
-"""Read, check and convert a session recorded by the capture app (experiments/01_camera_capture_delivery/capture).
+"""Read, check and convert a session recorded by the capture app (research/experiments/01_camera_capture_delivery/capture).
 
-    python experiments/open_vio/host/recording.py <session folder> [--euroc <output folder>]
+    python research/experiments/open_vio/host/recording.py <session folder> [--euroc <output folder>]
 
 The session folder is what the PC capture receiver writes (phone session v2, phone_session_v2.md): session.json,
 imu.csv, and for a walk frames.jsonl and cam0/<seq>.png. Every camera and motion-sensor time is integer

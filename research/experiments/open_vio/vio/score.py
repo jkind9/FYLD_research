@@ -12,10 +12,10 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
-tracking = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
-contracts = importlib.import_module("experiments.shared.contracts")
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+evaluation = importlib.import_module("research.experiments.03_camera_pose_estimation.src.evaluation")
+tracking = importlib.import_module("research.experiments.03_camera_pose_estimation.src.tracking")
+contracts = importlib.import_module("research.experiments.shared.contracts")
 
 FIELDS = ("ate_rigid_rmse_m", "ate_scaled_rmse_m", "ate_scaled_size", "rpe_1s_translation_rmse_m", "rpe_1s_rotation_rmse_rad")
 

@@ -9,7 +9,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 _tum_reader = importlib.import_module(
-    "experiments.03_camera_pose_estimation.src.dataset"
+    "research.experiments.03_camera_pose_estimation.src.dataset"
 )
 SAMPLE_STRIDE = 10
 

@@ -21,21 +21,21 @@ The systems are Basalt (BSD-3), Kimera-VIO (BSD-2), OKVIS2 (BSD-style) and OpenV
 This needs WSL, Docker, and the system sources cloned under `~/open_vio/src`. It runs on the CPU. Build the images once, from the repository root:
 
 ```text
-wsl -- bash experiments/open_vio/vio/build_all.sh
+wsl -- bash research/experiments/open_vio/vio/build_all.sh
 ```
 
 Run one system on a recording:
 
 ```text
-.venv/Scripts/python.exe experiments/open_vio/vio/run.py --system <basalt|okvis2|kimera|openvins> --dataset <folder containing mav0> --camchain <Kalibr camchain> --imu <Kalibr imu.yaml> --camera-rate <Hz> --reference <file> --reference-format <euroc|tum> --reference-frame <imu|camera> --profile <tumvi|phone> --run <run folder>
+.venv/Scripts/python.exe research/experiments/open_vio/vio/run.py --system <basalt|okvis2|kimera|openvins> --dataset <folder containing mav0> --camchain <Kalibr camchain> --imu <Kalibr imu.yaml> --camera-rate <Hz> --reference <file> --reference-format <euroc|tum> --reference-frame <imu|camera> --profile <tumvi|phone> --run <run folder>
 ```
 
-`--template-noise` keeps OKVIS2's or Kimera's own IMU noise values. The TUM-VI room1 runs go through `bash experiments/open_vio/vio/run_tumvi.sh <systems>` from Git Bash, with `REPO` set to the checkout that holds `data/`. Summarise runs with:
+`--template-noise` keeps OKVIS2's or Kimera's own IMU noise values. The TUM-VI room1 runs go through `bash research/experiments/open_vio/vio/run_tumvi.sh <systems>` from Git Bash, with `REPO` set to the checkout that holds `data/`. Summarise runs with:
 
 ```text
-.venv/Scripts/python.exe experiments/open_vio/vio/vio_report.py <runs folder>
+.venv/Scripts/python.exe research/experiments/open_vio/vio/vio_report.py <runs folder>
 ```
 
 ## Where results are recorded
 
-Trajectory errors, timings and the TUM-VI room1 comparison are in the [open_vio README](../README.md). Sources and licences are in [`research/visual_inertial_odometry/vio_systems.md`](../../../research/visual_inertial_odometry/vio_systems.md).
+Trajectory errors, timings and the TUM-VI room1 comparison are in the [open_vio README](../README.md). Sources and licences are in [`research/visual_inertial_odometry/vio_systems.md`](../../../visual_inertial_odometry/vio_systems.md).

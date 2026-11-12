@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from typing import Any
 
-from experiments.shared.contracts import Calibration
+from research.experiments.shared.contracts import Calibration
 
 from .validation import finite, identifier, pairs, pixel_support, position
 

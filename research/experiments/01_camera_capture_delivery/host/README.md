@@ -2,7 +2,7 @@
 
 This folder holds the host-side helpers of [experiment 01, camera capture and delivery](../README.md): a receiver for the old v1 live stream, a scorer for tape-measured walks, and a checker for check-app reports.
 
-The session readers now live in [`sitescan/session/`](../../../sitescan/session/README.md), and the capture receiver in `apps/receiver/`.
+The session readers now live in [`sitescan/session/`](../../../../sitescan/session/README.md), and the capture receiver in `apps/receiver/`.
 
 | File | What it does |
 |---|---|
@@ -15,9 +15,9 @@ The session readers now live in [`sitescan/session/`](../../../sitescan/session/
 Each file is a script. Run it from the repository root with the project environment:
 
 ```text
-.venv/Scripts/python.exe experiments/01_camera_capture_delivery/host/receiver.py --out experiments/01_camera_capture_delivery/runs/phonecheck
-.venv/Scripts/python.exe experiments/01_camera_capture_delivery/host/accuracy.py --session <session folder> --measurements <measurements.json> --out <scores.json>
-.venv/Scripts/python.exe experiments/01_camera_capture_delivery/host/report.py <report.json>
+.venv/Scripts/python.exe research/experiments/01_camera_capture_delivery/host/receiver.py --out research/experiments/01_camera_capture_delivery/runs/phonecheck
+.venv/Scripts/python.exe research/experiments/01_camera_capture_delivery/host/accuracy.py --session <session folder> --measurements <measurements.json> --out <scores.json>
+.venv/Scripts/python.exe research/experiments/01_camera_capture_delivery/host/report.py <report.json>
 ```
 
 `receiver.py` prints the PC's addresses to type into the app. The phone and PC must be on the same Wi-Fi, and Windows Firewall must allow the port on private networks. `--port` changes the port (default 8765) and `--sessions N` stops after N connections. The measurements file format is described in [`../field_accuracy.md`](../field_accuracy.md).

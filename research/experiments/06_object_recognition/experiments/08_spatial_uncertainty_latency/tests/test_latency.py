@@ -5,7 +5,7 @@ import importlib
 import pytest
 
 run = importlib.import_module(
-    "experiments.06_object_recognition.experiments.08_spatial_uncertainty_latency.run"
+    "research.experiments.06_object_recognition.experiments.08_spatial_uncertainty_latency.run"
 )
 
 

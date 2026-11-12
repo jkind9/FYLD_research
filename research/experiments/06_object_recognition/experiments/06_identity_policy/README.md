@@ -5,7 +5,7 @@ Replay saved detections to let new objects receive provisional identities even w
 From the repository root:
 
 ```powershell
-python -B -m experiments.06_object_recognition.experiments.06_identity_policy.cached_replay
+python -B -m research.experiments.06_object_recognition.experiments.06_identity_policy.cached_replay
 ```
 
 The default input is the accepted 60-frame Task22 publication. Its manifest and baseline ledger hashes are pinned in the publisher. To use another completed local run, pass `--source-run <path>`. The source must be inside the repository and contain `input/baseline_observations.json` or `output/observations.json`.
@@ -21,7 +21,7 @@ The shared publication tools (`Run` and `verify_run`) create and verify the rece
 Run the focused checks with:
 
 ```powershell
-python -B -m tools.check experiments/06_object_recognition/experiments/06_identity_policy/tests/test_cached_replay.py
+python -B -m tools.check research/experiments/06_object_recognition/experiments/06_identity_policy/tests/test_cached_replay.py
 ```
 
 This cached path does not migrate the object database or replace the broader identity-policy comparison planned in Task31.
@@ -44,4 +44,4 @@ The complete local run is `runs/20261005T102726.235703Z_bace0cc9ceb44abfa9172c16
 
 Association alone took 9.27 ms in this one CPU replay. That excludes inference, localization, file verification, publication and page building; it is not end-to-end latency. More candidate tracks also introduce more ambiguous matches. Independent labels are needed to establish whether new IDs correctly isolate books or split a physical object.
 
-The cup's frame104 and frame359 detections retain `object-0005` across the empty frame268. A separate shifted cup detection starts `object-0011`, so even this return success does not prove a correct cup count. [Demo 06](../../../../outputs/demo_pages/06_objects_in_3d.html) displays the corrected identities and their remaining unassigned cases.
+The cup's frame104 and frame359 detections retain `object-0005` across the empty frame268. A separate shifted cup detection starts `object-0011`, so even this return success does not prove a correct cup count. [Demo 06](../../../../../outputs/demo_pages/06_objects_in_3d.html) displays the corrected identities and their remaining unassigned cases.

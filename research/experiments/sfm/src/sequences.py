@@ -52,7 +52,7 @@ class Sequence:
             if values.shape != (8,):
                 raise ValueError("Ground-truth rows need eight values")
             rows.append(values)
-        from experiments.shared.geometry import pose_matrix
+        from research.experiments.shared.geometry import pose_matrix
 
         out = []
         for values in rows:

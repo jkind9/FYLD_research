@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from experiments.sfm.src import posed
+from research.experiments.sfm.src import posed
 
 
 def test_windows_cover_every_frame_once():

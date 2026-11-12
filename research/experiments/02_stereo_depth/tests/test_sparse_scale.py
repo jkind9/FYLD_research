@@ -5,9 +5,9 @@ import importlib
 import numpy as np
 import pytest
 
-geometry = importlib.import_module("experiments.02_stereo_depth.geometry")
-scoring = importlib.import_module("experiments.02_stereo_depth.scoring")
-sparse_scale = importlib.import_module("experiments.02_stereo_depth.sparse_scale")
+geometry = importlib.import_module("research.experiments.02_stereo_depth.geometry")
+scoring = importlib.import_module("research.experiments.02_stereo_depth.scoring")
+sparse_scale = importlib.import_module("research.experiments.02_stereo_depth.sparse_scale")
 
 
 def _scene(height=20, width=30):

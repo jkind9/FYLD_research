@@ -12,24 +12,24 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.contracts import Calibration
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.contracts import Calibration
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from .masks import METHODS, segment
 from .report import write_report
 from .support import coordinate_difference, summarise
 
-ROOT = Path(__file__).resolve().parents[4]
-prepare = importlib.import_module("experiments.06_object_recognition.datasets.prepare")
+ROOT = Path(__file__).resolve().parents[5]
+prepare = importlib.import_module("research.experiments.06_object_recognition.datasets.prepare")
 cache_api = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.cache"
+    "research.experiments.06_object_recognition.experiments.01_detection.cache"
 )
 score_api = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.scoring"
+    "research.experiments.06_object_recognition.experiments.01_detection.scoring"
 )
 localisation = importlib.import_module(
-    "experiments.06_object_recognition.pilot.localisation"
+    "research.experiments.06_object_recognition.pilot.localisation"
 )
 PUBLICATION_SHA256 = "eb30954d32b56778d55ac4a1858dd933ddec7550d2aa4da5bfb9e9ae1b5d57e3"
 HYPERPARAMETERS = {
@@ -120,7 +120,7 @@ def preflight(repo: Path) -> dict:
     prepare.verify_publication(publication, repo)
     manifest = cache_api.read_json(publication / "annotations.json")
     archived = cache_api.read_json(
-        repo / "experiments/datasets/tum_freiburg1_member_hashes.json"
+        repo / "research/experiments/datasets/tum_freiburg1_member_hashes.json"
     )["sequences"]["rgbd_dataset_freiburg1_desk"]["members"]
     sources = manifest["source_records"] + [
         f[role] for f in manifest["frames"] for role in ("rgb", "depth")

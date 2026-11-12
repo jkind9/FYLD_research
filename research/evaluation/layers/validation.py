@@ -10,18 +10,18 @@ from typing import Any
 
 import numpy as np
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.contracts import Pose
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.contracts import Pose
 
 from .records import StepResult
 from .steps.contracts import read_pose
 
-tracking_validation = importlib.import_module("experiments.03_camera_pose_estimation.src.validation")
-tracking_records = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
-surface_validation = importlib.import_module("experiments.04_surface_reconstruction.src.validation")
-depth_scoring = importlib.import_module("experiments.02_stereo_depth.scoring")
-depth_evaluation = importlib.import_module("experiments.02_stereo_depth.evaluate")
-depth_geometry = importlib.import_module("experiments.02_stereo_depth.geometry")
+tracking_validation = importlib.import_module("research.experiments.03_camera_pose_estimation.src.validation")
+tracking_records = importlib.import_module("research.experiments.03_camera_pose_estimation.src.tracking")
+surface_validation = importlib.import_module("research.experiments.04_surface_reconstruction.src.validation")
+depth_scoring = importlib.import_module("research.experiments.02_stereo_depth.scoring")
+depth_evaluation = importlib.import_module("research.experiments.02_stereo_depth.evaluate")
+depth_geometry = importlib.import_module("research.experiments.02_stereo_depth.geometry")
 SCORED_COMPONENTS = {"depth", "tracking", "surface"}
 
 

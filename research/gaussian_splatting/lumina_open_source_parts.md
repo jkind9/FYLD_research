@@ -51,7 +51,7 @@ Every stage has an open-source counterpart. The tables below list them. Three ga
 | [ARKit-Scanner](https://github.com/xiongyiheng/ARKit-Scanner) | Apache-2.0 | iPhone with LiDAR | 1920 × 1440 video, 256 × 192 depth, poses, intrinsics, motion sensors, exposure | Another reference layout |
 | [OpenQuestCapture](https://github.com/samuelm2/OpenQuestCapture) | MIT | Meta Quest 3/3s | Stereo images, depth, headset poses; COLMAP export via a companion repo | Has the only open coverage display found: "White indicates head-on coverage, while vivid colors indicate grazing angles" |
 | [RTAB-Map apps](https://github.com/introlab/rtabmap) | BSD-3-Clause | iPhone/iPad with LiDAR (App Store); Android with ARCore (APK) | Live mapping with loop closure; saves a `.db` database; exports PLY, LAS, OBJ | The nearest open match to Lumina's phone side, on both phone platforms |
-| This project's capture app | Project code | Redmi Note 11 Pro, ARCore | 30 fps Camera2 frames, ARCore pose, intrinsics, tracked points, raw depth with confidence, anchor corrections, exposure per frame ([phone session v2](../../experiments/01_camera_capture_delivery/phone_session_v2.md)) | Already records the same streams as Lumina, with ARCore depth in place of LiDAR |
+| This project's capture app | Project code | Redmi Note 11 Pro, ARCore | 30 fps Camera2 frames, ARCore pose, intrinsics, tracked points, raw depth with confidence, anchor corrections, exposure per frame ([phone session v2](../experiments/01_camera_capture_delivery/phone_session_v2.md)) | Already records the same streams as Lumina, with ARCore depth in place of LiDAR |
 
 What to take from Lumina's capture side: the project's app fixes focus (`Config.FocusMode.FIXED` in `CaptureActivity.java`) but does not lock exposure or white balance, and shows no coverage view. Locked exposure and white balance matter for splat training, which assumes a surface keeps its colour between photos. A near/far depth limit matches the project's finding that ARCore depth beyond about 2.5 m is unreliable.
 
@@ -152,7 +152,7 @@ Both invent content where the camera never looked. That is the opposite of what 
 | Option | Licence | Note |
 |---|---|---|
 | [Cloud2BIM](papers/cloud2bim_2503.11498.pdf) (Automation in Construction 177, 2025) | Open source per the paper; licence file not checked | Point cloud to an IFC building model with slabs, walls and openings. DXF would need a conversion step |
-| This project's grid footprint (Task55) | Project code | Ground plane, top-down height grid, seen and unknown area ([experiment 05](../../experiments/05_birds_eye_mapping/README.md)) |
+| This project's grid footprint (Task55) | Project code | Ground plane, top-down height grid, seen and unknown area ([experiment 05](../experiments/05_birds_eye_mapping/README.md)) |
 
 Lumina draws floor plans from point clouds or splat centres. Splat centres sit near surfaces but are placed for appearance, so a plan from the fused depth surface is the safer source of measurements.
 

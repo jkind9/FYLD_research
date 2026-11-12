@@ -105,3 +105,4 @@ research/experiments/01_camera_capture_delivery/build/container-readiness.json
 # Model weights stay local; the manifest records their source, licence and hashes.
 models/*
 !models/manifest.toml
+!models/README.md

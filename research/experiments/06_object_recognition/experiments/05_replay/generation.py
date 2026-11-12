@@ -8,15 +8,15 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from . import automatic, checked_inputs, payload, report
 
-ROOT = Path(__file__).resolve().parents[4]
-RUN_ROOT_RELATIVE = Path("experiments/06_object_recognition/experiments/05_replay/runs")
+ROOT = Path(__file__).resolve().parents[5]
+RUN_ROOT_RELATIVE = Path("research/experiments/06_object_recognition/experiments/05_replay/runs")
 FEATURE_CACHE_RELATIVE = Path(
-    "experiments/06_object_recognition/experiments/05_replay/runs/20261004T150809.296626Z_cdade192a8574e1985f2102cf66b8ef5"
+    "research/experiments/06_object_recognition/experiments/05_replay/runs/20261004T150809.296626Z_cdade192a8574e1985f2102cf66b8ef5"
 )
 FEATURE_CACHE_MANIFEST_SHA256 = (
     "c7469a85043bfb3aa9a6f1eed9cf95190ef0634a44036708ed21c195efe292ed"

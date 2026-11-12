@@ -2,11 +2,11 @@
 
 Two jobs, both reading only files:
 
-    python -m experiments.02_stereo_depth.scale_drift clip --source data/tum --sequence rgbd_dataset_freiburg1_desk \
+    python -m research.experiments.02_stereo_depth.scale_drift clip --source data/tum --sequence rgbd_dataset_freiburg1_desk \
         --output outputs/inputs/task65_clips/rgbd_dataset_freiburg1_desk_every2
-    python -m experiments.02_stereo_depth.scale_drift summarise --run "Depth Anything=<run folder>" ... \
-        --output experiments/02_stereo_depth/runs/task65/scale_drift.json
-    python -m experiments.02_stereo_depth.scale_drift check-space --path outputs --minimum-gb 30
+    python -m research.experiments.02_stereo_depth.scale_drift summarise --run "Depth Anything=<run folder>" ... \
+        --output research/experiments/02_stereo_depth/runs/task65/scale_drift.json
+    python -m research.experiments.02_stereo_depth.scale_drift check-space --path outputs --minimum-gb 30
 
 `clip` makes a full-length clip that the walkthrough tracker can follow (every 2nd frame
 that has sensor depth). `summarise` reads finished walkthrough runs and reports, per run,
@@ -30,15 +30,15 @@ from typing import Any
 import numpy as np
 from scipy.stats import spearmanr  # type: ignore[import-untyped]
 
-from experiments.shared.contracts import Calibration, Pose
+from research.experiments.shared.contracts import Calibration, Pose
 
 from .run import _resolve_sequence_root
 
-pose_dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
-pose_evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
-pose_tracking = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
-consistency = importlib.import_module("evaluation.layers.consistency")
-contracts = importlib.import_module("evaluation.layers.steps.contracts")
+pose_dataset = importlib.import_module("research.experiments.03_camera_pose_estimation.src.dataset")
+pose_evaluation = importlib.import_module("research.experiments.03_camera_pose_estimation.src.evaluation")
+pose_tracking = importlib.import_module("research.experiments.03_camera_pose_estimation.src.tracking")
+consistency = importlib.import_module("research.evaluation.layers.consistency")
+contracts = importlib.import_module("research.evaluation.layers.steps.contracts")
 
 HYPERPARAMETERS = {
     "clip_every": {"value": 2, "source": "inherited outputs/inputs/task51_real_clips/*/CLIP_SOURCE.txt"},
@@ -101,7 +101,7 @@ def make_clip(
     (output / "CLIP_SOURCE.txt").write_text(
         f"Copied from {root}: every {every}nd RGB row among the {len(paired)} rows with depth within "
         f"{tolerance_s} s ({len(rgb) - len(paired)} dropped), {len(kept)} frames, largest gap {largest:.3f} s, "
-        "nearest depth image each, full groundtruth.txt. Made by experiments/02_stereo_depth/scale_drift.py.\n",
+        "nearest depth image each, full groundtruth.txt. Made by research/experiments/02_stereo_depth/scale_drift.py.\n",
         encoding="utf-8",
     )
     return summary
@@ -225,7 +225,7 @@ def _best_fit_camera(run: dict[str, Any]) -> dict[str, Any] | None:
     records = []
     for row in run["tracking"]["records"]:
         pose = contracts.read_pose(row["pose"])
-        # Same segment key as the walkthrough scorer (evaluation/layers/validation.py:53-54).
+        # Same segment key as the walkthrough scorer (research/evaluation/layers/validation.py:53-54).
         keyed = Pose(pose.matrix, pose.world_id, json.dumps([pose.world_id, pose.segment_id]), pose.source)
         records.append(pose_tracking.Record(row["frame_id"], row["timestamp_s"], row["status"], keyed, row["reason"]))
     result = pose_evaluation.evaluate(records, pose_evaluation.read_references(root / "groundtruth.txt"))

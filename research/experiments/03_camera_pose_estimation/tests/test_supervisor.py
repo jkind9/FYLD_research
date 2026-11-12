@@ -10,16 +10,16 @@ from pathlib import Path
 
 import pytest
 
-from experiments.datasets.acquisition import sha256
+from research.experiments.datasets.acquisition import sha256
 
 supervisor = importlib.import_module(
-    "experiments.03_camera_pose_estimation.src.supervisor"
+    "research.experiments.03_camera_pose_estimation.src.supervisor"
 )
 
 
 def _write_complete_run(run_path: Path) -> None:
-    from experiments.datasets.acquisition import sha256
-    from experiments.shared.runs import _inventory, write_json
+    from research.experiments.datasets.acquisition import sha256
+    from research.experiments.shared.runs import _inventory, write_json
 
     metadata = run_path / "metadata"
     metadata.mkdir(parents=True, exist_ok=True)
@@ -186,7 +186,7 @@ def test_supervisor_timeout_writes_durable_failed_receipt_without_evaluation(tmp
         "runpy.run_module"
     )
     with pytest.raises(ValueError, match="not complete"):
-        importlib.import_module("experiments.shared.runs").verify_run(run_path)
+        importlib.import_module("research.experiments.shared.runs").verify_run(run_path)
 
 
 def test_supervisor_fails_closed_if_process_memory_limit_cannot_be_installed(
@@ -403,8 +403,8 @@ def test_supervisor_rejects_complete_worker_observed_after_wall_clock_deadline(
 
         def poll(self):
             if self.returncode is None and self.clock.now >= 0.2:
-                from experiments.datasets.acquisition import sha256
-                from experiments.shared.runs import _inventory, write_json
+                from research.experiments.datasets.acquisition import sha256
+                from research.experiments.shared.runs import _inventory, write_json
 
                 metadata = self.run_path / "metadata"
                 metadata.mkdir(parents=True, exist_ok=True)
@@ -485,7 +485,7 @@ def test_supervisor_rejects_complete_worker_observed_after_wall_clock_deadline(
     assert (
         json.loads(receipt_path.read_text())["status"] == "complete_artifact_rejected"
     )
-    importlib.import_module("experiments.shared.runs").verify_run(run_path)
+    importlib.import_module("research.experiments.shared.runs").verify_run(run_path)
 
 
 def test_abandoned_supervisor_launch_is_reconciled_before_new_work(tmp_path):
@@ -634,7 +634,7 @@ def test_run_root_lock_excludes_a_second_process(tmp_path):
     code = (
         "import importlib,sys,time; "
         "lock=importlib.import_module("
-        "'experiments.03_camera_pose_estimation.src.supervisor').RunRootLock; "
+        "'research.experiments.03_camera_pose_estimation.src.supervisor').RunRootLock; "
         "guard=lock(__import__('pathlib').Path(sys.argv[1])); "
         "guard.__enter__(); open(sys.argv[2],'w').close(); time.sleep(10)"
     )
@@ -660,7 +660,7 @@ def test_windows_process_memory_limit_assigns_and_reaps_worker(tmp_path):
     code = (
         "import importlib,os,sys,time; "
         "WindowsProcessMemoryLimit=importlib.import_module("
-        "'experiments.03_camera_pose_estimation.src.supervisor').WindowsProcessMemoryLimit; "
+        "'research.experiments.03_camera_pose_estimation.src.supervisor').WindowsProcessMemoryLimit; "
         "deadline=time.monotonic()+10; "
         "exec('while not os.path.exists(sys.argv[1]) and time.monotonic()<deadline: time.sleep(0.01)'); "
         "raise SystemExit(0 if WindowsProcessMemoryLimit.is_current_process_in_job() else 1)"

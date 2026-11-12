@@ -4,8 +4,8 @@ import html
 import json
 from pathlib import Path
 
-from experiments.shared.runs import write_json
-from experiments.shared.visualization import artifact
+from research.experiments.shared.runs import write_json
+from research.experiments.shared.visualization import artifact
 
 from .scene import export_scene
 

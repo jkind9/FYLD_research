@@ -1,6 +1,6 @@
 """A stand-in for the capture app in tests: builds phone session v2 messages and sends them as Uploader.java does.
 
-Also used by experiments/open_vio/tests and tests/ to write synthetic v2 session folders.
+Also used by research/experiments/open_vio/tests and tests/ to write synthetic v2 session folders.
 """
 
 from __future__ import annotations

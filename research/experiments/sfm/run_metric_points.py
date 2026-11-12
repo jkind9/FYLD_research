@@ -3,8 +3,8 @@
 Draws N depth-camera readings at SfM points, sizes the world from them, and scores the camera
 path against the true path. Example (`.venv`):
 
-    python -m experiments.sfm.run_metric_points --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
-        --every 1 --sfm-run experiments/sfm/runs/tum_xyz/<run>/output/incremental --run-root experiments/sfm/runs/metric_tum_xyz
+    python -m research.experiments.sfm.run_metric_points --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
+        --every 1 --sfm-run research/experiments/sfm/runs/tum_xyz/<run>/output/incremental --run-root research/experiments/sfm/runs/metric_tum_xyz
 """
 
 from __future__ import annotations
@@ -16,12 +16,12 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.shared.runs import Run, write_json
+from research.experiments.shared.runs import Run, write_json
 
 from . import run_dense
 from .src import metric_points, scoring, sequences
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 READING_COUNTS = (5, 20, 100, None)  # None is every reading
 
 HYPERPARAMETERS = {

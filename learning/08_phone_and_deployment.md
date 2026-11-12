@@ -72,7 +72,7 @@ The capture app therefore separates capturing from sending:
 
 The same ideas run inside TCP itself and most file-transfer tools; the app repeats them one level up because a TCP connection does not survive the phone dropping off Wi-Fi.
 
-> **Project status (15 October 2026).** Capture 1.2 (Task99) completed the Redmi recording `20261014_220756_walk`: 1,194 frames over 39.88 s at 29.92 fps, zero reported drops or missing frame numbers, motion sensors at 423.54 Hz, and 10.22 MB/s received. Sending finished 0.058 s after Stop; lossless PNGs and other session files occupy 225 MB on the PC. All images parsed and CPU replay produced 1.58 updates/s with no gap over one second. The earlier link-only check measured 33.4 MB/s and chose raw grey. The recording has 17 frames without ARCore records, one final frame without camera settings and 44 new depth maps. These limits remain visible in the checks; the 60 s rest and calibration recordings are still needed. [Measured result](../experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99).
+> **Project status (15 October 2026).** Capture 1.2 (Task99) completed the Redmi recording `20261014_220756_walk`: 1,194 frames over 39.88 s at 29.92 fps, zero reported drops or missing frame numbers, motion sensors at 423.54 Hz, and 10.22 MB/s received. Sending finished 0.058 s after Stop; lossless PNGs and other session files occupy 225 MB on the PC. All images parsed and CPU replay produced 1.58 updates/s with no gap over one second. The earlier link-only check measured 33.4 MB/s and chose raw grey. The recording has 17 frames without ARCore records, one final frame without camera settings and 44 new depth maps. These limits remain visible in the checks; the 60 s rest and calibration recordings are still needed. [Measured result](../research/experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99).
 
 ### Testing the Android app
 
@@ -92,7 +92,7 @@ That report exposed a frame-encoding exception. Android's JSON serializer can re
 
 ## Try it
 
-`experiments/01_camera_capture_delivery/README.md` describes the Android capability export that has run on the Redmi, and what a usable phone recording must contain (images, calibration, clocks, depth, motion data).
+`research/experiments/01_camera_capture_delivery/README.md` describes the Android capability export that has run on the Redmi, and what a usable phone recording must contain (images, calibration, clocks, depth, motion data).
 
 ## Further reading
 

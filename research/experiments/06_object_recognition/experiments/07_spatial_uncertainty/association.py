@@ -14,7 +14,7 @@ from scipy.optimize import linear_sum_assignment  # type: ignore[import-untyped]
 from scipy.spatial import cKDTree
 
 _support = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.spatial_support"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.spatial_support"
 )
 SupportSummary = _support.SupportSummary
 summarise = _support.summarise

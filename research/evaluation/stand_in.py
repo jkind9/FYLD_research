@@ -1,6 +1,6 @@
 """Turn a recorded clip into a phone session v1 folder, as a stand-in until ARCore recordings exist.
 
-    python -m evaluation.stand_in --recording tum:data/tum/rgbd_dataset_freiburg1_xyz --out <session folder>
+    python -m research.evaluation.stand_in --recording tum:data/tum/rgbd_dataset_freiburg1_xyz --out <session folder>
 
 This is a reference control, never a measurement of ARCore: the poses are the recording's ground truth and
 the "raw depth" is its depth sensor, subsampled to ARCore's size. session.json says so (control: reference).
@@ -24,7 +24,7 @@ from scipy.spatial.transform import Rotation
 
 from sitescan.session import wire_v1
 
-sequences = importlib.import_module("experiments.sfm.src.sequences")
+sequences = importlib.import_module("research.experiments.sfm.src.sequences")
 
 DEPTH_UNITS_PER_METRE = 5000.0  # TUM and ICL depth PNGs
 DEPTH_EVERY = 3

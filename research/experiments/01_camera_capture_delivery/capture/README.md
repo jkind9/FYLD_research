@@ -28,12 +28,12 @@ Tests are in `app/src/test/java/org/fyld/capture/`. `SessionV2Test` encodes the 
 Build and test in WSL (Ubuntu with the Android SDK and Gradle 8.14.3), from the repository root:
 
 ```text
-wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh
+wsl -d Ubuntu -- bash research/experiments/01_camera_capture_delivery/build/build-capture.sh
 ```
 
-The script runs `testDebugUnitTest assembleDebug` and stages the APK in [`mobile_deployments/`](../../../mobile_deployments/README.md). See [`build/`](../build/README.md).
+The script runs `testDebugUnitTest assembleDebug` and stages the APK in [`mobile_deployments/`](../../../../mobile_deployments/README.md). See [`build/`](../build/README.md).
 
-On the PC, the capture receiver now lives in `apps/receiver/` and the session readers in [`sitescan/session/`](../../../sitescan/session/README.md).
+On the PC, the capture receiver now lives in `apps/receiver/` and the session readers in [`sitescan/session/`](../../../../sitescan/session/README.md).
 
 ## Where results are recorded
 

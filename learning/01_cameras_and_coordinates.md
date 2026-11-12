@@ -26,7 +26,7 @@ This "back-projection" is how a depth image becomes a point cloud.
 
 Real lenses bend straight lines a little (barrel or pincushion distortion). Calibration measures extra coefficients that undo this before the pinhole formula applies.
 
-> **Project result.** TUM's recordings come with two calibrations: a simple default (`fx = fy = 525`, `cx = 319.5`, `cy = 239.5`, no distortion) and a published "fr1" set with five distortion terms. With the fr1 set, COLMAP matched 490,031 points on the desk recording but could not start a reconstruction; with the default, it placed all 298 frames. The cause is not established (the large sixth-order distortion term is suspected). Lesson: calibration is an input you have to test, not a constant you can copy. See `experiments/sfm/README.md`, "The published fr1 distortion set failed".
+> **Project result.** TUM's recordings come with two calibrations: a simple default (`fx = fy = 525`, `cx = 319.5`, `cy = 239.5`, no distortion) and a published "fr1" set with five distortion terms. With the fr1 set, COLMAP matched 490,031 points on the desk recording but could not start a reconstruction; with the default, it placed all 298 frames. The cause is not established (the large sixth-order distortion term is suspected). Lesson: calibration is an input you have to test, not a constant you can copy. See `research/experiments/sfm/README.md`, "The published fr1 distortion set failed".
 
 ## Calibration
 
@@ -62,7 +62,7 @@ Different datasets and tools disagree about which way the axes point.
 | OpenGL, many renderers | x right, y up, z backward | Right-handed |
 | ICL-NUIM (as published) | y up, with a negative `fy` | Converted on load (below) |
 
-> **Project result.** ICL-NUIM publishes its focal length as `fy = −480`, meaning a y-up camera with a mirrored world. The project flips the y axis of each camera (`F · T · F` with `F = diag(1, −1, 1, 1)`, see `experiments/sfm/src/sequences.py`, `FLIP_Y`). With that conversion, ICL's rendered depth fused along its true path lands 11.1 mm from the publisher's surface model, which shows the conventions are right (`experiments/sfm/README.md`, Task71).
+> **Project result.** ICL-NUIM publishes its focal length as `fy = −480`, meaning a y-up camera with a mirrored world. The project flips the y axis of each camera (`F · T · F` with `F = diag(1, −1, 1, 1)`, see `research/experiments/sfm/src/sequences.py`, `FLIP_Y`). With that conversion, ICL's rendered depth fused along its true path lands 11.1 mm from the publisher's surface model, which shows the conventions are right (`research/experiments/sfm/README.md`, Task71).
 
 Other details that bite:
 
@@ -76,10 +76,10 @@ Other details that bite:
 The geometry check builds a scene from supplied depth and supplied poses, then compares it with the reference. It exercises every formula above:
 
 ```text
-python -m pytest experiments/geometry_validation/tests -q
+python -m pytest research/experiments/geometry_validation/tests -q
 ```
 
-Read `experiments/geometry_validation/README.md` for what it checks, and `experiments/04_surface_reconstruction/README.md`, "From pixel to point", for the same maths in the surface layer.
+Read `research/experiments/geometry_validation/README.md` for what it checks, and `research/experiments/04_surface_reconstruction/README.md`, "From pixel to point", for the same maths in the surface layer.
 
 ## Further reading
 

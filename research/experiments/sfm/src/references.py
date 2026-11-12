@@ -10,7 +10,7 @@ import numpy as np
 
 from .sequences import FLIP_Y
 
-surface_dataset = importlib.import_module("experiments.04_surface_reconstruction.src.dataset")
+surface_dataset = importlib.import_module("research.experiments.04_surface_reconstruction.src.dataset")
 
 
 def icl_model_to_world(conventions: Path) -> np.ndarray:

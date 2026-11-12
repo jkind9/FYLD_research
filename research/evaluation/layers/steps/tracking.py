@@ -9,8 +9,8 @@ from typing import Protocol
 
 from numpy.typing import NDArray
 
-from experiments.shared.contracts import Pose
-from experiments.shared.runs import Run, write_json
+from research.experiments.shared.contracts import Pose
+from research.experiments.shared.runs import Run, write_json
 
 from ..records import StepResult, Unavailable, failed_step
 from .contracts import (
@@ -29,9 +29,9 @@ from .contracts import (
     read_pose,
 )
 
-pose_tracking = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
-pose_backends = importlib.import_module("experiments.03_camera_pose_estimation.src.backend")
-pose_evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
+pose_tracking = importlib.import_module("research.experiments.03_camera_pose_estimation.src.tracking")
+pose_backends = importlib.import_module("research.experiments.03_camera_pose_estimation.src.backend")
+pose_evaluation = importlib.import_module("research.experiments.03_camera_pose_estimation.src.evaluation")
 
 
 class TrackingMethod(MethodChoice, Protocol):

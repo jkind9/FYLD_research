@@ -13,7 +13,7 @@ Notes of 14 October 2026 for Task88, the raw recorder that feeds the open-source
 | Uncalibrated gyroscope | rad/s; "No gyro-drift compensation is performed. Factory calibration and temperature compensation is still applied"; values[3..5] are the drift estimate | Android `SensorEvent` documentation for `TYPE_GYROSCOPE_UNCALIBRATED` |
 | Uncalibrated accelerometer | m/s^2; values[0..2] "without bias compensation"; values[3..5] are the bias estimate | Android `SensorEvent` documentation for `TYPE_ACCELEROMETER_UNCALIBRATED` |
 | Rates above 200 Hz | Apps must declare the `HIGH_SAMPLING_RATE_SENSORS` permission to read sensors faster than 200 Hz | Android `SensorManager` class documentation (AOSP source) |
-| The Redmi's camera clock | Rear and front cameras report the REALTIME timestamp source | Task08 capability report, experiments/01_camera_capture_delivery/README.md |
+| The Redmi's camera clock | Rear and front cameras report the REALTIME timestamp source | Task08 capability report, research/experiments/01_camera_capture_delivery/README.md |
 | ARCore shared camera | Session created with `Session.Feature.SHARED_CAMERA`; the app's own `ImageReader` is added with `setAppSurfaces` "to receive additional images when ARCore is active"; camera opened with ARCore's wrapped callbacks; ARCore resumed in the capture session's `onActive`; the app must not issue its own repeating request while ARCore is active | [ARCore camera sharing guide](https://developers.google.com/ar/develop/java/camera-sharing); [SharedCamera reference](https://developers.google.com/ar/reference/java/com/google/ar/core/SharedCamera) |
 | ARCore default streams | One YUV CPU stream, "currently always 640x480", and one GPU stream, typically 1920x1080; mid-tier phones support either two YUV streams plus a GPU stream, or one YUV stream, a GPU stream and an occasional still | ARCore camera sharing guide |
 | ARCore's camera pose | "OpenGL camera pose with +X pointing right, +Y pointing up, and -Z pointing in the direction the camera is looking"; "the camera pose at the center of exposure of the center row of the image" | [ARCore Camera.getPose()](https://developers.google.com/ar/reference/java/com/google/ar/core/Camera) |
@@ -40,7 +40,7 @@ ARCore's own pose already depends on its internal calibration, so this is a chec
 
 ## What the capture app adds (Task96, 14 October 2026)
 
-Task96 merged Task88's recorder into one capture app that streams to the PC during the walk ([phone_session_v2.md](../../experiments/01_camera_capture_delivery/phone_session_v2.md)). It relies on these Android interfaces beyond the ones above (read 14 October 2026; summaries in our words):
+Task96 merged Task88's recorder into one capture app that streams to the PC during the walk ([phone_session_v2.md](../experiments/01_camera_capture_delivery/phone_session_v2.md)). It relies on these Android interfaces beyond the ones above (read 14 October 2026; summaries in our words):
 
 | Interface | What the app uses it for | Source |
 |---|---|---|

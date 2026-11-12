@@ -46,6 +46,6 @@ Victor Adrian Prisacariu, Olaf Kähler, David W. Murray (University of Oxford) a
 ## Relevance here
 
 - **Not a room method.** The project builds whole rooms; an outline hull of a room means nothing.
-- **For counted objects it suggests a shape without depth.** The project already has masks per object (the SAM family) and ARCore poses. Projecting mask probabilities from many views into a small voxel grid gives a closed outer shape and a rough volume for each object (a *visual hull*), even where learned depth is poor. It misses hollows. Not planned; noted for [object counting](../../experiments/06_object_recognition/README.md).
+- **For counted objects it suggests a shape without depth.** The project already has masks per object (the SAM family) and ARCore poses. Projecting mask probabilities from many views into a small voxel grid gives a closed outer shape and a rough volume for each object (a *visual hull*), even where learned depth is poor. It misses hollows. Not planned; noted for [object counting](../experiments/06_object_recognition/README.md).
 - **Gyroscope for rotation, vision for position:** ARCore already combines the camera and motion sensors, so there is nothing to add to tracking.
 - **Fading early evidence:** the capped running average is a way to let a corrected pose or a moved object outvote old frames. The project's visibility vote weights frames by distance, not by age.

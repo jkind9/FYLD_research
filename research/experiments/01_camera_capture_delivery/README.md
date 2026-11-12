@@ -1,12 +1,12 @@
 # Layer 1: camera capture and delivery
 
-This folder (experiment 01) is capture, step 1 of the six-step pipeline described in the [root README](../../README.md). It answers: **can a phone record what the other layers need, and get it to wherever those layers run?** It supplies raw images/sensors and records ARCore's available tracking/depth outputs for the processing methods.
+This folder (experiment 01) is capture, step 1 of the six-step pipeline described in the [root README](../../../README.md). It answers: **can a phone record what the other layers need, and get it to wherever those layers run?** It supplies raw images/sensors and records ARCore's available tracking/depth outputs for the processing methods.
 
-**Status:** FYLD capture 1.2 completed Redmi session `20261014_220756_walk`: 1,194 frames over 39.88 s, zero reported drops, all images verified, EuRoC files exported and CPU replay at 1.58 updates/s. The checker flags one final image without camera settings; 17 frames have no matching ARCore record. The [completed-session result](#completed-redmi-session-task99) records the metrics and limits. [Current APKs](../../mobile_deployments/README.md) are kept in one folder.
+**Status:** FYLD capture 1.2 completed Redmi session `20261014_220756_walk`: 1,194 frames over 39.88 s, zero reported drops, all images verified, EuRoC files exported and CPU replay at 1.58 updates/s. The checker flags one final image without camera settings; 17 frames have no matching ARCore record. The [completed-session result](#completed-redmi-session-task99) records the metrics and limits. [Current APKs](../../../mobile_deployments/README.md) are kept in one folder.
 
 ## How capture works
 
-**Remaining work, reviewed 15 October.** [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) now owns metadata coverage, Stop flushing, sustained queue checks and the 60 s rest. [Task102](../../task_list/open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) checks poor reconstruction, starting with the owner's sideways-photo observation and native-versus-upright depth control. [Task75](../../task_list/open/75_measure_arcore_camera_path_accuracy_on_the_redmi.md) owns physical accuracy trials; [Task103](../../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) owns actual handset calibration. See the [board](../../task_list/README.md) for order and dependencies. Historical instructions below are not directions to install retired apps.
+**Remaining work, reviewed 15 October.** [Task52](../../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) now owns metadata coverage, Stop flushing, sustained queue checks and the 60 s rest. [Task102](../../../task_list/open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) checks poor reconstruction, starting with the owner's sideways-photo observation and native-versus-upright depth control. [Task75](../../../task_list/open/75_measure_arcore_camera_path_accuracy_on_the_redmi.md) owns physical accuracy trials; [Task103](../../../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) owns actual handset calibration. See the [board](../../../task_list/README.md) for order and dependencies. Historical instructions below are not directions to install retired apps.
 
 A useful capture is more than a video file. Each frame needs:
 
@@ -22,11 +22,11 @@ Phones change images in ways that matter for measurement. Autofocus changes the 
 
 **Using two lenses at once.** Android groups physical lenses behind a "logical" camera. Whether an app may stream two rear lenses at the same moment is decided by the manufacturer for each phone. Android's [multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) reports it. Having three rear lenses does not mean stereo is available, so this must be checked on both phones before stereo depth is planned around them.
 
-**ARCore.** Google's augmented-reality toolkit can track the phone and provide depth on supported devices. Its [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback) records camera video and motion-sensor data in an MP4. It does not guarantee that every API output, such as depth maps or camera poses, is stored automatically. The default CPU image used for tracking is 640×480; the high-resolution GPU display texture is not recorded. A recorder must explicitly save any additional fields needed for later replay and check that they survive playback. Google's current [supported-device table](https://developers.google.com/ar/devices) lists Redmi Note 11 Pro with Depth API support. Xiaomi's [official device guide](https://alsgp0.fds.api.xiaomi.com/xiaomi-b2c-i18n-upload/user-guides/1c100fb724c5e54a94ff40e423c5d7ef.pdf) identifies the supplied Redmi code `2201116TG` as Redmi Note 11 Pro. This makes ARCore a supported-device candidate, not a runtime or measurement result. The Samsung handset is not confirmed available, and the received Redmi APK did not include ARCore. See the [24-row API inventory](../../research/phone_ar_platforms/arcore/README.md). No project phone has produced an ARCore measurement.
+**ARCore.** Google's augmented-reality toolkit can track the phone and provide depth on supported devices. Its [Recording and Playback API](https://developers.google.com/ar/develop/recording-and-playback) records camera video and motion-sensor data in an MP4. It does not guarantee that every API output, such as depth maps or camera poses, is stored automatically. The default CPU image used for tracking is 640×480; the high-resolution GPU display texture is not recorded. A recorder must explicitly save any additional fields needed for later replay and check that they survive playback. Google's current [supported-device table](https://developers.google.com/ar/devices) lists Redmi Note 11 Pro with Depth API support. Xiaomi's [official device guide](https://alsgp0.fds.api.xiaomi.com/xiaomi-b2c-i18n-upload/user-guides/1c100fb724c5e54a94ff40e423c5d7ef.pdf) identifies the supplied Redmi code `2201116TG` as Redmi Note 11 Pro. This makes ARCore a supported-device candidate, not a runtime or measurement result. The Samsung handset is not confirmed available, and the received Redmi APK did not include ARCore. See the [24-row API inventory](../../phone_ar_platforms/arcore/README.md). No project phone has produced an ARCore measurement.
 
 **Delivery.** The safest pattern is save first, upload later: record to the phone, check the file, then upload over Wi-Fi with file hashes so losses are detected. Live streaming is a separate, harder condition. It adds dropped frames and delay, and needs capture time kept apart from arrival time.
 
-**Capture technique.** Walk slowly, overlap views, film the same spot from different positions, and return to the start at the end. Revisits let the tracker correct drift. [Construction capture guidance](../../research/construction_site_context/construction_capture_guidance.md) covers this for real sites.
+**Capture technique.** Walk slowly, overlap views, film the same spot from different positions, and return to the start at the end. Revisits let the tracker correct drift. [Construction capture guidance](../../construction_site_context/construction_capture_guidance.md) covers this for real sites.
 
 ## Methods: hosted and on the phone
 
@@ -49,8 +49,8 @@ In the **hosted** route the phone only records and uploads; everything else runs
 | [ARCore Recording and Playback](https://developers.google.com/ar/develop/recording-and-playback) | Google's API for saving and replaying an ARCore session | One file holds images, IMU, camera position and depth from the phone. |
 | [Android multi-camera API](https://developer.android.com/media/camera/camera2/multi-camera) | Official documentation for using several lenses | Decides whether phone stereo is possible on each handset. |
 | [ARCore supported devices](https://developers.google.com/ar/devices) | Google's list of phones and their ARCore features | Both test phones are listed with depth support. |
-| [MobiDepth](../../research/depth_estimation/mobidepth.md) | Research on stereo depth from two phone cameras | Explains lens differences and timing problems on real phones. |
-| [Construction capture guidance](../../research/construction_site_context/construction_capture_guidance.md) | Evidence about taking useful site photos | How to film a site so later layers can reconstruct it. |
+| [MobiDepth](../../depth_estimation/mobidepth.md) | Research on stereo depth from two phone cameras | Explains lens differences and timing problems on real phones. |
+| [Construction capture guidance](../../construction_site_context/construction_capture_guidance.md) | Evidence about taking useful site photos | How to film a site so later layers can reconstruct it. |
 
 ## What can be improved
 
@@ -65,7 +65,7 @@ The sections below are the detailed experiment record: the test plan, the Androi
 
 ## Experiment record
 
-[Task 08](../../task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
+[Task 08](../../../task_list/archive/08_check_phone_capture_feasibility_alongside_reconstr.md) is the early phone-feasibility check. Run it alongside supplied-input reconstruction; camera limitations do not block the dataset control. Record support before committing to handset stereo, with alternative depth inputs explicitly identified.
 
 ## The piece we are testing
 
@@ -77,7 +77,7 @@ The confirmed phone is a Redmi Note 11 Pro 4G, model 2201116TG, running Android 
 
 The Redmi capability report is available in the local session below. A verified original image capture is still missing from the received evidence. The Samsung S23 is a separate possible test device, but its availability is unconfirmed. A public driving dataset cannot establish which camera combinations, timing or calibration the Redmi exposes.
 
-Delivery can be developed independently by replaying the acquired Middlebury quarter-resolution image pairs under `data/middlebury/dataset/MiddEval3/trainingQ/`. Compare delivered files and frame identifiers with the originals, including their file hashes, ordering and loss records. These files test delivery; their lack of capture timestamps does not test live camera synchronization. The replay bundle and interruption tests still need to be implemented. [Acquisition records](../../data/README.md).
+Delivery can be developed independently by replaying the acquired Middlebury quarter-resolution image pairs under `data/middlebury/dataset/MiddEval3/trainingQ/`. Compare delivered files and frame identifiers with the originals, including their file hashes, ordering and loss records. These files test delivery; their lack of capture timestamps does not test live camera synchronization. The replay bundle and interruption tests still need to be implemented. [Acquisition records](../../../data/README.md).
 
 ## Input and output agreement
 
@@ -157,7 +157,7 @@ Decide which device and capture route supplies reproducible inputs. Agree numeri
 
 ## Research and reuse
 
-[MobiDepth](../../research/depth_estimation/mobidepth.md) and [HiMoDepth](../../research/depth_estimation/himodepth.md) explain lens and timing differences. They do not establish support on these phones. [Construction capture guidance](../../research/construction_site_context/construction_capture_guidance.md) motivates overlapping views from approved safe positions.
+[MobiDepth](../../depth_estimation/mobidepth.md) and [HiMoDepth](../../depth_estimation/himodepth.md) explain lens and timing differences. They do not establish support on these phones. [Construction capture guidance](../../construction_site_context/construction_capture_guidance.md) motivates overlapping views from approved safe positions.
 
 ## Camera and streaming leads supplied during planning
 
@@ -177,9 +177,9 @@ Promote the observation format and reader when another experiment consumes them 
 
 ## Android package build and offline handoff
 
-Current installable APKs are listed in [mobile_deployments/README.md](../../mobile_deployments/README.md). Task98 consolidated the handoffs there, retaining FYLD capture and the latest Camera2 diagnostic. Older smoke, phonecheck and raw-recorder APKs were removed. Historical build results below describe those earlier binaries.
+Current installable APKs are listed in [mobile_deployments/README.md](../../../mobile_deployments/README.md). Task98 consolidated the handoffs there, retaining FYLD capture and the latest Camera2 diagnostic. Older smoke, phonecheck and raw-recorder APKs were removed. Historical build results below describe those earlier binaries.
 
-[Task24](../../task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md) owns the first-party p4a build and export helpers in `build/`, the package-only app in `app/main.py`, the native compile control in `native/smoke.c`, and build checks in `tests/`. Its cached WSL packaging route passed; clean dependency and container builds remain follow-ups. The app only prints `42`. It requests no camera permission and does not inspect camera or depth APIs. Task08 owns the separate capability and capture app.
+[Task24](../../../task_list/closed/24_recover_and_reproduce_android_apk_build_inside_cap.md) owns the first-party p4a build and export helpers in `build/`, the package-only app in `app/main.py`, the native compile control in `native/smoke.c`, and build checks in `tests/`. Its cached WSL packaging route passed; clean dependency and container builds remain follow-ups. The app only prints `42`. It requests no camera permission and does not inspect camera or depth APIs. Task08 owns the separate capability and capture app.
 
 The reproduced route reused Android libraries already built on this workstation (a warm build). It uses Ubuntu 24.04.4, host Python 3.12.3, Java 17.0.20.1, python-for-android (p4a) `2026.05.09`, Android SDK API 36, build tools 35.0.0, NDK `28.2.13676358` and Gradle 8.14.3. The APK verifies as package `org.fyld.toolchainsmoke`, version `0.1` (10241), minimum Android API 24, target API 36, and 64-bit ARM (`arm64`) only. The final run took 27.34 seconds. Its SHA-256 is `2a1f1f821408d637cbb8416e465b273245c5813013a73684f7f70dab45fc26e5`; the packaged source matches `app/main.py` SHA-256 `58a44735ffdfa6b14977516ad6e6e642d477999cd361537028f2d6b99e07ad68`; the debug certificate SHA-256 is `45e634374292b269842a381e50dc1bb08d6b30db388ed4572a880d9b1670e1c3`. Signature, package metadata, arm64 native libraries and the 68-entry compressed Python bundle passed verification.
 
@@ -188,7 +188,7 @@ This workstation's inputs are `/home/jkind/.venvs/p4a-2026.05.09` (p4a environme
 To repeat that build with the current handoff destination:
 
 ```sh
-wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-apk.sh \
+wsl -d Ubuntu -- bash research/experiments/01_camera_capture_delivery/build/build-apk.sh \
   --p4a-env /home/jkind/.venvs/p4a-2026.05.09 \
   --sdk /home/jkind/Android/Sdk \
   --predecessor-root /home/jkind/android-prep \
@@ -253,16 +253,16 @@ Every check ends as PASS, FAIL with a reason, or SKIPPED with a reason; `host/re
 **Build** (WSL, the SDK and Gradle from the build route above; the first build downloads ARCore 1.56.0 from Google's Maven repository):
 
 ```text
-wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh
+wsl -d Ubuntu -- bash research/experiments/01_camera_capture_delivery/build/build-capture.sh
 ```
 
 The check app was merged into FYLD capture. Its build and installation handoff now use `mobile_deployments/capture_v<version>_<YYYYMMDDTHHMMSSZ>_<hash8>/`; see the deployment index for the current APK. The v1 commands below describe the retired app and older recordings.
 
 **Install:** copy the current capture APK to the phone and open it, allowing installs from the transfer app. The owner installs from email because MIUI blocks adb installs.
 
-**Run:** on the computer, `python experiments/01_camera_capture_delivery/host/receiver.py --out experiments/01_camera_capture_delivery/runs/phonecheck` prints the address to type into the app (phone and computer on the same Wi-Fi; allow Python through the Windows firewall on private networks). Press 1 to 4 in order. Each stream and report becomes a session folder with the frames, `frames.jsonl`, `report.json` and `summary.json`. Check a report with `python experiments/01_camera_capture_delivery/host/report.py <report.json>`.
+**Run:** on the computer, `python research/experiments/01_camera_capture_delivery/host/receiver.py --out research/experiments/01_camera_capture_delivery/runs/phonecheck` prints the address to type into the app (phone and computer on the same Wi-Fi; allow Python through the Windows firewall on private networks). Press 1 to 4 in order. Each stream and report becomes a session folder with the frames, `frames.jsonl`, `report.json` and `summary.json`. Check a report with `python research/experiments/01_camera_capture_delivery/host/report.py <report.json>`.
 
-**Tests** (host side, no phone needed): `python -m pytest experiments/01_camera_capture_delivery/tests/test_phonecheck_host.py` covers message framing, a loopback stream with acknowledgements, saved files and the report rules.
+**Tests** (host side, no phone needed): `python -m pytest research/experiments/01_camera_capture_delivery/tests/test_phonecheck_host.py` covers message framing, a loopback stream with acknowledgements, saved files and the report rules.
 
 ### First device run, 14 October 2026
 
@@ -325,7 +325,7 @@ Task96 continues Task95, which was closed as a hand-over on 14 October without b
 **PC receiver.**
 
 ```text
-python -B -m apps.receiver.capture_receiver --out experiments/01_camera_capture_delivery/runs/capture --port 8766
+python -B -m apps.receiver.capture_receiver --out research/experiments/01_camera_capture_delivery/runs/capture --port 8766
 ```
 
 It prints this PC's address (192.168.68.123 on the owner's network) to type into the app, and writes one folder per session: `session.json`, `frames.jsonl`, `cam0/<seq>.png` (lossless grey), `frames/<seq>.jpg`, `depth/<seq>.bin`, `imu.csv`, `telemetry.jsonl`, and at the end `summary.json` (frames, missing frame numbers, IMU rates and gaps, a clock-base check, MB/s achieved, connections, and how long sending ran after Stop). It checks every message and refuses a bad one with an error message. `Receiver(..., on_frame=...)` calls back for each new frame, which is how `python -m apps.cli live --port 8766 --out <run>` processes a walk while it arrives. Use the repository's `.venv`. **Local network only:** the protocol has no authentication or encryption; sending over the internet needs a tunnel with authentication, which is out of scope.
@@ -336,7 +336,7 @@ It prints this PC's address (192.168.68.123 on the owner's network) to type into
 |---|---|---|
 | Phone (JVM, run by the build script) | `SessionV2Test.java` (9), `SendingTest.java` (11) | the encoders reproduce the shared fixture `capture/app/src/test/resources/session_v2/` (frame header and payload byte for byte, IMU batch, telemetry, end, hello and settings); points project like the host; deflate inflates back exactly; the deflate rule; the queue numbers, deletes only acknowledged files and continues numbering after a restart; image, capture result and ARCore record are matched out of order and released in order, with the 500 ms limit and drops when full; a fake PC that drops the connection without acknowledging two messages, then says where it is: the sender resumes with every message once and in order and deletes the delivered session; a PC that answers hello and then stops reading: the sender abandons the blocked connection after the no-progress limit and delivers on the next (with the limit removed this test fails); a refused session is kept and skipped |
 | PC | `tests/test_session_v2.py` (22), `tests/test_capture_receiver.py` (23) | the fixture parses to its written values; deflated grey reads back; 13 kinds of bad frame, 3 bad IMU batches and bad telemetry, end and hello are refused; a fake phone (`tests/fake_phone.py`) streams 40 frames with a window of 8, is cut off after message 25 and resumes: 40 frames, none missing or repeated, 2 connections; resends are acknowledged and not stored twice; a gap and a bad frame are refused; the speed check and report connections; the summary's IMU rates, clock base, MB/s and sending time after Stop |
-| Readers | `tests/test_sitescan_session.py`, `experiments/open_vio/tests` | a synthetic v2 folder written through the receiver's store is read by `session_v2.read_session`, replayed by `sitescan/pipelines`, and converted by `recording.py --euroc` |
+| Readers | `tests/test_sitescan_session.py`, `research/experiments/open_vio/tests` | a synthetic v2 folder written through the receiver's store is read by `session_v2.read_session`, replayed by `sitescan/pipelines`, and converted by `recording.py --euroc` |
 
 **Initial capture 1.0 build, 14 October:** the WSL build passed 20 JVM tests and produced a 914 KB APK, SHA-256 `d260cda55fa5cfe80f5f92b87bee55c1a1afb09b5c77f917c481961413c18f5d`. Version 1.2 supersedes it. The build script now publishes only into `mobile_deployments/capture_v<version>_<YYYYMMDDTHHMMSSZ>_<hash8>/`, with `.apk` and `.apk.bin` for email installation.
 
@@ -356,7 +356,7 @@ The seven Task97 JVM tests cover saving the thread and cause chain before delega
 
 Capture 1.1 was the diagnostic build, SHA-256 `bb4def77d56b59824f90a3fcc87b450d9e29fa43951e82878c8b7ae96cb014db`. Its saved exception arrived in `reports/20261014T215846_901_2201116TG.json` after reopening: `SessionMessages.encode` tried to call `getBytes` on a null JSON string in the frame-writer thread. The report does not identify the offending numeric field. Task99 tests invalid point projections and overflow, filters them before JSON encoding, and turns serialization failures into queue write errors. Capture 1.2 supersedes that handoff; install links are in the deployment index. Another reproduction of the old crash is not needed.
 
-Android Studio/AVD is proposed for Android runtime, permission, lifecycle and network tests, starting with Android 13/API 33. It has not been installed. Shared camera and raw depth on an AVD are not yet verified; sensor timing, sustained capture, Wi-Fi, heat and tracking still need the Redmi. Sources and limits: [Android testing and crash reports](../../research/phone_ar_platforms/android_testing_and_crash_reports.md).
+Android Studio/AVD is proposed for Android runtime, permission, lifecycle and network tests, starting with Android 13/API 33. It has not been installed. Shared camera and raw depth on an AVD are not yet verified; sensor timing, sustained capture, Wi-Fi, heat and tracking still need the Redmi. Sources and limits: [Android testing and crash reports](../../phone_ar_platforms/android_testing_and_crash_reports.md).
 
 ## Completed Redmi session (Task99)
 
@@ -381,17 +381,17 @@ The first recorded anchor id is 1, although the phone created 40 anchors. Initia
 
 Local outputs are `outputs/capture/capture_task99_220756/{validation.json,euroc/,live_verified/}`.
 
-Task100's [interactive 3D scene](../../outputs/capture/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) displays the saved surface as 78,328 Gaussian splats with height colours and eight source-photo bookmarks. It is a private, offline 1.58 MB HTML file; no household images are published. Its controls and Gaussian PLY download were tested offline in Chromium. This is a surface visualization, not photographic Gaussian training. [Exporter and settings](https://github.com/jkind9/FYLD_research/blob/9bf3b51/src/live/README.md#redmi-capture-12-result-task99).
+Task100's [interactive 3D scene](../../../outputs/capture/capture_task99_220756/viewer/redmi-walk-gaussian-splats.html) displays the saved surface as 78,328 Gaussian splats with height colours and eight source-photo bookmarks. It is a private, offline 1.58 MB HTML file; no household images are published. Its controls and Gaussian PLY download were tested offline in Chromium. This is a surface visualization, not photographic Gaussian training. [Exporter and settings](https://github.com/jkind9/FYLD_research/blob/9bf3b51/src/live/README.md#redmi-capture-12-result-task99).
 
 Reproduce the capture checks with:
 
 ```text
-.venv\Scripts\python -B experiments/open_vio/host/clock_check.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk
-.venv\Scripts\python -B experiments/open_vio/host/recording.py experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --euroc <new output folder>
-.venv\Scripts\python -B -m apps.cli replay --session experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --out <new output folder> --threads 16
+.venv\Scripts\python -B research/experiments/open_vio/host/clock_check.py research/experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk
+.venv\Scripts\python -B research/experiments/open_vio/host/recording.py research/experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --euroc <new output folder>
+.venv\Scripts\python -B -m apps.cli replay --session research/experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk --out <new output folder> --threads 16
 ```
 
-Capture 1.2's APK and identical email copy are in the [deployment index](../../mobile_deployments/README.md), with version and full UTC timestamp in their names. All 30 JVM tests pass. The combined capture, open_vio, live, shared-phone and hygiene suite passes 317 tests with 1 skipped. The 60 s rest, later calibration recordings, full frame/ARCore metadata coverage and independent accuracy remain open.
+Capture 1.2's APK and identical email copy are in the [deployment index](../../../mobile_deployments/README.md), with version and full UTC timestamp in their names. All 30 JVM tests pass. The combined capture, open_vio, live, shared-phone and hygiene suite passes 317 tests with 1 skipped. The 60 s rest, later calibration recordings, full frame/ARCore metadata coverage and independent accuracy remain open.
 
 ### Depth and orientation probe, 7 November 2026 (Task106)
 
@@ -413,10 +413,10 @@ Replayed with the unchanged Task99 settings, the live pipeline gave 47 updates a
 
 ## Historical delivery ownership, 6 October 2026
 
-[Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../task_list/stale/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../task_list/archive/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.
+[Task52](../../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns a usable phone recording with images, calibration, timestamps and explicit available/missing depth and motion data. [Task57](../../../task_list/stale/57_deploy_and_measure_the_useful_edge_workload.md) owns later device feasibility and the sustained useful workload. Task08 capability evidence and Task24 smoke packaging remain bounded groundwork, not completed deployment. [Task51](../../../task_list/archive/51_agree_success_criteria_and_the_first_deployment_ta.md) confirms the first software integration run uses prerecorded files on MasterPC; it does not authorize a phone capture or set field acceptance limits. The Redmi remains the chosen phone for later capture and live checks.
 
 Xiaomi's official guide identifies model `2201116TG` as Redmi Note 11 Pro, and Google's current ARCore supported-device list marks Redmi Note 11 Pro as supporting the Depth API. Together these sources make ARCore depth worth testing on the reported phone, but they do not prove that ARCore installs, starts or returns usable depth on its current software. The existing Camera2 APK does not include ARCore. A read-only WSL check found no cached `com.google.ar` dependency, attached ADB device, emulator or AVD; USB passthrough also showed no Android phone. The absence of a Camera2 `DEPTH16` stream does not test ARCore's motion-based depth path.
 
 ## Walkthrough input boundary
 
-The current phone-export path uses `experiments.shared.phone_session.read_phone_session` with `app.capture_report.validate_phone_session_export`. It validates recorded images, hashes, calibration and clocks while preserving absent depth and pose. Phone capture/readiness remains Task52 work. The first integration pipeline adds a prerecorded-data input boundary; it does not run a camera or upload service. Each run also exports method-labelled stage views in an offline index for inspection. See [the six-step runner](../../evaluation/layers/README.md) for saved-input lifetimes and failure behavior.
+The current phone-export path uses `research.experiments.shared.phone_session.read_phone_session` with `app.capture_report.validate_phone_session_export`. It validates recorded images, hashes, calibration and clocks while preserving absent depth and pose. Phone capture/readiness remains Task52 work. The first integration pipeline adds a prerecorded-data input boundary; it does not run a camera or upload service. Each run also exports method-labelled stage views in an offline index for inspection. See [the six-step runner](../../evaluation/layers/README.md) for saved-input lifetimes and failure behavior.

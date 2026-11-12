@@ -2,7 +2,7 @@
 
 Usage (detector environment, GPU only when no other process is using it):
     .venv/Scripts/python.exe -B -m \
-        experiments.06_object_recognition.experiments.01_detection.placement_run \
+        research.experiments.06_object_recognition.experiments.01_detection.placement_run \
         --data-root <checkout>/data --checkpoint <checkout>/models/yolo26x.pt
 
 `--limit N` scores only the first N images (by image id) for a smoke check.
@@ -15,8 +15,8 @@ import json
 import time
 from pathlib import Path
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, write_json
 
 from . import coco
 from .coco_scoring import PLACEMENT_AT, THRESHOLDS, score_image, summarise
@@ -83,7 +83,7 @@ HYPERPARAMETERS = {
 
 
 def _detector(checkpoint: Path, device: str):
-    module = importlib.import_module("experiments.06_object_recognition.pilot.detector")
+    module = importlib.import_module("research.experiments.06_object_recognition.pilot.detector")
     return module.YoloDetector(checkpoint, device)
 
 
@@ -174,7 +174,7 @@ def run(
 
 
 def main(argv: list[str] | None = None) -> None:
-    repo = Path(__file__).resolve().parents[4]
+    repo = Path(__file__).resolve().parents[5]
     parser = argparse.ArgumentParser(description="Task45 Part A COCO placement")
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)

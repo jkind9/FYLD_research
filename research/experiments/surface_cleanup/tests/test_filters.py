@@ -3,13 +3,13 @@
 import numpy as np
 import pytest
 
-from experiments.surface_cleanup.filters import keep_after, piece_majority
-from experiments.surface_cleanup.masks import (
+from research.experiments.surface_cleanup.filters import keep_after, piece_majority
+from research.experiments.surface_cleanup.masks import (
     edge_mask,
     near_first_passes,
     view_angle_mask,
 )
-from experiments.surface_cleanup.support import (
+from research.experiments.surface_cleanup.support import (
     spot_evidence,
     views_measuring,
     wide_support,

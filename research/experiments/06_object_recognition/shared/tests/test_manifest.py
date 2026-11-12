@@ -9,9 +9,9 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from experiments.shared.contracts import Calibration
+from research.experiments.shared.contracts import Calibration
 
-contracts = importlib.import_module("experiments.06_object_recognition.shared.manifest")
+contracts = importlib.import_module("research.experiments.06_object_recognition.shared.manifest")
 
 
 def source(repo, name, array):

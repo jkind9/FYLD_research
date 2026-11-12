@@ -2,7 +2,7 @@
 
 Usage (detector environment, GPU only when no other process is using it):
     .venv/Scripts/python.exe -B -m \
-        experiments.06_object_recognition.experiments.01_detection.jitter_run \
+        research.experiments.06_object_recognition.experiments.01_detection.jitter_run \
         --data-root <checkout>/data --checkpoint <checkout>/models/yolo26x.pt
 
 The detector sees only colour images. Depth and motion capture are read after
@@ -20,8 +20,8 @@ import cv2
 import numpy as np
 from scipy.spatial.transform import Rotation  # type: ignore[import-untyped]
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, write_json
 
 from .floor import ORB_SETTINGS, features, floor, pair_residuals
 from .jitter import (
@@ -112,7 +112,7 @@ HYPERPARAMETERS = {
 
 
 def _owner(name: str):
-    return importlib.import_module(f"experiments.03_camera_pose_estimation.src.{name}")
+    return importlib.import_module(f"research.experiments.03_camera_pose_estimation.src.{name}")
 
 
 def _poses(root: Path) -> tuple[np.ndarray, list]:
@@ -389,7 +389,7 @@ def run(
 
 
 def main(argv: list[str] | None = None) -> None:
-    repo = Path(__file__).resolve().parents[4]
+    repo = Path(__file__).resolve().parents[5]
     parser = argparse.ArgumentParser(description="Task45 Part B desk jitter")
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)

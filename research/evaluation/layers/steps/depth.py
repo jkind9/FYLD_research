@@ -10,8 +10,8 @@ from typing import Any, Protocol
 import numpy as np
 from PIL import Image
 
-from experiments.shared.geometry import check_depth_grid, depth_metres
-from experiments.shared.runs import Run, write_json
+from research.experiments.shared.geometry import check_depth_grid, depth_metres
+from research.experiments.shared.runs import Run, write_json
 from sitescan.depth.model import infer, load_model
 
 from ..records import StepResult, Unavailable, failed_step
@@ -29,11 +29,11 @@ from .contracts import (
     nearest_references,
 )
 
-pose_dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
+pose_dataset = importlib.import_module("research.experiments.03_camera_pose_estimation.src.dataset")
 # Experiment 02 owns the ZipDepth adapter and the tested sparse-point scale fit.
-zipdepth_owner = importlib.import_module("experiments.02_stereo_depth.zipdepth")
-depth_geometry = importlib.import_module("experiments.02_stereo_depth.geometry")
-sparse_points = importlib.import_module("experiments.02_stereo_depth.sparse_scale")
+zipdepth_owner = importlib.import_module("research.experiments.02_stereo_depth.zipdepth")
+depth_geometry = importlib.import_module("research.experiments.02_stereo_depth.geometry")
+sparse_points = importlib.import_module("research.experiments.02_stereo_depth.sparse_scale")
 ZIPDEPTH_CONVENTION = "relative_inverse_depth"
 
 
@@ -85,7 +85,7 @@ class DepthAnythingV2Metric:
     """Load an already-acquired indoor Small checkpoint without network access.
 
     Its output is in metres but biased: on TUM indoor frames it reads 1.34-1.41x too far,
-    and the factor varies 0.86-2.09 between frames (experiments/02_stereo_depth/README.md).
+    and the factor varies 0.86-2.09 between frames (research/experiments/02_stereo_depth/README.md).
     Downstream measurements need a per-frame scale source; this adapter applies none.
     """
 
@@ -160,7 +160,7 @@ class ScaledZipDepth:
                 ) from error
             raise Unavailable(
                 f"ZipDepth needs the Python package {error.name!r}; "
-                "install experiments/02_stereo_depth/requirements-task54-host.txt"
+                "install research/experiments/02_stereo_depth/requirements-task54-host.txt"
             ) from error
         read_recorded = RecordedSensorDepth(self.reference_root).load()
         return partial(

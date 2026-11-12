@@ -35,14 +35,14 @@ The five conditions are geometry with the last accepted position, geometry with 
 The exact Task20 source run, descriptor cache and settings are pinned in the Task21 task file. To rerun the CPU replay, use the repository Python environment:
 
 ```powershell
-.venv/Scripts/python.exe -m experiments.06_object_recognition.experiments.04_geometry_identity.run
+.venv/Scripts/python.exe -m research.experiments.06_object_recognition.experiments.04_geometry_identity.run
 ```
 
 Each replay invocation publishes a new immutable run. To check the accepted run without running inference or publishing another run, set `TASK21_VERIFIED_RUN` to its directory and run:
 
 ```powershell
-$env:TASK21_VERIFIED_RUN = 'experiments/06_object_recognition/experiments/04_geometry_identity/runs/20261004T143434.634726Z_33f59456f7d34e50a64020ed6e0613bb'
-.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider experiments/06_object_recognition/experiments/04_geometry_identity/tests
+$env:TASK21_VERIFIED_RUN = 'research/experiments/06_object_recognition/experiments/04_geometry_identity/runs/20261004T143434.634726Z_33f59456f7d34e50a64020ed6e0613bb'
+.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider research/experiments/06_object_recognition/experiments/04_geometry_identity/tests
 Remove-Item Env:\TASK21_VERIFIED_RUN
 ```
 
@@ -54,8 +54,8 @@ This is a small, previously inspected, provisional reference set. It supports wi
 
 ## Scoped follow-ups
 
-[Task31](../../../../task_list/stale/31_compare_provisional_object_ids_and_duplicate_relationships.md) owns provisional births and explicit duplicate/alias policy; [Task32](../../../../task_list/closed/32_investigate_spatial_support_and_position_uncertainty.md) owns spatial supports/calibration; [Task35](../../../../task_list/stale/35_measure_error_propagation_and_sequential_fusion.md) owns sequential error/fusion. Every detection should retain a unique observation ID, and missing depth means unknown position. Confirmed inventory remains distinct from provisional/rejected candidates. Task32's descriptive support summary remains in this package; its isolated support-aware association handoff is under `../07_spatial_uncertainty/association.py`. These new questions do not close Task21, which remains pending review.
+[Task31](../../../../../task_list/stale/31_compare_provisional_object_ids_and_duplicate_relationships.md) owns provisional births and explicit duplicate/alias policy; [Task32](../../../../../task_list/closed/32_investigate_spatial_support_and_position_uncertainty.md) owns spatial supports/calibration; [Task35](../../../../../task_list/stale/35_measure_error_propagation_and_sequential_fusion.md) owns sequential error/fusion. Every detection should retain a unique observation ID, and missing depth means unknown position. Confirmed inventory remains distinct from provisional/rejected candidates. Task32's descriptive support summary remains in this package; its isolated support-aware association handoff is under `../07_spatial_uncertainty/association.py`. These new questions do not close Task21, which remains pending review.
 
 ## Public identity scoring boundary
 
-The scorer is now `importlib.import_module("experiments.06_object_recognition.experiments.04_geometry_identity.validation").score_identity`. Its body and interpretation are unchanged; `run._score` remains the same compatibility import. The evaluation report calls the public validation owner. Experiment commands, settings, old runs and source snapshots stay intact. [Root sequencing and independent reference boundary](../../../../evaluation/layers/README.md).
+The scorer is now `importlib.import_module("research.experiments.06_object_recognition.experiments.04_geometry_identity.validation").score_identity`. Its body and interpretation are unchanged; `run._score` remains the same compatibility import. The evaluation report calls the public validation owner. Experiment commands, settings, old runs and source snapshots stay intact. [Root sequencing and independent reference boundary](../../../../evaluation/layers/README.md).

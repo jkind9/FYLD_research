@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from experiments.shared.visualization import write_viewer
+from research.experiments.shared.visualization import write_viewer
 
 
 @pytest.mark.parametrize("count", [0, 2])

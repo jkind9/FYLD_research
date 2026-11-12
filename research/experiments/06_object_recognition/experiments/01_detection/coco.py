@@ -16,7 +16,7 @@ from uuid import uuid4
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.datasets.acquisition import safe_name, sha256
+from research.experiments.datasets.acquisition import safe_name, sha256
 
 from .placement import decode_rle, polygon_mask
 

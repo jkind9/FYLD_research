@@ -41,13 +41,13 @@ uv sync --all-extras
 Explicitly acquire the [official YOLO26x checkpoint](https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26x.pt) at ignored `models/yolo26x.pt`. Our 118667365-byte checkpoint has SHA-256 `9fdd44a31c504547ffb81d2c6d9e6dac3493c8eaa8b0398d3f43bae6c7003e92`. Acquisition metadata is alongside it. Ultralytics and the checkpoint use AGPL-3.0; deployment licence suitability remains unresolved. The runner requires these exact bytes and the basename `yolo26x.pt` before importing the model loader. Other filenames can trigger model substitution in Ultralytics. Alternate models need a separate recorded protocol.
 
 ```powershell
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.pilot.run detect --device 0
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.pilot.run detect --device 0
 ```
 
 Inspect the printed run's `debug/detections.png`. Then map that verified run:
 
 ```powershell
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.pilot.run map --detection-run <detection-run-directory> --reviewed
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.pilot.run map --detection-run <detection-run-directory> --reviewed
 ```
 
 Open the second run's `review.html`. Scene data, Plotly and the annotated image are embedded for offline viewing. `review.png` is a static preview. Each run retains input hashes, configuration, installed environment, source snapshot, stage timing and a verified manifest. Failed or incomplete runs cannot be consumed. Copied parent artifacts must match their pinned detection manifest.
@@ -59,7 +59,7 @@ Analytic and fake-detector controls cover rotated/translated cameras, fractional
 All 41 controls passed on 3 October 2026. Implementation coverage was 91%; formatting, lint and type checks passed. Code review found a half-pixel selection mismatch, an empty-cloud plotting failure, missing verification of copied detector artifacts and alternate checkpoint loading. Each was fixed and has a regression control. The actual saved HTML also rendered offline in Edge without errors or network requests. Final diff review passed after the checkpoint fixes.
 
 ```powershell
-python -B -m pytest experiments/06_object_recognition/pilot/tests -p no:cacheprovider --basetemp=outputs/task27_checks_unique
+python -B -m pytest research/experiments/06_object_recognition/pilot/tests -p no:cacheprovider --basetemp=outputs/task27_checks_unique
 ```
 
 Use a fresh temporary path each time. On this machine, Windows sandbox permissions prevent pytest from accessing its restricted temporary folders. Successful tests ran outside that sandbox with output confined to this project.
@@ -85,4 +85,4 @@ A fresh RGB-only review on3October2026 found the cup partly visible at1305031460
 
 ## Importable Task46 counting
 
-Use `importlib.import_module("experiments.06_object_recognition.pilot.association").associate_frame` for the unchanged counting method. `replay.associate_frame` remains the same compatibility import, including its numerical behavior. The replay remains a standalone supplied-depth/supplied-pose control, with unchanged settings and commands. New complete sequencing belongs to [the root runner](../../../evaluation/layers/README.md), whose counts are isolated by estimated origin.
+Use `importlib.import_module("research.experiments.06_object_recognition.pilot.association").associate_frame` for the unchanged counting method. `replay.associate_frame` remains the same compatibility import, including its numerical behavior. The replay remains a standalone supplied-depth/supplied-pose control, with unchanged settings and commands. New complete sequencing belongs to [the root runner](../../../evaluation/layers/README.md), whose counts are isolated by estimated origin.

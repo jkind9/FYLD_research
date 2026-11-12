@@ -10,9 +10,9 @@ from scipy.spatial.transform import Rotation
 
 pycolmap = pytest.importorskip("pycolmap")
 
-from experiments.sfm.src import export, reconstruct, scoring, sequences
+from research.experiments.sfm.src import export, reconstruct, scoring, sequences
 
-REPO = Path(__file__).resolve().parents[3]
+REPO = Path(__file__).resolve().parents[4]
 COLMAP = REPO / "third_party/colmap-4.2.1-windows-nocuda/bin/colmap.exe"
 
 
@@ -205,7 +205,7 @@ def test_sift_incremental_recovers_a_rendered_path(tmp_path):
 
 
 def test_report_lists_complete_and_failed_mappers_and_skips_unfinished_runs(tmp_path):
-    from experiments.sfm import report
+    from research.experiments.sfm import report
 
     def fake(name, status):
         run = tmp_path / name

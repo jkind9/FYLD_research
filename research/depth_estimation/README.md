@@ -1,6 +1,6 @@
 # Depth estimation
 
-How far away each pixel is: phone stereo with two cameras, and learned depth from one image or a video. Project results are in experiments/02_stereo_depth; Task65 showed single-image depth changes size from frame to frame.
+How far away each pixel is: phone stereo with two cameras, and learned depth from one image or a video. Project results are in research/experiments/02_stereo_depth; Task65 showed single-image depth changes size from frame to frame.
 
 ## Notes
 

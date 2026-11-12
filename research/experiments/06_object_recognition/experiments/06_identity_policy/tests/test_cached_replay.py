@@ -6,11 +6,11 @@ import json
 
 import pytest
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 cached = importlib.import_module(
-    "experiments.06_object_recognition.experiments.06_identity_policy.cached_replay"
+    "research.experiments.06_object_recognition.experiments.06_identity_policy.cached_replay"
 )
 SOURCE_HASH = "a" * 64
 
@@ -291,7 +291,7 @@ def test_overlay_rejects_object_count_inconsistent_with_track_snapshot():
 
 @pytest.fixture
 def source_run(tmp_path, monkeypatch):
-    runs = importlib.import_module("experiments.shared.runs")
+    runs = importlib.import_module("research.experiments.shared.runs")
     monkeypatch.setattr(runs, "_git", lambda *_: "fixture")
     monkeypatch.setattr(runs, "_environment", dict)
     with Run(tmp_path / "source", tmp_path, {}) as run:

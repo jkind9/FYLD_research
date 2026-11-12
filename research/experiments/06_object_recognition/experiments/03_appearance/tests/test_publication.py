@@ -9,14 +9,14 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run
 
 runner = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.run"
+    "research.experiments.06_object_recognition.experiments.03_appearance.run"
 )
 cache = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.cache"
+    "research.experiments.06_object_recognition.experiments.03_appearance.cache"
 )
 
 

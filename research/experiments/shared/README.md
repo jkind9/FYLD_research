@@ -84,14 +84,14 @@ The shared inspection adapter exports an offline three-dimensional viewer using 
 
 `visualization.py` owns finite drawing geometry, paired display sampling and colour depth previews. `inspection.py` adapts saved camera and surface outputs. `publication.py` creates a new verified run from a complete source. All copied numerical files retain their original bytes. Original computation configuration and timings are archived beneath `metadata/computation/`; nested inspection copies resolve the original computation recursively. `metadata/publication.json` links the numerical timing record. New publication timing reports no processing FPS.
 
-Run `python -B -m experiments.shared.publication --source <complete-run> --stage 03 --runs <stage-runs>` or use stage `04`. Open the returned `viewer.html` directly in a browser. It needs no server or network packages. Drag to orbit, scroll to zoom and step observations with the controls. Display sampling is deterministic and recorded alongside full counts. It changes no scores or stored point arrays. GPU use is not required. Optional browser tests use Playwright and Edge with GPU and WebGL disabled; unavailable browser dependencies produce explicit skips.
+Run `python -B -m research.experiments.shared.publication --source <complete-run> --stage 03 --runs <stage-runs>` or use stage `04`. Open the returned `viewer.html` directly in a browser. It needs no server or network packages. Drag to orbit, scroll to zoom and step observations with the controls. Display sampling is deterministic and recorded alongside full counts. It changes no scores or stored point arrays. GPU use is not required. Optional browser tests use Playwright and Edge with GPU and WebGL disabled; unavailable browser dependencies produce explicit skips.
 
 ## Share a viewer as one file
 
 Export a completed inspection with:
 
 ```powershell
-python -B -m experiments.shared.share --source <complete-inspection-run> --output <destination-outside-source>/viewer.html
+python -B -m research.experiments.shared.share --source <complete-inspection-run> --output <destination-outside-source>/viewer.html
 ```
 
 Send the resulting HTML file. Recipients save it and open it in a JavaScript-enabled browser. All scene geometry, drawing code and preview images are embedded; no server, internet connection or neighbouring files are needed. Frame stepping, orbit, zoom and the reference overlay work as in the original viewer. This export uses the existing display samples and performs no inference or scoring.
@@ -102,4 +102,4 @@ The exporter verifies the source inventory before and after conversion. It rejec
 
 ## Root runner provenance
 
-The six-step runner reuses `Run`, `verify_run`, the timing ledger, shared calibration/pose records and geometry primitives. `artifact_inventory(path)` exposes the existing publication hash/link checks. Source snapshots now also include dirty and untracked Python sources under `evaluation/layers` when present, with the same exclusions for generated runs. Repositories without that folder retain their experiment inventory. Prediction hashes are recorded while the run is running, checked after scoring, then included in final publication. [Runner lifecycle](../../evaluation/layers/README.md).
+The six-step runner reuses `Run`, `verify_run`, the timing ledger, shared calibration/pose records and geometry primitives. `artifact_inventory(path)` exposes the existing publication hash/link checks. Source snapshots now also include dirty and untracked Python sources under `research/evaluation/layers` when present, with the same exclusions for generated runs. Repositories without that folder retain their experiment inventory. Prediction hashes are recorded while the run is running, checked after scoring, then included in final publication. [Runner lifecycle](../../evaluation/layers/README.md).

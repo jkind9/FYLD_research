@@ -24,7 +24,7 @@ These are API descriptions, not measurements of a chosen phone. Runtime, sustain
 
 ## Facts the phone stream relies on (checked 14 October 2026)
 
-Used by `experiments/01_camera_capture_delivery/phone_session_v1.md` (Task87):
+Used by `research/experiments/01_camera_capture_delivery/phone_session_v1.md` (Task87):
 
 - **Rate and newness.** The Frame reference: "Typically there are about 10 updates to the raw depth data per second"; "The depth images between those updates are a 3D reprojection"; a depth image is new when its `Image.getTimestamp()` differs from the previous one.
 - **Units.** "Each pixel contains the distance in millimeters to the camera plane"; 0 means no depth; confidence 0-255, and "removing depth pixels below a confidence threshold of half confidence (128) tends to work well".

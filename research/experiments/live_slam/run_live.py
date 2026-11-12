@@ -1,7 +1,7 @@
 """Run a live SLAM system in WSL on a recording, one frame at a time, and score the poses it reported.
 
-    python -m experiments.live_slam.run_live --system stella --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
-        --run-root experiments/live_slam/runs/stella_tum_xyz
+    python -m research.experiments.live_slam.run_live --system stella --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 \
+        --run-root research/experiments/live_slam/runs/stella_tum_xyz
 
 Needs the systems built by native/setup_wsl.sh and the runners built as in README.md. Uses the repository's `.venv`.
 """
@@ -17,12 +17,12 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.sfm.src import scoring, sequences
-from experiments.shared.runs import Run, write_json
+from research.experiments.sfm.src import scoring, sequences
+from research.experiments.shared.runs import Run, write_json
 
 from .src import trajectory
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 HOME = "/home/jkind/live_slam"
 SYSTEMS = {
     "stella": {"runner": f"{HOME}/runners/stella/build/run_stella", "vocabulary": f"{HOME}/vocab/orb_vocab.fbow",

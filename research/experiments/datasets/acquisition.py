@@ -316,7 +316,7 @@ def _trusted_tum_url(url: str) -> bool:
 
 def main() -> None:
     """Acquire the two predeclared ICL assets; never import estimator code."""
-    root = Path(__file__).resolve().parents[2] / "data" / "icl_nuim"
+    root = Path(__file__).resolve().parents[3] / "data" / "icl_nuim"
     if shutil.disk_usage(root.parent).free < 18 * 1024**3:
         raise ValueError("Acquisition requires at least 18 GiB free")
     for filename, size, folder in ASSETS:

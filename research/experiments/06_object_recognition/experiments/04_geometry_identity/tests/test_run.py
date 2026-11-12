@@ -5,21 +5,21 @@ import json
 import os
 from pathlib import Path
 
-from experiments.shared.runs import verify_run
+from research.experiments.shared.runs import verify_run
 
 runner = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.run"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.run"
 )
 association = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.association"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.association"
 )
 persistence = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.persistence"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.persistence"
 )
 
 
 def test_bounded_frozen_replay_publishes_five_checked_generations_and_review():
-    repo = Path(__file__).resolve().parents[5]
+    repo = Path(__file__).resolve().parents[6]
     verified_run = os.environ.get("TASK21_VERIFIED_RUN")
     run_path = Path(verified_run) if verified_run else runner.run_evaluation(repo)
     assert verify_run(run_path)["status"] == "complete"

@@ -32,7 +32,7 @@ It is written for three readers: the project owner, the manager who reads the re
 - That chain runs on about 2,800 lines of Python in 18 files, spread over `src/live` and five experiment folders. The repository holds 36,200 lines of Python outside tests. The other 92% is experiments, scoring and tools.
 - The proposal is one product package, here called `sitescan` (the name is a decision for the owner). It holds only the adopted chain. Each step of the chain (a *stage*) is one folder of plain functions, with a README that shows how to run it in under 15 lines.
 - Two *orchestrators* sit on top of the stages: code that decides which stage runs, on which frame, in what order. One is the live processor, the other the offline room build. Both call the same stage functions. A command line, the phone receiver and later a web API sit on top of the orchestrators.
-- Research keeps its place. `research/`, `learning/` and `experiments/` stay. Experiments import the product package; the package never imports an experiment.
+- Research keeps its place. `research/`, `learning/` and `research/experiments/` stay. Experiments import the product package; the package never imports an experiment.
 - The phone app moves to its own `android/` folder. The phone recording format stays the one boundary between the phone and the processing, wherever the processing runs.
 - The move goes one stage at a time. Before anything moves, today's outputs on a short test recording are saved (*golden outputs*), and each moved stage must reproduce them.
 - After the shared stages move, trial fast frame selection: group consecutive similar views, then process the sharpest eligible frame in each group. Section 7.12 defines the rule and its speed checks.
@@ -96,8 +96,8 @@ These open questions decide where the structure must stay easy to change: the sc
 **1. The product code lives inside the experiments.** Folder names such as `05_birds_eye_mapping` start with a digit, so Python cannot import them the normal way. `src/live/processor.py` loads them by string:
 
 ```python
-footprint_owner = importlib.import_module("experiments.05_birds_eye_mapping.measure")
-localisation = importlib.import_module("experiments.06_object_recognition.pilot.localisation")
+footprint_owner = importlib.import_module("research.experiments.05_birds_eye_mapping.measure")
+localisation = importlib.import_module("research.experiments.06_object_recognition.pilot.localisation")
 ```
 
 and `src/live/stream.py` edits `sys.path` to reach the session readers. An editor's "go to definition" cannot follow these. Renaming an experiment folder breaks the live processor, and nothing warns until it runs.
@@ -122,7 +122,7 @@ The room build borrows the live processor's map step by faking its `self`:
 
 **5. Checks everywhere.** Record types check their own fields when created: `Calibration` tests six conditions. A reader of the project's own recorded depth checks for symbolic links. The depth step checks the count and order of predictions it just asked for. Much of this guards against input that cannot occur, because the program made it. The cost is that the method is harder to find, and changes break rejection tests that say nothing about whether the depth is right.
 
-**6. Documents are lab notebooks.** `src/live/README.md` runs to 200 lines: how the code works, mixed with dated results from nine tasks, commands and output paths. `experiments/README.md` still reports depth as "test data ready; no method run". Code comments carry history ("inherited from experiment 03 dataset.py:79") where a reason should be.
+**6. Documents are lab notebooks.** `src/live/README.md` runs to 200 lines: how the code works, mixed with dated results from nine tasks, commands and output paths. `research/experiments/README.md` still reports depth as "test data ready; no method run". Code comments carry history ("inherited from experiment 03 dataset.py:79") where a reason should be.
 
 The root folder also carries files that belong elsewhere: `HARNESS_WORKFLOW_AUDIT.md` (115 KB), `.coverage`, `demo_outputs/` and `.worktrees/task-44`. `outputs/` has 41 folders, 24 of them named after task numbers, such as `capture_task113_093913`.
 
@@ -182,7 +182,7 @@ flowchart LR
 | Orchestrators, `sitescan/pipelines/` | Which stage runs, on which frame, in what order, with which settings. They keep state between frames | Stages, `sitescan/io.py` | Argument parsing, network code |
 | Interfaces, `apps/` | How a person or machine starts an orchestrator: command line, phone receiver, viewer, later a web API | Orchestrators | Any step of the method |
 
-Imports only point down this table. If one orchestrator needs logic that another has, that logic is a stage. `experiments/` and `evaluation/` sit outside all three and may import any of them.
+Imports only point down this table. If one orchestrator needs logic that another has, that logic is a stage. `research/experiments/` and `research/evaluation/` sit outside all three and may import any of them.
 
 ### Same stages, different orchestrators
 
@@ -265,13 +265,12 @@ mobile_depth_estimation_tracking/
 ├── tests/                 product tests, one folder per stage
 │   └── fixtures/          20-frame public test recording and golden outputs
 │
-├── evaluation/            scoring against references: TUM, ICL, ARCore depth, tape
-│
-├── experiments/           trials; import sitescan, never imported by it
-├── research/              sources and reviews by topic
+├── research/              everything outside the product; never imported by it
+│   ├── experiments/       trials; import sitescan
+│   ├── evaluation/        scoring against references: TUM, ICL, ARCore depth, tape
+│   └── <topic>/           sources and reviews by topic
 ├── learning/              chapters from first principles
 ├── task_list/             task records
-├── archive/               retired code, read only
 │
 └── data/  models/  outputs/  third_party/      local only, not in git
 ```
@@ -292,9 +291,9 @@ sitescan/depth/
 | `apps/` | Entry points | Nothing that a second entry point would also need |
 | `android/` | The phone app | A change to the recording updates `FORMAT.md`, the shared fixture on both sides, and the version number |
 | `tests/` | Product tests | Behaviour and golden tests of `sitescan/` and `apps/` only |
-| `evaluation/` | Scoring, reference data readers, stand-in recordings | May import `sitescan`. The product never imports it |
-| `experiments/` | Trials | May import `sitescan` and `evaluation`. May keep its own environment. Results go in its README |
-| `research/`, `learning/`, `task_list/` | Evidence, teaching, records | Unchanged |
+| `research/evaluation/` | Scoring, reference data readers, stand-in recordings | May import `sitescan`. The product never imports it |
+| `research/experiments/` | Trials | May import `sitescan` and `research.evaluation`. May keep its own environment. Results go in its README |
+| `research/` topic folders, `learning/`, `task_list/` | Evidence, teaching, records | Unchanged |
 
 Root clean-up: `HARNESS_WORKFLOW_AUDIT.md` moves to `task_list/` or `archive/`; `demo_outputs/` joins `outputs/`; `.coverage` and `.worktrees/` are ignored by git.
 
@@ -417,7 +416,7 @@ Keep the image scoring functions in `sitescan/selection/`. Put the shared groupi
 
 Tests cover identical views, brightness offsets, a changed view starting a group, the sharpest eligible winner, ties, zero-variance images, final flush, the live time limit and bounded pending work. Include a fixed-keyframe case where adjacent frames look similar but the last differs from the first. Verify that skipped images still deliver anchor corrections and that a winner's image and geometry come from the same frame.
 
-The existing [object appearance comparison](experiments/06_object_recognition/experiments/03_appearance/compare.py) uses the same ZNCC arithmetic on masked crops. The selector uses whole grey thumbnails and keeps its scoring independent of that experiment. Method references: [OpenCV's normalised correlation formula](https://docs.opencv.org/4.x/df/dfb/group__imgproc__object.html) and [area resizing](https://docs.opencv.org/4.x/da/d54/group__imgproc__transform.html).
+The existing [object appearance comparison](research/experiments/06_object_recognition/experiments/03_appearance/compare.py) uses the same ZNCC arithmetic on masked crops. The selector uses whole grey thumbnails and keeps its scoring independent of that experiment. Method references: [OpenCV's normalised correlation formula](https://docs.opencv.org/4.x/df/dfb/group__imgproc__object.html) and [area resizing](https://docs.opencv.org/4.x/da/d54/group__imgproc__transform.html).
 
 ### 7.13 Learning from SceneView and Open3Dmap
 
@@ -445,7 +444,7 @@ The [RTAB-Map review](research/camera_tracking_and_slam/rtabmap.md) and the [sur
 
 | Concern | Design consequence |
 |---|---|
-| RTAB-Map is a C++ tool with its own dependencies | It stays in `experiments/` with its own build, as COLMAP does (7.5). Its adapter reads recordings through `sitescan.session`. The product depends on it only if a trial adopts it |
+| RTAB-Map is a C++ tool with its own dependencies | It stays in `research/experiments/` with its own build, as COLMAP does (7.5). Its adapter reads recordings through `sitescan.session`. The product depends on it only if a trial adopts it |
 | Two systems can correct the same surface | RTAB-Map's pose graph and our anchors both move geometry after a correction. If its poses are ever adopted, fusion applies one correction, not both |
 | Grouping by colour and surface direction | A new function in `cleanup/` beside `largest_pieces`, chosen by a setting |
 | Region-aware scale | A new function in `scale/` beside `fit_grid`, chosen by a setting |
@@ -474,7 +473,7 @@ These rules target the marks of generated code found in this repository: defensi
 **Imports.** Before:
 
 ```python
-footprint_owner = importlib.import_module("experiments.05_birds_eye_mapping.measure")
+footprint_owner = importlib.import_module("research.experiments.05_birds_eye_mapping.measure")
 plane = footprint_owner.fit_dominant_plane(surface, inlier_distance_m=settings["inlier_distance_m"], ...)
 ```
 
@@ -486,7 +485,7 @@ from sitescan.mapping import measure_site
 
 **Borrowing a method through a fake object.** Before: `LiveProcessor._map(SimpleNamespace(_cameras=cameras), surface)`. After: `mapping.measure_site(surface, cameras)`, a function both orchestrators call.
 
-**Checks on data the program made.** Before, in `experiments/shared/contracts.py`:
+**Checks on data the program made.** Before, in `research/experiments/shared/contracts.py`:
 
 ```python
 def __post_init__(self) -> None:
@@ -622,28 +621,28 @@ It ends with the two orchestrators and how to run them. The 24H Insights VideoMo
 
 | Today | Becomes | What changes |
 |---|---|---|
-| `experiments/01_camera_capture_delivery/host/session_v1.py`, `session_v2.py`, `protocol.py` | `sitescan/session/` | One reader. One pose convention on the way out. All edge checks live here |
-| `experiments/01_camera_capture_delivery/phone_session_v2.md` | `sitescan/session/FORMAT.md` | Moved; content unchanged |
-| `experiments/01_camera_capture_delivery/host/capture_receiver.py` | `apps/receiver/` | Imports only |
+| `research/experiments/01_camera_capture_delivery/host/session_v1.py`, `session_v2.py`, `protocol.py` | `sitescan/session/` | One reader. One pose convention on the way out. All edge checks live here |
+| `research/experiments/01_camera_capture_delivery/phone_session_v2.md` | `sitescan/session/FORMAT.md` | Moved; content unchanged |
+| `research/experiments/01_camera_capture_delivery/host/capture_receiver.py` | `apps/receiver/` | Imports only |
 | `src/live/stream.py` (`replay`, `read_session`) | `sitescan/session/replay.py` | Normal imports; no `sys.path` edit |
-| `src/live/run.py` `depth_anything`, `src/walkthrough/steps/depth.py` `DepthAnythingV2Metric`, `experiments/shared/geometry.py` `depth_metres` | `sitescan/depth/model.py` | One `load_model` and one `predict`. No dummy calibration |
-| `src/live/orientation_control.py` (`quarter_turns`, `upright`, `recorded`, `turned_camera`) | `sitescan/depth/orientation.py` | The sideways-against-upright scoring stays in `experiments/` |
-| `src/live/sizing.py`, `experiments/sfm/src/dense.py` `fit_size`, `src/live/room_build.py` `grid_size`, `cell_index`, `fresh_depth` | `sitescan/scale/` | One stage offering `fit_one` and `fit_grid`; both orchestrators use it |
+| `src/live/run.py` `depth_anything`, `src/walkthrough/steps/depth.py` `DepthAnythingV2Metric`, `research/experiments/shared/geometry.py` `depth_metres` | `sitescan/depth/model.py` | One `load_model` and one `predict`. No dummy calibration |
+| `src/live/orientation_control.py` (`quarter_turns`, `upright`, `recorded`, `turned_camera`) | `sitescan/depth/orientation.py` | The sideways-against-upright scoring stays in `research/experiments/` |
+| `src/live/sizing.py`, `research/experiments/sfm/src/dense.py` `fit_size`, `src/live/room_build.py` `grid_size`, `cell_index`, `fresh_depth` | `sitescan/scale/` | One stage offering `fit_one` and `fit_grid`; both orchestrators use it |
 | `src/live/fragments.py` | `sitescan/fusion/fragments.py` | Logic unchanged |
-| `src/live/clean.py` `visibility_vote`, `vote_tallies`, `_measurements`, `largest_pieces` | `sitescan/cleanup/` | The six rejected filters move to `experiments/surface_cleanup/` |
-| `experiments/05_birds_eye_mapping/measure.py` `fit_dominant_plane`, `footprint`; `LiveProcessor._map` | `sitescan/mapping/` | `_map` becomes the plain function `measure_site` |
-| `experiments/06_object_recognition/pilot/detector.py`, `localisation.py`, `association.py`; `LiveProcessor._objects` | `sitescan/objects/` | Marked experimental; the known overcount is in its README |
+| `src/live/clean.py` `visibility_vote`, `vote_tallies`, `_measurements`, `largest_pieces` | `sitescan/cleanup/` | The six rejected filters move to `research/experiments/surface_cleanup/` |
+| `research/experiments/05_birds_eye_mapping/measure.py` `fit_dominant_plane`, `footprint`; `LiveProcessor._map` | `sitescan/mapping/` | `_map` becomes the plain function `measure_site` |
+| `research/experiments/06_object_recognition/pilot/detector.py`, `localisation.py`, `association.py`; `LiveProcessor._objects` | `sitescan/objects/` | Marked experimental; the known overcount is in its README |
 | `src/live/processor.py` | `sitescan/pipelines/live.py` | Calls stages; keeps only state. Gains upright images, grid scale, fresh-depth rule (as a separate, reviewed step) |
 | `src/live/room_build.py` | `sitescan/pipelines/room.py` | Argument parsing moves to `apps/cli.py` |
 | `src/live/run.py`, `room_build.main` | `apps/cli.py` | One command with three verbs |
-| `src/live/stand_in.py`, `src/live/score.py` | `evaluation/` | Stand-in writes the v2 format |
-| `src/walkthrough/` (about 3,600 lines) | `evaluation/layers/` or `archive/` | Owner decision (section 13) |
+| `src/live/stand_in.py`, `src/live/score.py` | `research/evaluation/` | Stand-in writes the v2 format |
+| `src/walkthrough/` (about 3,600 lines) | `research/evaluation/layers/` or `archive/` | Owner decision (section 13) |
 | `tools/demos/` | `apps/viewer/` | Imports only |
 | `tools/check.py` | stays as a developer tool | None |
-| `experiments/01_camera_capture_delivery/capture/` (Java, 2,717 lines plus 673 lines of tests), `build/` | `android/` | Moved; build scripts kept |
+| `research/experiments/01_camera_capture_delivery/capture/` (Java, 2,717 lines plus 673 lines of tests), `build/` | `android/` | Moved; build scripts kept |
 | `mobile_deployments/` | `android/releases.md` | One entry per build |
 
-What stays in `experiments/`: every rejected or untried method (Marigold, Prompt Depth Anything, Depth Anything 3, ZipDepth, COLMAP and the structure-from-motion runs, the live image-only trackers, LingBot-Map), the open-source tracker route (`open_vio`) until it is chosen, the segmentation and appearance trials for objects, and the clean-up trials. Each keeps its README as the evidence record. Each is updated to import `sitescan` instead of the old paths.
+What stays in `research/experiments/`: every rejected or untried method (Marigold, Prompt Depth Anything, Depth Anything 3, ZipDepth, COLMAP and the structure-from-motion runs, the live image-only trackers, LingBot-Map), the open-source tracker route (`open_vio`) until it is chosen, the segmentation and appearance trials for objects, and the clean-up trials. Each keeps its README as the evidence record. Each is updated to import `sitescan` instead of the old paths.
 
 ## 11. Migration plan
 
@@ -657,10 +656,10 @@ Start this work after a reproducible baseline is identified, rather than waiting
 | 3. Orchestrators, same behaviour | Connect live and room to the extracted stages. Keep current model, scale fallback, frame choice and experimental counting behaviour. Product code must not import the old implementations or experiments | Both pipelines match the phase 1 outputs. The full 15 October room reproduces the baseline 554,067 cleaned points within the recorded tolerance. Live replay stays at or above 1 update/s. This completes the shared-pipeline move |
 | 3a. Behaviour changes and trials | First give live upright images, grid scale and the fresh-depth rule, one checked change at a time. Then trial scale support and hold expiry, and far-depth triangulation with region-aware scale as its control. Depth correction from surfaces matched across views follows triangulation (7.14). Object association and colour grouping in clean-up wait for stable geometry and labelled objects. RTAB-Map's mapping is an experiment with frames, depth and poses held fixed. Frame selection from 7.12 remains its own off/on experiment | Record before/after accuracy, coverage and cost for each change; keep a new default only with supporting results. A new baseline records an adopted change. The trials do not block independent work in phases 4–6 |
 | 4. Interfaces and app | `apps/cli.py`, `apps/receiver/`, `apps/viewer/`; the app to `android/` | A new walk recorded and processed using only the new commands |
-| 5. Re-point and retire | Experiments import `sitescan`. The walkthrough goes to `evaluation/` or `archive/`. Temporary forwarding imports are deleted | No `importlib` or `sys.path` edits in `sitescan/` or `apps/`. Default tests under 60 s |
-| 6. Documents | Root README rewritten as the product README: what it does, install, run, where things are. `experiments/README.md` status table corrected | The manager runs the depth example from the README on a fresh clone |
+| 5. Re-point and retire | Experiments import `sitescan`. The walkthrough goes to `research/evaluation/` or `archive/`. Temporary forwarding imports are deleted | No `importlib` or `sys.path` edits in `sitescan/` or `apps/`. Default tests under 60 s |
+| 6. Documents | Root README rewritten as the product README: what it does, install, run, where things are. `research/experiments/README.md` status table corrected | The manager runs the depth example from the README on a fresh clone |
 
-**Progress (9 November 2026).** Phases 0 and 1 are done. The baseline is commit `d859867`. `pyproject.toml` and `uv.lock` pin the versions that made the golden outputs (torch 2.11.0 CPU, transformers 5.14.1, open3d 0.19.0, numpy 2.4.2). `sitescan/` now contains session, depth, scale, fusion, cleanup and mapping; objects and pipelines remain empty. The committed fixture `tests/fixtures/tum_desk_20` and its outputs `tum_desk_20_golden.json` are described in `tests/fixtures/README.md`; `pytest -m golden` checks them. The full 15 October room rebuilt to the same 554,067 cleaned points. `models/manifest.toml` lists the two models with their hashes. Not done in phase 1: the local 20-frame slice of the 15 October walk, because a cut from mid-walk loses the anchor events before it; the full-walk run stands in for it. Phase 2: the session stage now lives in `sitescan/session`, with shared RGB records and OpenCV matrix poses. Old callers use forwarding imports. Its golden outputs, full-room numbers and Chromium page match the baseline. Depth now lives in `sitescan/depth`; its array callable replaces the dummy calibration, with recorded live input and upright room input preserved. Its golden and full-room outputs match. Scale now lives in `sitescan/scale`, offering single and grid fits with shared target projection. Live fallback and room freshness remain unchanged; golden and full-room outputs match. Fusion now lives in `sitescan/fusion`, with fragment bindings, corrected surfaces and RGB order preserved. Golden and full-room outputs match. Cleanup now keeps only the visibility vote and largest pieces in `sitescan/cleanup`; rejected filters and tuner diagnostics live in `experiments/surface_cleanup`. Old imports, golden outputs and full-room results match. Mapping now lives in `sitescan/mapping`, with array-based plane and footprint functions shared by both callers. The room no longer fakes a live processor; experiment chunk readers remain outside the package. Golden and full-room results match. Objects, both orchestrators, the command line and the removal of `src/` followed on 11 November; see [section 15](#status-11-november-2026).
+**Progress (9 November 2026).** Phases 0 and 1 are done. The baseline is commit `d859867`. `pyproject.toml` and `uv.lock` pin the versions that made the golden outputs (torch 2.11.0 CPU, transformers 5.14.1, open3d 0.19.0, numpy 2.4.2). `sitescan/` now contains session, depth, scale, fusion, cleanup and mapping; objects and pipelines remain empty. The committed fixture `tests/fixtures/tum_desk_20` and its outputs `tum_desk_20_golden.json` are described in `tests/fixtures/README.md`; `pytest -m golden` checks them. The full 15 October room rebuilt to the same 554,067 cleaned points. `models/manifest.toml` lists the two models with their hashes. Not done in phase 1: the local 20-frame slice of the 15 October walk, because a cut from mid-walk loses the anchor events before it; the full-walk run stands in for it. Phase 2: the session stage now lives in `sitescan/session`, with shared RGB records and OpenCV matrix poses. Old callers use forwarding imports. Its golden outputs, full-room numbers and Chromium page match the baseline. Depth now lives in `sitescan/depth`; its array callable replaces the dummy calibration, with recorded live input and upright room input preserved. Its golden and full-room outputs match. Scale now lives in `sitescan/scale`, offering single and grid fits with shared target projection. Live fallback and room freshness remain unchanged; golden and full-room outputs match. Fusion now lives in `sitescan/fusion`, with fragment bindings, corrected surfaces and RGB order preserved. Golden and full-room outputs match. Cleanup now keeps only the visibility vote and largest pieces in `sitescan/cleanup`; rejected filters and tuner diagnostics live in `research/experiments/surface_cleanup`. Old imports, golden outputs and full-room results match. Mapping now lives in `sitescan/mapping`, with array-based plane and footprint functions shared by both callers. The room no longer fakes a live processor; experiment chunk readers remain outside the package. Golden and full-room results match. Objects, both orchestrators, the command line and the removal of `src/` followed on 11 November; see [section 15](#status-11-november-2026).
 
 During phases 0–3, read-only source review and independent measurements can continue. Freeze a stage's implementation while moving it. After phase 3, method trials use the extracted stages and can run alongside interface work in phases 4–6. Keep work that would change the same stage sequential. Do not make the core refactor depend on a new phone recording, a GPU slot or a completed SceneView benchmark.
 
@@ -682,7 +681,7 @@ During phases 0–3, read-only source review and independent measurements can co
 Phases 0 and 1 went ahead on the recommended answers to 1, 3, 5 and 7: the package is `sitescan`, the fixture is recording format v2, the environment tool is uv, and the code says "scale". Each is cheap to change until phase 2 moves code. Decisions 2 and 4 are not needed until their stages move.
 
 1. **Package name.** Working name `sitescan`.
-2. **The walkthrough runner (about 3,600 lines).** Owner chose on 9 November: keep its layer-by-layer tests with known-correct inputs in `evaluation/layers/`.
+2. **The walkthrough runner (about 3,600 lines).** Owner chose on 9 November: keep its layer-by-layer tests with known-correct inputs in `research/evaluation/layers/`.
 3. **Recording version 1.** Drop the v1 reader and have the stand-in write v2 (recommended), or keep both readers.
 4. **Object counting.** Owner chose on 9 November: move the pilot into `sitescan/objects/` marked experimental; keep its current behaviour.
 5. **Environment tool.** uv (recommended), pip-tools or conda.
@@ -741,13 +740,13 @@ The owner asked for a full review once the stage moves were reported done: does 
 10. Model weights sit in `data/models/` and `checkpoints/`, not `models/`, although `models/manifest.toml` exists.
 11. The root still holds `HARNESS_WORKFLOW_AUDIT.md` (115 KB), a `.coverage` file from 14 October, `demo_outputs/` (8 tracked files, 18 MB of generated pages), `checkpoints/` and `.worktrees/task-44`. The last is a stale copy of files from 5 October, not a registered git worktree.
 12. `outputs/` has 72 entries. 25 are named after task numbers and 21 are loose `.log` or `.csv` files beside the folder they describe. Pytest scratch folders (`task92_pytest_*`) and input clips (`task65_clips`, `task51_real_clips`) sit among the results.
-13. `src/` mixes the two orchestrators with 7 trial and scoring scripts (`denoise_trial`, `landmark_probe`, `depth_check`, `cleanup_attributes`, `count_report`, `score`, `stand_in`) and the 3,600-line walkthrough runner. The owner chose on 9 November to move the walkthrough to `evaluation/layers/`. `src/` holds 42 imports that load code by folder path; there were 35 when this design was written.
+13. `src/` mixes the two orchestrators with 7 trial and scoring scripts (`denoise_trial`, `landmark_probe`, `depth_check`, `cleanup_attributes`, `count_report`, `score`, `stand_in`) and the 3,600-line walkthrough runner. The owner chose on 9 November to move the walkthrough to `research/evaluation/layers/`. `src/` holds 42 imports that load code by folder path; there were 35 when this design was written.
 14. The default test lane takes 348 s, against the 60 s aim in section 7.7. `pytest.ini` lists 19 test folders by hand.
 
 **Documents.**
 
 15. The root README (423 lines) is a research narrative from mid-October. It says depth has "no method run", names Task55 as owner of a mapping method that now exists, and never mentions `sitescan`. Much of it repeats `PROJECT_PLAN.md`.
-16. The status table in `experiments/README.md` is out of date in the same way.
+16. The status table in `research/experiments/README.md` is out of date in the same way.
 17. `src/live/README.md` (199 lines) mixes how to run the code with dated results from nine tasks.
 18. The `sitescan` README tells readers to use `.venv-sitescan` for the product and `.venv-yolo` for objects.
 
@@ -757,13 +756,13 @@ The owner asked for a full review once the stage moves were reported done: does 
 2. Move the objects stage, keeping its behaviour. Detection, lifting a box into 3D, matching and counting become array functions; the object list that persists between frames becomes one small class, as `Fragments` is for fusion.
 3. Move both orchestrators into `sitescan/pipelines/`, with `sitescan/io.py` for writing results and `apps/cli.py` as the one command. They keep reading wire records and keep ARCore-axes anchors (finding 5), so outputs do not change. `src/live/run.py` and `room_build.py` keep working as thin forwards until phase 5.
 4. Small code fixes for findings 6–8, each checked against the golden outputs.
-5. Move the walkthrough and the trial scripts out of `src/` into `evaluation/`. Default tests become the product lane; the full suite stays one command.
+5. Move the walkthrough and the trial scripts out of `src/` into `research/evaluation/`. Default tests become the product lane; the full suite stays one command.
 6. Tidy the root and `outputs/`: weights into `models/`, the audit file into `archive/`, demo pages and old runs into named groups under `outputs/`.
 7. Rewrite the root README as the product README with a map of the repository; correct the experiments status table; move dated results out of how-to READMEs; add a page that shows how the orchestrators combine the stages.
 
 ### Status, 10 November 2026
 
-Fix 1 is done. `uv sync --all-extras` builds the one root environment, `.venv`, from `uv.lock`; new extras are `objects` (Ultralytics 8.4.172), `sfm` (pycolmap 4.2.1) and `eval` (matplotlib, plotly, Playwright, psutil, PyYAML, easydict), pinned to the versions past runs used. In `.venv` the default lane gave 1,044 passed and 2 failed: experiment 03's tracker supervisor started its worker through the venv's `python.exe` launcher, so the Windows memory cap held the launcher and not the worker. The supervisor now starts the base interpreter directly (`direct_interpreter` in `memory_limits.py`), and both tests pass in `.venv` and on the system Python. The golden lane passes in `.venv` (3 passed). `.venv-sitescan`, `.venv-yolo`, `.venv-colmap` and `.venv-sfm` are removed; the LingBot-Map conda environment now sits at `experiments/lingbot_map/.venv` and still starts. Eight experiment `requirements.txt` files that the lock now covers are removed; the two GPU and WSL pins in `experiments/02_stereo_depth` stay. Task record 145 was closed early by another session and does not show this; this note is the record.
+Fix 1 is done. `uv sync --all-extras` builds the one root environment, `.venv`, from `uv.lock`; new extras are `objects` (Ultralytics 8.4.172), `sfm` (pycolmap 4.2.1) and `eval` (matplotlib, plotly, Playwright, psutil, PyYAML, easydict), pinned to the versions past runs used. In `.venv` the default lane gave 1,044 passed and 2 failed: experiment 03's tracker supervisor started its worker through the venv's `python.exe` launcher, so the Windows memory cap held the launcher and not the worker. The supervisor now starts the base interpreter directly (`direct_interpreter` in `memory_limits.py`), and both tests pass in `.venv` and on the system Python. The golden lane passes in `.venv` (3 passed). `.venv-sitescan`, `.venv-yolo`, `.venv-colmap` and `.venv-sfm` are removed; the LingBot-Map conda environment now sits at `research/experiments/lingbot_map/.venv` and still starts. Eight experiment `requirements.txt` files that the lock now covers are removed; the two GPU and WSL pins in `research/experiments/02_stereo_depth` stay. Task record 145 was closed early by another session and does not show this; this note is the record.
 
 Fixes 2–7 then waited for a parallel research task (148), which finished the same day.
 
@@ -772,10 +771,14 @@ Fixes 2–7 then waited for a parallel research task (148), which finished the s
 Fixes 2–7 are done, and with them phases 2, 3 and 5. Every check below ran on 11 November.
 
 - **Objects (fix 2).** `sitescan/objects/` holds detection, placement, matching and an `Objects` class for the counted objects, as `Fragments` is for fusion. The matcher gave the pilot's output on 2,000 random multi-frame sequences; placement differs by at most 4.4e-16 m; the detector, now given RGB arrays, gave the same 47 boxes on 12 frames of the 15 October walk as when given file paths. The pilot's matcher forwards to the stage. The pilot's detector keeps its own copy of two constants, because an accepted feature cache pins that file's hash.
-- **Orchestrators (fix 3).** `sitescan/pipelines/room.py` (`build_room`, `RoomSettings`) and `live.py` (`LiveProcessor`, `LiveSettings`, `run_live`) call only stages; `sitescan/io.py` writes results; `apps/cli.py` has the verbs `room`, `replay` and `live`; the receiver is in `apps/receiver/`. Both still read wire records and place fragments with ARCore-axes anchors (finding 5). Output fields say "scale" (decision 7); the golden file's keys were renamed with every number unchanged. The golden lane passes. The full 15 October room reproduces all summary numbers of baseline `d859867`, including 554,067 cleaned points and 6.35 × 3.30 m. Live replay of that walk under another project's CPU load gave 1.23 updates/s against 1.24 for the old code run straight after under the same load ([evaluation/results.md](evaluation/results.md)).
+- **Orchestrators (fix 3).** `sitescan/pipelines/room.py` (`build_room`, `RoomSettings`) and `live.py` (`LiveProcessor`, `LiveSettings`, `run_live`) call only stages; `sitescan/io.py` writes results; `apps/cli.py` has the verbs `room`, `replay` and `live`; the receiver is in `apps/receiver/`. Both still read wire records and place fragments with ARCore-axes anchors (finding 5). Output fields say "scale" (decision 7); the golden file's keys were renamed with every number unchanged. The golden lane passes. The full 15 October room reproduces all summary numbers of baseline `d859867`, including 554,067 cleaned points and 6.35 × 3.30 m. Live replay of that walk under another project's CPU load gave 1.23 updates/s against 1.24 for the old code run straight after under the same load ([research/evaluation/results.md](research/evaluation/results.md)).
 - **Small fixes (fix 4).** `cleanup.clean_room` returns both masks and the room calls it (finding 6); mapping sums points directly (finding 7); the scale stage shares one clipping helper (finding 8). Golden and full-room outputs are unchanged.
-- **`src/` dissolved (fix 5).** The walkthrough runner is `evaluation/layers/`, the stage report `evaluation/stage_report/`, scoring scripts `evaluation/`, clean-up trials `experiments/surface_cleanup/`. All forwarding modules are deleted; nothing imports `src`. The 69 moves are their own commit, so history follows each file. `pytest` now runs the product lane (80 tests, 3 s); `pytest -c pytest-full.ini` runs everything (about 1,600 tests, 6.5 min) by folder instead of a hand-kept list. That exposed two test files with the same module path, now renamed.
+- **`src/` dissolved (fix 5).** The walkthrough runner is `research/evaluation/layers/`, the stage report `research/evaluation/stage_report/`, scoring scripts `research/evaluation/`, clean-up trials `research/experiments/surface_cleanup/`. All forwarding modules are deleted; nothing imports `src`. The 69 moves are their own commit, so history follows each file. `pytest` now runs the product lane (80 tests, 3 s); `pytest -c pytest-full.ini` runs everything (about 1,600 tests, 6.5 min) by folder instead of a hand-kept list. That exposed two test files with the same module path, now renamed.
 - **Root and outputs (fix 6).** Weights are in `models/`. The audit is in `archive/`. The demo pages are in `outputs/demo_pages/`, out of git, rebuilt by `tools.demos.build`. `.coverage` is deleted and the stale `.worktrees/task-44` run copy moved to the ignored `archive/local_staging/`. `outputs/` is grouped into `refactor`, `cleanup`, `capture`, `lingbot_map`, `task_runs`, `inputs` and `scratch`, with the tracked documents that cite them updated.
-- **Documents (fix 7).** The root README is the product README, with a generated function index (`tools/function_index.py`; a test fails when it is stale) and a Future work section. Every product, app, evaluation and tool folder and 19 experiment sub-folders gained a README. Dated results moved from the old live README to `evaluation/results.md`. `notebooks/00_sitescan_walkthrough.ipynb` runs each orchestrator, then repeats its steps one stage call at a time and asserts the same numbers.
+- **Documents (fix 7).** The root README is the product README, with a generated function index (`tools/function_index.py`; a test fails when it is stale) and a Future work section. Every product, app, evaluation and tool folder and 19 experiment sub-folders gained a README. Dated results moved from the old live README to `research/evaluation/results.md`. `notebooks/00_sitescan_walkthrough.ipynb` runs each orchestrator, then repeats its steps one stage call at a time and asserts the same numbers.
 
-Still open from section 6 and 10, now listed under Future work in the root README: the Android app's move to `android/`; the receiver's tests and fake phone into `tests/`; `evaluation/` still borrows dataset readers from `experiments/`; `tools/demos` stays a developer tool until a viewer reads only pipeline outputs (it reads experiment runs today, which `apps/` may not import); the switch to `session.frames()` with its own golden check.
+Still open from section 6 and 10, now listed under Future work in the root README: the Android app's move to `android/`; the receiver's tests and fake phone into `tests/`; `research/evaluation/` still borrows dataset readers from `research/experiments/`; `tools/demos` stays a developer tool until a viewer reads only pipeline outputs (it reads experiment runs today, which `apps/` may not import); the switch to `session.frames()` with its own golden check.
+
+### Status, 12 November 2026
+
+The top level now holds only the product and its support folders. `experiments/` and `evaluation/` moved under `research/`, so their modules are `research.experiments.*` and `research.evaluation.*`. `archive/` left git; it is kept at commit `d064d5f`, with a local copy in `outputs/archive/`. The 437 moves are their own commit. Old runs keep the source paths they recorded under `experiments/`; the two scripts that re-check a specific older run still read those recorded paths. Provenance citations in experiment settings ("inherited experiments/...") keep their original text, because saved receipts are compared with them. An accepted feature cache pins the bytes of `06_object_recognition/pilot/detector.py` and `03_appearance/features.py`, so those two files keep their old `experiments.*` imports; `research/experiments/__init__.py` maps the old name to the package so they still import.

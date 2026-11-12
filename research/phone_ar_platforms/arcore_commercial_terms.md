@@ -19,7 +19,7 @@ ARCore can be used in a commercial product. No fee is stated for the core featur
 
 | Risk | Why it matters | Mitigation |
 |---|---|---|
-| Google discontinues or changes ARCore | Google ended its earlier Tango platform; the terms allow discontinuation | Keep tracking behind the walkthrough's tracking contract so another tracker (stella_vslam, BSD-2, tested in `experiments/live_slam`) can replace it |
+| Google discontinues or changes ARCore | Google ended its earlier Tango platform; the terms allow discontinuation | Keep tracking behind the walkthrough's tracking contract so another tracker (stella_vslam, BSD-2, tested in `research/experiments/live_slam`) can replace it |
 | Device coverage | ARCore needs a phone on Google's supported list with Google Play and Play Services for AR installed; phones without Google Play cannot run it | Check the fleet's handsets against the list; iPhones would need ARKit instead |
 | High-risk-use clause | If measurements are used for safety decisions on site (for example excavation near services), check whether that counts as a use where failure could cause injury | Have the terms reviewed for the intended use; keep a human check on safety decisions |
 | Data processing by Google | Google may monitor API use; Cloud Anchors and Geospatial send sensor data to Google | Use only on-device features (tracking, depth); avoid Cloud Anchors and Geospatial unless the privacy notice and data review allow it |
@@ -49,4 +49,4 @@ Filled in after the owner asked whether a product can be sold with ARCore. Read 
 
 ## Used in this project
 
-The Redmi check app (`experiments/01_camera_capture_delivery/phonecheck/`) uses ARCore 1.56.0 on-device features only. Task92 adds an **ARCore and privacy notice** button at the top of its main screen, with Google's required text, links to Google Play Services for AR and Google's privacy policy, and Google/ARCore terms links. It also describes the images, poses, points and depth sent to the selected computer. The APK builds; checking the screen and links on the Redmi remains part of the [field capture](../../experiments/01_camera_capture_delivery/field_accuracy.md). This research notice does not establish that a product's privacy policy or terms have been reviewed.
+The Redmi check app (`research/experiments/01_camera_capture_delivery/phonecheck/`) uses ARCore 1.56.0 on-device features only. Task92 adds an **ARCore and privacy notice** button at the top of its main screen, with Google's required text, links to Google Play Services for AR and Google's privacy policy, and Google/ARCore terms links. It also describes the images, poses, points and depth sent to the selected computer. The APK builds; checking the screen and links on the Redmi remains part of the [field capture](../experiments/01_camera_capture_delivery/field_accuracy.md). This research notice does not establish that a product's privacy policy or terms have been reviewed.

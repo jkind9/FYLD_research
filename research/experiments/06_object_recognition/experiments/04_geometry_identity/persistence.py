@@ -10,8 +10,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run, write_json
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 IdentityStore = importlib.import_module("identity_store").IdentityStore

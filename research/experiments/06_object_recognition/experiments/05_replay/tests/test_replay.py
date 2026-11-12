@@ -4,10 +4,10 @@ import importlib
 from pathlib import Path
 
 checked_inputs = importlib.import_module(
-    "experiments.06_object_recognition.experiments.05_replay.checked_inputs"
+    "research.experiments.06_object_recognition.experiments.05_replay.checked_inputs"
 )
 generation = importlib.import_module(
-    "experiments.06_object_recognition.experiments.05_replay.generation"
+    "research.experiments.06_object_recognition.experiments.05_replay.generation"
 )
 
 
@@ -18,7 +18,7 @@ def test_output_preflight_uses_the_requested_repository():
 
 
 def test_verified_inputs_keep_sixty_frames_and_exact_automatic_proposals():
-    data = checked_inputs.load(Path(__file__).resolve().parents[5])
+    data = checked_inputs.load(Path(__file__).resolve().parents[6])
     assert len(data["baseline_rows"]) == 60
     assert [frame["frame_id"] for frame in data["proposal_frames"]] == [
         "23",
@@ -40,7 +40,7 @@ def test_verified_inputs_keep_sixty_frames_and_exact_automatic_proposals():
 
 
 def test_same_class_instances_in_one_frame_keep_distinct_observation_keys():
-    data = checked_inputs.load(Path(__file__).resolve().parents[5])
+    data = checked_inputs.load(Path(__file__).resolve().parents[6])
     frame = data["proposal_frames"][0]
     same_class = [row for row in frame["proposals"] if row["class_id"] == 62]
     assert len(same_class) == 5
@@ -48,7 +48,7 @@ def test_same_class_instances_in_one_frame_keep_distinct_observation_keys():
 
 
 def test_accepted_actual_box_embeddings_reuse_cuda_receipt_without_inference():
-    repo = Path(__file__).resolve().parents[5]
+    repo = Path(__file__).resolve().parents[6]
     sources = checked_inputs.load(repo)
     automatic, provenance = generation._read_accepted_feature_cache(repo, sources)
     assert provenance["manifest_sha256"] == generation.FEATURE_CACHE_MANIFEST_SHA256

@@ -8,7 +8,7 @@ import pytest
 from PIL import Image
 
 viewer = importlib.import_module(
-    "experiments.06_object_recognition.pilot.replay_viewer"
+    "research.experiments.06_object_recognition.pilot.replay_viewer"
 )
 
 

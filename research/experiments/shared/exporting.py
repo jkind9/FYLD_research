@@ -7,7 +7,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 from PIL import Image
 
-from experiments.shared.runs import write_json
+from research.experiments.shared.runs import write_json
 
 
 def _raster(path: Path, values: np.ndarray, units: str) -> dict:

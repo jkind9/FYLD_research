@@ -10,7 +10,7 @@ import importlib
 import numpy as np
 import pytest
 
-measure = importlib.import_module("experiments.05_birds_eye_mapping.measure")
+measure = importlib.import_module("research.experiments.05_birds_eye_mapping.measure")
 
 CELL_M = 0.05
 UP = np.array([0.0, 0.0, 1.0])
@@ -152,7 +152,7 @@ def test_up_pointing_below_the_plane_flips_heights_to_stay_positive():
 def test_preview_draws_unseen_cells_grey_and_states_its_scale(tmp_path):
     from PIL import Image
 
-    preview = importlib.import_module("experiments.05_birds_eye_mapping.preview")
+    preview = importlib.import_module("research.experiments.05_birds_eye_mapping.preview")
     result = _footprint(
         np.vstack((_rectangle(hole=((0.5, 1.5), (1.0, 2.0))), _board(0.0, 0.0)))
     )
@@ -173,7 +173,7 @@ def test_preview_marks_cells_whose_top_is_below_the_plane(tmp_path):
     """A floor seen under a desk-top plane must not look like the plane itself."""
     from PIL import Image
 
-    preview = importlib.import_module("experiments.05_birds_eye_mapping.preview")
+    preview = importlib.import_module("research.experiments.05_birds_eye_mapping.preview")
     observed = np.ones((2, 2), dtype=bool)
     heights = np.array([[0.0, -0.7], [0.4, 0.0]])
 

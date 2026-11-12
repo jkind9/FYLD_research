@@ -8,9 +8,9 @@ from time import perf_counter
 
 import numpy as np
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.exporting import export_frame
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.exporting import export_frame
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from .control import GeometryBackend, compute
 from .icl import load_frame, select_ids
@@ -155,7 +155,7 @@ def main() -> None:
         "--runs", type=Path, default=Path(__file__).resolve().parents[1] / "runs"
     )
     args = parser.parse_args()
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     print(execute(args.dataset, args.frame_ids, args.runs, repo))
 
 

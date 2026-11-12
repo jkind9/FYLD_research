@@ -9,10 +9,10 @@ from time import perf_counter
 import numpy as np
 import psutil
 
-from experiments.geometry_validation.src.icl import select_ids
-from experiments.shared.contracts import Pose
-from experiments.shared.exporting import _cloud_preview
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.geometry_validation.src.icl import select_ids
+from research.experiments.shared.contracts import Pose
+from research.experiments.shared.exporting import _cloud_preview
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from .backend import reconstruct
 from .dataset import copy_checked, read_reference, snapshot_frame, snapshot_metadata
@@ -307,7 +307,7 @@ def main() -> None:
             args.threshold_m,
             args.recover_run,
             args.runs,
-            Path(__file__).resolve().parents[3],
+            Path(__file__).resolve().parents[4],
         ),
     )
 

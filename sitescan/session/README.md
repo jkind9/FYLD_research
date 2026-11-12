@@ -49,7 +49,7 @@ print([f.seq for f in frames if f.depth is not None])
 | `stop` | None | Replay until the recording ends unless a caller supplies a stop event | [Replay tests](../../tests/test_sitescan_session.py) |
 | `reader` | `frames` | New callers receive shared records; old live callers temporarily select wire records | [Architecture](../../DESIGN.md#5-target-architecture) |
 | `PIXEL_TOLERANCE_PX` | 0.5 px | Accept recorded rounding while checking point projection | [Wire contract](FORMAT.md) |
-| `QUATERNION_TOLERANCE` | 0.001 | Preserve the existing phone quaternion check | [Shared phone fixture tests](../../experiments/01_camera_capture_delivery/tests/test_session_v1.py) |
+| `QUATERNION_TOLERANCE` | 0.001 | Preserve the existing phone quaternion check | [Shared phone fixture tests](../../research/experiments/01_camera_capture_delivery/tests/test_session_v1.py) |
 
 ## Limits
 

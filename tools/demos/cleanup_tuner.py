@@ -1,6 +1,6 @@
 """Offline page for tuning the clean-up by hand: the raw fused room, with every clean-up stage on sliders.
 
-python -B -m tools.demos.cleanup_tuner --attributes <experiments.surface_cleanup.cleanup_attributes folder> --session <v2 session> \
+python -B -m tools.demos.cleanup_tuner --attributes <research.experiments.surface_cleanup.cleanup_attributes folder> --session <v2 session> \
     --out <page.html> --views 65 420
 
 The page runs each stage in the browser, in the order listed, on the points the earlier stages kept. It embeds the
@@ -182,7 +182,7 @@ def tuner_page(data: dict) -> str:
   <h2>Current settings</h2>
   <p>Copy these to report a setting that cleans the room well.</p>
   <textarea id="settings" readonly></textarea>
-  <p class="note">Built by tools/demos/cleanup_tuner.py from experiments/surface_cleanup/cleanup_attributes.py. Everything runs in this
+  <p class="note">Built by tools/demos/cleanup_tuner.py from research/experiments/surface_cleanup/cleanup_attributes.py. Everything runs in this
     page; nothing is fetched. Background: research/surface_denoising/README.md.</p>
 </div>"""
     return build_page("Clean-up tuner", "The raw fused room with every clean-up stage on sliders.", body, data,
@@ -191,7 +191,7 @@ def tuner_page(data: dict) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--attributes", type=Path, required=True, help="experiments.surface_cleanup.cleanup_attributes output folder")
+    parser.add_argument("--attributes", type=Path, required=True, help="research.experiments.surface_cleanup.cleanup_attributes output folder")
     parser.add_argument("--session", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--views", type=int, nargs="*", default=[], help="recorded frames to add as camera bookmarks")

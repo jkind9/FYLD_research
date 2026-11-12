@@ -9,10 +9,10 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from evaluation.layers.steps.contracts import ColourFrame, RGBDFrame
-from evaluation.layers.steps.depth import RecordedSensorDepth
-from evaluation.layers.steps.tracking import ReferencePoses
-from experiments.shared.contracts import Calibration
+from research.evaluation.layers.steps.contracts import ColourFrame, RGBDFrame
+from research.evaluation.layers.steps.depth import RecordedSensorDepth
+from research.evaluation.layers.steps.tracking import ReferencePoses
+from research.experiments.shared.contracts import Calibration
 
 CAMERA = Calibration(2, 2, 2, 2, 0.5, 0.5, "x-right_y-down_z-forward")
 # Original tables: data/tum/rgbd_dataset_freiburg1_xyz/{rgb,depth}.txt, first 20 rows.

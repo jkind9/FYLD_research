@@ -25,8 +25,8 @@ Both runners write the same files into the output folder:
 This needs WSL (Ubuntu 24.04) and, once, `sudo apt install` of the system libraries listed in the [live SLAM README](../README.md). No GPU is used. From the repository root, inside WSL:
 
 ```text
-bash experiments/live_slam/native/setup_wsl.sh stella
-bash experiments/live_slam/native/setup_wsl.sh orbslam3
+bash research/experiments/live_slam/native/setup_wsl.sh stella
+bash research/experiments/live_slam/native/setup_wsl.sh orbslam3
 ```
 
 Then build each runner as the live SLAM README describes: copy the `.cc` file and the `CMakeLists.txt` into `~/live_slam/runners/<system>/` and run CMake there. The runners are normally started from Windows by `../run_live.py`, which converts paths with `to_wsl` and writes the frame list.

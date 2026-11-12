@@ -7,12 +7,12 @@ from collections.abc import Callable
 
 import numpy as np
 
-from experiments.shared.contracts import Pose
+from research.experiments.shared.contracts import Pose
 
 from .sequences import Sequence
 
-evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
-tracking = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
+evaluation = importlib.import_module("research.experiments.03_camera_pose_estimation.src.evaluation")
+tracking = importlib.import_module("research.experiments.03_camera_pose_estimation.src.tracking")
 
 SCORE_FIELDS = ("ate_scaled_rmse_m", "ate_scaled_size", "ate_rigid_rmse_m", "rpe_1s_translation_rmse_m",
                 "rpe_1s_rotation_rmse_rad", "position_rmse_m", "position_samples", "segments")

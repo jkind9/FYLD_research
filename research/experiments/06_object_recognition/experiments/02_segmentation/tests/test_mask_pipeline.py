@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 pipeline = importlib.import_module(
-    "experiments.06_object_recognition.experiments.02_segmentation.mask_pipeline"
+    "research.experiments.06_object_recognition.experiments.02_segmentation.mask_pipeline"
 )
 
 LINEAGE = {

@@ -11,18 +11,18 @@ Two pre-gap frames are enrollment; four later frames are evaluation; validation 
 Use the repository's `.venv` (`uv sync --all-extras`). No model, inference or download is required.
 
 ```powershell
-python -B -m experiments.06_object_recognition.datasets.prepare
-python -B -m experiments.06_object_recognition.datasets.prepare --verify
-python -B tools/check.py experiments/06_object_recognition/shared/tests experiments/06_object_recognition/datasets/tests
+python -B -m research.experiments.06_object_recognition.datasets.prepare
+python -B -m research.experiments.06_object_recognition.datasets.prepare --verify
+python -B tools/check.py research/experiments/06_object_recognition/shared/tests research/experiments/06_object_recognition/datasets/tests
 ```
 
-[Open the prepared reference review](../../../data/object_revisits/desk_smoke_v1/review.html). `publication.json` seals source copies, separate method inputs, evaluator annotations, masks and overlays with SHA256. Preparation validates source hashes/dimensions, writes a fresh staging directory, checks artifacts, then renames it. Existing destinations are refused. A failed staging directory remains unpublished for inspection; restart uses a new destination. Verification rejects missing, extra or changed artifacts and rechecks original sources. There is no resume or overwrite.
+[Open the prepared reference review](../../../../data/object_revisits/desk_smoke_v1/review.html). `publication.json` seals source copies, separate method inputs, evaluator annotations, masks and overlays with SHA256. Preparation validates source hashes/dimensions, writes a fresh staging directory, checks artifacts, then renames it. Existing destinations are refused. A failed staging directory remains unpublished for inspection; restart uses a new destination. Verification rejects missing, extra or changed artifacts and rechecks original sources. There is no resume or overwrite.
 
 Method inputs exclude identities, labels, masks, annotation provenance, revisit answers and reference-pose metadata. Evaluator annotations stay separate. Supplied camera poses may be loaded only in a named reference-pose control; estimated-pose methods must not consume groundtruth.txt.
 
 ## Offline source handoff
 
-A fresh checkout requires the already acquired source payload. Copy the RGB/depth files and rgb.txt, depth.txt and groundtruth.txt named in the frozen annotation file to `data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/`. Preserve the sibling `EXTRACTION.json` from the acquired project for archive provenance. The original archive was checked against local SHA256 `e983d6830916e66dc4a46a71368046b149b283de87769690e7aa4e0b9483530c`; the publisher supplies no checksum. Preparation verifies each frozen source SHA256 and fails on unavailable or changed files. It does not fetch data implicitly. See [source acquisition records](../../../data/README.md) for attribution and original format.
+A fresh checkout requires the already acquired source payload. Copy the RGB/depth files and rgb.txt, depth.txt and groundtruth.txt named in the frozen annotation file to `data/tum/rgbd_dataset_freiburg1_desk/rgbd_dataset_freiburg1_desk/`. Preserve the sibling `EXTRACTION.json` from the acquired project for archive provenance. The original archive was checked against local SHA256 `e983d6830916e66dc4a46a71368046b149b283de87769690e7aa4e0b9483530c`; the publisher supplies no checksum. Preparation verifies each frozen source SHA256 and fails on unavailable or changed files. It does not fetch data implicitly. See [source acquisition records](../../../../data/README.md) for attribution and original format.
 
 Raw registered depth is unsigned16 PNG, divided by5000 for metres; zero means missing. Preserve raw bytes. The existing processed-depth adapter excludes values at or beyond4metres. This distinction is recorded in the manifest. No hole filling is used. Calibration is 640x480, focal lengths525, centre319.5/239.5, camera axes right/down/forward; RGB/depth pairing tolerance is0.02seconds.
 
@@ -32,7 +32,7 @@ The 13-case registry marks cup return, distinct monitors, viewpoint, uncontrolle
 
 ## Independent reference follow-up
 
-[Task40](../../../task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md) owns shared reference and missing-capture design. It preserves this provisional six-frame publication. Human-checked pixel masks, surveyed physical anchors/visible surfaces, 3D endpoint/corner coordinates with orientation and uncertainty, instrument uncertainty and new-session hard cases require separate acquisition/authorisation. Identical-looking objects seen only in separate views need independent identity evidence or an explicitly ambiguous reference, rather than guessed labels.
+[Task40](../../../../task_list/closed/40_plan_independent_references_and_hard_case_acquisition.md) owns shared reference and missing-capture design. It preserves this provisional six-frame publication. Human-checked pixel masks, surveyed physical anchors/visible surfaces, 3D endpoint/corner coordinates with orientation and uncertainty, instrument uncertainty and new-session hard cases require separate acquisition/authorisation. Identical-looking objects seen only in separate views need independent identity evidence or an explicitly ambiguous reference, rather than guessed labels.
 
 Retain camera/calibration/timestamp/world/revision and depth-measurement lineage. Session-disjoint validation/calibration and held-out evaluation must keep nearby frames/derivatives together. Task13's desk hold-out is already inspected by this object stream, so it cannot be called an independent end-to-end hold-out across these components. Frozen camera settings remain unchanged.
 
@@ -46,4 +46,4 @@ The Redmi's first [capability export](../../01_camera_capture_delivery/README.md
 
 ## Actual reference collection, 6 October 2026
 
-[Task53](../../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) owns collection and publication of independent physical measurements, human identities and separate development/test sessions. Task40 supplies the design; it does not collect those references. [Task52](../../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns recorder engineering. The existing six-frame publication remains provisional and unchanged.
+[Task53](../../../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) owns collection and publication of independent physical measurements, human identities and separate development/test sessions. Task40 supplies the design; it does not collect those references. [Task52](../../../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns recorder engineering. The existing six-frame publication remains provisional and unchanged.

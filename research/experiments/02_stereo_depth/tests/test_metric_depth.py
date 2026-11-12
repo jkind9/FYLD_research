@@ -5,7 +5,7 @@ import importlib
 import numpy as np
 import pytest
 
-geometry = importlib.import_module("experiments.02_stereo_depth.geometry")
+geometry = importlib.import_module("research.experiments.02_stereo_depth.geometry")
 
 
 @pytest.mark.parametrize(
@@ -79,7 +79,7 @@ def test_shape_alignment_reports_share_of_non_positive_aligned_values():
     reference_depth_m = np.array([[1.0, 1.0, 1.0, 100.0]])
     reference_valid = np.ones(reference_depth_m.shape, dtype=bool)
     raw_relative_depth = np.array([[0.0, 1.0, 2.0, 3.0]])
-    scoring = importlib.import_module("experiments.02_stereo_depth.scoring")
+    scoring = importlib.import_module("research.experiments.02_stereo_depth.scoring")
 
     result = scoring.score_shape_to_metric(
         raw_relative_depth,
@@ -93,7 +93,7 @@ def test_shape_alignment_reports_share_of_non_positive_aligned_values():
 
 
 def test_per_image_scores_report_errors_coverage_and_reference_distance_bands():
-    scoring = importlib.import_module("experiments.02_stereo_depth.scoring")
+    scoring = importlib.import_module("research.experiments.02_stereo_depth.scoring")
     reference_depth_m = np.array([[0.5, 1.0, 1.5, 2.0], [2.5, 3.0, 4.0, 0.0]])
     reference_valid = np.array(
         [[True, True, True, True], [True, True, True, False]]
@@ -141,7 +141,7 @@ def test_per_image_scores_report_errors_coverage_and_reference_distance_bands():
 
 
 def test_per_image_scores_exclude_invalid_predictions_from_errors_and_coverage():
-    scoring = importlib.import_module("experiments.02_stereo_depth.scoring")
+    scoring = importlib.import_module("research.experiments.02_stereo_depth.scoring")
     reference_depth_m = np.array([[1.0, 2.0, 3.0]])
     reference_valid = np.ones(reference_depth_m.shape, dtype=bool)
     predicted_depth_m = np.array([[1.0, np.nan, 0.0]])
@@ -163,7 +163,7 @@ def test_per_image_scores_exclude_invalid_predictions_from_errors_and_coverage()
 
 
 def test_metric_and_reference_aligned_shape_scores_are_separate_views():
-    scoring = importlib.import_module("experiments.02_stereo_depth.scoring")
+    scoring = importlib.import_module("research.experiments.02_stereo_depth.scoring")
     reference_depth_m = np.array([[1.0, 2.0], [3.0, 4.0]])
     reference_valid = np.ones(reference_depth_m.shape, dtype=bool)
     raw_relative_depth = 2.0 * reference_depth_m
@@ -191,7 +191,7 @@ def test_metric_and_reference_aligned_shape_scores_are_separate_views():
 
 
 def test_metric_depth_can_enter_shape_view_without_changing_metric_view():
-    scoring = importlib.import_module("experiments.02_stereo_depth.scoring")
+    scoring = importlib.import_module("research.experiments.02_stereo_depth.scoring")
     reference_depth_m = np.array([[1.0, 2.0], [3.0, 4.0]])
     reference_valid = np.ones(reference_depth_m.shape, dtype=bool)
     raw_metric_depth_m = 3.0 + 2.0 * reference_depth_m
@@ -212,7 +212,7 @@ def test_invalid_metric_predictions_do_not_affect_shape_alignment():
     reference_depth_m = np.array([[1.0, 2.0, 4.0]])
     reference_valid = np.ones(reference_depth_m.shape, dtype=bool)
     raw_metric_depth_m = np.array([[2.0, 4.0, -100.0]])
-    scoring = importlib.import_module("experiments.02_stereo_depth.scoring")
+    scoring = importlib.import_module("research.experiments.02_stereo_depth.scoring")
 
     result = scoring.score_shape_to_metric(
         raw_metric_depth_m,

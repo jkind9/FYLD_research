@@ -1,7 +1,7 @@
 """Every layer's contract: what its method receives and returns, and what the layer saves.
 
 Methods see only the method contract. Later layers see only the saved outputs.
-evaluation/layers/README.md, "Layer contracts", lists both with units and checks.
+research/evaluation/layers/README.md, "Layer contracts", lists both with units and checks.
 """
 
 import importlib
@@ -14,14 +14,14 @@ import numpy as np
 from numpy.typing import NDArray
 from PIL import Image
 
-from experiments.shared.contracts import Calibration, Pose
-from experiments.shared.runs import Run
+from research.experiments.shared.contracts import Calibration, Pose
+from research.experiments.shared.runs import Run
 
 from ..records import Unavailable
 
 # Experiment folders start with digits, so `import` syntax cannot name them.
-pose_dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
-pose_tracking = importlib.import_module("experiments.03_camera_pose_estimation.src.tracking")
+pose_dataset = importlib.import_module("research.experiments.03_camera_pose_estimation.src.dataset")
+pose_tracking = importlib.import_module("research.experiments.03_camera_pose_estimation.src.tracking")
 # Numeric experiment names need dynamic imports; runtime records retain their owning classes.
 if TYPE_CHECKING:
     RGBDFrame = Any
@@ -208,7 +208,7 @@ def check_capture_clock(capture: CaptureOutput) -> None:
 
 
 # Experiment 03's RGB-D frames and odometry only accept depth below 4 m (the Kinect
-# working range): experiments/03_camera_pose_estimation/src/dataset.py:43 and backend.py:74.
+# working range): research/experiments/03_camera_pose_estimation/src/dataset.py:43 and backend.py:74.
 RGBD_MAX_DEPTH_M = 4.0
 
 

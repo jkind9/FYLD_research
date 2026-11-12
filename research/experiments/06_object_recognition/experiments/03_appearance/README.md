@@ -23,7 +23,7 @@ All twenty-five same-class pairs are retained, including observations of distinc
 Use the already installed pinned environment:
 
 ```powershell
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.03_appearance.run
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.experiments.03_appearance.run
 ```
 
 The command verifies inputs, constructs the existing checkpoint directly, requests one embedding per crop and publishes a new run. The first request also causes the installed predictor's full-model CUDA warmup. The recorded first-call cost includes that warmup. GPU runtime, precision, pooled layer, vector length and checkpoint hashes are checked and recorded. No automatic download or silent CPU fallback occurs.
@@ -65,8 +65,8 @@ Forty-one focused controls passed with 91% implementation coverage. Ruff, progra
 
 ## Next comparison, without reopening Task20
 
-[Task33](../../../../task_list/stale/33_compare_object_appearance_context_and_spatial_association.md) will compare object-only/context appearance and spatial trade-offs on fixed inputs. ZNCC and existing YOLO26x pooled features are measured baselines. ResNet50 and contextual embeddings are proposed, untested and require their own acquisition/execution decisions. One incorrect monitor ranking is a recorded failure; it does not establish failure on all objects. Geometry-only and combined rules both resolve the current eleven observations, so wider tests must assess when additional appearance helps.
+[Task33](../../../../../task_list/stale/33_compare_object_appearance_context_and_spatial_association.md) will compare object-only/context appearance and spatial trade-offs on fixed inputs. ZNCC and existing YOLO26x pooled features are measured baselines. ResNet50 and contextual embeddings are proposed, untested and require their own acquisition/execution decisions. One incorrect monitor ranking is a recorded failure; it does not establish failure on all objects. Geometry-only and combined rules both resolve the current eleven observations, so wider tests must assess when additional appearance helps.
 
 ## Optional walkthrough appearance and validation
 
-Appearance is an optional part of step 6 and is disabled by default. The root adapter explicitly calls the existing crop/classical-descriptor owner when selected; it does not load learned features. `adapter.prepare_crop`, `adapter.describe_classical` and `features.FeatureExtractor` remain in this experiment. `importlib.import_module("experiments.06_object_recognition.experiments.03_appearance.validation")` forwards `label_pairs` and `rank_queries` for their existing schemas. Independent identities remain scorer-only. [Runner contract](../../../../evaluation/layers/README.md).
+Appearance is an optional part of step 6 and is disabled by default. The root adapter explicitly calls the existing crop/classical-descriptor owner when selected; it does not load learned features. `adapter.prepare_crop`, `adapter.describe_classical` and `features.FeatureExtractor` remain in this experiment. `importlib.import_module("research.experiments.06_object_recognition.experiments.03_appearance.validation")` forwards `label_pairs` and `rank_queries` for their existing schemas. Independent identities remain scorer-only. [Runner contract](../../../../evaluation/layers/README.md).

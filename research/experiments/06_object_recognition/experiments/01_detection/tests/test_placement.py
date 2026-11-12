@@ -6,7 +6,7 @@ import math
 import numpy as np
 import pytest
 
-PACKAGE = "experiments.06_object_recognition.experiments.01_detection"
+PACKAGE = "research.experiments.06_object_recognition.experiments.01_detection"
 scoring = importlib.import_module(f"{PACKAGE}.scoring")
 placement = importlib.import_module(f"{PACKAGE}.placement")
 

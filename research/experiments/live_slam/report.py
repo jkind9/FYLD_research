@@ -1,6 +1,6 @@
 """Summarise live SLAM runs: median (and range) over repeats per system and recording.
 
-    python -m experiments.live_slam.report experiments/live_slam/runs
+    python -m research.experiments.live_slam.report research/experiments/live_slam/runs
 """
 
 from __future__ import annotations

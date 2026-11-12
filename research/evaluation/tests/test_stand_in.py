@@ -5,7 +5,7 @@ import json
 import numpy as np
 from PIL import Image
 
-from evaluation import stand_in
+from research.evaluation import stand_in
 from sitescan.session import read_wire_session, wire_v1
 
 

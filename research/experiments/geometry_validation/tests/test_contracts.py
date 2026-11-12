@@ -8,13 +8,13 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from experiments.shared.contracts import (
+from research.experiments.shared.contracts import (
     Calibration,
     Observation,
     Pose,
     require_same_origin,
 )
-from experiments.shared.geometry import (
+from research.experiments.shared.geometry import (
     associate_times,
     backproject,
     depth_metres,
@@ -24,8 +24,8 @@ from experiments.shared.geometry import (
     validate_transform,
 )
 
-icl = importlib.import_module("experiments.geometry_validation.src.icl")
-control = importlib.import_module("experiments.geometry_validation.src.control")
+icl = importlib.import_module("research.experiments.geometry_validation.src.icl")
+control = importlib.import_module("research.experiments.geometry_validation.src.control")
 
 
 def test_known_geometry_and_direction():
@@ -173,7 +173,7 @@ def test_bad_images_and_pose_rows(dataset):
 
 def test_publisher_surface_origin():
     # Expected constants transcribed from publisher SurfReg trajectory-2 mapping.
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     conventions = json.loads((repo / "data/icl_nuim/conventions.json").read_text())
     basis = np.asarray(conventions["alignment"]["S_model_first_camera"])
     np.testing.assert_allclose(
@@ -193,10 +193,10 @@ def test_publisher_surface_origin():
 
 
 def test_complete_pipeline_and_failure(dataset, tmp_path):
-    runner = importlib.import_module("experiments.geometry_validation.src.run")
-    from experiments.shared.runs import verify_run
+    runner = importlib.import_module("research.experiments.geometry_validation.src.run")
+    from research.experiments.shared.runs import verify_run
 
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     path = runner.execute(dataset, [1], tmp_path / "runs", repo)
     assert verify_run(path)["status"] == "complete"
     assert (
@@ -228,7 +228,7 @@ def test_cli_requires_explicit_selection():
     import sys
 
     result = subprocess.run(
-        [sys.executable, "-B", "-m", "experiments.geometry_validation.src.run"],
+        [sys.executable, "-B", "-m", "research.experiments.geometry_validation.src.run"],
         capture_output=True,
         text=True,
         check=False,
@@ -254,7 +254,7 @@ def test_nonfirst_pose_composition(dataset):
 
 
 def test_acquired_frame_conformance():
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     if not (repo / "data/icl_nuim/trajectory2/rgb/1.png").is_file():
         pytest.skip(
             "Acquired dataset remains local; synthetic control is always tested"

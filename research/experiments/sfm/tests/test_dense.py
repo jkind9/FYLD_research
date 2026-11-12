@@ -8,8 +8,8 @@ from scipy.spatial.transform import Rotation
 
 pytest.importorskip("open3d")
 
-from experiments.sfm import run_dense
-from experiments.sfm.src import dense, references, sequences
+from research.experiments.sfm import run_dense
+from research.experiments.sfm.src import dense, references, sequences
 
 CAMERA = dense.Pinhole(160, 120, 100.0, 100.0, 80.0, 60.0)
 
@@ -114,7 +114,7 @@ def test_inputs_are_not_changed():
 
 
 def test_dense_report_row_and_table(tmp_path):
-    from experiments.sfm import report
+    from research.experiments.sfm import report
 
     run = tmp_path / "run"
     (run / "metadata").mkdir(parents=True)

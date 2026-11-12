@@ -1,6 +1,6 @@
 """One table of every run under a folder (each run's scores.json), for the README.
 
-    python experiments/open_vio/vio/vio_report.py experiments/open_vio/runs/vio_tumvi_room1
+    python research/experiments/open_vio/vio/vio_report.py research/experiments/open_vio/runs/vio_tumvi_room1
 """
 
 from __future__ import annotations

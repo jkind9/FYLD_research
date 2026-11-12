@@ -10,8 +10,8 @@ from pathlib import Path
 
 import psutil  # type: ignore[import-untyped]
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from .cache import (
     ACCEPTED_ANNOTATIONS_SHA256,
@@ -25,10 +25,10 @@ from .report import write_report
 from .scoring import evaluate
 
 manifest_api = importlib.import_module(
-    "experiments.06_object_recognition.shared.manifest"
+    "research.experiments.06_object_recognition.shared.manifest"
 )
-ROOT = Path(__file__).resolve().parents[4]
-ANNOTATIONS = "experiments/06_object_recognition/datasets/desk_smoke_v1.json"
+ROOT = Path(__file__).resolve().parents[5]
+ANNOTATIONS = "research/experiments/06_object_recognition/datasets/desk_smoke_v1.json"
 HYPERPARAMETERS = {
     "iou_thresholds": {
         "value": [0.3, 0.5, 0.7],

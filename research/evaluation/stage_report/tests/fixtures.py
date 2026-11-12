@@ -6,14 +6,14 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import _inventory, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import _inventory, write_json
 
 scoring = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.scoring"
+    "research.experiments.06_object_recognition.experiments.01_detection.scoring"
 )
 identity_run_module = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.run"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.run"
 )
 
 
@@ -59,7 +59,7 @@ def camera_run(path: Path, offset_m: float = 0.05, frames: int = 3) -> str:
     reference = path / "input/evaluation/groundtruth.txt"
     reference.parent.mkdir(parents=True, exist_ok=True)
     reference.write_text("\n".join(rows) + "\n", encoding="utf-8")
-    from evaluation.stage_report.stages import camera
+    from research.evaluation.stage_report.stages import camera
 
     write_json(path / "output/metrics.json", camera.score(path))
     return seal(path)
@@ -117,7 +117,7 @@ def surface_run(path: Path, recovery: bool = True) -> str:
         np.save(path / "output" / frame / "reference_distance.npy", values)
     np.save(path / "output/reference_distance.npy", np.array([0.0, 0.04, 0.2, 0.5]))
     write_json(path / "metadata/configuration.json", {"frame_ids": [1, 2]})
-    from evaluation.stage_report.stages import surface
+    from research.evaluation.stage_report.stages import surface
 
     metrics = surface.score(path, 0.05)
     metrics["threshold_m"] = 0.05

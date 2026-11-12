@@ -8,9 +8,9 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
+from research.experiments.datasets.acquisition import sha256
 
-prepare = importlib.import_module("experiments.06_object_recognition.datasets.prepare")
+prepare = importlib.import_module("research.experiments.06_object_recognition.datasets.prepare")
 ANNOTATIONS = Path(__file__).parents[1] / "desk_smoke_v1.json"
 
 

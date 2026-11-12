@@ -1,6 +1,6 @@
-"""Score a live run's surface against the ICL living-room reference, as experiments/sfm/run_dense.py does.
+"""Score a live run's surface against the ICL living-room reference, as research/experiments/sfm/run_dense.py does.
 
-    python -m evaluation.score --run <live run folder> --icl data/icl_nuim
+    python -m research.evaluation.score --run <live run folder> --icl data/icl_nuim
 """
 
 from __future__ import annotations
@@ -14,8 +14,8 @@ from pathlib import Path
 import numpy as np
 import open3d as o3d
 
-references = importlib.import_module("experiments.sfm.src.references")
-surface_evaluation = importlib.import_module("experiments.04_surface_reconstruction.src.evaluation")
+references = importlib.import_module("research.experiments.sfm.src.references")
+surface_evaluation = importlib.import_module("research.experiments.04_surface_reconstruction.src.evaluation")
 THRESHOLD_M = 0.05  # inherited experiment 04 reporting threshold
 
 

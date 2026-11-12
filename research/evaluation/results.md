@@ -1,7 +1,7 @@
 # Measured results of the room and live pipelines
 
 Dated measurements of the two orchestrators in `sitescan/pipelines/`. How to run them is
-in [sitescan/pipelines/README.md](../sitescan/pipelines/README.md); this page only records
+in [sitescan/pipelines/README.md](../../sitescan/pipelines/README.md); this page only records
 what runs gave. All runs are CPU only, on a 32-thread desktop, with the depth model on 16
 threads, unless a row says otherwise. Output folders under `outputs/` are local only.
 
@@ -41,7 +41,7 @@ under load neither keeps every gap under a second. Local outputs:
 
 ## Live replay of public recordings, 14 October 2026
 
-Stand-in recordings (`python -B -m evaluation.stand_in`): the clip's true path and its depth
+Stand-in recordings (`python -B -m research.evaluation.stand_in`): the clip's true path and its depth
 sensor standing in for ARCore, replayed at recorded speed.
 
 | Recording | Frames received | Updates | Updates per second | Longest gap | Update time, median | Delay, frame to result |
@@ -55,7 +55,7 @@ Median stage times on TUM xyz: depth model 250 ms, map 200 ms, surface 35 ms, fu
 detection 274 ms on its own thread. At 1 cm on ICL, extracting and thinning 2.6 million
 surface points costs about 670 ms per update.
 
-ICL surface accuracy (`python -B -m evaluation.score`): 46 mm mean distance at 1 cm and
+ICL surface accuracy (`python -B -m research.evaluation.score`): 46 mm mean distance at 1 cm and
 52 mm at 2 cm; 71% and 69% of points within 5 cm; 22% of the room covered from 28–37 fused frames.
 
 ## Live replay of the 14 October Redmi walk
@@ -68,7 +68,7 @@ points in 33 updates and from the previous update in 30. Local outputs:
 
 ## Why live counts are too high, 14 October 2026
 
-`python -B -m evaluation.count_report <run>/updates.jsonl` splits the new identities of a live run.
+`python -B -m research.evaluation.count_report <run>/updates.jsonl` splits the new identities of a live run.
 
 | | TUM xyz | TUM desk |
 |---|---:|---:|
@@ -88,4 +88,4 @@ of the same class. Position scatter from learned depth inside a box is the main 
 ## Fixture outputs
 
 `tests/fixtures/tum_desk_20_golden.json` holds both orchestrators' outputs on the committed
-20-frame fixture; `pytest -m golden` compares them. See [tests/fixtures/README.md](../tests/fixtures/README.md).
+20-frame fixture; `pytest -m golden` compares them. See [tests/fixtures/README.md](../../tests/fixtures/README.md).

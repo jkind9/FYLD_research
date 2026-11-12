@@ -9,22 +9,22 @@ from types import SimpleNamespace
 import numpy as np
 from PIL import Image
 
-from experiments.shared.contracts import Calibration, Pose
+from research.experiments.shared.contracts import Calibration, Pose
 
 adapter = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.adapter"
+    "research.experiments.06_object_recognition.experiments.03_appearance.adapter"
 )
 feature_api = importlib.import_module(
-    "experiments.06_object_recognition.experiments.03_appearance.features"
+    "research.experiments.06_object_recognition.experiments.03_appearance.features"
 )
 detector_api = importlib.import_module(
-    "experiments.06_object_recognition.pilot.detector"
+    "research.experiments.06_object_recognition.pilot.detector"
 )
 localisation = importlib.import_module(
-    "experiments.06_object_recognition.pilot.localisation"
+    "research.experiments.06_object_recognition.pilot.localisation"
 )
 identity = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.association"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.association"
 )
 
 POLICIES = ("combined-last", "combined-viewmedian")

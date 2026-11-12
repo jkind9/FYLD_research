@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from evaluation import orientation_control as oc
+from research.evaluation import orientation_control as oc
 
 
 def test_turn_upright_and_back_is_unchanged():

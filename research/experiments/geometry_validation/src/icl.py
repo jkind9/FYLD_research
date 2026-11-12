@@ -8,8 +8,8 @@ import numpy as np
 from numpy.typing import NDArray
 from PIL import Image
 
-from experiments.shared.contracts import Calibration, Observation, Pose
-from experiments.shared.geometry import pose_matrix, validate_transform
+from research.experiments.shared.contracts import Calibration, Observation, Pose
+from research.experiments.shared.geometry import pose_matrix, validate_transform
 
 
 @dataclass(frozen=True)

@@ -3,9 +3,9 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.geometry_validation.src.control import compute
-from experiments.geometry_validation.src.icl import Frame
-from experiments.shared.geometry import transform_points
+from research.experiments.geometry_validation.src.control import compute
+from research.experiments.geometry_validation.src.icl import Frame
+from research.experiments.shared.geometry import transform_points
 
 
 def fault_points(frame: Frame, fault: str) -> NDArray:

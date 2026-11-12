@@ -15,7 +15,7 @@ Given each frame's depth image and camera pose, back-project every valid pixel a
 
 Fusion averages noise and gives one clean surface, but only if the inputs agree. If each frame's depth has a different size (chapter 2), fusion averages several copies of a wall into one thick, blurred wall. **Fusion helps only after every frame's depth is consistent with the camera path.**
 
-The project uses Open3D's `ScalableTSDFVolume` (`experiments/sfm/src/dense.py`), with truncation at 4 voxels and depth limited to 0.1-4 m.
+The project uses Open3D's `ScalableTSDFVolume` (`research/experiments/sfm/src/dense.py`), with truncation at 4 voxels and depth limited to 0.1-4 m.
 
 ## Three ways to get the dense depth
 
@@ -155,7 +155,7 @@ Mean distance from the reconstructed surface to the reference (lower is better).
 | Depth Anything 3 Small, given the camera poses, sized to SfM points | **79 mm** | 318 mm | 490 mm |
 | SfM sparse points alone (best-fit size) | 77 mm, 4% covered | 48 mm, 20% covered | 57 mm, 21% covered |
 
-Sources: Tasks 71, 72, 78, 79 and 80 in `experiments/sfm/README.md`, which also lists Depth Anything 3's other modes.
+Sources: Tasks 71, 72, 78, 79 and 80 in `research/experiments/sfm/README.md`, which also lists Depth Anything 3's other modes.
 
 **Live, 14 October (Task89).** The live processor, fed ICL in the phone stream format with the true path and the rendered depth standing in for ARCore's raw depth, fused 28 frames while the clip played at its recorded speed (about one frame a second). Its surface is 46 mm from the reference on average, with 71% of points within 5 cm, but it covers only 22% of the room. It is not comparable with the table above, which fuses every frame: fewer frames give fewer points to be wrong and less of the room. See `https://github.com/jkind9/FYLD_research/blob/9bf3b51/src/live/README.md`.
 
@@ -183,11 +183,11 @@ Task100 turns the Redmi walk's saved surface into an offline interactive HTML. I
 
 ### Fuse and score depth
 
-Fuse Depth Anything along the SfM path, sized to SfM points, and score it (TUM desk; paths in `experiments/sfm/README.md`):
+Fuse Depth Anything along the SfM path, sized to SfM points, and score it (TUM desk; paths in `research/experiments/sfm/README.md`):
 
 ```text
-.venv\Scripts\python -m experiments.sfm.run_dense --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 --depth model-sfm-size --depth-maps <Depth Anything run> --poses sfm:<SfM run>/output/incremental --sfm-size best-fit --run-root experiments/sfm/runs/dense_tum_desk
-.venv\Scripts\python -m experiments.sfm.report --dense experiments/sfm/runs/dense_tum_desk/*
+.venv\Scripts\python -m research.experiments.sfm.run_dense --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_desk_every2 --depth model-sfm-size --depth-maps <Depth Anything run> --poses sfm:<SfM run>/output/incremental --sfm-size best-fit --run-root research/experiments/sfm/runs/dense_tum_desk
+.venv\Scripts\python -m research.experiments.sfm.report --dense research/experiments/sfm/runs/dense_tum_desk/*
 ```
 
 `output/surface_points.npy` in the run folder can be opened in any point-cloud viewer.
@@ -196,4 +196,4 @@ Fuse Depth Anything along the SfM path, sized to SfM points, and score it (TUM d
 
 - Lecture 9 (multi-view stereo, plane sweep) and lecture 12 (3D representations) in [research/3d_vision_fundamentals](../research/3d_vision_fundamentals/README.md).
 - [Open3D RGB-D note](../research/camera_tracking_and_slam/open3d_rgbd.md) for fusion.
-- `experiments/04_surface_reconstruction/README.md` for the representations table (points, TSDF, surfels, splats, feed-forward 3D).
+- `research/experiments/04_surface_reconstruction/README.md` for the representations table (points, TSDF, surfels, splats, feed-forward 3D).

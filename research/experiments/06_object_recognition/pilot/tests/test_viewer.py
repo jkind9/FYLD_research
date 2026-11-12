@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-report = importlib.import_module("experiments.06_object_recognition.pilot.report")
+report = importlib.import_module("research.experiments.06_object_recognition.pilot.report")
 
 
 def test_offline_marked_cloud_rotates_and_switches_coordinate_frames(tmp_path):

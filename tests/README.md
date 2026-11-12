@@ -6,7 +6,7 @@ Tests of `sitescan/` and `apps/`. The default lane runs in about 10 seconds.
 |---|---|---|
 | Behaviour (default) | `.venv/Scripts/python.exe -B -m pytest` | Small hand-made inputs with known answers, one file per stage plus the pipelines |
 | Golden | `.venv/Scripts/python.exe -B -m pytest -m golden` | Both orchestrators on the committed fixture recording; every output number matches the saved one within 0.1% or 1 mm. Needs the local depth weights |
-| Everything | `.venv/Scripts/python.exe -B -m pytest -c pytest-full.ini` | This lane plus every test under `evaluation/`, `experiments/` and `tools/` (about 1,600 tests) |
+| Everything | `.venv/Scripts/python.exe -B -m pytest -c pytest-full.ini` | This lane plus every test under `research/evaluation/`, `research/experiments/` and `tools/` (about 1,600 tests) |
 
 | Path | What it holds |
 |---|---|

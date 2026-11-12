@@ -2,7 +2,7 @@
 # Run the JVM tests (encoders against the shared v2 fixture, the phone queue, the sender with resume), then build the
 # capture app (debug APK) in WSL with the SDK and Gradle already used by build-apk.sh, and stage it for installing.
 # Gradle downloads the ARCore library from Google's Maven repository on the first build.
-# Run from the repository root: wsl -d Ubuntu -- bash experiments/01_camera_capture_delivery/build/build-capture.sh
+# Run from the repository root: wsl -d Ubuntu -- bash research/experiments/01_camera_capture_delivery/build/build-capture.sh
 set -euo pipefail
 
 SDK="${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}"

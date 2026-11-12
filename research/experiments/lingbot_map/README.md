@@ -1,6 +1,6 @@
 # LingBot-Map on the 15 October walk (Task128)
 
-LingBot-Map turns ordinary video into a camera pose and a depth map for every frame, as frames arrive. Its public demo shows a 25,000-frame multi-room walk mapped from above, with the walked camera path drawn through it. That is the output this project is aiming for. This experiment runs it on this project's own Redmi walk and measures it against ARCore. Research note: [research/feed_forward_3d/lingbot_map.md](../../research/feed_forward_3d/lingbot_map.md).
+LingBot-Map turns ordinary video into a camera pose and a depth map for every frame, as frames arrive. Its public demo shows a 25,000-frame multi-room walk mapped from above, with the walked camera path drawn through it. That is the output this project is aiming for. This experiment runs it on this project's own Redmi walk and measures it against ARCore. Research note: [research/feed_forward_3d/lingbot_map.md](../../feed_forward_3d/lingbot_map.md).
 
 **CPU only for now.** The owner reserved this PC's GPU for another project on 8 November 2026. LingBot-Map is built for an NVIDIA GPU (the authors report 12 frames per second on an RTX 4090), so CPU runs here are slow and are used for measurement, not speed.
 
@@ -30,11 +30,11 @@ The owner watches RAM while runs go. `run.py` keeps it bounded:
 ## Run it
 
 ```text
-experiments\lingbot_map\.venv\python -B experiments/lingbot_map/run.py --frames <session>/frames --model third_party/lingbot-map-weights/lingbot-map.pt --out <run folder> --device cpu --stride 3 --window 16 [--first 10]
-.venv\Scripts\python -B -m experiments.lingbot_map.compare --run <run folder> --session <session> --surface outputs/cleanup/room_build_clean_up_093913/surface.ply
+experiments\lingbot_map\.venv\python -B research/experiments/lingbot_map/run.py --frames <session>/frames --model third_party/lingbot-map-weights/lingbot-map.pt --out <run folder> --device cpu --stride 3 --window 16 [--first 10]
+.venv\Scripts\python -B -m research.experiments.lingbot_map.compare --run <run folder> --session <session> --surface outputs/cleanup/room_build_clean_up_093913/surface.ply
 ```
 
-Set `PYTHONIOENCODING=utf-8` first: LingBot-Map prints characters the Windows console code page cannot show. Setup of `experiments/lingbot_map/.venv` (Python 3.10, torch 2.8.0 cu128, LingBot-Map at commit b9dd1b1) is recorded in `research/repositories.json`.
+Set `PYTHONIOENCODING=utf-8` first: LingBot-Map prints characters the Windows console code page cannot show. Setup of `research/experiments/lingbot_map/.venv` (Python 3.10, torch 2.8.0 cu128, LingBot-Map at commit b9dd1b1) is recorded in `research/repositories.json`.
 
 ## Results
 
@@ -138,7 +138,7 @@ The owner judged the LingBot-Map viewer no better than the cleaned room build. T
 | GPU run, 17 frames | ARCore raw depth | 0.042, 99.5% | 0.060, 98.5% | 14 of 17 |
 | GPU run, 13 frames | ARCore tracked points | 0.081, 94.2% | 0.102, 90.8% | 12 of 13 |
 
-LingBot-Map's depth has a better shape: 38% lower error against ARCore depth, and 20% lower against tracked points, which reach farther. Its confidence map also marks its worst pixels. Against tracked points, per-frame-sized depth has a middle half 0.162 wide in its least confident quarter and 0.071 wide in its most confident; part of that is distance (median 3.2 m against 1.5 m). The test this points to is a room build with LingBot-Map's depth in place of Depth Anything V2 ([parts note](../../research/feed_forward_3d/lingbot_map_how_it_works.md#next-test-this-suggests)). The scoring script is not yet in the repository: it was run from a scratch file while another session held the task board.
+LingBot-Map's depth has a better shape: 38% lower error against ARCore depth, and 20% lower against tracked points, which reach farther. Its confidence map also marks its worst pixels. Against tracked points, per-frame-sized depth has a middle half 0.162 wide in its least confident quarter and 0.071 wide in its most confident; part of that is distance (median 3.2 m against 1.5 m). The test this points to is a room build with LingBot-Map's depth in place of Depth Anything V2 ([parts note](../../feed_forward_3d/lingbot_map_how_it_works.md#next-test-this-suggests)). The scoring script is not yet in the repository: it was run from a scratch file while another session held the task board.
 
 Local outputs: `outputs/lingbot_map/lingbot_map_15oct_first100_gpu/` (with `lingbot-map-first100-gpu-viewer.html`) and `outputs/lingbot_map/lingbot_map_15oct_stride3_cpu_first100/` (the CPU run cut to the same frames), each with `compare.json` and `lingbot_cloud.ply`; VRAM logs in `outputs/lingbot_map/lingbot_map_15oct_first100_gpu_vram.csv`.
 

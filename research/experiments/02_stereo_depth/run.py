@@ -164,14 +164,14 @@ def _validate_checkpoint(method: str, checkpoint: Path) -> Path:
 def _load_method(args: argparse.Namespace) -> Callable[..., Iterator[Any]]:
     checkpoint = _validate_checkpoint(args.method, args.checkpoint)
     if args.method == "depth-anything":
-        depth_step = importlib.import_module("evaluation.layers.steps.depth")
+        depth_step = importlib.import_module("research.evaluation.layers.steps.depth")
         method = depth_step.DepthAnythingV2Metric(
             checkpoint=checkpoint,
             device=args.device,
             max_depth_m=20.0,
         )
     else:
-        zipdepth = importlib.import_module("experiments.02_stereo_depth.zipdepth")
+        zipdepth = importlib.import_module("research.experiments.02_stereo_depth.zipdepth")
         method = zipdepth.ZipDepth(
             checkpoint=checkpoint,
             build=args.zip_build,

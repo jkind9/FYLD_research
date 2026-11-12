@@ -1,7 +1,7 @@
 """Save Depth Anything V2 Metric Small depth for every frame of a sequence (CPU, `.venv`).
 
-    python -m experiments.sfm.dump_depth --recording icl:data/icl_nuim/trajectory2 --every 2 \
-        --output experiments/sfm/runs/depth/icl_every2
+    python -m research.experiments.sfm.dump_depth --recording icl:data/icl_nuim/trajectory2 --every 2 \
+        --output research/experiments/sfm/runs/depth/icl_every2
 """
 
 from __future__ import annotations
@@ -15,9 +15,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from experiments.shared.contracts import Calibration
-from evaluation.layers.steps.contracts import ColourFrame
-from evaluation.layers.steps.depth import DepthAnythingV2Metric
+from research.experiments.shared.contracts import Calibration
+from research.evaluation.layers.steps.contracts import ColourFrame
+from research.evaluation.layers.steps.depth import DepthAnythingV2Metric
 
 from .src import sequences
 

@@ -34,7 +34,7 @@ from .steps.objects import (
 from .steps.video_depth import MetricVideoDepthAnything
 from .validation import ScoreRequest
 
-pose_evaluation = importlib.import_module("experiments.03_camera_pose_estimation.src.evaluation")
+pose_evaluation = importlib.import_module("research.experiments.03_camera_pose_estimation.src.evaluation")
 # Local weights each depth choice uses when --depth-checkpoint is not given.
 DEFAULT_DEPTH_CHECKPOINTS = {
     "depth-anything": Path("models/depth_anything_v2_metric_indoor_small"),
@@ -141,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(f"--depth-scale {args.depth_scale} needs --dataset, because it reads that dataset's references")
     spec = PipelineSpec(
         args.run_root,
-        Path(__file__).resolve().parents[2],
+        Path(__file__).resolve().parents[3],
         (TumSequence(args.dataset) if args.dataset is not None else PhoneExport(args.report, args.bundle)),
         depth=depth_choice(args),
         mapping=mapping_choice(args),

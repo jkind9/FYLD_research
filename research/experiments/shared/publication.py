@@ -9,7 +9,7 @@ import re
 import shutil
 from pathlib import Path
 
-from experiments.datasets.acquisition import sha256
+from research.experiments.datasets.acquisition import sha256
 
 from .inspection import computation_metadata, tracking_view
 from .runs import Run, verify_run, write_json
@@ -67,7 +67,7 @@ def publish(source: Path, runs: Path, repo: Path, stage: str) -> Path:
             tracking_view(run.path)
         else:
             module = importlib.import_module(
-                "experiments.04_surface_reconstruction.src.review"
+                "research.experiments.04_surface_reconstruction.src.review"
             )
             metrics = json.loads((run.path / "output/metrics.json").read_text())
             frames = json.loads((run.path / "output/surface.json").read_text())[
@@ -126,7 +126,7 @@ def main() -> None:
     parser.add_argument("--runs", type=Path, required=True)
     args = parser.parse_args()
     path = publish(
-        args.source, args.runs, Path(__file__).resolve().parents[2], args.stage
+        args.source, args.runs, Path(__file__).resolve().parents[3], args.stage
     )
     logging.basicConfig(level=logging.INFO)
     logging.getLogger(__name__).info("Inspection: %s", path / "viewer.html")

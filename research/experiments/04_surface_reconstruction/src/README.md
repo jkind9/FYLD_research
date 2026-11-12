@@ -18,21 +18,21 @@ The surface is direct point accumulation: every valid depth pixel is placed in t
 | `validation/controls.py` | `fault_points(frame, fault)` makes deliberately wrong surfaces (`double_depth`, `inverse_pose`) to check the scorer notices them. |
 | `validation/__init__.py` | Public entry to the scorer; re-exports `SurfaceScorer`, `DistanceTotals`, `distance_summary`, `nearest` and `validate_points`. |
 
-`experiments/evaluation/stages/surface.py` re-scores saved runs with `DistanceTotals` and `distance_summary`.
+`research/evaluation/stage_report/stages/surface.py` re-scores saved runs with `DistanceTotals` and `distance_summary`.
 
 ## How to run it
 
 Run from the repository root, CPU only:
 
 ```text
-.venv/Scripts/python.exe -B -m experiments.04_surface_reconstruction.src.run --dataset data/icl_nuim --frame-ids 1 101 201 --threshold-m 0.05
-.venv/Scripts/python.exe -B -m experiments.04_surface_reconstruction.src.inspection --dataset data/icl_nuim --frame-ids 1 101 201 --threshold-m 0.05 --recover-run <earlier run folder>
+.venv/Scripts/python.exe -B -m research.experiments.04_surface_reconstruction.src.run --dataset data/icl_nuim --frame-ids 1 101 201 --threshold-m 0.05
+.venv/Scripts/python.exe -B -m research.experiments.04_surface_reconstruction.src.inspection --dataset data/icl_nuim --frame-ids 1 101 201 --threshold-m 0.05 --recover-run <earlier run folder>
 ```
 
 `--frame-ids` and `--threshold-m` are required; nothing is chosen for you. `--runs` changes where run folders are written. Tests:
 
 ```text
-.venv/Scripts/python.exe -B tools/check.py -q experiments/04_surface_reconstruction/tests
+.venv/Scripts/python.exe -B tools/check.py -q research/experiments/04_surface_reconstruction/tests
 ```
 
 ## Where results are recorded

@@ -8,15 +8,15 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, verify_run
 
-runner = importlib.import_module("experiments.06_object_recognition.pilot.run")
+runner = importlib.import_module("research.experiments.06_object_recognition.pilot.run")
 localisation = importlib.import_module(
-    "experiments.06_object_recognition.pilot.localisation"
+    "research.experiments.06_object_recognition.pilot.localisation"
 )
 detector_module = importlib.import_module(
-    "experiments.06_object_recognition.pilot.detector"
+    "research.experiments.06_object_recognition.pilot.detector"
 )
 
 

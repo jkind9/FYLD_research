@@ -19,7 +19,7 @@ There is no independent physical identity or position reference for these propos
 
 ## Reproduce and inspect
 
-Run from the repository root with `python -B experiments/06_object_recognition/experiments/08_spatial_uncertainty_latency/run.py`. The runner copies its inputs and source, records settings, hashes and environment, checks every association output, and verifies a new immutable run folder.
+Run from the repository root with `python -B research/experiments/06_object_recognition/experiments/08_spatial_uncertainty_latency/run.py`. The runner copies its inputs and source, records settings, hashes and environment, checks every association output, and verifies a new immutable run folder.
 
 The corrected run's [results](runs/20261005T215109.670881Z_b75b396878c74919898f3d75b274cf78/output/results.json), [settings](runs/20261005T215109.670881Z_b75b396878c74919898f3d75b274cf78/input/settings.json), and [manifest](runs/20261005T215109.670881Z_b75b396878c74919898f3d75b274cf78/metadata/manifest.json) are saved under `20261005T215109.670881Z_b75b396878c74919898f3d75b274cf78`. The manifest is complete with 309 files and SHA-256 `9e080c393ffcc3ea22f811f93f6ab73d3348f2bba9fb4fb8d6358808c758a8b6`. The decision signature SHA-256 is `69be99177851717b504aaccbfc0535e2ba988a394df1d652cf66d49f6e6735b5`.
 

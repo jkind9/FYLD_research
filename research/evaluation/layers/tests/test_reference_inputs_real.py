@@ -8,14 +8,14 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from evaluation.layers import pipeline
-from evaluation.layers.config import PipelineSpec
-from evaluation.layers.steps.capture import TumSequence, pose_dataset
-from evaluation.layers.steps.contracts import nearest_references
-from evaluation.layers.steps.depth import RecordedSensorDepth
-from evaluation.layers.steps.tracking import ReferencePoses
+from research.evaluation.layers import pipeline
+from research.evaluation.layers.config import PipelineSpec
+from research.evaluation.layers.steps.capture import TumSequence, pose_dataset
+from research.evaluation.layers.steps.contracts import nearest_references
+from research.evaluation.layers.steps.depth import RecordedSensorDepth
+from research.evaluation.layers.steps.tracking import ReferencePoses
 
-REPO = Path(__file__).resolve().parents[3]
+REPO = Path(__file__).resolve().parents[4]
 DATASET = REPO / "data/tum/rgbd_dataset_freiburg1_xyz"
 pytestmark = pytest.mark.skipif(
     not (DATASET / "rgb/1305031102.175304.png").is_file(),

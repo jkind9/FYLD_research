@@ -3,7 +3,7 @@
 Points use each frame's own pose. Anchor corrections move a whole fragment rigidly, so they cannot separate
 copies made inside one fragment.
 
-    python -B -m evaluation.landmark_probe --session <v2 session> --first 660 --last 730 --out <probe.json>
+    python -B -m research.evaluation.landmark_probe --session <v2 session> --first 660 --last 730 --out <probe.json>
 """
 
 import argparse

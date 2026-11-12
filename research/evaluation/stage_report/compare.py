@@ -7,7 +7,7 @@ No pass/fail limits are applied; the verdict only states direction.
 
 from typing import Any
 
-from evaluation.stage_report.schema import SCHEMA_VERSION
+from research.evaluation.stage_report.schema import SCHEMA_VERSION
 
 SECTION_KEYS = (
     ("dataset", "dataset"),

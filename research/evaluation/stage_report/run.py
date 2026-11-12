@@ -1,7 +1,7 @@
 """Build one per-stage accuracy report from pinned, verified runs (Task 44).
 
 Usage:
-    python -B -m evaluation.stage_report.run --runs-root <repo holding the run folders>
+    python -B -m research.evaluation.stage_report.run --runs-root <repo holding the run folders>
 
 Run folders are gitignored, so `--runs-root` names the checkout that holds them.
 Every run is verified and its manifest hash checked against the pin before any
@@ -12,9 +12,9 @@ import argparse
 from pathlib import Path
 from typing import Any
 
-from evaluation.stage_report import render, schema
-from evaluation.stage_report.stages import camera, detection, identity, surface
-from experiments.shared.runs import Run, write_json
+from research.evaluation.stage_report import render, schema
+from research.evaluation.stage_report.stages import camera, detection, identity, surface
+from research.experiments.shared.runs import Run, write_json
 
 HYPERPARAMETERS = {
     "detection_iou_thresholds": {
@@ -59,28 +59,28 @@ HYPERPARAMETERS = {
 
 PINNED: dict[str, dict[str, Any]] = {
     "camera_path": {
-        "path": "experiments/03_camera_pose_estimation/runs/20261002T164601.734717Z_befb0ccd27ab44daba6d9ac41f9b9ae0",
+        "path": "research/experiments/03_camera_pose_estimation/runs/20261002T164601.734717Z_befb0ccd27ab44daba6d9ac41f9b9ae0",
         "sha256": "3d5e3f6fe69855725e26645e265e62d8a5f0d9f0274523d7721aa87c3174dbd6",
         "dataset": "TUM freiburg1 xyz, 30 frames (Task05)",
         "reference_kind": "independent",
         "wrapper": camera.camera_section,
     },
     "detection": {
-        "path": "experiments/06_object_recognition/experiments/01_detection/runs/20261004T071442.158193Z_4be5db5d6dca43e4be715c0665e44fcd",
+        "path": "research/experiments/06_object_recognition/experiments/01_detection/runs/20261004T071442.158193Z_4be5db5d6dca43e4be715c0665e44fcd",
         "sha256": "7ee60f385871eeb6288c007bc03a548a233a2fee3e6dcf7cca9a5f583a15e39c",
         "dataset": "TUM freiburg1 desk, 6 frames (Task18)",
         "reference_kind": "provisional",
         "wrapper": detection.detection_section,
     },
     "surface": {
-        "path": "experiments/04_surface_reconstruction/runs/20261002T145103.184769Z_000165ef2e044376baf54b675172a64e",
+        "path": "research/experiments/04_surface_reconstruction/runs/20261002T145103.184769Z_000165ef2e044376baf54b675172a64e",
         "sha256": "ef35312a41243ed86b5ff5b144afea1012bd54bd7a1aec02f2dbee2871179e7f",
         "dataset": "ICL-NUIM living room, 9 views (Task04)",
         "reference_kind": "independent",
         "wrapper": surface.surface_section,
     },
     "identity": {
-        "path": "experiments/06_object_recognition/experiments/04_geometry_identity/runs/20261004T143434.634726Z_33f59456f7d34e50a64020ed6e0613bb",
+        "path": "research/experiments/06_object_recognition/experiments/04_geometry_identity/runs/20261004T143434.634726Z_33f59456f7d34e50a64020ed6e0613bb",
         "sha256": "75a1b943ab087d846a87d71289b4e118063fad8bac2010694e1521499046d6f7",
         "dataset": "TUM freiburg1 desk, 11 observations (Task21, pending review)",
         "reference_kind": "provisional",
@@ -133,11 +133,11 @@ def publish(report: dict, repo: Path, output: Path) -> Path:
 
 
 def main(argv: list[str] | None = None) -> None:
-    repo = Path(__file__).resolve().parents[2]
+    repo = Path(__file__).resolve().parents[3]
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--runs-root", type=Path, default=repo)
     parser.add_argument(
-        "--output", type=Path, default=repo / "evaluation/stage_report/runs"
+        "--output", type=Path, default=repo / "research/evaluation/stage_report/runs"
     )
     arguments = parser.parse_args(argv)
     path = publish(build(arguments.runs_root.resolve()), repo, arguments.output)

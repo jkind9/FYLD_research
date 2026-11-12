@@ -5,7 +5,7 @@ import re
 from collections.abc import Iterable
 from typing import Any
 
-from experiments.shared.contracts import Calibration
+from research.experiments.shared.contracts import Calibration
 
 
 def identifier(value: Any, name: str) -> str:

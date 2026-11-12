@@ -1,6 +1,6 @@
 """One offline page for a clean-up trial: the room before clean-up, what the visibility vote removes, and the scores.
 
-python -B -m tools.demos.cleanup_scene --trial <experiments.surface_cleanup.denoise_trial folder> --session <v2 session> --out <viewer.html>
+python -B -m tools.demos.cleanup_scene --trial <research.experiments.surface_cleanup.denoise_trial folder> --session <v2 session> --out <viewer.html>
 
 The page embeds the walk's photos, so it stays local.
 """
@@ -107,7 +107,7 @@ def report(results: dict, kept: str) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--trial", type=Path, required=True, help="experiments.surface_cleanup.denoise_trial output folder")
+    parser.add_argument("--trial", type=Path, required=True, help="research.experiments.surface_cleanup.denoise_trial output folder")
     parser.add_argument("--session", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--voxel", type=float, default=0.03, help="display cell size in metres (Task115 used 3 cm)")

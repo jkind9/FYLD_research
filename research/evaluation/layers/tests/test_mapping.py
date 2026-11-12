@@ -10,9 +10,12 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from evaluation.layers import pipeline
-from evaluation.layers.steps import mapping
-from evaluation.layers.tests.test_adapters import config, read  # noqa: F401  (fixture)
+from research.evaluation.layers import pipeline
+from research.evaluation.layers.steps import mapping
+from research.evaluation.layers.tests.test_adapters import (  # noqa: F401  (fixture)
+    config,
+    read,
+)
 
 
 def _floor(offset_x: float = 0.0) -> np.ndarray:
@@ -147,7 +150,7 @@ def test_six_layer_run_with_grid_footprint_shows_a_map_per_origin(config):  # no
 
 
 def test_cli_mapping_choice():
-    from evaluation.layers.cli import mapping_choice
+    from research.evaluation.layers.cli import mapping_choice
 
     assert isinstance(mapping_choice(argparse.Namespace(mapping="grid-footprint")), mapping.GridFootprint)
     assert mapping_choice(argparse.Namespace(mapping=None)) is None

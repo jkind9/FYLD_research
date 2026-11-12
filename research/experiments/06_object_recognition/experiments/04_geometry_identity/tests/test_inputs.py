@@ -6,13 +6,13 @@ from pathlib import Path
 import pytest
 
 inputs = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.inputs"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.inputs"
 )
 output_root = inputs.output_root
 
 
 def test_output_must_not_overlap_frozen_roots(tmp_path):
-    repo = Path(__file__).resolve().parents[5]
+    repo = Path(__file__).resolve().parents[6]
     with pytest.raises(ValueError, match="protected"):
         output_root(repo, repo / "data/object_revisits/desk_smoke_v1/new-run")
     with pytest.raises(ValueError, match="inside the repository"):
@@ -20,7 +20,7 @@ def test_output_must_not_overlap_frozen_roots(tmp_path):
 
 
 def test_output_ancestor_cannot_contain_a_protected_input(tmp_path):
-    repo = Path(__file__).resolve().parents[5]
+    repo = Path(__file__).resolve().parents[6]
     with pytest.raises(ValueError, match="overlaps"):
         output_root(repo, repo)
 

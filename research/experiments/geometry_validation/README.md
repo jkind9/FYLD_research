@@ -31,7 +31,7 @@ The coordinate-channel images (`camera_x.png`, `world_z.png`, and similar files)
 
 ## How to validate a run
 
-1. **Integrity:** require a complete receipt and verify every artifact hash with `experiments.shared.runs.verify_run`. Compare the copied RGB/depth hashes with the selected source files. This proves files were retained correctly.
+1. **Integrity:** require a complete receipt and verify every artifact hash with `research.experiments.shared.runs.verify_run`. Compare the copied RGB/depth hashes with the selected source files. This proves files were retained correctly.
 2. **Geometry meaning:** run the independent analytic tests, including known translations/rotations, signed calibration, invalid depth, reflections and distinct origins. Those checks can expose wrong scale or transform direction.
 3. **Per-input consistency:** confirm image dimensions match calibration, point counts match the validity mask, point-to-pixel correspondence is preserved and projection residuals remain below the `1e-10` pixel arithmetic limit. This is not a field accuracy threshold.
 4. **Visual diagnosis:** inspect depth, camera/world/reference point views and supplied camera positions. Unexpected flips, axes or gaps guide investigation, but an attractive cloud alone cannot establish accuracy.
@@ -52,7 +52,7 @@ Run from the repository root after building the environment:
 ```powershell
 uv sync --all-extras
 python -B tools/check.py -q
-python -B -m experiments.geometry_validation.src.run --dataset data/icl_nuim --frame-ids <explicit IDs>
+python -B -m research.experiments.geometry_validation.src.run --dataset data/icl_nuim --frame-ids <explicit IDs>
 ```
 
 Replace `<explicit IDs>` with the ordered frames you intend to inspect. ID 0 is excluded because it has no supplied pose. There is no implicit stride, frame cap, depth clipping or point thinning. Each run has a unique directory under `runs/`; opening `review.html` shows matching stage visuals for each selected input. All GPU runs require the user's permission beforehand. This command only executes the CPU control.
@@ -80,7 +80,7 @@ geometry_validation/
     review.html
 ```
 
-The numerical arrays retain every valid pixel. Preview intensities use the range recorded in each legend; compare raw values rather than gray levels across frames. Black invalid pixels represent unobserved depth. The fixed reference conversion includes a reflection and is kept separate from proper camera poses. Raw inputs and metadata are copied before decoding. A complete run passes `experiments.shared.runs.verify_run`; failure leaves a failed receipt and partial artifacts, while abrupt termination can leave running status. Restart creates a new run.
+The numerical arrays retain every valid pixel. Preview intensities use the range recorded in each legend; compare raw values rather than gray levels across frames. Black invalid pixels represent unobserved depth. The fixed reference conversion includes a reflection and is kept separate from proper camera poses. Raw inputs and metadata are copied before decoding. A complete run passes `research.experiments.shared.runs.verify_run`; failure leaves a failed receipt and partial artifacts, while abrupt termination can leave running status. Restart creates a new run.
 
 Mathematics and portable records live in [shared](../shared/README.md). No CUDA framework, HTTP server or model weights enter those records. Later tracking adapters can produce the same pose agreement on a desktop GPU, edge device or hosted backend. Inference timing and data-transfer timing must be measured separately. A supplied-pose control is never an estimated tracker result.
 

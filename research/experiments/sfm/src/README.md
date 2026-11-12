@@ -16,20 +16,20 @@ SfM recovers camera positions and 3D points from images alone, so its result has
 | `prompt.py` | `prompt_map(...)` turns a frame's SfM points into a low-resolution depth prompt for Prompt Depth Anything. |
 | `references.py` | `icl_reference(icl_root)` loads the ICL-NUIM reference surface in the same right-handed world as the true poses. |
 
-The scripts that use these modules are one level up: `run_sfm.py`, `run_dense.py`, `run_metric_points.py`, `dump_depth.py`, `dump_da3_depth.py`, `dump_prompt_depth.py` and `report.py`. `experiments/live_slam/run_live.py` also imports `scoring` and `sequences`.
+The scripts that use these modules are one level up: `run_sfm.py`, `run_dense.py`, `run_metric_points.py`, `dump_depth.py`, `dump_da3_depth.py`, `dump_prompt_depth.py` and `report.py`. `research/experiments/live_slam/run_live.py` also imports `scoring` and `sequences`.
 
 ## How to run it
 
 Nothing here is a script. Run the entry points from the repository root:
 
 ```text
-.venv/Scripts/python.exe -m experiments.sfm.run_sfm --recording tum:<recording folder> --features sift --run-root <run folder> [--depth-run <finished walkthrough run>]
+.venv/Scripts/python.exe -m research.experiments.sfm.run_sfm --recording tum:<recording folder> --features sift --run-root <run folder> [--depth-run <finished walkthrough run>]
 ```
 
 `reconstruct.py` needs the COLMAP 4.2.1 Windows build (no CUDA) unpacked to `third_party/colmap-4.2.1-windows-nocuda/`, which Git ignores. COLMAP and the learned features run on the CPU. Tests:
 
 ```text
-.venv/Scripts/python.exe -m pytest experiments/sfm/tests -p no:cacheprovider --import-mode=importlib
+.venv/Scripts/python.exe -m pytest research/experiments/sfm/tests -p no:cacheprovider --import-mode=importlib
 ```
 
 ## Where results are recorded

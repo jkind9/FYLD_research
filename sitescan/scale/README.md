@@ -67,12 +67,12 @@ ahead of the camera clock. It is not a clock alignment or scale-expiry rule.
 Live tries raw depth, tracked points, then its last scale (`frame_scale` in the live
 pipeline). Room chooses fresh depth and a grid fit. These choices belong to the
 orchestrators, not this stage. The optional
-scale-and-shift experiment remains in `experiments/sfm`.
+scale-and-shift experiment remains in `research/experiments/sfm`.
 
 ## Tests
 
 `python -B -m pytest -q tests/test_sitescan_scale.py tests/test_pipelines.py
-experiments/sfm/tests/test_dense.py` checks confidence,
+research/experiments/sfm/tests/test_dense.py` checks confidence,
 camera projection, image bounds, point depth, invalid pairs, support thresholds, grid
 blending and fallback, source fallback, freshness and the retained shift experiment.
 Golden room and live outputs check the combined numerical result.

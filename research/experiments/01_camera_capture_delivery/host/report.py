@@ -1,6 +1,6 @@
 """Check a Redmi check-app report and count its results.
 
-    python experiments/01_camera_capture_delivery/host/report.py <report.json>
+    python research/experiments/01_camera_capture_delivery/host/report.py <report.json>
 
 Every check must say PASS, FAIL or SKIPPED; FAIL and SKIPPED must give a reason, so nothing is left unknown.
 """

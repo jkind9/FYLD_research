@@ -20,7 +20,7 @@ The tutorial's input assumptions and API output are checked. Its numerical bench
 
 Motion-estimation success does not guarantee that a plain surface constrains every direction of motion. Local gates may miss an incorrect estimate. Supplied depth gives this experiment metric scale, but surface accuracy still needs an independent geometry reference. A declared up direction also does not establish gravity alignment.
 
-For FYLD, this motivates a controlled comparison: hold depth fixed and change the source of camera poses. The [independent experiment plans](../../experiments/README.md) separate that question from phone capture and depth estimation.
+For FYLD, this motivates a controlled comparison: hold depth fixed and change the source of camera poses. The [independent experiment plans](../experiments/README.md) separate that question from phone capture and depth estimation.
 
 ## Licence and two next questions
 

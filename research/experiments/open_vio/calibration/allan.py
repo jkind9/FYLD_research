@@ -1,6 +1,6 @@
 """Motion-sensor noise from a recording at rest, by Allan deviation (IEEE Std 952-1997 method).
 
-    python experiments/open_vio/calibration/allan.py <recording folder>
+    python research/experiments/open_vio/calibration/allan.py <recording folder>
 
 Writes allan.json in the recording folder. White noise (Kalibr's "noise density") falls on a line of slope -1/2
 on a log-log Allan deviation plot and is read at tau = 1 s; bias random walk lies on a line of slope +1/2 and is

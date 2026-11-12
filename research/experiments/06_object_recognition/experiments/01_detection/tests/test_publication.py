@@ -10,11 +10,11 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run
 
 runner = importlib.import_module(
-    "experiments.06_object_recognition.experiments.01_detection.run"
+    "research.experiments.06_object_recognition.experiments.01_detection.run"
 )
 ANNOTATIONS = Path(__file__).parents[3] / "datasets/desk_smoke_v1.json"
 

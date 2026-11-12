@@ -1,4 +1,4 @@
-"""Files exchanged with the native SLAM runners, and per-frame rows for experiments/sfm scoring.
+"""Files exchanged with the native SLAM runners, and per-frame rows for research/experiments/sfm scoring.
 
 A runner writes one line per frame: `time segment x y z qx qy qz qw` (camera-to-world, the
 system's own units) or `time lost`. A segment is one map; a reset starts a new one.
@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.shared.geometry import pose_matrix
+from research.experiments.shared.geometry import pose_matrix
 
 
 def to_wsl(path: Path) -> str:
@@ -52,7 +52,7 @@ def read_trajectory(path: Path, *, time_scale: float = 1.0) -> list[tuple[float,
 
 
 def rows(frame_ids: list[str], times: list[float], poses: list, *, tolerance_s: float = 0.001) -> list[dict]:
-    """One row per input frame in the form `experiments/sfm/src/scoring.py` reads; unmatched frames are unplaced."""
+    """One row per input frame in the form `research/experiments/sfm/src/scoring.py` reads; unmatched frames are unplaced."""
     stamps = np.array([t for t, _, _ in poses]) if poses else np.array([])
     out = []
     for frame_id, t in zip(frame_ids, times):

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.shared.runs import write_json
+from research.experiments.shared.runs import write_json
 
 
 def write(

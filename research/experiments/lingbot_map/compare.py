@@ -7,7 +7,7 @@ fused learned depth. ARCore is not ground truth: every number here is agreement 
 
 Writes compare.json and lingbot_cloud.ply (ARCore world, metres, y up) into the run folder.
 
-    .venv\\Scripts\\python -B -m experiments.lingbot_map.compare --run <run folder> --session <v2 session> [--surface <surface.ply>]
+    .venv\\Scripts\\python -B -m research.experiments.lingbot_map.compare --run <run folder> --session <v2 session> [--surface <surface.ply>]
 """
 
 import argparse
@@ -18,7 +18,7 @@ import numpy as np
 import open3d as o3d
 from PIL import Image
 
-from evaluation.depth_check import BINS, point_targets, summarise
+from research.evaluation.depth_check import BINS, point_targets, summarise
 from sitescan.depth.orientation import quarter_turns
 from sitescan.session import read_wire_session, wire_v1
 

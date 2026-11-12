@@ -19,7 +19,7 @@ The store enforces these rules:
 There is no command line. Run its tests from the repository root:
 
 ```text
-.venv/Scripts/python.exe -B -m pytest experiments/06_object_recognition/tests/test_identity_store.py -p no:cacheprovider
+.venv/Scripts/python.exe -B -m pytest research/experiments/06_object_recognition/tests/test_identity_store.py -p no:cacheprovider
 ```
 
 ## Where results are recorded

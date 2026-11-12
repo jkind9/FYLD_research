@@ -19,7 +19,7 @@ The module imports its support summary from `04_geometry_identity/spatial_suppor
 There is no command line. Import the module from the repository root:
 
 ```text
-.venv/Scripts/python.exe -B -m pytest experiments/06_object_recognition/experiments/07_spatial_uncertainty/tests -p no:cacheprovider
+.venv/Scripts/python.exe -B -m pytest research/experiments/06_object_recognition/experiments/07_spatial_uncertainty/tests -p no:cacheprovider
 ```
 
 It runs on the CPU and needs SciPy.

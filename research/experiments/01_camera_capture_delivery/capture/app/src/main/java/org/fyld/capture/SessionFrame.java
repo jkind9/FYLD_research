@@ -3,7 +3,7 @@ package org.fyld.capture;
 import org.json.JSONObject;
 
 /**
- * One phone session v2 frame (experiments/01_camera_capture_delivery/phone_session_v2.md) as plain values,
+ * One phone session v2 frame (research/experiments/01_camera_capture_delivery/phone_session_v2.md) as plain values,
  * encoded to the JSON header and payload the PC reads. No Android or ARCore types, so it is tested on the JVM.
  */
 final class SessionFrame {

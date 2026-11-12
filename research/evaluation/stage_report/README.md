@@ -37,12 +37,12 @@ Segmentation, depth support, 3D position and count have no wrapper yet. Tasks 34
 ## Run it
 
 ```bash
-python -B -m evaluation.stage_report.run --runs-root <checkout holding the run folders>
+python -B -m research.evaluation.stage_report.run --runs-root <checkout holding the run folders>
 ```
 
-Run folders are not in git, so `--runs-root` names the checkout that has them. The command checks each pinned run, builds the report and publishes it as a new verified run under `evaluation/stage_report/runs/`, with `output/report.json`, a readable `output/report.md` and the per-item rows.
+Run folders are not in git, so `--runs-root` names the checkout that has them. The command checks each pinned run, builds the report and publishes it as a new verified run under `research/evaluation/stage_report/runs/`, with `output/report.json`, a readable `output/report.md` and the per-item rows.
 
-Tests: `python -B -m pytest evaluation/stage_report/tests`. The small fixtures are built in the tests. To also check that the four pinned runs reproduce exactly, set `EVAL_RUNS_ROOT` to the checkout that holds them; without it those tests skip and say why.
+Tests: `python -B -m pytest research/evaluation/stage_report/tests`. The small fixtures are built in the tests. To also check that the four pinned runs reproduce exactly, set `EVAL_RUNS_ROOT` to the checkout that holds them; without it those tests skip and say why.
 
 ## First report, 5 October 2026
 
@@ -56,14 +56,14 @@ The first report combines four earlier runs on three datasets. It is a composite
 | Identity | Task21, TUM desk, 11 sightings | 4 of 5 rules match all 11 with no wrong merges or splits; the appearance-only rule leaves 4 unresolved | provisional |
 | Segmentation, depth support, 3D position, count | none | unavailable | none yet |
 
-Every number equals the value its own run stored, bit for bit. Report run: `evaluation/stage_report/runs/20261005T084939.267589Z_eb6fdf05c67b4cf19da710104a771448` (manifest SHA-256 `0b9d468c…8e81`, report format version 2), generated in the Task 44 worktree. It replaces two earlier reports from the same day in older formats; `compare` refuses reports from another format version.
+Every number equals the value its own run stored, bit for bit. Report run: `research/evaluation/stage_report/runs/20261005T084939.267589Z_eb6fdf05c67b4cf19da710104a771448` (manifest SHA-256 `0b9d468c…8e81`, report format version 2), generated in the Task 44 worktree. It replaces two earlier reports from the same day in older formats; `compare` refuses reports from another format version.
 
 No stage has yet been scored both with correct inputs and with predicted inputs on the same frames, so the split between a stage's own error and inherited error is so far tested only on synthetic data.
 
 ## Complete walkthrough successor, 6 October 2026
 
-[Task56](../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns one complete same-recording test, including phone-compatible inputs, independently scored counts/dimensions/area, full processing time and peak memory. It extends this existing report schema and its comparison/readers for missing stage measures and site area, with an explicit format version. It reuses existing method owners and keeps reference answers outside method inputs. The composite report above remains historical component evidence; no complete walkthrough run is claimed.
+[Task56](../../../task_list/open/56_benchmark_complete_walkthrough_accuracy_time_and_m.md) owns one complete same-recording test, including phone-compatible inputs, independently scored counts/dimensions/area, full processing time and peak memory. It extends this existing report schema and its comparison/readers for missing stage measures and site area, with an explicit format version. It reuses existing method owners and keeps reference answers outside method inputs. The composite report above remains historical component evidence; no complete walkthrough run is claimed.
 
 ## Complete walkthrough ownership
 
-The sole current six-step sequencing lives in [evaluation/layers](../../evaluation/layers/README.md). This package still joins/scorers existing compatible results; Task56 consumes the root runner and owns complete physical-survey adapters and measured time/memory reports. Identity reporting now imports the public experiment validation scorer, with identical historical interpretation. No software fixture here establishes worksite accuracy, total latency or sustained edge acceptance.
+The sole current six-step sequencing lives in [research/evaluation/layers](../layers/README.md). This package still joins/scorers existing compatible results; Task56 consumes the root runner and owns complete physical-survey adapters and measured time/memory reports. Identity reporting now imports the public experiment validation scorer, with identical historical interpretation. No software fixture here establishes worksite accuracy, total latency or sustained edge acceptance.

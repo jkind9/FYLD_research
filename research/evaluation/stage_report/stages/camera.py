@@ -4,8 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
-from evaluation.stage_report import schema
-from evaluation.stage_report.stages.common import (
+from research.evaluation.stage_report import schema
+from research.evaluation.stage_report.stages.common import (
     file_sha256,
     owner,
     read_json,
@@ -14,10 +14,10 @@ from evaluation.stage_report.stages.common import (
     scope,
     verified_run,
 )
-from experiments.shared.contracts import Pose
+from research.experiments.shared.contracts import Pose
 
-EVALUATION = "experiments.03_camera_pose_estimation.src.evaluation"
-TRACKING = "experiments.03_camera_pose_estimation.src.tracking"
+EVALUATION = "research.experiments.03_camera_pose_estimation.src.evaluation"
+TRACKING = "research.experiments.03_camera_pose_estimation.src.tracking"
 METHOD = "layer3_tracker"
 TOO_FEW = "scorer returned no value (too few tracked frames matched to the reference)"
 REPORTED = (

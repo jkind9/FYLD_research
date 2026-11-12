@@ -8,9 +8,9 @@ import numpy as np
 import pytest
 from PIL import Image
 
-marigold = importlib.import_module("experiments.02_stereo_depth.marigold")
-TumDepthFrame = importlib.import_module("experiments.02_stereo_depth.dataset").TumDepthFrame
-TumDepthSelection = importlib.import_module("experiments.02_stereo_depth.dataset").TumDepthSelection
+marigold = importlib.import_module("research.experiments.02_stereo_depth.marigold")
+TumDepthFrame = importlib.import_module("research.experiments.02_stereo_depth.dataset").TumDepthFrame
+TumDepthSelection = importlib.import_module("research.experiments.02_stereo_depth.dataset").TumDepthSelection
 
 
 @pytest.fixture

@@ -59,10 +59,10 @@ print(rows[0]["association"], rows[0]["object_id"])
 
 | Name | Default | Why | Evidence |
 |---|---|---|---|
-| Detector | YOLO26x, SHA-256 `9fdd44a3…` | The checkpoint the counting results were measured with | [Pilot README](../../experiments/06_object_recognition/pilot/README.md) |
-| `imgsz`, `conf`, `iou` | 640, 0.25, 0.7 | Ultralytics defaults, kept for comparable results | [Detection experiment](../../experiments/06_object_recognition/experiments/01_detection/README.md) |
-| `max_distance_m` | 0.35 m | Tuned for cups placed from reference depth at every frame | [Object experiments](../../experiments/06_object_recognition/README.md) |
-| `ambiguity_margin_m` | 0.05 m | Leaves near-ties unresolved instead of guessing | [Object experiments](../../experiments/06_object_recognition/README.md) |
+| Detector | YOLO26x, SHA-256 `9fdd44a3…` | The checkpoint the counting results were measured with | [Pilot README](../../research/experiments/06_object_recognition/pilot/README.md) |
+| `imgsz`, `conf`, `iou` | 640, 0.25, 0.7 | Ultralytics defaults, kept for comparable results | [Detection experiment](../../research/experiments/06_object_recognition/experiments/01_detection/README.md) |
+| `max_distance_m` | 0.35 m | Tuned for cups placed from reference depth at every frame | [Object experiments](../../research/experiments/06_object_recognition/README.md) |
+| `ambiguity_margin_m` | 0.05 m | Leaves near-ties unresolved instead of guessing | [Object experiments](../../research/experiments/06_object_recognition/README.md) |
 
 ## Limits
 

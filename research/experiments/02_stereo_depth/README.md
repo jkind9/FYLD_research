@@ -1,6 +1,6 @@
 # Layer 2: depth estimation
 
-This folder is layer 2 of the five-layer pipeline described in the [root README](../../README.md). It answers one question: **how far away is each pixel, in metres?**
+This folder is layer 2 of the five-layer pipeline described in the [root README](../../../README.md). It answers one question: **how far away is each pixel, in metres?**
 
 A phone video is flat. Without depth, nothing in it can be measured. Depth is what turns pixels into points in space. The surface layer (layer 4) needs it to build a 3D model. The object layer (layer 5) needs it to give each object a position. The camera tracker (layer 3) can use it to fix the real-world scale of the camera path.
 
@@ -46,8 +46,8 @@ Every depth result also needs the calibration of the camera that took it: focal 
 | [Depth Pro](https://arxiv.org/abs/2410.02073) (Apple) | Hosted | Metric depth from a single image, with sharp edges. | Apple sample-code licence; check terms. |
 | [ARCore Depth API](https://developers.google.com/ar/develop/java/depth/raw-depth) | On the phone | Depth from motion, plus a per-pixel confidence. Uses a depth sensor if the phone has one. Both test phones are listed by Google as supporting it ([device list](https://developers.google.com/ar/devices), checked 4 October 2026). | Google terms. Confidence values are not calibrated error bars. Quality on our phones is unmeasured. |
 | OpenCV semi-global block matching ([StereoSGBM](https://docs.opencv.org/4.x/d2/d85/classcv_1_1StereoSGBM.html)) | Either | Classical stereo matching with no learned weights. The planned first baseline. | Apache-2.0. Runs on a CPU. |
-| Multi-view semi-global matching between keyframes ([Mobile3DRecon](../../research/dense_surface_fusion/mobile3drecon.md), IEEE TVCG 2020) | On the phone | One camera: each keyframe is matched against two earlier keyframes about 0.6 m away, using the tracker's poses. No rectification is needed. Unsure pixels are dropped, then a small network cleans the rest. 70 ms per keyframe on one Snapdragon 710 core. | No code released; to be written from the paper. Combining it with learned depth: [note](../../research/dense_surface_fusion/triangulation_and_learned_depth.md). |
-| [MobileStereoNet](https://arxiv.org/abs/2108.09770), [HITNet](https://arxiv.org/abs/2007.12140), [BANet](../../research/depth_estimation/banet.md) | On the phone | Learned stereo networks designed to be small and fast. | Check code and weight terms for each. |
+| Multi-view semi-global matching between keyframes ([Mobile3DRecon](../../dense_surface_fusion/mobile3drecon.md), IEEE TVCG 2020) | On the phone | One camera: each keyframe is matched against two earlier keyframes about 0.6 m away, using the tracker's poses. No rectification is needed. Unsure pixels are dropped, then a small network cleans the rest. 70 ms per keyframe on one Snapdragon 710 core. | No code released; to be written from the paper. Combining it with learned depth: [note](../../dense_surface_fusion/triangulation_and_learned_depth.md). |
+| [MobileStereoNet](https://arxiv.org/abs/2108.09770), [HITNet](https://arxiv.org/abs/2007.12140), [BANet](../../depth_estimation/banet.md) | On the phone | Learned stereo networks designed to be small and fast. | Check code and weight terms for each. |
 | [Depth Anything V2](https://arxiv.org/abs/2406.09414) Small | On the phone | Small single-image depth model. Relative depth by default; metric versions exist. | The Small model is Apache-2.0; larger models are non-commercial. |
 
 On-phone models run through a mobile runtime: [LiteRT](https://ai.google.dev/edge/litert) (formerly TensorFlow Lite), [ONNX Runtime Mobile](https://onnxruntime.ai/docs/tutorials/mobile/), [ExecuTorch](https://pytorch.org/executorch) or the precompiled models on [Qualcomm AI Hub](https://aihub.qualcomm.com/). Published speeds come from the authors' hardware and do not predict speed on these phones.
@@ -56,22 +56,22 @@ On-phone models run through a mobile runtime: [LiteRT](https://ai.google.dev/edg
 
 | Source | What it is | Why it matters here |
 |---|---|---|
-| [ARCore Raw Depth](https://developers.google.com/ar/develop/java/depth/raw-depth) and the [project note](../../research/phone_ar_platforms/arcore_raw_depth.md) | Google's documentation for phone depth with confidence | The cheapest route to depth on both test phones. It separates fresh depth from depth reused from earlier frames. |
+| [ARCore Raw Depth](https://developers.google.com/ar/develop/java/depth/raw-depth) and the [project note](../../phone_ar_platforms/arcore_raw_depth.md) | Google's documentation for phone depth with confidence | The cheapest route to depth on both test phones. It separates fresh depth from depth reused from earlier frames. |
 | [FoundationStereo](https://arxiv.org/abs/2501.09898) | A 2025 stereo model trained on 1 million synthetic pairs | The strongest hosted option if the phones can capture two lenses at once. |
 | [Depth Anything 3](https://arxiv.org/abs/2511.10647) | A 2025 model that predicts consistent depth across many views | The strongest hosted option for single-lens video. |
-| [MobiDepth](../../research/depth_estimation/mobidepth.md) | Research on stereo depth from two phone cameras | Explains how lens differences and capture timing on real phones affect depth. |
+| [MobiDepth](../../depth_estimation/mobidepth.md) | Research on stereo depth from two phone cameras | Explains how lens differences and capture timing on real phones affect depth. |
 | [Middlebury stereo, version 3](https://vision.middlebury.edu/stereo/submit3/) | A stereo benchmark with exact reference depth | The scoring data for this layer. |
 
-More background: [HiMoDepth](../../research/depth_estimation/himodepth.md) on keeping image detail in phone stereo, [MobileStereoNet](../../research/depth_estimation/mobilestereonet.md), [BANet](../../research/depth_estimation/banet.md) and [HyperSight](../../research/depth_estimation/hypersight.md) on using camera motion for longer range.
+More background: [HiMoDepth](../../depth_estimation/himodepth.md) on keeping image detail in phone stereo, [MobileStereoNet](../../depth_estimation/mobilestereonet.md), [BANet](../../depth_estimation/banet.md) and [HyperSight](../../depth_estimation/hypersight.md) on using camera motion for longer range.
 
 ## Where this layer stands
 
-- The Middlebury version 3 quarter-resolution training data is downloaded and checked at `data/middlebury/dataset/MiddEval3/trainingQ/`. It has 15 indoor scenes with left and right images, calibration, reference disparity and masks. [Download records](../../data/README.md).
+- The Middlebury version 3 quarter-resolution training data is downloaded and checked at `data/middlebury/dataset/MiddEval3/trainingQ/`. It has 15 indoor scenes with left and right images, calibration, reference disparity and masks. [Download records](../../../data/README.md).
 - TUM Freiburg1 `xyz` and `desk` recordings are available under `data/tum/`. The existing timestamp reader in experiment 03 finds 792 paired frames in `xyz` and 573 in `desk`. Every-tenth-frame samples loaded successfully: 80 and 58 frames, respectively.
 - `geometry.py` converts metric maps and aligns metric, relative, inverse-relative and affine-invariant log-depth maps to the sensor reference for a clearly labelled shape score. Invalid metric pixels do not enter the alignment fit. `scoring.py` keeps raw metric accuracy separate from reference-aligned shape scores and reports AbsRel, RMSE, δ1, coverage, distance bands and the share of aligned values that are non-positive.
-- `evaluation/layers/steps/depth.py` has an offline-only Depth Anything V2 metric adapter. It requires a local checkpoint folder and sets `local_files_only=True`; it cannot download weights.
+- `research/evaluation/layers/steps/depth.py` has an offline-only Depth Anything V2 metric adapter. It requires a local checkpoint folder and sets `local_files_only=True`; it cannot download weights.
 - Depth Anything V2 Metric Small and ZipDepth have each run on the same 138 TUM color frames on CPU and GPU. The score table in [Task54 measurements](#task54-measurements-on-tum) separates raw metric depth from shape scores aligned to the sensor reference.
-- Checkpoint hashes, run outputs, CPU/GPU timing details and per-frame depth maps are stored under the ignored `experiments/02_stereo_depth/runs/task54*` directories. They are local research artifacts and are not committed.
+- Checkpoint hashes, run outputs, CPU/GPU timing details and per-frame depth maps are stored under the ignored `research/experiments/02_stereo_depth/runs/task54*` directories. They are local research artifacts and are not committed.
 - Marigold V2 uses the official WSL inference program. The first frame failed in VAE `conv3d` with cuDNN "GET was unable to find an engine to execute this computation" while the active game and desktop used 15,910 of 16,303 MiB of GPU memory. The owner asked to keep the game open and record this result. One CPU retry failed before inference because bitsandbytes requires a GPU for 4-bit quantization. Task62 reran it with the GPU free: xyz completed (shape AbsRel 0.0356, 16.6 s per frame), and the model was then dropped for being under 1 frame per second.
 - ZipDepth's NPU build exports to ONNX with output differences below 6.3e-7 on all sampled frames. TFLite float32 and float16 files were generated, but LiteRT cannot allocate their tensors because a multiply has incompatible broadcast shapes. No phone runtime timing has been measured; Task57 owns that check.
 - Layers 3, 4 and 5 currently use depth from the TUM and ICL-NUIM benchmark recordings. The object layer ignores depth at or beyond 4 m. Nothing here establishes accuracy at worksite distances.
@@ -115,12 +115,12 @@ No numeric pass mark is set yet. Agree quality and coverage limits before accept
 
 - **Start the baseline.** Run StereoSGBM on a fixed Middlebury split to get the first measured number for this layer.
 - **Measure ARCore depth on both phones.** Film a scene with tape-measured distances and score ARCore depth and confidence against it. This decides whether on-phone depth is good enough for site checks.
-- **Combine learned and measured depth.** Use ARCore or stereo points to fix the scale of a dense learned depth map, and measure whether the result beats either alone. Eight published ways of combining triangulated and learned depth, and a proposed order for this project, are in [triangulation_and_learned_depth.md](../../research/dense_surface_fusion/triangulation_and_learned_depth.md) (8 November 2026).
+- **Combine learned and measured depth.** Use ARCore or stereo points to fix the scale of a dense learned depth map, and measure whether the result beats either alone. Eight published ways of combining triangulated and learned depth, and a proposed order for this project, are in [triangulation_and_learned_depth.md](../../dense_surface_fusion/triangulation_and_learned_depth.md) (8 November 2026).
 - **Test range.** Error grows with distance. Worksites need checks beyond the current 4 m indoor limit, with outdoor references.
 - **Calibrate confidence.** Check whether low-confidence pixels really are the wrong ones before using confidence to weight later layers.
 - **Find a sequence with stereo and a reference camera path.** TUM has no stereo pair and Middlebury has no camera path, so neither can test how stereo depth affects tracking. A synchronised stereo dataset or a measured phone recording is needed for that swap.
 
-Once tracking or reconstruction can read this layer's output without knowing where it was computed, promote the depth record format into [experiments/shared](../shared/README.md). See the [experiment guide](../README.md) for how the layers connect.
+Once tracking or reconstruction can read this layer's output without knowing where it was computed, promote the depth record format into [research/experiments/shared](../shared/README.md). See the [experiment guide](../README.md) for how the layers connect.
 
 ## Task54 measurements on TUM
 
@@ -143,10 +143,10 @@ Run either tested model from the repository root after installing `requirements-
 
 ```powershell
 $env:PYTHONPATH = "$PWD;$PWD\data\models\ZipDepth"
-python -m experiments.02_stereo_depth.run --method depth-anything --checkpoint <local-metric-checkpoint> --tum-root data/tum --output experiments/02_stereo_depth/runs/task54 --device cuda
-python -m experiments.02_stereo_depth.run --method depth-anything --checkpoint <local-metric-checkpoint> --tum-root data/tum --output experiments/02_stereo_depth/runs/task54_cpu --device cpu
-python -m experiments.02_stereo_depth.run --method zipdepth --checkpoint models/ZipDepth/checkpoints/zipdepth_base.pth --tum-root data/tum --output experiments/02_stereo_depth/runs/task54 --device cuda --zip-build gpu
-python -m experiments.02_stereo_depth.run --method zipdepth --checkpoint models/ZipDepth/checkpoints/zipdepth_base.pth --tum-root data/tum --output experiments/02_stereo_depth/runs/task54_cpu --device cpu --zip-build gpu
+python -m research.experiments.02_stereo_depth.run --method depth-anything --checkpoint <local-metric-checkpoint> --tum-root data/tum --output research/experiments/02_stereo_depth/runs/task54 --device cuda
+python -m research.experiments.02_stereo_depth.run --method depth-anything --checkpoint <local-metric-checkpoint> --tum-root data/tum --output research/experiments/02_stereo_depth/runs/task54_cpu --device cpu
+python -m research.experiments.02_stereo_depth.run --method zipdepth --checkpoint models/ZipDepth/checkpoints/zipdepth_base.pth --tum-root data/tum --output research/experiments/02_stereo_depth/runs/task54 --device cuda --zip-build gpu
+python -m research.experiments.02_stereo_depth.run --method zipdepth --checkpoint models/ZipDepth/checkpoints/zipdepth_base.pth --tum-root data/tum --output research/experiments/02_stereo_depth/runs/task54_cpu --device cpu --zip-build gpu
 ```
 
 Each sequence writes native predictions and `results.json` under a new method folder. Existing results are never overwritten. If Windows denies the final directory rename, the runner copies the finished staging folder and checks the published file list and sizes before removing staging.
@@ -159,7 +159,7 @@ Marigold V2 source was pinned to `9926d93b0780de5f64bee20895b25a56a98ffbf8`. Its
 
 ## Task62 follow-up measurements, 7 October 2026
 
-A review of Task54 found gaps; [Task62](../../task_list/closed/62_close_task_54_review_gaps_phone_build_score_memory.md) filled them. The same 138 frames and settings as above.
+A review of Task54 found gaps; [Task62](../../../task_list/closed/62_close_task_54_review_gaps_phone_build_score_memory.md) filled them. The same 138 frames and settings as above.
 
 **Phone build scored.** The 0.07 ZipDepth rows above come from the desktop checkpoint (`a559…`). The model exported to ONNX is the separate phone checkpoint (`zipdepth_base_npu.pth`, SHA-256 `627c04fd…`, 6,142,058 parameters). It is slightly more accurate:
 
@@ -193,15 +193,15 @@ GPU times here are with the GPU free; Task54's 27 ms was measured while a game s
 Fifty known distances per frame are enough to reach the every-pixel result, and ten cost about 0.01 AbsRel. For Depth Anything, one scale factor from ten points cuts its error from 0.345 to 0.082 on xyz. The chosen points are exact Kinect values, so a real phone's noisier points will do worse; measuring that needs phone recordings (Task52). Run it with:
 
 ```powershell
-python -m experiments.02_stereo_depth.sparse_scale `
-  --set "ZipDepth phone build=experiments/02_stereo_depth/runs/task62_gpu_npu/zipdepth" `
-  --set "Depth Anything=experiments/02_stereo_depth/runs/task54/depth-anything" `
-  --output experiments/02_stereo_depth/runs/<new>/sparse_scale.json
+python -m research.experiments.02_stereo_depth.sparse_scale `
+  --set "ZipDepth phone build=research/experiments/02_stereo_depth/runs/task62_gpu_npu/zipdepth" `
+  --set "Depth Anything=research/experiments/02_stereo_depth/runs/task54/depth-anything" `
+  --output research/experiments/02_stereo_depth/runs/<new>/sparse_scale.json
 ```
 
 **Which depth method for the pipeline.** On these numbers the phone build of ZipDepth with a per-frame scale from about 50 phone points is the strongest candidate: about 0.07 shape error, 42 fps on CPU and 190 fps on the desktop GPU, 6.1 million parameters and an ONNX export. Depth Anything's raw metres need the same scale source anyway. The walkthrough does not yet have a scale-source adapter for relative depth; that needs ARCore depth or tracked points from a phone recording (Task52).
 
-Tests for this experiment: `python -m pytest experiments/02_stereo_depth/tests -q` (51 tests).
+Tests for this experiment: `python -m pytest research/experiments/02_stereo_depth/tests -q` (51 tests).
 
 ZipDepth NPU export used the original fused model graph, `dynamo=False`, and ONNX opset 17. The resulting 24,604,413-byte model has SHA-256 `ecf73a4ffd16562be0c67f89404530b29926ac3b562034d00eb3b0f35ae913ed`. Across the 138 selected TUM frames, mean absolute output differences from PyTorch were 2.57e-8 (xyz) and 2.35e-8 (desk); maximum differences were 6.30e-7 and 5.55e-7. ONNX Runtime CPU inference is verified for the exported graph. TFLite conversion produced float32 (24,615,956 bytes) and float16 (12,331,112 bytes) files, but LiteRT failed allocation at a multiply with shapes `[1,48,64,96]` and `[1,64,96,96]`. These files are not usable phone exports.
 
@@ -211,7 +211,7 @@ ZipDepth NPU export used the original fused model graph, `dynamo=False`, and ONN
 
 In the walkthrough, Depth Anything V2 Metric Small gets each frame's shape about right but its size wrong, and by a different amount in each frame. On 30 TUM xyz frames its median predicted/sensor distance moves between 1.21 and 1.63. When the frames are combined, the same surface lands at a different distance from each camera, so the 3D view shows it several times along the viewing direction. The camera tracker (Open3D RGB-D odometry) reads each jump in size as camera motion: at frame 16 the size jumps from 1.39 to 1.62 and camera error from 147 to 337 mm in the same frame.
 
-[Task65](../../task_list/done/65_diagnose_and_fix_frame_to_frame_depth_scale_drift.md) measures this and tests fixes. Results are below the survey.
+[Task65](../../../task_list/done/65_diagnose_and_fix_frame_to_frame_depth_scale_drift.md) measures this and tests fixes. Results are below the survey.
 
 ### What existing systems do (survey, 8 October 2026)
 
@@ -256,7 +256,7 @@ The useful part of the idea is consensus across several overlapping frames. The 
 
 ### Camera path comparison: raw depth and overlap chain
 
-The [offline camera-path report](../../outputs/task_runs/task65_runs/camera_path_comparison.html) compares Depth Anything V2 Metric Small with the same depth method corrected by the RGB-only overlap chain. It plots the top-down camera path against TUM motion-capture ground truth and the per-frame position error. Lower RMSE means a closer camera path.
+The [offline camera-path report](../../../outputs/task_runs/task65_runs/camera_path_comparison.html) compares Depth Anything V2 Metric Small with the same depth method corrected by the RGB-only overlap chain. It plots the top-down camera path against TUM motion-capture ground truth and the per-frame position error. Lower RMSE means a closer camera path.
 
 | TUM recording sample | Frames matched | Raw depth camera RMSE | Overlap-chain RMSE | Change |
 |---|---:|---:|---:|---:|
@@ -290,7 +290,7 @@ A fitted size well below 1 means the estimated path is too long; raw Depth Anyth
 | zipdepth-scaled | 356 mm | 279 mm | 139 mm (0.34) | 481 mm | 299 mm | 289 mm (0.92) |
 | chain-pose-anchor-exact | 260 mm | 159 mm | 119 mm (0.57) | 934 mm | 480 mm | 438 mm (0.79) |
 
-Even with the Kinect sensor's depth (`recorded`), the walkthrough tracker misses the desk path by 112 mm after a best fit. Structure from motion on the same frames, from the images alone, scores 24 mm on desk and 12 mm on xyz (experiments/sfm/README.md), so the tracker itself, not only the depth, limits the camera path.
+Even with the Kinect sensor's depth (`recorded`), the walkthrough tracker misses the desk path by 112 mm after a best fit. Structure from motion on the same frames, from the images alone, scores 24 mm on desk and 12 mm on xyz (research/experiments/sfm/README.md), so the tracker itself, not only the depth, limits the camera path.
 
 Both full-recording paths improve, but still miss ground truth by 0.37 m on xyz and 1.01 m on desk. The result supports the scale-drift diagnosis and the overlap chain as a candidate. It does not make the camera path accurate enough for deployment. The Kinect-depth rows are sensor-backed controls, not RGB-only alternatives.
 
@@ -298,14 +298,14 @@ Sources: [TUM RGB-D benchmark and trajectory evaluation](https://cvg.cit.tum.de/
 
 ### Code and model files
 
-- `evaluation/layers/steps/depth_scale.py`: `ScaleCorrected(base, scale)` with four scale sources (`OverlapChainScale`, `PoseTriangulatedScale`, and the reference controls `ReferenceFrameScale` and `ReferenceGlobalScale`); `--depth-scale` on the walkthrough command line.
-- `evaluation/layers/steps/video_depth.py`: `MetricVideoDepthAnything`; `--depth video-depth-anything`. It needs the upstream code cloned at commit `4f5ae23172ba60fd7bc11ef671cca678842c7072` (7 October 2025) into `models/Video-Depth-Anything` and that folder on `PYTHONPATH`. The weights are `checkpoints/metric_video_depth_anything_vits.pth`: 116,444,063 bytes, SHA-256 `3c28432b4e1f0d7bb31cad5151b6313b49457db5aa58d82e85bfb0f8b1311b33`, from `depth-anything/Metric-Video-Depth-Anything-Small`. One extra package went into the environment used then (`.venv-yolo`, now merged into `.venv`): `easydict==1.13` (LGPL-3.0, used once upstream to hold settings). The upstream pins (PyTorch 2.1.1, NumPy 1.24) were not installed, and the optional `xformers` is not used.
-- `evaluation/layers/consistency.py`: the surface-gap measure. It moves frame B's points into frame A's camera with the run's poses and compares them with A's depth along A's view, nearest point per pixel only. The report's surface page now shows it per frame and by frame separation. The depth page now shows each frame's scale ratio.
+- `research/evaluation/layers/steps/depth_scale.py`: `ScaleCorrected(base, scale)` with four scale sources (`OverlapChainScale`, `PoseTriangulatedScale`, and the reference controls `ReferenceFrameScale` and `ReferenceGlobalScale`); `--depth-scale` on the walkthrough command line.
+- `research/evaluation/layers/steps/video_depth.py`: `MetricVideoDepthAnything`; `--depth video-depth-anything`. It needs the upstream code cloned at commit `4f5ae23172ba60fd7bc11ef671cca678842c7072` (7 October 2025) into `models/Video-Depth-Anything` and that folder on `PYTHONPATH`. The weights are `checkpoints/metric_video_depth_anything_vits.pth`: 116,444,063 bytes, SHA-256 `3c28432b4e1f0d7bb31cad5151b6313b49457db5aa58d82e85bfb0f8b1311b33`, from `depth-anything/Metric-Video-Depth-Anything-Small`. One extra package went into the environment used then (`.venv-yolo`, now merged into `.venv`): `easydict==1.13` (LGPL-3.0, used once upstream to hold settings). The upstream pins (PyTorch 2.1.1, NumPy 1.24) were not installed, and the optional `xformers` is not used.
+- `research/evaluation/layers/consistency.py`: the surface-gap measure. It moves frame B's points into frame A's camera with the run's poses and compares them with A's depth along A's view, nearest point per pixel only. The report's surface page now shows it per frame and by frame separation. The depth page now shows each frame's scale ratio.
 - `scale_drift.py`: `clip` makes full-length every-2nd-frame clips that the tracker can follow; `summarise` reads finished runs into one table; `check-space` stops a queue below 30 GB free.
 
 ## Current delivery ownership, 6 October 2026
 
-[Task54](../../task_list/closed/54_implement_and_validate_real_metric_depth.md) implemented and scored local real depth methods. It chooses the usable phone or hosted route from capture evidence; it does not wait indefinitely for stereo. [Task52](../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) supplies phone observations and [Task53](../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) supplies independent physical references.
+[Task54](../../../task_list/closed/54_implement_and_validate_real_metric_depth.md) implemented and scored local real depth methods. It chooses the usable phone or hosted route from capture evidence; it does not wait indefinitely for stereo. [Task52](../../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) supplies phone observations and [Task53](../../../task_list/open/53_collect_independent_scene_measurements_and_object_.md) supplies independent physical references.
 
 ## Walkthrough depth boundary
 

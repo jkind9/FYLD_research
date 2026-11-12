@@ -13,8 +13,8 @@ from uuid import uuid4
 
 import psutil
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run, write_json
 
 from .memory_limits import WindowsProcessMemoryLimit, direct_interpreter
 
@@ -41,7 +41,7 @@ os.environ["FYLD_TRACKING_JOB_LIMIT_BYTES"] = str(
     release["process_memory_limit_bytes"]
 )
 sys.argv = ["tracking-worker", *json.loads(sys.argv[2])]
-runpy.run_module("experiments.03_camera_pose_estimation.src.run", run_name="__main__")
+runpy.run_module("research.experiments.03_camera_pose_estimation.src.run", run_name="__main__")
 """
 _P = ParamSpec("_P")
 _T = TypeVar("_T")

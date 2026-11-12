@@ -1,12 +1,12 @@
 # Live SLAM on recorded data
 
-This folder answers one question: **how accurate and how fast is an established live SLAM system on the project's recordings, when it only ever sees frames up to the current one?** The owner ruled on 14 October 2026 that the deployed system must be live (or update at least once per second), so the offline structure-from-motion path in `experiments/sfm` can only be a reference. On the phone, ARCore will track the camera; until ARCore recordings exist, this is the evidence for live tracking accuracy. Task: [84](../../task_list/done/84_live_cpu_slam_on_the_recorded_data_scored_causally.md). Background: [the SLAM review](../../research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md).
+This folder answers one question: **how accurate and how fast is an established live SLAM system on the project's recordings, when it only ever sees frames up to the current one?** The owner ruled on 14 October 2026 that the deployed system must be live (or update at least once per second), so the offline structure-from-motion path in `research/experiments/sfm` can only be a reference. On the phone, ARCore will track the camera; until ARCore recordings exist, this is the evidence for live tracking accuracy. Task: [84](../../../task_list/done/84_live_cpu_slam_on_the_recorded_data_scored_causally.md). Background: [the SLAM review](../../camera_tracking_and_slam/sota_slam_review_2026-10-14.md).
 
 ## How it works
 
 1. `run_live.py` writes the recording's frame list (time and image path, in order) and a camera file built from the system's own TUM example settings, with this recording's pinhole camera and no distortion.
 2. A small native runner (`native/run_stella.cc`, `native/run_orbslam3.cc`) feeds the frames to the SLAM system one at a time, in WSL, as fast as it can process them. For every frame it writes the pose the system returned at that moment (`live.txt`), or "lost", and how long that frame took (`frame_ms.txt`). At the end it saves the system's own refined trajectory (`final_*.txt`).
-3. `run_live.py` scores both with the same code as the SfM runs (`experiments/sfm/src/scoring.py`): best fit with size, rigid best fit, 1 s relative error, share of frames tracked. Images only; no depth and no ground truth reach the system.
+3. `run_live.py` scores both with the same code as the SfM runs (`research/experiments/sfm/src/scoring.py`): best fit with size, rigid best fit, 1 s relative error, share of frames tracked. Images only; no depth and no ground truth reach the system.
 
 "Live" scores use only what the system knew at each frame. "Final" scores use its refined trajectory after the whole run, which a live system would not have had at the time.
 
@@ -26,8 +26,8 @@ sudo apt update && sudo apt install -y libopencv-dev libeigen3-dev libyaml-cpp-d
 Build the systems into `~/live_slam` (outside the repository; commits are logged to `~/live_slam/BUILD.txt`):
 
 ```text
-bash experiments/live_slam/native/setup_wsl.sh stella
-bash experiments/live_slam/native/setup_wsl.sh orbslam3
+bash research/experiments/live_slam/native/setup_wsl.sh stella
+bash research/experiments/live_slam/native/setup_wsl.sh orbslam3
 ```
 
 Build each runner:
@@ -41,15 +41,15 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j 16
 (the same for `orbslam3`). Then, from Windows in the repository's `.venv`:
 
 ```text
-python -m experiments.live_slam.run_live --system stella --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --run-root experiments/live_slam/runs/stella_tum_xyz_every2
-python -m pytest experiments/live_slam/tests -p no:cacheprovider --import-mode=importlib
+python -m research.experiments.live_slam.run_live --system stella --recording tum:outputs/inputs/task65_clips/rgbd_dataset_freiburg1_xyz_every2 --run-root research/experiments/live_slam/runs/stella_tum_xyz_every2
+python -m pytest research/experiments/live_slam/tests -p no:cacheprovider --import-mode=importlib
 ```
 
 Build notes: Pangolin v0.6 (needed by ORB-SLAM3) fails under GCC 13 unless `<cstdint>` and `<limits>` are force-included and its X11 window code is switched off; ORB-SLAM3 needs C++14. `setup_wsl.sh` does both.
 
 ## Results, 14 October 2026
 
-Five repeats per setting; median with the range over repeats in brackets. "Path error" is best fit with size (the standard monocular score) on the largest map; "frames tracked" counts frames in that map. Timing is the time the system took per frame on a 32-thread desktop CPU in WSL2. From `python -m experiments.live_slam.report experiments/live_slam/runs`:
+Five repeats per setting; median with the range over repeats in brackets. "Path error" is best fit with size (the standard monocular score) on the largest map; "frames tracked" counts frames in that map. Timing is the time the system took per frame on a 32-thread desktop CPU in WSL2. From `python -m research.experiments.live_slam.report research/experiments/live_slam/runs`:
 
 | Setting | Repeats | Frames tracked (largest map) | Maps | Live path error | Final path error | ms per frame, median | ms per frame, 95th pct |
 |---|---:|---:|---:|---|---|---:|---:|

@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from experiments.shared.contracts import Calibration
-from experiments.shared.geometry import backproject
+from research.experiments.shared.contracts import Calibration
+from research.experiments.shared.geometry import backproject
 
 from .scoring import binary
 

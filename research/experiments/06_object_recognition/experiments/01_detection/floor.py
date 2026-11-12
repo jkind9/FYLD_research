@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.shared.contracts import Calibration
+from research.experiments.shared.contracts import Calibration
 
 from .jitter import backproject_pixel, project_world
 
@@ -51,7 +51,7 @@ def matches(left: NDArray | None, right: NDArray | None) -> list[tuple[int, int]
     if left is None or right is None or not len(left) or not len(right):
         return []
     compare = importlib.import_module(
-        "experiments.06_object_recognition.experiments.03_appearance.compare"
+        "research.experiments.06_object_recognition.experiments.03_appearance.compare"
     )
     return compare._mutual(left, right, cv2.NORM_HAMMING)
 

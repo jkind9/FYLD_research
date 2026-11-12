@@ -10,8 +10,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import Run, verify_run, write_json
 
 from . import cache
 from .adapter import describe_classical, prepare_crop
@@ -20,9 +20,9 @@ from .evaluator import label_pairs, rank_queries
 from .features import FeatureExtractor
 from .report import write_report
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[5]
 source_api = importlib.import_module(
-    "experiments.06_object_recognition.experiments.02_segmentation.run"
+    "research.experiments.06_object_recognition.experiments.02_segmentation.run"
 )
 ORIGINAL_SHA256 = "a786adc5f814ad9773712397f46ba79d8d40dc5c174fe17045336440cdffd920"
 PUBLISHED_SHA256 = "27fe047dac254161ea823d6c55aeb28e16bd88cd993f1e4bf8fbdee40d4741d3"
@@ -152,7 +152,7 @@ def output_root(repo: Path, output: Path) -> Path:
 def preflight(repo: Path) -> dict:
     manifest = source_api.preflight(repo)
     if (
-        sha256(repo / "experiments/06_object_recognition/datasets/desk_smoke_v1.json")
+        sha256(repo / "research/experiments/06_object_recognition/datasets/desk_smoke_v1.json")
         != ORIGINAL_SHA256
     ):
         raise ValueError("Original annotation pin differs")

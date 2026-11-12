@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.datasets.acquisition import sha256
-from experiments.geometry_validation.src.icl import Frame, load_frame
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.geometry_validation.src.icl import Frame, load_frame
 
 PLY_TYPES = {"float": "<f4", "double": "<f8", "uchar": "u1"}
 

@@ -5,7 +5,7 @@ import json
 import numpy as np
 import pytest
 
-from experiments.shared.visualization import (
+from research.experiments.shared.visualization import (
     artifact,
     frustum,
     sample_points,
@@ -58,7 +58,7 @@ def test_viewer_escapes_embedded_json(tmp_path):
 def test_tracking_alignment_rotation_failure_and_first_match():
     from scipy.spatial.transform import Rotation
 
-    from experiments.shared.inspection import aligned_tracking
+    from research.experiments.shared.inspection import aligned_tracking
 
     first = np.eye(4)
     first[:3, :3] = Rotation.from_euler("z", 30, degrees=True).as_matrix()
@@ -92,7 +92,7 @@ def test_tracking_alignment_rotation_failure_and_first_match():
 def test_depth_role_and_missing_pixels(tmp_path):
     from PIL import Image
 
-    from experiments.shared.visualization import depth_preview
+    from research.experiments.shared.visualization import depth_preview
 
     legend = depth_preview(
         np.array([[0.0, 1.0], [2.0, 3.0]]),
@@ -128,8 +128,8 @@ def test_nonfinite_calibration_rejected():
 
 
 def test_nested_computation_metadata(tmp_path):
-    from experiments.shared.inspection import computation_metadata
-    from experiments.shared.runs import write_json
+    from research.experiments.shared.inspection import computation_metadata
+    from research.experiments.shared.runs import write_json
 
     for suffix in ("metadata", "metadata/computation"):
         write_json(tmp_path / suffix / "configuration.json", {"publication_only": True})
@@ -139,8 +139,8 @@ def test_nested_computation_metadata(tmp_path):
 
 
 def test_legacy_surface_computation_metadata(tmp_path):
-    from experiments.shared.inspection import computation_metadata
-    from experiments.shared.runs import write_json
+    from research.experiments.shared.inspection import computation_metadata
+    from research.experiments.shared.runs import write_json
 
     write_json(
         tmp_path / "metadata/configuration.json", {"republication_source": "prior"}
@@ -151,8 +151,8 @@ def test_legacy_surface_computation_metadata(tmp_path):
 
 
 def test_publication_preserves_numeric_bytes_and_timing(tmp_path, monkeypatch):
-    from experiments.shared import publication, runs
-    from experiments.shared.runs import Run, verify_run, write_json
+    from research.experiments.shared import publication, runs
+    from research.experiments.shared.runs import Run, verify_run, write_json
 
     monkeypatch.setattr(runs, "_git", lambda *_: "fake")
     with Run(tmp_path / "original", tmp_path, {}) as source:
@@ -182,7 +182,7 @@ def test_publication_preserves_numeric_bytes_and_timing(tmp_path, monkeypatch):
 
 
 def test_initial_inventory_hash_rejects_changed_source(tmp_path):
-    from experiments.shared.publication import copy_inventory
+    from research.experiments.shared.publication import copy_inventory
 
     source = tmp_path / "source"
     source.mkdir()
@@ -194,11 +194,11 @@ def test_initial_inventory_hash_rejects_changed_source(tmp_path):
 def test_surface_total_cap_and_roles(tmp_path, monkeypatch):
     import importlib
 
-    from experiments.shared.inspection import surface_view
-    from experiments.shared.runs import write_json
+    from research.experiments.shared.inspection import surface_view
+    from research.experiments.shared.runs import write_json
 
     reader = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.dataset"
+        "research.experiments.04_surface_reconstruction.src.dataset"
     )
     monkeypatch.setattr(reader, "read_reference", lambda _: np.array([[0.0, 0.0, 1.0]]))
     write_json(

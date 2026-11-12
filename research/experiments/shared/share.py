@@ -14,7 +14,7 @@ from uuid import uuid4
 
 from PIL import Image
 
-from experiments.datasets.acquisition import sha256
+from research.experiments.datasets.acquisition import sha256
 
 from .runs import verify_run
 from .visualization import render_viewer

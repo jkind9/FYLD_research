@@ -5,20 +5,20 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run
 
 BASELINE_RELATIVE = Path(
-    "experiments/06_object_recognition/pilot/runs/20261003T200418.845966Z_f20e5b1de3744f47a850ffa3b3ba396b"
+    "research/experiments/06_object_recognition/pilot/runs/20261003T200418.845966Z_f20e5b1de3744f47a850ffa3b3ba396b"
 )
 DETECTION_RELATIVE = Path(
-    "experiments/06_object_recognition/experiments/01_detection/runs/20261004T071442.158193Z_4be5db5d6dca43e4be715c0665e44fcd"
+    "research/experiments/06_object_recognition/experiments/01_detection/runs/20261004T071442.158193Z_4be5db5d6dca43e4be715c0665e44fcd"
 )
 APPEARANCE_RELATIVE = Path(
-    "experiments/06_object_recognition/experiments/03_appearance/runs/20261004T135203.039973Z_fd481f16c8374ca2a0f04d6f0703a16d"
+    "research/experiments/06_object_recognition/experiments/03_appearance/runs/20261004T135203.039973Z_fd481f16c8374ca2a0f04d6f0703a16d"
 )
 IDENTITY_RELATIVE = Path(
-    "experiments/06_object_recognition/experiments/04_geometry_identity/runs/20261004T143434.634726Z_33f59456f7d34e50a64020ed6e0613bb"
+    "research/experiments/06_object_recognition/experiments/04_geometry_identity/runs/20261004T143434.634726Z_33f59456f7d34e50a64020ed6e0613bb"
 )
 BASELINE_SHA256 = "e07af81930e80fe7400c0a0b12b26138c3fea6f7533b1b8137b5186a587267a3"
 DETECTION_SHA256 = "7ee60f385871eeb6288c007bc03a548a233a2fee3e6dcf7cca9a5f583a15e39c"

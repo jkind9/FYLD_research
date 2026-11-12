@@ -1,12 +1,20 @@
 # Research evidence
 
+This folder holds everything outside the product: source reviews by topic (below), and two
+code folders. The product in [`sitescan/`](../sitescan/README.md) never imports from here.
+
+| Folder | Holds | Modules |
+|---|---|---|
+| [experiments/](experiments/README.md) | Every trial, adopted or rejected, each with its README as the evidence record | `research.experiments.<name>` |
+| [evaluation/](evaluation/README.md) | Scoring against references, stand-in recordings, the layer-by-layer runner and [measured results](evaluation/results.md) | `research.evaluation.<name>` |
+
 Original source review: 1 October 2026. [Recovered Claude research](session_recovery/README.md), added on 2 October, records missing edge SLAM sources, phone capture requirements, source corrections and unresolved leads. It also preserves the supplied trace. Read that addendum alongside the older tables; their unknown fields have not all been revised. Paper results are publisher claims, not results reproduced by this project.
 
 Start with the [reading guide](reading_guide.md), which orders the 21 source notes now kept in the topic folders below. The [background explanation](start_here.md) introduces depth, camera movement, reconstruction and the different measurements needed to assess a site map.
 
-For a quick start by topic, each layer README opens with its top 5 sources and a table of hosted and on-phone methods with licences: [capture](../experiments/01_camera_capture_delivery/README.md), [depth](../experiments/02_stereo_depth/README.md), [camera position](../experiments/03_camera_pose_estimation/README.md), [surfaces](../experiments/04_surface_reconstruction/README.md), [top-down map](../experiments/05_birds_eye_mapping/README.md) and [objects](../experiments/06_object_recognition/README.md). Those tables add 2025–2026 methods checked on 4 October 2026 (for example SAM 3, Depth Anything 3, MapAnything and FoundationStereo); the detailed notes below remain the deeper review.
+For a quick start by topic, each layer README opens with its top 5 sources and a table of hosted and on-phone methods with licences: [capture](experiments/01_camera_capture_delivery/README.md), [depth](experiments/02_stereo_depth/README.md), [camera position](experiments/03_camera_pose_estimation/README.md), [surfaces](experiments/04_surface_reconstruction/README.md), [top-down map](experiments/05_birds_eye_mapping/README.md) and [objects](experiments/06_object_recognition/README.md). Those tables add 2025–2026 methods checked on 4 October 2026 (for example SAM 3, Depth Anything 3, MapAnything and FoundationStereo); the detailed notes below remain the deeper review.
 
-The current [six-piece experiment plan](../experiments/README.md) connects research to independent tests. Start with verified geometry and supplied-input reconstruction; inspect phones alongside this work. The new [object recognition and persistent counting plan](../experiments/06_object_recognition/README.md) relates the supplied recognition papers to multi-view labels, moving-feature removal and revisit identities. Its ScienceDirect source remains unverified. The [dataset guide](../experiments/datasets/README.md) explains reference inputs for each stage. Earlier implementation and local outputs are preserved in [the prototype archive](../archive/task00_prototype/README.md).
+The current [six-piece experiment plan](experiments/README.md) connects research to independent tests. Start with verified geometry and supplied-input reconstruction; inspect phones alongside this work. The new [object recognition and persistent counting plan](experiments/06_object_recognition/README.md) relates the supplied recognition papers to multi-view labels, moving-feature removal and revisit identities. Its ScienceDirect source remains unverified. The [dataset guide](experiments/datasets/README.md) explains reference inputs for each stage. Earlier implementation and local outputs are preserved in [the prototype archive](https://github.com/jkind9/FYLD_research/blob/d064d5f/archive/task00_prototype/README.md).
 
 **Paper and lecture PDFs are not in Git.** They are third-party copyright, so the `papers/` and `lectures/` folders exist only on the working machine. Each topic README names the paper, and the file name holds its arXiv number where it has one (for example `glomap_2407.20219.pdf` is arXiv 2407.20219).
 
@@ -57,7 +65,7 @@ The proposed area output describes observed surfaces. Unseen space remains unkno
 
 The current local baseline uses three datasets: TUM RGB-D, ICL-NUIM and Middlebury v3. They support indoor tracking, synthetic surface reconstruction and stereo controls. None supplies outdoor phone-worksite footage with surveyed object boundaries and owner-confirmed identities across disappearance and return.
 
-Task41 checked 14 additional public candidates against publisher documentation. The capability, reference, size, licence and access details are in the [dataset inventory](../experiments/datasets/README.md#public-dataset-inventory-for-hosted-processing-5-october-2026). The inventory is research only. No candidate was downloaded or run. It keeps the KITTI and nuScenes entries separate and marks missing permission, subset size and measurement details as unknown.
+Task41 checked 14 additional public candidates against publisher documentation. The capability, reference, size, licence and access details are in the [dataset inventory](experiments/datasets/README.md#public-dataset-inventory-for-hosted-processing-5-october-2026). The inventory is research only. No candidate was downloaded or run. It keeps the KITTI and nuScenes entries separate and marks missing permission, subset size and measurement details as unknown.
 
 The near-term shortlist for separate review is ETH3D's small stereo pack, a LaMAria example or approved training sequence, one ScanNet++ scene if access is granted, and ROADWork annotations if the rights for included images are resolved. TartanGround can provide controlled synthetic failure cases after calculating a small exact subset. These sources do not replace survey measurements and confirmed identity labels from the intended worksite.
 
@@ -65,7 +73,7 @@ Two sources remain outside the public inventory: a few street-works-like scenes 
 
 ## Task16 shortlist and experiment protocol
 
-[Task16](../task_list/closed/16_research_segmentation_recognition_and_camera_corre.md) records the source review and draft protocol for Tasks17–22 and 25. The owner later clarified that exploratory replay and association trials do not approve this broader protocol, so Task16 remains pending review. Each experiment records its own authorised settings and limits. The [stage06 plan](../experiments/06_object_recognition/README.md#proposed-comparison-protocol) holds the proposed protocol. Keep the existing YOLO26x checkpoint for the first detection comparison. Other learned models remain research candidates; no new models or weights are downloaded.
+[Task16](../task_list/closed/16_research_segmentation_recognition_and_camera_corre.md) records the source review and draft protocol for Tasks17–22 and 25. The owner later clarified that exploratory replay and association trials do not approve this broader protocol, so Task16 remains pending review. Each experiment records its own authorised settings and limits. The [stage06 plan](experiments/06_object_recognition/README.md#proposed-comparison-protocol) holds the proposed protocol. Keep the existing YOLO26x checkpoint for the first detection comparison. Other learned models remain research candidates; no new models or weights are downloaded.
 
 The requested [Kuey survey](https://kuey.net/index.php/kuey/article/download/2260/1290/13992) separates boundary methods, such as edge detection, from region methods. It reviews algorithms; it is not a current device benchmark or a runnable object inventory. A Canny contour is a boundary control. GrabCut with a checked rectangle prompt is a classical mask-producing control. Neither supplies an object class or instance identity. OpenCV's [marker watershed guide](https://docs.opencv.org/4.12.0/d3/db4/tutorial_py_watershed.html) describes a seeded region method that can test touching objects.
 
@@ -102,13 +110,13 @@ A similarity score can nominate a keyframe pair but cannot provide camera positi
 
 ### Five-experiment protocol
 
-The [stage06 plan](../experiments/06_object_recognition/README.md#proposed-comparison-protocol) specifies the experiment boundaries, split rules, negative cases and processing-cost ledger. It keeps evaluator-only masks, object IDs and reference poses out of method input except explicitly named reference controls. Task17's inventory found a desk cup return and distinct monitors, with missing or unusable cases recorded separately. Preserve Task13's desk hold-out and frozen settings. No model, checkpoint or GPU run was performed for Task16.
+The [stage06 plan](experiments/06_object_recognition/README.md#proposed-comparison-protocol) specifies the experiment boundaries, split rules, negative cases and processing-cost ledger. It keeps evaluator-only masks, object IDs and reference poses out of method input except explicitly named reference controls. Task17's inventory found a desk cup return and distinct monitors, with missing or unusable cases recorded separately. Preserve Task13's desk hold-out and frozen settings. No model, checkpoint or GPU run was performed for Task16.
 
 The earlier bounded trials recorded delegated numerical choices in their own receipts. New comparisons require their own reviewed settings, references and execution authorisation. Unsupported footage scenarios remain gaps; contract controls cannot replace recorded evidence. Desktop results do not establish phone performance.
 
 ## Research agenda, 4 October 2026
 
-This review uses primary documentation and papers. Proposed comparisons below are unperformed. Local results and their source artifacts are summarized in the [object experiment README](../experiments/06_object_recognition/README.md); vendor/paper results remain external evidence. Task16's broader protocol remains pending review.
+This review uses primary documentation and papers. Proposed comparisons below are unperformed. Local results and their source artifacts are summarized in the [object experiment README](experiments/06_object_recognition/README.md); vendor/paper results remain external evidence. Task16's broader protocol remains pending review.
 
 ### A. Observation IDs, provisional identities and duplicates
 

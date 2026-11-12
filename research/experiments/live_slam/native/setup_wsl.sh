@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build stella_vslam (BSD-2) and ORB-SLAM3 (GPLv3, reference only) in WSL Ubuntu 24.04, outside the repository.
-# Needs the system libraries from experiments/live_slam/README.md ("Setup"). Run: bash setup_wsl.sh [stella|orbslam3|all]
+# Needs the system libraries from research/experiments/live_slam/README.md ("Setup"). Run: bash setup_wsl.sh [stella|orbslam3|all]
 set -euo pipefail
 
 ROOT="${LIVE_SLAM_ROOT:-$HOME/live_slam}"

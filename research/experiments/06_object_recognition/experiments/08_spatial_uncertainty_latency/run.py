@@ -17,9 +17,9 @@ from types import ModuleType
 import numpy as np
 import scipy
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[5]
 TASK48_RUN = ROOT / (
-    "experiments/06_object_recognition/experiments/07_spatial_uncertainty/runs/"
+    "research/experiments/06_object_recognition/experiments/07_spatial_uncertainty/runs/"
     "20261005T190553.450639Z_99c53d40233e4d74839dc55d84284d68"
 )
 TASK48_COMPARATOR = TASK48_RUN / "input/execution_input/evaluator/compare_association.py"
@@ -31,7 +31,7 @@ TASK48_INPUT = TASK48_RUN / "input/execution_input/task22_source_input"
 TASK48_REFERENCE = TASK48_RUN / "input/execution_input/tum_groundtruth_pose_reference.txt"
 TASK48_MEMBER_HASHES = TASK48_RUN / "input/execution_input/tum_member_hashes.json"
 ASSOCIATION_SOURCE = ROOT / (
-    "experiments/06_object_recognition/experiments/07_spatial_uncertainty/association.py"
+    "research/experiments/06_object_recognition/experiments/07_spatial_uncertainty/association.py"
 )
 RUNS = Path(__file__).resolve().parent / "runs"
 
@@ -184,8 +184,8 @@ def _copy_inputs(run_path: Path) -> tuple[Path, Path, dict[str, str]]:
 
 def run(output_root: Path = RUNS) -> Path:
     sys.path.insert(0, str(ROOT))
-    from experiments.datasets.acquisition import sha256
-    from experiments.shared.runs import Run, verify_run, write_json
+    from research.experiments.datasets.acquisition import sha256
+    from research.experiments.shared.runs import Run, verify_run, write_json
 
     ca = _load_module(TASK48_COMPARATOR, "task48_comparator")
     if verify_run(TASK48_RUN)["status"] != "complete":

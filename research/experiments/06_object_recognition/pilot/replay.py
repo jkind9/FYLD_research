@@ -13,11 +13,15 @@ from typing import Any
 
 import numpy as np
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.contracts import Pose
-from experiments.shared.geometry import associate_times, backproject, transform_points
-from experiments.shared.runs import Run, verify_run, write_json
-from experiments.shared.visualization import sample_points
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.contracts import Pose
+from research.experiments.shared.geometry import (
+    associate_times,
+    backproject,
+    transform_points,
+)
+from research.experiments.shared.runs import Run, verify_run, write_json
+from research.experiments.shared.visualization import sample_points
 
 from .association import associate_frame
 from .detector import PREDICT_SETTINGS, YoloDetector  # type: ignore[import-not-found]
@@ -27,11 +31,11 @@ from .localisation import (  # type: ignore[import-not-found]
 )
 from .replay_viewer import write_replay_review  # type: ignore[import-not-found]
 
-dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
+dataset = importlib.import_module("research.experiments.03_camera_pose_estimation.src.dataset")
 evaluation = importlib.import_module(
-    "experiments.03_camera_pose_estimation.src.evaluation"
+    "research.experiments.03_camera_pose_estimation.src.evaluation"
 )
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 MAX_FRAMES = 60
 DISPLAY_FRAME_CAP = 500
 DISPLAY_CLOUD_CAP = 20000
@@ -160,7 +164,7 @@ def _read(path: Path) -> dict:
 
 
 def _members(repo: Path, source: Path) -> dict:
-    return _read(repo / "experiments/datasets/tum_freiburg1_member_hashes.json")[
+    return _read(repo / "research/experiments/datasets/tum_freiburg1_member_hashes.json")[
         "sequences"
     ][source.name]["members"]
 
@@ -249,7 +253,7 @@ def replay(
         "detection_depth_input": "RGB detector outputs saved before depth/pose processing",
     }
     run = Run(
-        repo / "experiments/06_object_recognition/pilot/runs", repo, configuration
+        repo / "research/experiments/06_object_recognition/pilot/runs", repo, configuration
     )
     members = _members(repo, source)
     with run:

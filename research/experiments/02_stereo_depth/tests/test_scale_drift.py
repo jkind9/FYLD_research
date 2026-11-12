@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-scale_drift = importlib.import_module("experiments.02_stereo_depth.scale_drift")
+scale_drift = importlib.import_module("research.experiments.02_stereo_depth.scale_drift")
 
 HEADER = "# timestamp filename\n"
 

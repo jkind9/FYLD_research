@@ -12,9 +12,9 @@ from typing import Protocol
 import numpy as np
 from PIL import Image
 
-from experiments.shared.contracts import Calibration
-from experiments.shared.phone_session import read_phone_session
-from experiments.shared.runs import Run, write_json
+from research.experiments.shared.contracts import Calibration
+from research.experiments.shared.phone_session import read_phone_session
+from research.experiments.shared.runs import Run, write_json
 
 from ..records import StepResult, Unavailable, failed_step
 from .contracts import (
@@ -25,8 +25,8 @@ from .contracts import (
     method_label,
 )
 
-phone_report = importlib.import_module("experiments.01_camera_capture_delivery.app.capture_report")
-pose_dataset = importlib.import_module("experiments.03_camera_pose_estimation.src.dataset")
+phone_report = importlib.import_module("research.experiments.01_camera_capture_delivery.app.capture_report")
+pose_dataset = importlib.import_module("research.experiments.03_camera_pose_estimation.src.dataset")
 
 
 class CaptureSource(MethodChoice, Protocol):

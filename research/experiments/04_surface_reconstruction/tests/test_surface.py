@@ -9,18 +9,18 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from experiments.geometry_validation.src.icl import load_frame
-from experiments.shared.contracts import Pose
-from experiments.shared.runs import verify_run
+from research.experiments.geometry_validation.src.icl import load_frame
+from research.experiments.shared.contracts import Pose
+from research.experiments.shared.runs import verify_run
 
-backend = importlib.import_module("experiments.04_surface_reconstruction.src.backend")
+backend = importlib.import_module("research.experiments.04_surface_reconstruction.src.backend")
 evaluation = importlib.import_module(
-    "experiments.04_surface_reconstruction.src.evaluation"
+    "research.experiments.04_surface_reconstruction.src.evaluation"
 )
 dataset_module = importlib.import_module(
-    "experiments.04_surface_reconstruction.src.dataset"
+    "research.experiments.04_surface_reconstruction.src.dataset"
 )
-runner = importlib.import_module("experiments.04_surface_reconstruction.src.run")
+runner = importlib.import_module("research.experiments.04_surface_reconstruction.src.run")
 
 
 def write_ply(path, points):
@@ -162,9 +162,9 @@ def test_exact_batch_matches_incremental():
 
 def test_recovered_inspection_and_mismatch(dataset, tmp_path):
     inspection = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.inspection"
+        "research.experiments.04_surface_reconstruction.src.inspection"
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
     (prior / "metadata/status.json").write_text('{"status":"running"}')
     path = inspection.execute(dataset, [1, 2], 0.05, prior, tmp_path / "new", repo)
@@ -196,9 +196,9 @@ def test_recovered_inspection_and_mismatch(dataset, tmp_path):
 
 def test_recovery_rejects_changed_scoring_dependencies(dataset, tmp_path):
     inspection = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.inspection"
+        "research.experiments.04_surface_reconstruction.src.inspection"
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
     reference = dataset / "reference_surface/living-room.ply"
     original = reference.read_bytes()
@@ -214,7 +214,7 @@ def test_recovery_rejects_changed_scoring_dependencies(dataset, tmp_path):
         )
     old_query = (
         prior
-        / "metadata/source/experiments/04_surface_reconstruction/src/evaluation.py"
+        / "metadata/source/research/experiments/04_surface_reconstruction/src/evaluation.py"
     )
     old_query.write_text(old_query.read_text().replace("k=1, eps=0", "k=1, eps=0.1"))
     (prior / "metadata/status.json").write_text('{"status":"running"}')
@@ -226,7 +226,7 @@ def test_recovery_rejects_changed_scoring_dependencies(dataset, tmp_path):
 
 def test_recovered_summary_weighting():
     recovery = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.recovery"
+        "research.experiments.04_surface_reconstruction.src.recovery"
     )
     result = recovery.combine_summaries(
         [
@@ -242,12 +242,12 @@ def test_recovered_summary_weighting():
 @pytest.mark.parametrize("damage", ["missing", "changed"])
 def test_recovery_requires_extracted_fault_control_source(dataset, tmp_path, damage):
     recovery = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.recovery"
+        "research.experiments.04_surface_reconstruction.src.recovery"
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
     (prior / "metadata/status.json").write_text('{"status":"running"}')
-    dependency = "experiments/04_surface_reconstruction/src/validation/controls.py"
+    dependency = "research/experiments/04_surface_reconstruction/src/validation/controls.py"
     source = prior / "metadata/source" / dependency
     source.parent.mkdir(parents=True, exist_ok=True)
     if damage == "missing":
@@ -266,13 +266,13 @@ def test_recovery_requires_extracted_fault_control_source(dataset, tmp_path, dam
 
 def test_recovery_retains_fault_control_dependency_in_evidence(dataset, tmp_path):
     recovery = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.recovery"
+        "research.experiments.04_surface_reconstruction.src.recovery"
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
     evidence = tmp_path / "evidence"
     recovery.validate_prior(prior, dataset, [1, 2], 0.05, repo, evidence)
-    dependency = "experiments/04_surface_reconstruction/src/validation/controls.py"
+    dependency = "research/experiments/04_surface_reconstruction/src/validation/controls.py"
     assert (evidence / "source" / dependency).read_bytes() == (
         repo / dependency
     ).read_bytes()
@@ -280,9 +280,9 @@ def test_recovery_retains_fault_control_dependency_in_evidence(dataset, tmp_path
 
 def test_recovery_empty_frame_and_bad_fault_summary(dataset, tmp_path):
     inspection = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.inspection"
+        "research.experiments.04_surface_reconstruction.src.inspection"
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     Image.fromarray(np.zeros((1, 2), dtype=np.uint16)).save(
         dataset / "trajectory2/depth/1.png"
     )
@@ -314,9 +314,9 @@ def test_recovery_empty_frame_and_bad_fault_summary(dataset, tmp_path):
 
 def test_recovery_rejects_plausible_complete_run_fault_tampering(dataset, tmp_path):
     inspection = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.inspection"
+        "research.experiments.04_surface_reconstruction.src.inspection"
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
     record = prior / "output/2/stages.json"
     saved = json.loads(record.read_text())
@@ -341,9 +341,9 @@ def test_recovery_rejects_plausible_complete_run_fault_tampering(dataset, tmp_pa
 
 def test_completed_inspection_without_controls_can_be_reused(dataset, tmp_path):
     inspection = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.inspection"
+        "research.experiments.04_surface_reconstruction.src.inspection"
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
     (prior / "metadata/status.json").write_text('{"status":"running"}')
     first = inspection.execute(dataset, [1, 2], 0.05, prior, tmp_path / "first", repo)
@@ -359,9 +359,9 @@ def test_recovery_rejects_changes_after_initial_verification(
     dataset, tmp_path, monkeypatch
 ):
     inspection = importlib.import_module(
-        "experiments.04_surface_reconstruction.src.inspection"
+        "research.experiments.04_surface_reconstruction.src.inspection"
     )
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     prior = runner.execute(dataset, [1, 2], 0.05, tmp_path / "prior", repo)
     original = inspection.validate_prior
 
@@ -390,7 +390,7 @@ def test_all_invalid_dataset_fails_without_publishing(dataset, tmp_path):
     )
     with pytest.raises(ValueError, match="empty reconstruction"):
         runner.execute(
-            dataset, [1], 0.05, tmp_path / "runs", Path(__file__).resolve().parents[3]
+            dataset, [1], 0.05, tmp_path / "runs", Path(__file__).resolve().parents[4]
         )
     run = next((tmp_path / "runs").iterdir())
     assert json.loads((run / "metadata/status.json").read_text())["status"] == "failed"
@@ -447,7 +447,7 @@ def test_publisher_ply_trailing_newline_only(dataset, tmp_path):
 
 
 def test_run_complete_inputs_scores_and_tampering(dataset, tmp_path):
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     path = runner.execute(dataset, [1, 2], 0.05, tmp_path / "runs", repo)
     assert verify_run(path)["status"] == "complete"
     result = json.loads((path / "output/metrics.json").read_text())
@@ -477,7 +477,7 @@ def test_run_complete_inputs_scores_and_tampering(dataset, tmp_path):
 
 def test_failed_run_keeps_receipt(dataset, tmp_path):
     (dataset / "trajectory2/depth/2.png").unlink()
-    repo = Path(__file__).resolve().parents[3]
+    repo = Path(__file__).resolve().parents[4]
     with pytest.raises(FileNotFoundError):
         runner.execute(dataset, [1, 2], 0.05, tmp_path / "runs", repo)
     paths = list((tmp_path / "runs").iterdir())

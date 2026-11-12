@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from experiments.sfm.src import prompt
+from research.experiments.sfm.src import prompt
 
 IMAGE = (480, 640)
 GRID = (192, 256)

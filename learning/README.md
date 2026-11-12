@@ -1,6 +1,6 @@
 # Learning: 3D from a phone walkthrough, explained from the start
 
-This folder teaches the ideas behind this repository to someone who has not worked on SLAM or 3D vision before. Each chapter explains one part of the problem from first principles, shows what this project measured, and points to the code and notes that hold the detail. It is built from the project's research notes (`research/`) and experiment results (`experiments/`) as of 14 October 2026.
+This folder teaches the ideas behind this repository to someone who has not worked on SLAM or 3D vision before. Each chapter explains one part of the problem from first principles, shows what this project measured, and points to the code and notes that hold the detail. It is built from the project's research notes (`research/`) and experiment results (`research/experiments/`) as of 14 October 2026.
 
 ## The problem in one paragraph
 
@@ -21,7 +21,7 @@ A person walks through a worksite filming with a phone. We want two things from 
                                                      match across views, count
 ```
 
-The project builds and tests each box on its own with known inputs, then connects them. The repository code that runs all six in order is `evaluation/layers/`.
+The project builds and tests each box on its own with known inputs, then connects them. The repository code that runs all six in order is `research/evaluation/layers/`.
 
 ## Reading order
 
@@ -55,4 +55,4 @@ Chapters 1 to 4 are the core of SLAM. If you only have an hour, read 1, 3, 4 and
 
 - The [research folder](../research/README.md) holds the papers and source notes behind each chapter, grouped by topic.
 - The [lecture slides](../research/3d_vision_fundamentals/README.md) from a university 3D vision course cover the maths in more depth; each chapter names the matching lecture.
-- The [experiments folder](../experiments/README.md) holds the code, settings and full result tables.
+- The [experiments folder](../research/experiments/README.md) holds the code, settings and full result tables.

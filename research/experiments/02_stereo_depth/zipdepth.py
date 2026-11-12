@@ -10,7 +10,7 @@ from typing import Any, Literal
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.shared.runs import Run
+from research.experiments.shared.runs import Run
 
 Build = Literal["gpu", "npu"]
 ZipDepthConvention = Literal["relative_inverse_depth"]

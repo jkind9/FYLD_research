@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from experiments.shared.share import export_share
-from experiments.shared.tests.test_share import make_source
+from research.experiments.shared.share import export_share
+from research.experiments.shared.tests.test_share import make_source
 
 
 def test_moved_viewer_images_and_controls_without_network(tmp_path):

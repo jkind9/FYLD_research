@@ -24,7 +24,7 @@ The reference checkout is pinned to 3.12.6, commit `4d5b60e19ad268072adaf1267d21
 
 A preliminary CPU run using pycolmap 3.12.6 registered 120 of 120 TUM colour images in its largest component and exported 8,217 sparse points. Mean reprojection error was 0.7854 pixels. This measures image consistency, not physical accuracy. Runtime was 172.32 seconds. These are local measurements, separate from the paper's benchmarks. The output remains at arbitrary scale and is not a dense surface. Final independent implementation review is pending.
 
-Since 13 October the project has run the official COLMAP 4.2.1 Windows build without CUDA, with pycolmap 4.2.1 only for reading models ([experiments/sfm](../../experiments/sfm/README.md)).
+Since 13 October the project has run the official COLMAP 4.2.1 Windows build without CUDA, with pycolmap 4.2.1 only for reading models ([research/experiments/sfm](../experiments/sfm/README.md)).
 
 ## Lessons from the project's runs (13 October to 8 November 2026)
 
@@ -32,7 +32,7 @@ Since 13 October the project has run the official COLMAP 4.2.1 Windows build wit
 
 The incremental mapper drops any camera with a lens distortion number above `--Mapper.max_extra_param` (default 1). The limit is there because a large value usually means COLMAP's own lens estimate has gone wrong. TUM's published fr1 calibration has k3 = 1.1633. The three distortion terms (0.26, −0.95 and 1.16) mostly cancel, so the image corner bends by only about 5%. Even so, every starting pair lost both cameras ("Discarding reconstruction due to bad initial pair") and no model was built.
 
-With the limit raised to 2, the same matches placed all 298 desk frames: 15.2 mm path error after a best fit with size, against 24.0 mm with the plain default calibration. Converting pixels to rays and back with this calibration gives 0.00 px error, so the lens maths was never the problem. The global mapper has no such setting and still fails with this calibration, for a reason not yet found. The run is recorded in [experiments/sfm](../../experiments/sfm/README.md).
+With the limit raised to 2, the same matches placed all 298 desk frames: 15.2 mm path error after a best fit with size, against 24.0 mm with the plain default calibration. Converting pixels to rays and back with this calibration gives 0.00 px error, so the lens maths was never the problem. The global mapper has no such setting and still fails with this calibration, for a reason not yet found. The run is recorded in [research/experiments/sfm](../experiments/sfm/README.md).
 
 The same check applies when COLMAP is used to estimate the Redmi's lens: raise the limit before trusting a failure.
 

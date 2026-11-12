@@ -40,7 +40,7 @@ Map of 14 October 2026. The owner asked what would have to be rebuilt or slotted
 
 ARCore's shared-camera mode lets an app read Camera2 images while ARCore runs. A recorder that saves raw camera frames, motion-sensor readings and ARCore's poses together gives, in one walk, both the inputs an open VIO system needs and ARCore's answer to compare against. Open systems can then be run offline on these recordings (as Task84 did for stella_vslam and ORB-SLAM3) before any is ported to the phone.
 
-Stream B started on 14 October 2026 in [experiments/open_vio/](../../experiments/open_vio/README.md). Step 1, the recorder, and what Android and ARCore promise about clocks: [../visual_inertial_odometry/phone_recording_and_clocks.md](../visual_inertial_odometry/phone_recording_and_clocks.md).
+Stream B started on 14 October 2026 in [research/experiments/open_vio/](../experiments/open_vio/README.md). Step 1, the recorder, and what Android and ARCore promise about clocks: [../visual_inertial_odometry/phone_recording_and_clocks.md](../visual_inertial_odometry/phone_recording_and_clocks.md).
 
 ## Sources
 

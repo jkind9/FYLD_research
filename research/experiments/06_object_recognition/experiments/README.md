@@ -20,7 +20,7 @@ The labels in these trials are coarse and were inspected earlier, so results are
 Run from the repository root with the project environment, CPU unless a row above says otherwise. The usual form is:
 
 ```text
-.venv/Scripts/python.exe -B -m experiments.06_object_recognition.experiments.<folder>.run
+.venv/Scripts/python.exe -B -m research.experiments.06_object_recognition.experiments.<folder>.run
 ```
 
 Each trial publishes a new run folder under its own `runs/` and never edits an old one. Several trials read the saved outputs of an earlier trial, so a fresh checkout needs those run folders; each trial's README names them. `08_spatial_uncertainty_latency/run.py` has no command-line options and starts a full timing run when executed.

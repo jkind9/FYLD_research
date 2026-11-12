@@ -19,13 +19,13 @@ Nothing here predicts depth or estimates camera motion. Per-frame points stay se
 Run from the repository root, CPU only:
 
 ```text
-.venv/Scripts/python.exe -B -m experiments.geometry_validation.src.run --dataset data/icl_nuim --frame-ids <explicit IDs>
+.venv/Scripts/python.exe -B -m research.experiments.geometry_validation.src.run --dataset data/icl_nuim --frame-ids <explicit IDs>
 ```
 
 `--frame-ids` is required. Tests:
 
 ```text
-.venv/Scripts/python.exe -B tools/check.py -q experiments/geometry_validation/tests
+.venv/Scripts/python.exe -B tools/check.py -q research/experiments/geometry_validation/tests
 ```
 
 ## Where results are recorded

@@ -50,7 +50,7 @@ print(fragments.surface().shape[1], fragments.frames_per_fragment())
 |---|---|---|---|
 | `voxel_m` | Required; room and live use 0.02 m | Adopted surface resolution; 52 mm mean surface error on the synthetic ICL control | [Measured chain](../../DESIGN.md#2-where-the-project-is) |
 | `keyframes_per_fragment` | 10 | Adopted grouping keeps correction work local | [Fusion tests](../../tests/test_sitescan_fusion.py) |
-| `TRUNCATION_VOXELS` | 4 | Retain the existing signed-distance averaging band | [Original fusion control](../../experiments/sfm/src/dense.py) |
+| `TRUNCATION_VOXELS` | 4 | Retain the existing signed-distance averaging band | [Original fusion control](../../research/experiments/sfm/src/dense.py) |
 | `DEPTH_RANGE_M` | 0.1–4.0 m | Preserve the adopted near and far integration limits | [Fusion tests](../../tests/test_sitescan_fusion.py) |
 
 ## Limits

@@ -15,8 +15,8 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.spatial.transform import Rotation, Slerp  # type: ignore[import-untyped]
 
-from experiments.shared.contracts import Calibration
-from experiments.shared.geometry import backproject, project, transform_points
+from research.experiments.shared.contracts import Calibration
+from research.experiments.shared.geometry import backproject, project, transform_points
 
 from .placement import box_slices
 

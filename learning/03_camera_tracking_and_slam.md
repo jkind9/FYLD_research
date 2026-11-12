@@ -79,11 +79,11 @@ What this means here:
 - **Learned and foundation-model SLAM are the most accurate but need a GPU**, which is not allowed for now.
 - **Streaming models skip the tracking stage.** LingBot-Map (Apache-2.0) gives a pose and depth per frame from plain video at 12 fps on an RTX 4090. SLAM3R (non-commercial licence) gives dense points at 20+ fps on an RTX 4090D without solving poses at all. Neither gives metres or closes loops, so ARCore would still supply the size. GS-ICP SLAM (MIT) tracks RGB-D frames while growing a Gaussian splat map, up to 107 fps on an RTX 4090. All three are built for a GPU.
 
-> **Project result: one streaming model on the CPU.** LingBot-Map ran on the 15 October Redmi walk on the CPU, with a quarter of its default memory window to fit in RAM, at 0.09 frames per second. One size fitted to ARCore's path held for the whole walk (the size from depth agreed within 3%). Its camera path stayed within 0.118 m RMSE of ARCore's over 6.7 m. Its depth was right in the median from 1 to 4 m, but about twice as scattered as the room build's and 40% too near beyond 4 m. Sized frame by frame to ARCore depth instead, as the room build does, its depth had 38% lower error than Depth Anything V2 on the same frames, so its depth may be worth more as a part than the whole system. (Task128, `experiments/lingbot_map/README.md`, `research/feed_forward_3d/lingbot_map_how_it_works.md`.)
+> **Project result: one streaming model on the CPU.** LingBot-Map ran on the 15 October Redmi walk on the CPU, with a quarter of its default memory window to fit in RAM, at 0.09 frames per second. One size fitted to ARCore's path held for the whole walk (the size from depth agreed within 3%). Its camera path stayed within 0.118 m RMSE of ARCore's over 6.7 m. Its depth was right in the median from 1 to 4 m, but about twice as scattered as the room build's and 40% too near beyond 4 m. Sized frame by frame to ARCore depth instead, as the room build does, its depth had 38% lower error than Depth Anything V2 on the same frames, so its depth may be worth more as a part than the whole system. (Task128, `research/experiments/lingbot_map/README.md`, `research/feed_forward_3d/lingbot_map_how_it_works.md`.)
 
 Notes: [LingBot-Map](../research/feed_forward_3d/lingbot_map.md), [SLAM3R](../research/feed_forward_3d/slam3r.md), [splat SLAM](../research/gaussian_splatting/lumina_open_source_parts.md#7-building-splats-live-gaussian-splat-slam).
 
-> **Project result: live SLAM on a CPU is fast and close to the offline path.** Run frame by frame on the recorded clips, ORB-SLAM3 tracks TUM xyz with 12.8 mm error and stella_vslam (BSD-2 licence) with 17.1 mm, against 11.9 mm for offline structure from motion; both take 5-12 ms per frame on a desktop CPU. On the faster desk recording both are about 26-28 mm, but stella_vslam loses 9-12% of frames and ORB-SLAM3 at half frame rate sometimes loses track and starts a second map. (Task84, `experiments/live_slam/README.md`.)
+> **Project result: live SLAM on a CPU is fast and close to the offline path.** Run frame by frame on the recorded clips, ORB-SLAM3 tracks TUM xyz with 12.8 mm error and stella_vslam (BSD-2 licence) with 17.1 mm, against 11.9 mm for offline structure from motion; both take 5-12 ms per frame on a desktop CPU. On the faster desk recording both are about 26-28 mm, but stella_vslam loses 9-12% of frames and ORB-SLAM3 at half frame rate sometimes loses track and starts a second map. (Task84, `research/experiments/live_slam/README.md`.)
 
 The full review, with sources: [research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md](../research/camera_tracking_and_slam/sota_slam_review_2026-10-14.md).
 
@@ -96,14 +96,14 @@ If a tracker loses its place (blur, a blank wall, a person walking past), later 
 Score a saved camera path against TUM's motion-capture path with the project's evaluator (best fit, best fit with size, 1 s relative error):
 
 ```text
-python -m pytest experiments/03_camera_pose_estimation/tests -q
+python -m pytest research/experiments/03_camera_pose_estimation/tests -q
 ```
 
-`experiments/03_camera_pose_estimation/src/evaluation.py` holds the scoring code; `evaluate()` returns `ate_rigid_rmse_m`, `ate_scaled_rmse_m`, `ate_scaled_size` and `rpe_1s_translation_rmse_m`.
+`research/experiments/03_camera_pose_estimation/src/evaluation.py` holds the scoring code; `evaluate()` returns `ate_rigid_rmse_m`, `ate_scaled_rmse_m`, `ate_scaled_size` and `rpe_1s_translation_rmse_m`.
 
 ## Further reading
 
 - [research/camera_tracking_and_slam](../research/camera_tracking_and_slam/README.md), starting with the 13 October tracking review.
 - [ORB-SLAM note](../research/camera_tracking_and_slam/orb_slam/README.md) and the Android SLAM review beside it.
 - Lecture 8, second file (incremental SfM, loop closure, SLAM) in [research/3d_vision_fundamentals](../research/3d_vision_fundamentals/README.md).
-- `experiments/03_camera_pose_estimation/README.md` for the layer's methods table and the first CPU trial.
+- `research/experiments/03_camera_pose_estimation/README.md` for the layer's methods table and the first CPU trial.

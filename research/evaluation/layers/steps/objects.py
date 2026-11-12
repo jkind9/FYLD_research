@@ -10,8 +10,8 @@ from typing import Any, Protocol
 
 import numpy as np
 
-from experiments.shared.contracts import Pose
-from experiments.shared.runs import Run, write_json
+from research.experiments.shared.contracts import Pose
+from research.experiments.shared.runs import Run, write_json
 
 from ..records import StepResult, Unavailable, failed_step
 from .contracts import (
@@ -25,11 +25,11 @@ from .contracts import (
     read_pose,
 )
 
-detector_owner = importlib.import_module("experiments.06_object_recognition.pilot.detector")
-localisation = importlib.import_module("experiments.06_object_recognition.pilot.localisation")
-association = importlib.import_module("experiments.06_object_recognition.pilot.association")
-segmentation_owner = importlib.import_module("experiments.06_object_recognition.experiments.02_segmentation.masks")
-appearance_owner = importlib.import_module("experiments.06_object_recognition.experiments.03_appearance.adapter")
+detector_owner = importlib.import_module("research.experiments.06_object_recognition.pilot.detector")
+localisation = importlib.import_module("research.experiments.06_object_recognition.pilot.localisation")
+association = importlib.import_module("research.experiments.06_object_recognition.pilot.association")
+segmentation_owner = importlib.import_module("research.experiments.06_object_recognition.experiments.02_segmentation.masks")
+appearance_owner = importlib.import_module("research.experiments.06_object_recognition.experiments.03_appearance.adapter")
 PROPOSAL_FIELDS = {"xyxy", "label", "object_id", "association"}
 
 
@@ -282,8 +282,8 @@ def _output(method: DetectorMethod, observations: list[dict[str, Any]], origins:
         "synthetic_detector": method.control == "software",
         "methods": {
             "detection": method_label(method),
-            "localisation": "experiments.06_object_recognition.pilot.localisation.localise_detection",
-            "counting": "experiments.06_object_recognition.pilot.association.associate_frame",
+            "localisation": "research.experiments.06_object_recognition.pilot.localisation.localise_detection",
+            "counting": "research.experiments.06_object_recognition.pilot.association.associate_frame",
         },
         "frames": observations,
         "origins": [

@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 spatial_support = importlib.import_module(
-    "experiments.06_object_recognition.experiments.04_geometry_identity.spatial_support"
+    "research.experiments.06_object_recognition.experiments.04_geometry_identity.spatial_support"
 )
 LINEAGE = {
     "coordinate_frame": "world",

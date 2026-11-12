@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from evaluation.layers import consistency
-from experiments.shared.contracts import Calibration, Pose
+from research.evaluation.layers import consistency
+from research.experiments.shared.contracts import Calibration, Pose
 
 CAMERA = Calibration(40, 30, 30.0, 30.0, 19.5, 14.5, "x-right_y-down_z-forward")
 FINE = Calibration(80, 60, 60.0, 60.0, 39.5, 29.5, "x-right_y-down_z-forward")

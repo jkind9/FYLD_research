@@ -7,8 +7,8 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
-from experiments.datasets.acquisition import sha256
-from experiments.shared.runs import verify_run
+from research.experiments.datasets.acquisition import sha256
+from research.experiments.shared.runs import verify_run
 
 
 def verified_run(path: Path, pinned_sha256: str | None) -> dict:

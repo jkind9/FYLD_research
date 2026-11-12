@@ -6,7 +6,7 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-from experiments.shared.geometry import (
+from research.experiments.shared.geometry import (
     backproject,
     depth_metres,
     project,

@@ -170,7 +170,7 @@ These blur the boundary: one pass gives what SfM and dense depth give separately
 | Method | Required input | Output | Status here |
 |---|---|---|---|
 | Back-projection (point accumulation) | Depth images, poses, intrinsics | Point cloud | Walkthrough `MetricPoints` |
-| TSDF fusion (Open3D) | Depth images, poses, intrinsics | One fused surface (points or mesh) | `experiments/sfm/src/dense.py` |
+| TSDF fusion (Open3D) | Depth images, poses, intrinsics | One fused surface (points or mesh) | `research/experiments/sfm/src/dense.py` |
 | Per-frame size to tracked points | Learned depth, sparse 3D points with their pixels, poses | Learned depth resized to agree with the points | Task72 |
 | Grid footprint | 3D points in metres; which way is up | Ground plane, top-down height grid, seen and unknown area | Task55 |
 | Depth freshness check | Depth timestamp and image timestamp | Keep or skip the depth map | Task116: `room_build` skips depth over 0.1 s old |

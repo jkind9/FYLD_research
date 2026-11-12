@@ -10,9 +10,9 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from evaluation.layers.steps import depth as depth_step
-from evaluation.layers.steps import objects as objects_step
-from evaluation.layers.steps.contracts import Calibration, DepthPrediction
+from research.evaluation.layers.steps import depth as depth_step
+from research.evaluation.layers.steps import objects as objects_step
+from research.evaluation.layers.steps.contracts import Calibration, DepthPrediction
 
 SHAPE = (6, 8)
 ROWS, COLS = np.mgrid[0 : SHAPE[0], 0 : SHAPE[1]]
@@ -180,7 +180,7 @@ def test_points_per_frame_must_be_an_integer_of_at_least_two(points):
 
 
 def test_cli_scaled_choice_uses_the_phone_checkpoint_by_default():
-    from evaluation.layers.cli import DEFAULT_DEPTH_CHECKPOINTS, depth_choice
+    from research.evaluation.layers.cli import DEFAULT_DEPTH_CHECKPOINTS, depth_choice
 
     args = argparse.Namespace(
         depth="zipdepth-scaled", depth_checkpoint=None, dataset=Path("tum"), device="cpu", points_per_frame=50

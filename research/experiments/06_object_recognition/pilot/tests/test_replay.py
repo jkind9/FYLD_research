@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-replay = importlib.import_module("experiments.06_object_recognition.pilot.replay")
+replay = importlib.import_module("research.experiments.06_object_recognition.pilot.replay")
 
 
 def _detection(class_id, position):

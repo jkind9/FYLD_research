@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 association = importlib.import_module(
-    "experiments.06_object_recognition.experiments.07_spatial_uncertainty.association"
+    "research.experiments.06_object_recognition.experiments.07_spatial_uncertainty.association"
 )
 
 

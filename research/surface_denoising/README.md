@@ -157,7 +157,7 @@ The owner's request quoted a search summary with five strategies. What the sourc
 
 ## Proposed clean-up stage for `sitescan/pipelines`
 
-`experiments/surface_cleanup/` now holds the trial versions of the masks, the near-first passes and the visibility vote (Task120). The proposal below is revised by the trial results in the next section.
+`research/experiments/surface_cleanup/` now holds the trial versions of the masks, the near-first passes and the visibility vote (Task120). The proposal below is revised by the trial results in the next section.
 
 1. **Between size and fuse, per frame:** stale-depth rejection and better sizing beyond ARCore depth's reach. The depth-jump and grazing-angle masks are dropped as stand-alone fixes: on the 15 October walk they added floaters.
 2. **After fusion, against recent views:** the visibility vote, with near views outvoting far ones. In the trial it removed 53-80% of the surface lying in empty space. Live, each update would add its newest view's votes to running totals kept per surface point, about 17 ms against a 680,000-point surface.
@@ -176,7 +176,7 @@ Every clean-up removes some real surface. Report what it removes and what it kee
 
 ## Trial on the 15 October walk, 8 November 2026 (Task120)
 
-`python -B -m experiments.surface_cleanup.denoise_trial --session <v2 session> --out <folder>` runs Depth Anything V2 Metric Small once per frame that `room_build` fuses (134 frames), then fuses and scores each variant below. CPU only, with the GPU hidden from the process; the whole run takes 81 s. Tracked points with even ids may be used for sizing; only odd ids (2,418 point views in cells without ARCore depth, and every odd-id view for the surface scores) are used for scoring. Tracked points are ARCore's own triangulation, not ground truth; ICL-NUIM has not been run yet. The settings are first guesses by Claude, not tuned: edge jump 5% in a 3 × 3 neighbourhood, side-on beyond 75°, vote margin the larger of 8 cm and 5%. The baseline reproduces `room_build` to within 2 of 676,855 points; the trial stores depth as 32-bit floats. A repeat run gave identical scores.
+`python -B -m research.experiments.surface_cleanup.denoise_trial --session <v2 session> --out <folder>` runs Depth Anything V2 Metric Small once per frame that `room_build` fuses (134 frames), then fuses and scores each variant below. CPU only, with the GPU hidden from the process; the whole run takes 81 s. Tracked points with even ids may be used for sizing; only odd ids (2,418 point views in cells without ARCore depth, and every odd-id view for the surface scores) are used for scoring. Tracked points are ARCore's own triangulation, not ground truth; ICL-NUIM has not been run yet. The settings are first guesses by Claude, not tuned: edge jump 5% in a 3 × 3 neighbourhood, side-on beyond 75°, vote margin the larger of 8 cm and 5%. The baseline reproduces `room_build` to within 2 of 676,855 points; the trial stores depth as 32-bit floats. A repeat run gave identical scores.
 
 **Where the fused depth lies.** 10% of fused pixels are within 1 m, 76% at 1-2.5 m and 14% at 2.5-4 m; 1.2% of valid pixels lie beyond 4 m and are dropped. This walk is a small house, so it does not test a 10 m room. Depth-jump pixels are 1.8-3.0% of each band and side-on pixels 6.8-8.9%. The prediction that the floor band is mostly flying-pixel or side-on depth is not supported: removing both cut points below the floor by only 11%.
 
@@ -247,7 +247,7 @@ Task122 found that echo layers survive because frames from one standing spot agr
 | MVSNet (PyTorch port) [`eval.py`](https://github.com/xy-guo/MVSNet_pytorch/blob/master/eval.py), `check_geometric_consistency` | Each source view's depth is projected into the reference; it agrees if it lands within 1 px and 1% depth. A pixel is kept if at least 3 views agree and the network's confidence is over 0.8 | 1 px, 1%, 3 views |
 | PCL tutorial [`conditional_euclidean_clustering.cpp`](https://github.com/PointCloudLibrary/pcl/blob/master/doc/tutorials/content/sources/conditional_euclidean_clustering/conditional_euclidean_clustering.cpp) | Two neighbours join one cluster only if a condition holds; the example tests intensity, or normals within 30°. Clusters smaller than a thousandth or larger than a fifth of the cloud are set aside and can be read back | 30°; size limits N/1000 and N/5 |
 
-Two rules were built from these (`experiments/surface_cleanup/`):
+Two rules were built from these (`research/experiments/surface_cleanup/`):
 
 - **Spots rule** (`wide_support`, after COLMAP's filter). A surface point is kept if some view measured it nearer than 2.5 m, where ARCore depth sizes the learned depth. Otherwise it needs two more views that measured it at the same depth (within the vote margin, the larger of 8 cm and 5%) from rays at least 3° from the first measuring view's ray. Angles are taken against the first view that measured the point, which is cheaper than comparing every pair. So a point whose first view sat between two others can be dropped even though those two are more than 3° apart.
 - **Pieces by make-up** (`piece_majority`, after PCL's conditional clustering). Points within 3 cm whose normals differ by under 30° join one piece, so the side-on strip at a corner does not join an echo copy to the wall behind it. A piece is removed whole when more than half its points fail the spots rule. This is the "remove a component by its make-up" idea from the chain-linking section above.
@@ -284,7 +284,7 @@ Filtering can only remove what views disagree about. The spots rule finds disagr
 
 The owner asked for every clean-up setting on a slider, starting from the raw room, to tune chain linking by eye. Two steps build it:
 
-    python -B -m experiments.surface_cleanup.cleanup_attributes --session <v2 session> --out <folder>
+    python -B -m research.experiments.surface_cleanup.cleanup_attributes --session <v2 session> --out <folder>
     python -B -m tools.demos.cleanup_tuner --attributes <folder> --session <v2 session> --out <page.html> --views 65 420
 
 The first fuses the room under `room_build` rules (`raw.ply`, no clean-up) and stores, per point, the evidence the depth-map stages test: frames measuring it, see-through share of the weighted vote, nearest measured depth, second-widest angle between measuring views, and mean distance to its 20 nearest neighbours. The second builds one offline page (17.3 MB for 676,853 points; local only, it embeds photos). Each stage has an on/off tick and each parameter a slider with a description: vote share; minimum frames; spots angle and trusted distance; outlier spread; radius and neighbour count; and for chain linking the link distance, neighbours needed to extend a chain (DBSCAN's `min_points`; 1 is plain chain linking), maximum normal difference for a link (PCL's rule), minimum piece size, and how many of the largest pieces to keep (2DGS's rule). Radius outliers and chain linking run in the page on the raw points (1-3 s per change in headless Chromium without a GPU).
@@ -330,7 +330,7 @@ What this shows:
 
 Local outputs: `outputs/cleanup/room_build_clean_up_093913/{surface.ply,raw_surface.ply,summary.json,redmi-room-15oct-clean.html}` (the viewer is local only; it embeds photos).
 
-Local outputs: `outputs/cleanup/denoise_trial_093913_v7/{results.json,<variant>.ply}` (all 22 variants, Task124; earlier variants give the same scores as before), `outputs/cleanup/denoise_trial_093913_v5/` (Task122's 16 variants), `outputs/cleanup/denoise_trial_093913_v2/` (Task120), and the first run in `outputs/cleanup/denoise_trial_093913/`. It lacks the two "beyond 2.5 m" rows, has the same numbers for the rest, and adds one more variant (tracked-point size in every cell, masks and vote: blocked 1.2% and 4.2%, 119,990 points below the floor). Tests: `experiments/surface_cleanup/tests/test_filters.py` and `test_denoise_trial.py`.
+Local outputs: `outputs/cleanup/denoise_trial_093913_v7/{results.json,<variant>.ply}` (all 22 variants, Task124; earlier variants give the same scores as before), `outputs/cleanup/denoise_trial_093913_v5/` (Task122's 16 variants), `outputs/cleanup/denoise_trial_093913_v2/` (Task120), and the first run in `outputs/cleanup/denoise_trial_093913/`. It lacks the two "beyond 2.5 m" rows, has the same numbers for the rest, and adds one more variant (tracked-point size in every cell, masks and vote: blocked 1.2% and 4.2%, 119,990 points below the floor). Tests: `research/experiments/surface_cleanup/tests/test_filters.py` and `test_denoise_trial.py`.
 
 ## Order to try
 

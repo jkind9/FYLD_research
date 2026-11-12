@@ -21,7 +21,7 @@ def main() -> None:
     parser.add_argument("apk", type=Path)
     parser.add_argument("--aapt", type=Path, required=True)
     args = parser.parse_args()
-    root = Path(__file__).resolve().parents[3] / "mobile_deployments"
+    root = Path(__file__).resolve().parents[4] / "mobile_deployments"
     print(publish_capture(args.apk, root, apk_version(args.apk, args.aapt)))
 
 

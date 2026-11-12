@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 import pytest
 
-module = importlib.import_module("experiments.06_object_recognition.pilot.detector")
+module = importlib.import_module("research.experiments.06_object_recognition.pilot.detector")
 
 
 class Array:

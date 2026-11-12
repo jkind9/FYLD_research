@@ -19,9 +19,9 @@ Every run also creates `output/visualizations/index.html` and `manifest.json`. T
 
 ```python
 from pathlib import Path
-from evaluation.layers.config import PipelineSpec
-from evaluation.layers.pipeline import run
-from evaluation.layers.steps.capture import TumSequence
+from research.evaluation.layers.config import PipelineSpec
+from research.evaluation.layers.pipeline import run
+from research.evaluation.layers.steps.capture import TumSequence
 
 spec = PipelineSpec(
     run_root=Path("outputs/walkthrough"),
@@ -68,7 +68,7 @@ A frozen choice records its name, settings and control label. Its `load()` retur
 ```python
 from dataclasses import dataclass, field
 import numpy as np
-from evaluation.layers.steps.contracts import DepthPrediction
+from research.evaluation.layers.steps.contracts import DepthPrediction
 
 @dataclass(frozen=True)
 class FlatDepth:
@@ -106,8 +106,8 @@ Surface point order preserves correspondence with source colours. Each surface s
 
 ```python
 from dataclasses import replace
-from evaluation.layers.steps.depth import RecordedSensorDepth
-from evaluation.layers.steps.tracking import ReferencePoses
+from research.evaluation.layers.steps.depth import RecordedSensorDepth
+from research.evaluation.layers.steps.tracking import ReferencePoses
 
 root = spec.source.root
 controlled = replace(spec, depth=RecordedSensorDepth(root),
@@ -130,8 +130,8 @@ Controls use `software` for fixed fixtures and `reference` for recorded answers.
 From the repository root:
 
 ```powershell
-python -B -m evaluation.layers.cli --dataset data/tum/rgbd_dataset_freiburg1_xyz --run-root outputs/walkthrough
-python -B -m evaluation.layers.cli --report <camera-report.json> --bundle <export-folder> --run-root <output-folder>
+python -B -m research.evaluation.layers.cli --dataset data/tum/rgbd_dataset_freiburg1_xyz --run-root outputs/walkthrough
+python -B -m research.evaluation.layers.cli --report <camera-report.json> --bundle <export-folder> --run-root <output-folder>
 ```
 
 Without `--depth`, the depth layer is unavailable and later layers wait, so the command returns exit code 2. The scorer still records the tracking reference path and hash.
@@ -139,7 +139,7 @@ Without `--depth`, the depth layer is unavailable and later layers wait, so the 
 ### Choosing real methods from the command line
 
 ```powershell
-.venv/Scripts/python.exe -B -m evaluation.layers.cli `
+.venv/Scripts/python.exe -B -m research.evaluation.layers.cli `
   --dataset <tum-recording-or-clip> --run-root outputs/walkthrough `
   --depth depth-anything --device cpu --mapping grid-footprint `
   --detector-checkpoint models/yolo26x.pt --max-distance-m 0.35 --ambiguity-margin-m 0.05 `
@@ -269,7 +269,7 @@ Phone geometry currently requires the full unrotated sensor grid, zero skew and 
 ## Software checks
 
 ```powershell
-python -B tools/check.py evaluation/layers/tests experiments/shared/tests -q
+python -B tools/check.py research/evaluation/layers/tests research/experiments/shared/tests -q
 ```
 
 The fixtures test execution order, saved contracts, timing, reference labels, scoring integrity, failures and visual exports. They are ordinary method choices labelled `software`, never physical accuracy evidence. Existing frozen experiment commands and historical runs remain unchanged.
