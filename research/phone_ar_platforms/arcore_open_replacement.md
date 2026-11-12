@@ -36,9 +36,11 @@ Map of 14 October 2026. The owner asked what would have to be rebuilt or slotted
 - **Start-up and robustness.** ARCore starts tracking within seconds and recovers from blur and fast turns; research systems are less forgiving (OpenVINS took 35-40 s to initialise in one study).
 - **Porting to the phone.** The candidates are desktop C++; each needs an Android NDK build and a sustained-speed check.
 
-## A route that keeps ARCore as the reference
+## Recording ARCore beside the open route, for comparison
 
 ARCore's shared-camera mode lets an app read Camera2 images while ARCore runs. A recorder that saves raw camera frames, motion-sensor readings and ARCore's poses together gives, in one walk, both the inputs an open VIO system needs and ARCore's answer to compare against. Open systems can then be run offline on these recordings (as Task84 did for stella_vslam and ORB-SLAM3) before any is ported to the phone.
+
+**Update, 12 November 2026.** The owner decided the product will not use ARCore ([decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). The open parts in the map above are now the product route, not a fallback. ARCore's recorded answer remains a comparison on recordings, and is never an input or the size reference. Templates and parts for the depth row (learned depth sized by depth triangulated along the open tracker's path), and the changes `sitescan/` needs, are in [../visual_inertial_odometry/depth_without_arcore_2026-11-12.md](../visual_inertial_odometry/depth_without_arcore_2026-11-12.md). The capture app still opens the camera through ARCore's shared-camera mode, so the next capture work is a plain Camera2 mode. Whether the ARCore mode stays for comparison recordings is an open owner decision.
 
 Stream B started on 14 October 2026 in [research/experiments/open_vio/](../experiments/open_vio/README.md). Step 1, the recorder, and what Android and ARCore promise about clocks: [../visual_inertial_odometry/phone_recording_and_clocks.md](../visual_inertial_odometry/phone_recording_and_clocks.md).
 

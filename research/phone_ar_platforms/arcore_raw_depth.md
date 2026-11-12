@@ -33,6 +33,8 @@ Used by `research/experiments/01_camera_capture_delivery/phone_session_v1.md` (T
 
 ## Relevance to a site capture
 
+**Update, 12 November 2026.** The product will not use ARCore depth ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). The checks below still apply to the ARCore depth already recorded, which is now a comparison only. They apply equally to the triangulated depth that replaces it: newness, invalid values, coverage and repeatability against independent lengths.
+
 Our proposed test would export raw depth, confidence, poses, calibration and timestamps together. Check whether successive frames represent new depth or reused estimates. Reject invalid values before fusion. Measure repeatability against independent lengths and report observed coverage alongside area.
 
 Interpolated colours in a renderer are not additional depth observations. Occluded and low-confidence regions should remain unknown. Capture instructions should let a worker decline inaccessible views without treating that as successful full coverage.

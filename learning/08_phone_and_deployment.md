@@ -20,6 +20,12 @@ Its accuracy depends on the phone and the walk. Published tests range from about
 
 How ARCore works inside is explained in [chapter 11](11_inside_arcore.md).
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)). The reasons are in the paragraph above: it is closed source, Google can change or withdraw it, its terms exclude uses where failure could cause injury, and it runs only on phones Google supports. Its depth also reaches only about 2.5 m.
+
+- **Camera path:** an open visual-inertial tracker on the phone's own camera and motion sensors ([chapter 12](12_rebuilding_arcore.md)).
+- **Depth:** the project's own learned model, sized by depth triangulated along that path.
+- **ARCore's role now:** the results below stand as measurements, and ARCore's recordings remain a comparison.
+
 ## Hosted against on the phone
 
 - **Hosted, current route**: the phone captures; the PC stores and processes. Current runs are CPU only. Offline SfM and batch models are comparison references; their results do not establish live performance.
@@ -35,10 +41,10 @@ Putting chapters 2-5 together:
 
 | Need | Source on the phone | Evidence from recorded data |
 |---|---|---|
-| Camera path | ARCore's own tracking, not a depth-based tracker | Image-feature tracking with refinement (SfM) is 3-5 times more accurate than the old depth-based tracker (chapter 3) |
-| Real-world size | ARCore's metric tracking, or about 20 depth readings at tracked points | 20 readings give a path within 1.15 times the best possible (chapter 4) |
-| Dense surfaces | A small learned depth model, resized each frame to ARCore's tracked points | Within 8-27 mm of the true-path ceiling on recorded data (chapter 5) |
-| Better surfaces, if needed | Multi-view stereo on recent frames, on a server that updates at least once per second | Not yet run (needs GPU permission) |
+| Camera path | An open visual-inertial tracker (Basalt first), not a depth-based tracker. Until 12 November this row said ARCore's own tracking | Image-feature tracking with refinement (SfM) is 3-5 times more accurate than the old depth-based tracker (chapter 3). Basalt: 0.146 m over a 146 m walk on TUM-VI with one camera (chapter 12) |
+| Real-world size | The tracker's metric path from the motion sensors, carried into depth by points triangulated along it | 20 readings give a path within 1.15 times the best possible (chapter 4) |
+| Dense surfaces | A small learned depth model, resized each frame to points triangulated along the tracker's path | Within 8-27 mm of the true-path ceiling on recorded data (chapter 5) |
+| Better surfaces | Multi-view stereo between recent keyframes, fused where it is confident | Not yet run. Mobile3DRecon ran it on one phone CPU core, so it needs no GPU (chapter 5) |
 
 The small depth model candidates measured so far: ZipDepth's phone build (6.1M parameters, shape AbsRel 0.07, 24 ms per frame on a desktop CPU, exported to ONNX; its TFLite conversion failed) and Depth Anything V2 Small (25M parameters, 218-318 ms per frame on a desktop CPU). Neither has run on the phone yet (Task57).
 
@@ -57,6 +63,8 @@ What a recording must therefore hold:
 - **The camera's settings per frame** (exposure, readout time, focus), which the trackers need to model a rolling-shutter phone camera.
 
 ARCore's *shared-camera mode* makes this possible on one phone: ARCore tracks as usual and the same camera session also hands every image to the app.
+
+**Update, 12 November 2026.** With ARCore out of the product, the next capture work is a mode that opens the camera through Camera2 alone. That lets the app lock exposure, white balance and focus, which ARCore controls in shared mode. The ARCore mode can still record comparison walks.
 
 ### Getting every frame to the PC
 
@@ -86,7 +94,7 @@ That report exposed a frame-encoding exception. Android's JSON serializer can re
 
 ## What is still unmeasured
 
-- ARCore's pose, depth and point accuracy on the Redmi (Tasks 52 and 75).
+- The open tracker's path accuracy on the calibrated Redmi, with ARCore's recorded path as a comparison (Tasks 103, 104 and 75).
 - Any model's speed, memory, heat and battery on the phone (Task57).
 - Whether a real site walk (sunlight, mud, moving people, repeated textures) tracks as well as the indoor benchmarks.
 

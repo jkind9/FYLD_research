@@ -2,19 +2,19 @@
 id: "104"
 title: Compare open trackers and surfaces on the same Redmi v2 walk
 status: open
-priority: MED
+priority: HIGH
 type: experiment
-blocked_by: [52, 102, 103]
+blocked_by: [52, 103]
 blocks: []
-verification_test: "experiments/open_vio/tests/test_vio.py"
+verification_test: "research/experiments/open_vio/tests/test_vio.py"
 plan_reviewed: null
 files:
-  - experiments/open_vio/**
-  - experiments/live_slam/**
+  - research/experiments/open_vio/**
+  - research/experiments/live_slam/**
   - src/live/**
 docs:
-  - experiments/open_vio/README.md
-  - experiments/live_slam/README.md
+  - research/experiments/open_vio/README.md
+  - research/experiments/live_slam/README.md
   - learning/12_rebuilding_arcore.md
   - task_list/README.md
 baseline_metric:
@@ -23,11 +23,16 @@ baseline_metric:
   baseline_value: "Four VIO systems tested on TUM-VI, visual SLAM tested on TUM/ICL; zero calibrated Redmi comparisons"
   target: "Same-walk CPU tracking and surface comparison with loss, timing, calibration identity and honest reference limits"
 created: 2026-10-15
-last_updated: 2026-10-15
+last_updated: 2026-11-12
 superseded_by: null
 ---
 
 # Task 104: Compare open trackers and surfaces on the same Redmi v2 walk
+
+## Amendment, 12 November 2026
+
+Now the decisive test of the product's tracker (owner decision 10, [plan](../../PROJECT_PLAN.md#owner-decisions-in-force)). Blocked by Tasks52 and 103 only; Task102's ARCore diagnosis no longer gates it. Run Basalt first on the recorded v2 walks, whose motion sensors are already recorded, scored against ARCore's path as a comparison, with tracking loss, start-up time and CPU cost. Then rebuild the 15 October room on Basalt's poses through `sitescan`, once DESIGN section 7.15 change 1 lets the session reader take an outside trajectory ([next steps](../../PROJECT_PLAN.md#next-steps)). The two Android projects that track without ARCore report tracking, not depth, as their failure point ([review](../../research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md#whole-chain-templates)).
+
 
 ## In plain English
 

@@ -6,13 +6,13 @@ priority: MED
 type: experiment
 blocked_by: [102]
 blocks: []
-verification_test: "experiments/sfm/tests/test_posed.py"
+verification_test: "research/experiments/sfm/tests/test_posed.py"
 plan_reviewed: null
 files:
-  - experiments/sfm/**
+  - research/experiments/sfm/**
   - src/live/tests/**
 docs:
-  - experiments/sfm/README.md
+  - research/experiments/sfm/README.md
   - task_list/README.md
 baseline_metric:
   source: "15 October board review; evidence below"

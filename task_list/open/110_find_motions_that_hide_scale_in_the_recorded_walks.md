@@ -6,15 +6,15 @@ priority: MEDIUM
 type: experiment
 blocked_by: []
 blocks: []
-verification_test: "experiments/open_vio/tests/test_motion_check.py"
+verification_test: "research/experiments/open_vio/tests/test_motion_check.py"
 plan_reviewed: null
 files:
-  - experiments/open_vio/host/**
-  - experiments/open_vio/tests/**
+  - research/experiments/open_vio/host/**
+  - research/experiments/open_vio/tests/**
   - outputs/**
 docs:
-  - experiments/open_vio/README.md
-  - experiments/01_camera_capture_delivery/field_accuracy.md
+  - research/experiments/open_vio/README.md
+  - research/experiments/01_camera_capture_delivery/field_accuracy.md
 baseline_metric:
   source: "SLAM Handbook Table 11.1 (research/camera_tracking_and_slam/slam_handbook.md)"
   field: "share of walk time in motions that hide scale or distance"

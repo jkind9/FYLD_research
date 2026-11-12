@@ -90,4 +90,6 @@ The reviewed README advertises Android SDK version 4.67.0, minimum API 24, compi
 3. Check SceneView's Android demo on the Redmi as a bounded phone benchmark. Record depth availability, export contents, model accuracy, update rate, memory and heat. A Pixel demo video cannot supply those results.
 4. If an Android depth port is needed, test the pinned LiteRT Small conversion and source-pose handling. Measure accuracy and sustained cost; a target rate in source is not achieved throughput.
 
-No new experiments or architecture changes are approved by this note. The owner's 8 November order remains: refactor first; preserve ARCore as the metric reference; optimise dimensional accuracy rather than splat appearance.
+No new experiments or architecture changes are approved by this note. The owner's 8 November order was: refactor first (done 11 November); preserve ARCore as the metric reference; optimise dimensional accuracy rather than splat appearance.
+
+**Update, 12 November 2026.** ARCore is no longer the metric reference or a product input ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). SceneView's ARCore-based capture and scale sources are therefore reference only. Its non-ARCore parts still transfer: source-pose handling, scale-support checks, the bounded inference queue and object merging. Scale-support checks in item 1 should be scored with triangulated targets along the open tracker's path. ARCore depth may serve there only as a comparison on the existing recordings.

@@ -29,6 +29,10 @@ It is written for three readers: the project owner, the manager who reads the re
 ## 1. The proposal in brief
 
 - The research has settled on one processing chain. ARCore (Google's phone tracking library) gives the camera path. A learned depth model gives the shape of the scene. ARCore's own depth readings give the real size. Frames are fused into one surface, the surface is cleaned, and then it is measured and searched for objects.
+- **Update, 12 November 2026.** The owner decided the product will not use ARCore ([PROJECT_PLAN decision 10](PROJECT_PLAN.md#owner-decisions-in-force)).
+  - The camera path will come from an open visual-inertial tracker, Basalt first.
+  - Real size will come from depth triangulated along that path.
+  - The code still reads ARCore's records. Section 7.15 lists the five changes that remove them.
 - That chain runs on about 2,800 lines of Python in 18 files, spread over `src/live` and five experiment folders. The repository holds 36,200 lines of Python outside tests. The other 92% is experiments, scoring and tools.
 - The proposal is one product package, here called `sitescan` (the name is a decision for the owner). It holds only the adopted chain. Each step of the chain (a *stage*) is one folder of plain functions, with a README that shows how to run it in under 15 lines.
 - Two *orchestrators* sit on top of the stages: code that decides which stage runs, on which frame, in what order. One is the live processor, the other the offline room build. Both call the same stage functions. A command line, the phone receiver and later a web API sit on top of the orchestrators.
@@ -67,10 +71,10 @@ The PC replays the 15 October walk at 1.70 updates per second on a 32-thread des
 
 ### What is still open
 
-- **Far depth.** ARCore depth stops at about 2.5 m, so beyond that the scale is a guess. Multi-view stereo between keyframes is the next trial.
+- **Far depth.** ARCore depth stops at about 2.5 m, so beyond that the scale is a guess. Multi-view stereo between keyframes is the next trial. Without ARCore (section 7.15), triangulated depth must give the scale at every distance.
 - **Counting.** It overcounts. It waits on stable geometry and a labelled inventory.
 - **Accuracy.** No agreed targets and no independent measurements of a real site.
-- **Tracker route.** ARCore now; an open-source tracker (Basalt) is the fallback and is not chosen.
+- **Tracker route.** Decided on 12 November: an open visual-inertial tracker, Basalt first ([PROJECT_PLAN decision 10](PROJECT_PLAN.md#owner-decisions-in-force)). ARCore stays only as a comparison on recordings. Basalt has run on public data, not yet on a Redmi recording; the Redmi is not yet calibrated.
 
 These open questions decide where the structure must stay easy to change: the scale stage (far depth) and the objects stage (counting). A new method there should be one new function beside the old one, chosen by a setting.
 
@@ -139,8 +143,8 @@ The root folder also carries files that belong elsewhere: `HARNESS_WORKFLOW_AUDI
 
 ### A site visit
 
-1. The field worker carries an Android phone that supports ARCore, with the FYLD capture app installed. There is no calibration step.
-2. On site they press Record and walk the work area for 1–3 minutes with the phone upright. The app shows whether ARCore is tracking and how much is waiting to send.
+1. The field worker carries an Android phone of a model the project has calibrated, with the FYLD capture app installed. The worker does no calibration: the project measures each supported phone model once and ships the numbers with the app.
+2. On site they press Record and walk the work area for 1–3 minutes with the phone upright. The app shows whether the tracker is tracking and how much is waiting to send.
 3. During the walk the results update at least once a second: the surface so far, the top-down map, the object counts and the areas not yet seen. The worker can go back for a missed corner.
 4. After Stop, the result set is:
    - a 3D surface in metres, as a PLY file and an offline viewer;
@@ -156,7 +160,7 @@ Today steps 1–3 work with a PC on the same Wi-Fi. The measurements and counts 
 | Where | Network | Today | Suited to |
 |---|---|---|---|
 | A laptop on the same Wi-Fi | Local Wi-Fi. The capture app delivered 10.22 MB/s | Works on a 32-thread desktop at 1.58–1.70 updates per second. A laptop is untested | Trials, now |
-| A server in FYLD's cloud, where FYLD already serves models with BentoML | Mobile data. Processing needs only the colour images (about 2 MB/s, 16 Mbit/s) and ARCore's records; the lossless grey images (9.2 MB/s) serve the open-source trackers and can stay on the phone. Whether a mobile uplink sustains 16 Mbit/s is untested | Untested | The product, if live results may lag or the stream is reduced |
+| A server in FYLD's cloud, where FYLD already serves models with BentoML | Mobile data. Processing needs the colour images (about 2 MB/s, 16 Mbit/s) plus the camera path. Without ARCore (7.15), the path comes from the open tracker. If the tracker runs on the phone, only its poses are added. If it runs on the server, the lossless grey images (9.2 MB/s) and the motion sensors must be sent too. Whether a mobile uplink sustains either rate is untested | Untested | The product, if live results may lag or the stream is reduced |
 | The phone | None | Untested. The depth model is not yet exported for the phone | The product, long term |
 
 The design does not pick one. It makes the choice cheap. The boundary is the recording format, not a function call, so the same orchestrators run behind each option.
@@ -359,7 +363,9 @@ Code comments give a reason in one line. A comment links to evidence by file pat
 
 ### 7.9 Run outputs
 
-Every run writes one folder, `outputs/<session>_<pipeline>_<yyyymmdd-hhmm>/`, with the same files whatever the orchestrator: `surface.ply`, `site.json`, `objects.json`, `updates.jsonl` (live only) and `run.json`. `run.json` records the settings, git commit, package version, model hashes and timings. A result can then be traced to the exact code and model that made it.
+Every run writes one folder, `outputs/<recording>/<tool>/<yyyymmdd-hhmm>_<label>/` (built 12 November 2026, `sitescan/runs.py`). The recording is a short name from `recordings.toml` (`redmi-20261015-0939`, `tum-desk-20`), which also marks recordings that show a home as private. The tool is what ran: `room`, `replay`, `live`, `compare`, `trajectory` or a trial's name. The label is one to four lowercase words joined by hyphens saying what is different; the time orders runs, so names carry no task numbers or versions. A path under `outputs/` stays within 80 characters.
+
+`run.json` records the command, every setting, the options typed, the git commit with any uncommitted code changes (written beside it as `source.diff`) and untracked code files with their hashes, the runs it read, and, once finished, its status and headline numbers. A result can then be traced to the code that made it. Pages and screenshots made from a run go in its `pages/` and `screens/`. `tools/runs.py` lists and filters runs and writes `outputs/index.html`. Still to do: model hashes in `run.json`, and the research `Run` class, which copies the source tree into each run (the cause of Windows path-length test failures), moving to the same layout with `source.diff`.
 
 ### 7.10 Mobile deployment: the recording format is the contract
 
@@ -370,6 +376,8 @@ Every run writes one folder, `outputs/<session>_<pipeline>_<yyyymmdd-hhmm>/`, wi
   2. Depth model: export to ONNX or LiteRT (TensorFlow Lite). ZipDepth, a smaller candidate (6.1 million parameters, 24 ms per frame on a desktop CPU), exported to ONNX, but its TensorFlow Lite conversion failed. Depth Anything V2 Small has not been tried.
   3. Objects: YOLO on the phone is a known path; Google's ARCore ML sample does it.
   4. Fusion and clean-up last. Open3D, which fuses today, does not publish an Android build (to confirm before planning the port), so this needs other code. RTAB-Map's Android ARCore driver (BSD-3-Clause core) is one candidate; its accuracy and speed on the Redmi are unmeasured.
+- **The tracker, once ARCore is gone (7.15).** The open tracker runs on the PC or server from the grey images and motion sensors already in the recording, or on the phone as an Android NDK build of Basalt. Running on the phone, its poses join the recording as a new optional field, like any other on-phone result.
+- **Capture without ARCore.** A capture mode that opens the camera with plain Camera2 is the next capture work ([PROJECT_PLAN next steps](PROJECT_PLAN.md#next-steps)). It changes the app, not the format: v2 already allows frames without an ARCore record.
 - **One app throughout.** The capture app gains processing behind a setting. There is no second app; the owner ruled this on 14 October.
 - **`android/` layout:** the Gradle project, its tests, and `releases.md` with one entry per build (today one README per build in `mobile_deployments/`). APK files are kept as release files, not in git.
 - **Python stays the reference.** A phone port is correct when it matches the Python output on the parity fixture, not when its output looks right.
@@ -450,6 +458,54 @@ The [RTAB-Map review](research/camera_tracking_and_slam/rtabmap.md) and the [sur
 | Region-aware scale | A new function in `scale/` beside `fit_grid`, chosen by a setting |
 | Correcting depth from surfaces matched across views | The one idea that does not fit one stage. It keeps each frame's patch before fusion, corrects depth, then rebuilds. That means a second pass in the room orchestrator and probably a new stage between scale and fusion. Add that stage only when a trial adopts the method |
 | Kinds of match | Same material, same class, same surface and same physical object are different relations. A learned embedding (a vector describing appearance) suggests a match but is not an identity: two identical cones stay two objects in `objects/` |
+
+### 7.15 Removing ARCore: five changes
+
+On 12 November the owner decided the product will not use ARCore ([PROJECT_PLAN decision 10](PROJECT_PLAN.md#owner-decisions-in-force)). The camera path will come from an open visual-inertial tracker, Basalt first. Real size will come from depth triangulated along that path. The [12 November review](research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md#is-sitescan-ready-to-swap-these-in) checked the package against that change, with line references.
+
+**What already fits.**
+
+- Stages take arrays.
+- The depth model is a callable passed in.
+- The scale fits take any `(pixels, metres)` targets, and `point_targets` turns any world points into them.
+- Clean-up and mapping take points and camera positions.
+
+**What does not.** ARCore is built into the data and the wiring.
+
+- **`types.py`:** `ArcoreDepth`, and ARCore anchors, tracking state and time on `Frame`. There is no field for the motion sensors.
+- **`session/`:** pose and intrinsics come only from ARCore's record. A frame without one has neither, so both pipelines skip it.
+- **`pipelines/`:** the room fuses only frames with fresh ARCore depth and scales only to it. Live's scale sources are a fixed sequence: ARCore depth, then ARCore points, then the previous scale. Keyframes are ARCore anchors.
+- **`fusion/` and `objects/`:** positions are kept relative to anchors, which only ARCore supplies.
+- **`depth/orientation.py`:** "down" is the world's −y, which is ARCore's convention. A tracker whose world has gravity along z would turn images the wrong way, and nothing would raise an error.
+- **Elsewhere:** nothing reads `imu.csv`, and the capture app opens the camera through ARCore.
+
+**The changes, in order.** Rule 4 of section 8 allows a choosing mechanism once two real methods exist. ARCore and an open tracker are two, so a setting with a plain `if` or dict chooses between them. There are still no registries.
+
+| # | Change | Where | Check |
+|---|---|---|---|
+| 1 | Poses and intrinsics from outside the recording. `session.frames()` takes an optional trajectory and a calibration, matched to frames by timestamp. The trajectory is in TUM format, which the open-VIO host already writes. The reader converts the tracker's world to gravity-up once, so `orientation.py` and everything after it stay unchanged | `session/` | Golden outputs unchanged with ARCore as the default. On the fixture, a trajectory file equal to the recorded poses gives identical outputs |
+| 2 | Measured depth not tied to ARCore. `ArcoreDepth` becomes a measured-depth record with a `source` field, keeping its own camera, time and confidence. Dense triangulated depth then follows the same freshness and confidence rules | `types.py`, `session/`, `scale/targets.py` | Golden outputs unchanged |
+| 3 | Scale targets chosen by name in settings: ARCore depth, ARCore points, tracker landmarks, sparse triangulation or dense triangulation. Each returns pixels, metres and a weight. Both pipelines read the same setting instead of a fixed sequence. `fit_grid` takes weights when the weighting trial runs | `scale/`, `pipelines/` | Golden outputs unchanged with today's setting. Each new source is its own trial |
+| 4 | A `triangulate/` stage: keyframe choice, sparse triangulation with known poses, later the plane sweep. One small class holds the rolling window of keyframes, as `Fragments` holds volumes | new `triangulate/` | Behaviour tests on synthetic views with known depth; trials in the order of the plan |
+| 5 | Anchors from keyframes. The open tracker's keyframe poses become anchors. With odometry only, they are never corrected, which `Fragments` and `Objects` already handle. A back end with loop closure would send its corrected keyframe poses as anchor updates | `session/`, `pipelines/` | A walk on tracker poses fuses and counts with no ARCore records |
+
+**The tracker stays outside the package for trials.** Basalt runs as its own program in WSL, from the EuRoC export the open-VIO host already writes, and its trajectory file is read through change 1. Section 13, decision 8, covers how it joins the product later.
+
+**ARCore stays the default source until a trial replaces it.** That way each change keeps the golden outputs. The ARCore-specific code is deleted only once the open route is adopted, and existing recordings remain readable as comparisons.
+
+**Status, 12 November 2026: all five changes are built.**
+
+| # | What was built | Check |
+|---|---|---|
+| 1 | `session.read_tum` and `read_calibration`; `frames()` and `read_wire_session()` take `trajectory` and `calibration`. Times are read as exact decimals; a pose within 1 µs is the frame's own, else poses at most 0.1 s apart are interpolated. The world is turned so the tracker's up axis is +y. Kalibr results convert with `research/experiments/open_vio/calibration/to_sitescan.py` | A trajectory of the fixture's recorded poses gives those poses back to 1e-12 |
+| 2 | `ArcoreDepth` is now `MeasuredDepth` with `source` ("arcore" or "sweep"); the dense sweep returns one | Golden outputs unchanged |
+| 3 | `scale_sources` in `RoomSettings` and `LiveSettings`, read by both pipelines from `pipelines/targets.py`: `arcore_depth`, `tracked_points`, `sparse`, `dense`. `fit_one` and `fit_grid` take weights; `scale.fit_power` adds a robust scale that changes with distance (`RoomSettings.scale_fit`) | Golden outputs unchanged |
+| 4 | `sitescan/triangulate/`: sparse triangulation against a rolling window of keyframes (`Triangulator`) and a Census + semi-global plane sweep, optionally around a prior | 17 behaviour tests on rendered scenes; a fixture trial against Kinect depth ([research/experiments/triangulation](research/experiments/triangulation/README.md)) |
+| 5 | With a trajectory, the reader starts an anchor once a second; tracked points and ARCore anchors are dropped | The fixture fuses and maps on tracker poses with no ARCore record used |
+
+"Golden outputs unchanged" was checked more strictly than the golden lane: on this machine every room and live number (26 and 241) is identical to the run made just before the changes. The golden file gained four room summary entries (`pose_source` and the `scale` record) with their default values; no saved number changed. On this machine the golden lane fails as it did before the changes, on map areas and plane normals that differ from the machine that saved them.
+
+Not built: the tracker inside the package (it stays outside, decision 8 in section 13), lens undistortion, the live path's upright images and grid scale, Basalt's own landmarks as targets, and a polar-rectification check of the sweep.
 
 ## 8. How the code should read
 
@@ -642,7 +698,7 @@ It ends with the two orchestrators and how to run them. The 24H Insights VideoMo
 | `research/experiments/01_camera_capture_delivery/capture/` (Java, 2,717 lines plus 673 lines of tests), `build/` | `android/` | Moved; build scripts kept |
 | `mobile_deployments/` | `android/releases.md` | One entry per build |
 
-What stays in `research/experiments/`: every rejected or untried method (Marigold, Prompt Depth Anything, Depth Anything 3, ZipDepth, COLMAP and the structure-from-motion runs, the live image-only trackers, LingBot-Map), the open-source tracker route (`open_vio`) until it is chosen, the segmentation and appearance trials for objects, and the clean-up trials. Each keeps its README as the evidence record. Each is updated to import `sitescan` instead of the old paths.
+What stays in `research/experiments/`: every rejected or untried method (Marigold, Prompt Depth Anything, Depth Anything 3, ZipDepth, COLMAP and the structure-from-motion runs, the live image-only trackers, LingBot-Map), the open-source tracker runners and calibration tools (`open_vio`), which became the product route on 12 November but stay here until a tracker joins the product (section 7.15), the segmentation and appearance trials for objects, and the clean-up trials. Each keeps its README as the evidence record. Each is updated to import `sitescan` instead of the old paths.
 
 ## 11. Migration plan
 
@@ -654,7 +710,7 @@ Start this work after a reproducible baseline is identified, rather than waiting
 | 1. Skeleton and golden outputs | Add `pyproject.toml`, the lock file and empty stage folders. Build both fixtures. Run today's code and relevant existing tests, explicitly including folders skipped by default discovery. Save baseline outputs and tolerances before moving a stage | Relevant existing tests and `pytest -m golden` pass against today's implementation; a full local 15 October room result is also saved |
 | 2. Stages, in chain order | Session, depth, scale, fusion, clean-up, mapping, objects. For each: copy the adopted functions, rewrite to section 8, write the README to section 9, add behaviour tests, point the old location at the new function so experiments keep working | Golden outputs unchanged after each stage |
 | 3. Orchestrators, same behaviour | Connect live and room to the extracted stages. Keep current model, scale fallback, frame choice and experimental counting behaviour. Product code must not import the old implementations or experiments | Both pipelines match the phase 1 outputs. The full 15 October room reproduces the baseline 554,067 cleaned points within the recorded tolerance. Live replay stays at or above 1 update/s. This completes the shared-pipeline move |
-| 3a. Behaviour changes and trials | First give live upright images, grid scale and the fresh-depth rule, one checked change at a time. Then trial scale support and hold expiry, and far-depth triangulation with region-aware scale as its control. Depth correction from surfaces matched across views follows triangulation (7.14). Object association and colour grouping in clean-up wait for stable geometry and labelled objects. RTAB-Map's mapping is an experiment with frames, depth and poses held fixed. Frame selection from 7.12 remains its own off/on experiment | Record before/after accuracy, coverage and cost for each change; keep a new default only with supporting results. A new baseline records an adopted change. The trials do not block independent work in phases 4–6 |
+| 3a. Behaviour changes and trials | Since 12 November, the five ARCore-removal changes in 7.15 run alongside, with ARCore as the default source until a trial replaces it; the order is in the plan's Next steps. First give live upright images, grid scale and the fresh-depth rule, one checked change at a time. Then trial scale support and hold expiry, and far-depth triangulation with region-aware scale as its control. Depth correction from surfaces matched across views follows triangulation (7.14). Object association and colour grouping in clean-up wait for stable geometry and labelled objects. RTAB-Map's mapping is an experiment with frames, depth and poses held fixed. Frame selection from 7.12 remains its own off/on experiment | Record before/after accuracy, coverage and cost for each change; keep a new default only with supporting results. A new baseline records an adopted change. The trials do not block independent work in phases 4–6 |
 | 4. Interfaces and app | `apps/cli.py`, `apps/receiver/`, `apps/viewer/`; the app to `android/` | A new walk recorded and processed using only the new commands |
 | 5. Re-point and retire | Experiments import `sitescan`. The walkthrough goes to `research/evaluation/` or `archive/`. Temporary forwarding imports are deleted | No `importlib` or `sys.path` edits in `sitescan/` or `apps/`. Default tests under 60 s |
 | 6. Documents | Root README rewritten as the product README: what it does, install, run, where things are. `research/experiments/README.md` status table corrected | The manager runs the depth example from the README on a fresh clone |
@@ -687,13 +743,19 @@ Phases 0 and 1 went ahead on the recommended answers to 1, 3, 5 and 7: the packa
 5. **Environment tool.** uv (recommended), pip-tools or conda.
 6. **Timing.** Reopened by the owner on 9 November. Recommendation: save the baseline and start phases 0–3 next; resume method trials at their output-preservation check. Do not wait for all open experiments or make those trials wait for phases 4–6. Phases 0 and 1 were done on 9 November.
 7. **Scale or size.** One word in code and product docs for the factor that turns learned depth into metres. "Scale" is recommended.
+8. **How the open tracker joins the product (added 12 November).** Basalt is C++. It could join in three ways:
+   - as an external program whose trajectory file the session reader takes;
+   - as a process fed live by the receiver;
+   - as a build on the phone, writing poses into the recording.
+
+   Recommendation: use the external program for trials (7.15). Decide between the other two when a trial adopts the tracker and the plan settles where processing runs (section 4).
 
 ## 14. Terms used
 
 | Term | Meaning |
 |---|---|
 | AbsRel | Mean absolute relative error: the average of \|predicted − true\| / true |
-| Anchor | A point ARCore keeps and corrects over time. Fragments are stored relative to one |
+| Anchor | A pose that may be corrected later. Today it is a point ARCore keeps and corrects over time; after 7.15 it is an open tracker's keyframe pose. Fragments are stored relative to one |
 | ARCore | Google's phone tracking library. Gives the camera path, tracked points and raw depth |
 | Fragment | One TSDF volume holding about 10 keyframes, stored relative to an anchor |
 | Golden output | A saved result from known-good code, used to check that a rewrite gives the same answer |
@@ -703,7 +765,9 @@ Phases 0 and 1 went ahead on the recommended answers to 1, 3, 5 and 7: the packa
 | Session | One recording from the capture app, in the format defined in `phone_session_v2.md` |
 | Selection keyframe | The first image in a similarity group; all later candidates in that group are compared with it |
 | Stage | One step of the method, such as depth or clean-up |
+| Triangulation | Placing a point in 3D from where it appears in two or more images whose camera poses are known |
 | TSDF | Truncated signed distance function: a voxel grid that averages many depth maps into one surface |
+| Visual-inertial odometry (VIO) | Following the camera by fusing its images with gyroscope and accelerometer readings, which give metres and gravity. Basalt is one |
 | Visibility vote | Drop a point when the views that see through it outweigh the views that see it there |
 | VOL | Variance of Laplacian: the variance of an image's second spatial derivative, used here to rank candidate sharpness |
 | ZNCC | Zero-mean normalised cross-correlation: image similarity after removing mean brightness and normalising contrast |
@@ -782,3 +846,5 @@ Still open from section 6 and 10, now listed under Future work in the root READM
 ### Status, 12 November 2026
 
 The top level now holds only the product and its support folders. `experiments/` and `evaluation/` moved under `research/`, so their modules are `research.experiments.*` and `research.evaluation.*`. `archive/` left git; it is kept at commit `d064d5f`, with a local copy in `outputs/archive/`. The 437 moves are their own commit. Old runs keep the source paths they recorded under `experiments/`; the two scripts that re-check a specific older run still read those recorded paths. Provenance citations in experiment settings ("inherited experiments/...") keep their original text, because saved receipts are compared with them. An accepted feature cache pins the bytes of `06_object_recognition/pilot/detector.py` and `03_appearance/features.py`, so those two files keep their old `experiments.*` imports; `research/experiments/__init__.py` maps the old name to the package so they still import.
+
+Later on 12 November the owner decided the product will not use ARCore ([PROJECT_PLAN decision 10](PROJECT_PLAN.md#owner-decisions-in-force)). Section 7.15 lists the five changes that take ARCore out of `sitescan/`. Section 13 adds decision 8, on how the open tracker joins the product. The documents were brought in line the same day. The five changes were then built, with ARCore kept as the default; [section 7.15](#715-removing-arcore-five-changes) records what was built and how it was checked.

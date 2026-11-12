@@ -4,18 +4,18 @@ title: Finish capture metadata coverage and sustained Redmi checks
 status: open
 priority: HIGH
 type: infra
-blocked_by: ["111"]
+blocked_by: []
 blocks: []
-verification_test: "experiments/01_camera_capture_delivery/tests/test_capture_receiver.py"
+verification_test: "research/experiments/01_camera_capture_delivery/tests/test_capture_receiver.py"
 plan_reviewed: null
 files:
-  - experiments/01_camera_capture_delivery/**
-  - experiments/open_vio/host/**
-  - experiments/open_vio/tests/**
+  - research/experiments/01_camera_capture_delivery/**
+  - research/experiments/open_vio/host/**
+  - research/experiments/open_vio/tests/**
   - mobile_deployments/README.md
 docs:
-  - experiments/01_camera_capture_delivery/README.md
-  - experiments/open_vio/README.md
+  - research/experiments/01_camera_capture_delivery/README.md
+  - research/experiments/open_vio/README.md
   - learning/08_phone_and_deployment.md
   - task_list/README.md
 baseline_metric:
@@ -24,11 +24,16 @@ baseline_metric:
   baseline_value: "1194 frames, zero reported drops; 17 without ARCore, final frame without Camera2 settings, anchor 0 absent; no rest or sustained trial"
   target: "Explain or fix metadata gaps, validate a new completed capture and 60 s rest, and report sustained queue behaviour"
 created: 2026-10-06
-last_updated: 2026-10-15
+last_updated: 2026-11-12
 superseded_by: null
 ---
 
 # Task 52: Finish capture metadata coverage and sustained Redmi checks
+
+## Amendment, 12 November 2026
+
+No longer blocked by Task111, which is deferred. Owner decision 10 ([plan](../../PROJECT_PLAN.md#owner-decisions-in-force)) adds one capture item, pending the owner's approval of the app change ([decisions needed](../../PROJECT_PLAN.md#decisions-needed), item 4): a capture mode that opens the camera with plain Camera2, without ARCore, with exposure, white balance and focus locked. It must exist before the next recording round. Capture checks should flag stale or empty measured data of any kind.
+
 
 ## In plain English
 

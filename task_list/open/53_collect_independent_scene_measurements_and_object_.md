@@ -6,16 +6,16 @@ priority: HIGH
 type: infra
 blocked_by: [52, 61]
 blocks: []
-verification_test: "experiments/06_object_recognition/datasets/tests/test_reference_bank.py"
+verification_test: "research/experiments/06_object_recognition/datasets/tests/test_reference_bank.py"
 plan_reviewed: null
 files:
   - .gitignore
-  - experiments/06_object_recognition/datasets/**
-  - experiments/datasets/**
+  - research/experiments/06_object_recognition/datasets/**
+  - research/experiments/datasets/**
   - data/controlled_scene/**
 docs:
-  - experiments/06_object_recognition/datasets/README.md
-  - experiments/datasets/README.md
+  - research/experiments/06_object_recognition/datasets/README.md
+  - research/experiments/datasets/README.md
   - data/README.md
   - task_list/README.md
 baseline_metric:

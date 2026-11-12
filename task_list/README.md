@@ -1,5 +1,36 @@
 # Task board
 
+## Update, 12 November 2026: no ARCore in the product
+
+The owner decided the product will not use ARCore ([PROJECT_PLAN decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)).
+
+- **Camera path:** an open visual-inertial tracker, Basalt first.
+- **Size:** depth triangulated along that path.
+- **ARCore's role now:** its recordings remain a comparison only.
+
+The working order is in the plan's [Next steps](../PROJECT_PLAN.md#next-steps), and the code changes are in [DESIGN section 7.15](../DESIGN.md#715-removing-arcore-five-changes). Each affected open task has a dated amendment:
+
+| Task | Change |
+|---|---|
+| [103](open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) Redmi calibration | Priority HIGH; on the critical path. Needs the owner's target video and about 3 hours at rest |
+| [104](open/104_compare_open_trackers_and_surfaces_on_the_same_red.md) Open trackers on Redmi walks | Priority HIGH; now the decisive tracker test. Blocked by 52 and 103 only (102 removed) |
+| [75](open/75_measure_arcore_camera_path_accuracy_on_the_redmi.md) Physical accuracy | Retitled: it scores the open tracker and its surfaces against tape, ARCore beside it. Blocked by 52 and 103 (102 removed) |
+| [52](open/52_build_and_verify_a_usable_phone_recording.md) Capture | No longer blocked by 111. Adds a capture mode without ARCore (plain Camera2, exposure, white balance and focus locked), pending owner approval |
+| [102](open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) Diagnose the Redmi room | Narrowed. No longer waits on 108; its ARCore suspects matter only for comparison |
+| [108](open/108_fuse_arcore_raw_depth_along_the_arcore_path_on_the.md) ARCore-only surface | Deferred, priority LOW; no longer blocks 102. Move to `stale/` with the board tool |
+| [111](open/111_find_why_the_14_october_walk_saved_empty_arcore_de.md) Empty 14 October ARCore depth | Deferred, priority LOW; no longer blocks 52. Move to `stale/` with the board tool |
+| 110, 112, 53, 56, 61, 68, 74 | Unchanged in scope. 110's scale-hiding motions and 112's upright frames hold for any tracker |
+
+**Work not yet filed as tasks.** These are the plan's next steps 1, 2 and 5–7. File each one when work on it begins:
+
+- reading poses and intrinsics from outside the recording (DESIGN 7.15, change 1);
+- the triangulation stage, built and scored on public visual-inertial data;
+- the 15 October room on Basalt's poses;
+- Any2Full-S;
+- the dense plane sweep.
+
+**Paths.** On 12 November `experiments/` moved under `research/`. The open tasks' frontmatter paths and this board's experiment links now point at `research/experiments/`. References to `src/` in open tasks and in older sections below predate the 11 November refactor. They have no one-to-one new home; [DESIGN section 10](../DESIGN.md#10-translation-map-todays-code-to-its-new-home) maps them. Closed and done records keep their original paths. The task CLI was not available for this update, so 108 and 111 were not moved.
+
 ## Update, 7 November 2026
 
 A read-only probe (Task106) found three facts that reorder the start of the queue:
@@ -8,7 +39,7 @@ A read-only probe (Task106) found three facts that reorder the start of the queu
 2. **A second completed walk exists.** `20261015_093913_walk` (capture 1.2, 822 frames, 0 drops) has 147 depth maps; 144 pass the live sizing rule. Diagnosis moves to it.
 3. **The phone was in portrait for 90-99% of both walks**, so the depth model saw sideways images throughout. The effect on depth is still untested.
 
-Task102's first steps are now Tasks107-109, run on the 15 October walk; Task102 combines their results. Task110 checks the walks for motions that hide scale (SLAM Handbook Table 11.1). Research from the same day: [SLAM Handbook note](../research/camera_tracking_and_slam/slam_handbook.md) and [review of five supplied SLAM links](../research/camera_tracking_and_slam/slam_links_review_2026-11-07.md). Evidence: [depth and orientation probe](../experiments/01_camera_capture_delivery/README.md#depth-and-orientation-probe-7-november-2026-task106).
+Task102's first steps are now Tasks107-109, run on the 15 October walk; Task102 combines their results. Task110 checks the walks for motions that hide scale (SLAM Handbook Table 11.1). Research from the same day: [SLAM Handbook note](../research/camera_tracking_and_slam/slam_handbook.md) and [review of five supplied SLAM links](../research/camera_tracking_and_slam/slam_links_review_2026-11-07.md). Evidence: [depth and orientation probe](../research/experiments/01_camera_capture_delivery/README.md#depth-and-orientation-probe-7-november-2026-task106).
 
 ## Current position, 15 October 2026
 
@@ -20,7 +51,7 @@ The owner judged the reconstructed geometry poor. Task100's interactive Gaussian
 
 Known input gaps: 17 images without matched ARCore records, one final image without Camera2 settings, and no anchor-0 creation record. There are 44 new raw-depth maps, but the 63 replay updates used tracked-point scale 33 times and previous scale 30 times, never raw-depth scale. Export and clock checks wrote outputs but returned status 1 for missing settings. The estimated -2.67 ms clock offset is not independent calibration. No 60 s rest, target video or approximately 3-hour calibration rest has arrived.
 
-Evidence: [capture results](../experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99), [live processing](../src/live/README.md), [open tracker/calibration results](../experiments/open_vio/README.md), [deployment index](../mobile_deployments/README.md), [Task99](done/99_fix_redmi_frame_json_crash_and_publish_a_timestamp.md), [Task100](done/100_build_offline_gaussian_splat_html_viewer_for_the_r.md).
+Evidence: [capture results](../research/experiments/01_camera_capture_delivery/README.md#completed-redmi-session-task99), [live processing](../src/live/README.md), [open tracker/calibration results](../research/experiments/open_vio/README.md), [deployment index](../mobile_deployments/README.md), [Task99](done/99_fix_redmi_frame_json_crash_and_publish_a_timestamp.md), [Task100](done/100_build_offline_gaussian_splat_html_viewer_for_the_r.md).
 
 ## Next execution sequence
 
@@ -28,9 +59,9 @@ This is the proposed technical order from the 15 October review, revised on 7 No
 
 | Order | Task | Direct output | Start condition / completion boundary |
 |---|---|---|---|
-| 1 | **107** — [Replay the 15 October walk](open/107_replay_the_15_october_walk_through_the_live_pipeli.md) | Live replay with unchanged settings; how often ARCore depth sets the scale; map floor and height beside the 14 October baseline | Ready now. No code change. Different walk, so not a paired comparison. |
+| 1 | **107** — [Replay the 15 October walk](done/107_replay_the_15_october_walk_through_the_live_pipeli.md) | Live replay with unchanged settings; how often ARCore depth sets the scale; map floor and height beside the 14 October baseline | Ready now. No code change. Different walk, so not a paired comparison. |
 | 2 | **108** — [Fuse ARCore depth along ARCore's path](open/108_fuse_arcore_raw_depth_along_the_arcore_path_on_the.md) | A surface with no learned depth; floor orientation, wall angles, room size | Ready now. Separates pose/axis faults from learned-depth faults. Test the pixel-to-world mapping first. |
-| 3 | **109** — [Measure the sideways-image effect](open/109_measure_whether_sideways_images_harm_learned_depth.md) | Learned-depth error against ARCore depth for native and upright input on 20 identical frames | Ready now. Confirm the upright turn by eye before scoring. |
+| 3 | **109** — [Measure the sideways-image effect](done/109_measure_whether_sideways_images_harm_learned_depth.md) | Learned-depth error against ARCore depth for native and upright input on 20 identical frames | Ready now. Confirm the upright turn by eye before scoring. |
 | 4 | **102** — [Diagnose the Redmi reconstruction](open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) | Stated causes from Tasks107-109, plus the remaining convention and offline-camera checks | After Tasks107-109. Report causes supported by controls, not a promised visual improvement. |
 | 5 | **68** — [Include all maintained tests](open/68_add_the_depth_and_area_tests_to_the_default_test_r.md) | Matching default test lists and an omission regression check | Verified: 28 maintained test folders; pytest omits 10 and the runner 11. Run the omitted suites first to see whether failures are hidden. |
 | 6 | **111** — [Find why the 14 October depth is empty](open/111_find_why_the_14_october_walk_saved_empty_arcore_de.md) | Stated cause; a warning for stale or empty depth during capture | Ready now. Tests first for any app or receiver fix. |

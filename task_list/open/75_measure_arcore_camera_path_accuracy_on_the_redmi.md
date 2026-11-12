@@ -1,17 +1,17 @@
 ---
 id: "75"
-title: Measure Redmi ARCore drift and physical distance error
+title: Measure Redmi camera-path drift and physical distance error (open tracker, ARCore as comparison)
 status: open
 priority: MED
 type: experiment
-blocked_by: [52, 102]
+blocked_by: [52, 103]
 blocks: []
-verification_test: "experiments/01_camera_capture_delivery/tests/test_accuracy.py"
+verification_test: "research/experiments/01_camera_capture_delivery/tests/test_accuracy.py"
 plan_reviewed: null
 files:
-  - experiments/01_camera_capture_delivery/**
+  - research/experiments/01_camera_capture_delivery/**
 docs:
-  - experiments/01_camera_capture_delivery/README.md
+  - research/experiments/01_camera_capture_delivery/README.md
   - task_list/README.md
 baseline_metric:
   source: "15 October board review; evidence below"
@@ -19,11 +19,16 @@ baseline_metric:
   baseline_value: "1177 matched ARCore records, all tracking; zero independently measured Redmi accuracy trials"
   target: "At least three closed-loop trials with surveyed marker distances and an offline same-frame camera comparison"
 created: 2026-10-13
-last_updated: 2026-10-15
+last_updated: 2026-11-12
 superseded_by: null
 ---
 
-# Task 75: Measure Redmi ARCore drift and physical distance error
+# Task 75: Measure Redmi camera-path drift and physical distance error (open tracker, ARCore as comparison)
+
+## Amendment, 12 November 2026
+
+Owner decision 10 ([plan](../../PROJECT_PLAN.md#owner-decisions-in-force)) removes ARCore from the product. The physical trials stay; what they score changes. Score the open tracker (Basalt, once Task103 has calibrated the Redmi) and the surfaces built on its path against the tape-measured distances, with ARCore's path from the same walk beside it as a comparison. Blocked by Tasks52 and 103 instead of 102, whose ARCore suspects no longer gate the product. The walks should carry the next round's content: a return to the start point, two or more identical objects, a few small objects, and tape distances under 2.5 m and between 3 and 8 m.
+
 
 ## In plain English
 

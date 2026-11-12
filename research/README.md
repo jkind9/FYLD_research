@@ -20,6 +20,8 @@ The current [six-piece experiment plan](experiments/README.md) connects research
 
 ## Topic folders, 13 October 2026
 
+Added 12 November 2026: the product will not use ARCore ([owner decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)). The open visual-inertial route is now the product route. [Open templates and parts](visual_inertial_odometry/depth_without_arcore_2026-11-12.md) for learned depth sized by triangulated depth along that route were reviewed the same day. Notes below that treat ARCore as the route or as the size reference predate the decision. ARCore results in them stand as recorded, as a comparison.
+
 Added 9 November 2026: [SceneView and Open3Dmap review](products/sceneview_open3dmap_review_2026-11-09.md). SceneView's Android code overlaps our metric-depth, fusion and object-merging stages; Open3Dmap is a lower-priority capture/cloud workflow reference with missing runtime artefacts and noncommercial terms. Detailed notes: [SceneView](phone_ar_platforms/sceneview.md), [Open3Dmap](products/e2e_product_research/11_open3dmap/README.md). Source review only, at pinned commits; no benchmarks run.
 
 Notes and papers are grouped by topic. Each folder's README lists its notes, saved papers and the matching course lectures.
@@ -33,8 +35,8 @@ Notes and papers are grouped by topic. Each folder's README lists its notes, sav
 | [structure_from_motion](structure_from_motion/README.md) | Solving camera poses and sparse points together; COLMAP, GLOMAP and newer methods |
 | [depth_estimation](depth_estimation/README.md) | Phone stereo and learned depth from images or video |
 | [feed_forward_3d](feed_forward_3d/README.md) | Networks that output 3D points and camera poses in one pass (VGGT, MapAnything, Depth Anything 3), or a splat scene in one pass (YoNoSplat, AnySplat, WorldMirror; 8 November) |
-| [visual_inertial_odometry](visual_inertial_odometry/README.md) | Open-source replacement for ARCore's tracking (Stream B): phone camera and motion-sensor clocks, recording, calibration and open visual-inertial systems |
-| [phone_ar_platforms](phone_ar_platforms/README.md) | ARCore and Apple frameworks: pose, depth and their measured accuracy |
+| [visual_inertial_odometry](visual_inertial_odometry/README.md) | The product's tracking route since 12 November (Stream B, replacing ARCore): phone camera and motion-sensor clocks, recording, calibration, open visual-inertial systems, and the [12 November review](visual_inertial_odometry/depth_without_arcore_2026-11-12.md) of metric depth without ARCore |
+| [phone_ar_platforms](phone_ar_platforms/README.md) | ARCore and Apple frameworks: pose, depth and their measured accuracy. Since 12 November ARCore is a comparison only, not a product input |
 | [vr_and_stereo_viewing](vr_and_stereo_viewing/README.md) | Headset viewing: stereo video, panoramas, head turning versus head movement |
 | [datasets_and_benchmarks](datasets_and_benchmarks/README.md) | Recordings with reference answers (TUM, ETH3D, EuRoC, ICL-NUIM) |
 | [construction_site_context](construction_site_context/README.md) | Site capture practice and product context |

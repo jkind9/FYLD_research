@@ -2,6 +2,8 @@
 
 Checked on 14 October 2026 from Google's own pages, after the owner asked whether using ARCore in a product raises commercial issues. This is a reading of the published terms, not legal advice; a product launch should have the terms reviewed by someone qualified.
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)), so these terms no longer bind a shipped product. The dependence on Google and the high-risk-use clause below were among the reasons for the decision. The terms still apply to any research build that links ARCore, such as the current capture app, which keeps its notice while ARCore runs in it.
+
 ## Short answer
 
 ARCore can be used in a commercial product. No fee is stated for the core features this project uses (motion tracking, depth, point cloud, planes). The obligations are a user-facing notice, compliance with Google's privacy requirements, and Google's general API terms. The real risks are dependence on Google (it can change or discontinue the service), device coverage (only phones on Google's supported list with Google Play), and a high-risk-use clause to check against how site measurements will be used.

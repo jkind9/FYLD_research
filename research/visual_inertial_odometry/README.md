@@ -1,5 +1,7 @@
 # Visual-inertial odometry: the open-source replacement for ARCore's tracking
 
+**Update, 12 November 2026.** This is now the product route, not a fallback. The owner decided the product will not use ARCore ([decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). The camera path in metres comes from an open tracker (Basalt first). Depth comes from the project's own learned model, sized by depth triangulated along that path. Templates, parts and the changes `sitescan/` needs are in [depth_without_arcore_2026-11-12.md](depth_without_arcore_2026-11-12.md). Calibrating the Redmi ([Task103](../../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md)) and running the open trackers on Redmi walks ([Task104](../../task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md)) are on the critical path. ARCore's recorded path remains a comparison.
+
 Visual-inertial odometry (VIO) follows a camera through space by fusing its images with gyroscope and accelerometer readings. The motion sensors give scale in metres and the direction of gravity, which images alone cannot. This folder holds the sources for Stream B: rebuilding ARCore's functions from open parts, starting 14 October 2026. The function-by-function plan with checked licences is in [../phone_ar_platforms/arcore_open_replacement.md](../phone_ar_platforms/arcore_open_replacement.md); the plain-language chapter is [learning/12_rebuilding_arcore.md](../../learning/12_rebuilding_arcore.md).
 
 ## Notes
@@ -8,6 +10,7 @@ Visual-inertial odometry (VIO) follows a camera through space by fusing its imag
 |---|---|
 | [vio_systems.md](vio_systems.md) | Basalt, Kimera-VIO, OKVIS2 and OpenVINS: licences, methods, monocular support, how they were run, results on TUM-VI room1, patent caution (Task91) |
 | [calibration.md](calibration.md) | Kalibr, Basalt calibration and the Allan deviation; TUM-VI's calibration facts used as the reference; phone-specific traps (Task90) |
+| [depth_without_arcore_2026-11-12.md](depth_without_arcore_2026-11-12.md) | Owner decision of 12 November 2026 not to rely on ARCore. Open templates and parts for metric depth from VIO, learned depth and triangulation (OKVIS2-X, VI-Depth, Any2Full, plane-sweep parts), GPL/AGPL Android references (DAVIO, 3d-recon), and what in `sitescan/` assumes ARCore |
 | [phone_recording_and_clocks.md](phone_recording_and_clocks.md) | Android camera and motion-sensor clocks, ARCore's shared-camera mode and pose conventions, published phone recorders, how the project measures the camera-to-IMU time offset (Task88), and the Android interfaces the capture app adds for telemetry, storage and compression (Task96) |
 
 ## Papers

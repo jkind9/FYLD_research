@@ -168,6 +168,14 @@ Lumina draws floor plans from point clouds or splat centres. Splat centres sit n
 
 ## How this project's pipeline compares (8 November 2026)
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). The comparison below describes the pipeline as it stood on 8 November.
+
+- **Lessons that still apply:**
+  - Count coverage only once measured depth exists. That depth is now triangulated along the open tracker's path, not ARCore's.
+  - Lock exposure and white balance. This is now part of the planned Camera2 capture mode without ARCore.
+  - Export to COLMAP with known poses. These are now the tracker's poses.
+- **Lesson that no longer applies:** running RTAB-Map's ARCore app on the Redmi. It is a comparison at most, not a product candidate.
+
 The stages run in the same order, and both split the work the same way: the phone captures, a PC processes. Lumina is ahead in two places that are not algorithms, the sensor and the care taken at capture. This project is ahead on live processing and objects.
 
 | Stage | Lumina | This project | Gap |

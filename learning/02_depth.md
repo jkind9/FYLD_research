@@ -46,7 +46,7 @@ If each frame's depth is a different size, the same wall lands at a different di
 The project tried three fixes (Task65):
 
 1. **Overlap chain** (images only): carry each frame's size forward from earlier frames through tracked corners. Cut camera error by 48-73% but left 0.37 m (xyz) and 1.01 m (desk).
-2. **Triangulation with metric motion** (the phone route): triangulate corners using known metric camera motion, standing in for ARCore, and fit each frame's size to them.
+2. **Triangulation with metric motion** (the phone route): triangulate corners using known metric camera motion, standing in for the phone's tracker, and fit each frame's size to them. Since 12 November 2026 this is the product's sizing route, with an open visual-inertial tracker supplying the motion ([chapter 12](12_rebuilding_arcore.md)).
 3. **Video Depth Anything**: a model that keeps depth consistent over 32-frame windows. Promising on a short clip; 0.77 frames per second on the CPU.
 
 None made the old tracker accurate. The real fix came from changing the tracker (chapters 3 and 4) and sizing depth to the tracker's own points (chapter 5).

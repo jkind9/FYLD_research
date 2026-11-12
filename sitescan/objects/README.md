@@ -68,6 +68,7 @@ print(rows[0]["association"], rows[0]["object_id"])
 
 - Live replays of two public desk recordings (TUM fr1 xyz and fr1 desk, 14 October 2026) ended with 51 and 45 new identities. 23 and 21 of them appeared 0.35–0.7 m from an object of the same class. The cause is position scatter: learned depth inside a box moves a chair or screen further than 0.35 m between views. Counting only objects seen 3 or more times still left 9 chairs and 7 screens on fr1 xyz.
 - No real scene has a counted inventory yet, so no count has been scored against the truth.
+- Objects follow ARCore's anchor corrections today. Owner decision 10 plans an open tracker's keyframe poses as anchors ([DESIGN section 7.15](../../DESIGN.md#715-removing-arcore-five-changes)).
 - The box median mixes object and background depth; a segmentation mask would place objects better (trial in the object experiments).
 
 ## Tests

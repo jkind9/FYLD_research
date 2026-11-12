@@ -2,10 +2,10 @@
 id: "108"
 title: Fuse ARCore raw depth along the ARCore path on the 15 October walk
 status: open
-priority: HIGH
+priority: LOW
 type: experiment
 blocked_by: []
-blocks: ["102"]
+blocks: []
 verification_test: "src/live/tests/test_arcore_depth_fusion.py"
 plan_reviewed: null
 files:
@@ -19,11 +19,16 @@ baseline_metric:
   baseline_value: "never built; 144 of 147 depth maps on the 15 October walk pass the sizing rule"
   target: "A surface from ARCore depth and poses alone, with floor orientation, wall angles and room size reported, to separate pose/axis faults from learned-depth faults"
 created: 2026-11-07
-last_updated: 2026-11-07
+last_updated: 2026-11-12
 superseded_by: null
 ---
 
 # Task 108: Fuse ARCore raw depth along the ARCore path on the 15 October walk
+
+## Amendment, 12 November 2026
+
+Deferred. After owner decision 10 ([plan](../../PROJECT_PLAN.md#owner-decisions-in-force)), a surface from ARCore depth and poses alone serves only as a comparison, and Task113 already built the 15 October room from ARCore depth. It no longer blocks Task102. Move it to `stale/` with the board tool when that is next run.
+
 
 ## In plain English
 

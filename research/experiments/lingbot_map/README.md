@@ -8,6 +8,8 @@ LingBot-Map turns ordinary video into a camera pose and a depth map for every fr
 
 LingBot-Map gives no real-world size. ARCore is not ground truth either, so every number below says how well two estimates agree.
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../../PROJECT_PLAN.md#owner-decisions-in-force)). The results below, which size and score against ARCore, stand as comparisons. A follow-up room build with LingBot-Map's depth would be sized by depth triangulated along the open tracker's path, not by ARCore depth.
+
 1. **Size and camera path.** One best fit with size (Umeyama, through Open3D's point-to-point estimate with scaling) maps LingBot-Map's camera centres onto ARCore's. This gives one size for the walk and the path difference left over.
 2. **Depth by distance.** LingBot-Map's depth, times that size, against ARCore's tracked points in each frame, grouped by distance. This is the check Task117 ran on the room build's fused depth. There, depth beyond 3 m came out about 15% too near and caused the door echoes.
 3. **Point cloud.** Every third frame's depth (every second pixel, confidence at least 1.5, under 10 m), placed in ARCore's world and thinned to 2 cm. It is measured against the room build's cleaned surface and can be opened in the project's viewer.

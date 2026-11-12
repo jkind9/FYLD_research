@@ -21,6 +21,8 @@ Primary entry points: [SceneView overview](https://github.com/sceneview/scenevie
 
 ## What this adds to what we already know
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). The 8 November rule below that kept ARCore depth as the metric reference is superseded. SceneView's ARCore capture and ARCore-anchored scale fit are now reference only. Its scale-support checks, source-pose handling, bounded queue and object merging still transfer. Score them with depth triangulated along the open tracker's path, keeping ARCore depth on existing walks as a comparison.
+
 The [current design](../../DESIGN.md) uses ARCore pose, learned depth, metric sizing, fragment fusion, cleanup and objects. The owner put the refactor before new experiments on 8 November. The same decision kept ARCore depth as the metric reference and deferred photo-realistic splat output. On 9 November the owner reopened the refactor's timing. The recommendation below distinguishes the shared-pipeline move from the later interface and Android moves.
 
 SceneView supplies Android examples for several missing product details: bounded scale hold, capture-time pose attached to delayed inference, memory limits and user feedback. It also supplies an alternative to our current centre-distance object association. Its room-scan implementation means we should no longer describe it only as a model viewer. The code is a reason to benchmark it; it is not a result showing that Android distinct-object counting or dimensional accuracy is solved.

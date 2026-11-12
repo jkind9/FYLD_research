@@ -39,6 +39,14 @@ Checked on 5 October 2026 from developer documentation and code repositories. No
 
 ## Compared with this repository
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../../../PROJECT_PLAN.md#owner-decisions-in-force)). In the table below, layers 1-3 are now covered by these:
+
+- **Layer 1:** the phone camera through Camera2.
+- **Layer 2:** learned depth sized by depth triangulated along the tracker's path.
+- **Layer 3:** an open visual-inertial tracker, Basalt first.
+
+The ARCore ML sample test below is a comparison benchmark only. The "same or new" rule it would measure does not depend on where positions come from ([open route](../../../visual_inertial_odometry/depth_without_arcore_2026-11-12.md)).
+
 | This repository's layer | Covered on the phone by |
 |---|---|
 | 1. Capture | ARCore recording, or the phone camera |

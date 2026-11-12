@@ -40,16 +40,35 @@ The project's main findings in the order they were found, with the numbers behin
 - **7 November. A usable second walk exists.** The 15 October walk (822 frames) has 147 depth maps, and 144 pass the sizing rule (Task106).
 - **7 November. The depth model saw sideways images.** The phone was in portrait for 90-99% of both walks, and the 90-degree sensor image was never rotated. The effect on depth is untested (Task109).
 
+## 12 November: no ARCore in the product
+
+- **12 November. The owner dropped ARCore from the product** ([decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)).
+  - **Camera path:** an open visual-inertial tracker (Basalt first) on the phone's own camera and motion sensors, which give metres and gravity.
+  - **Depth:** the project's own learned model, sized by depth triangulated along that path.
+  - **ARCore's role now:** its recordings stay as a comparison only.
+  - **Why:** ARCore is closed, Google can change or withdraw it, and its depth reaches only about 2.5 m.
+- **12 November. No open project does the whole chain under a permissive licence on a phone CPU, but every part exists.** A source review, with nothing run ([note](../research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md)), found:
+  - **OKVIS2-X** (BSD-3) is the closest whole-chain template: visual-inertial tracking, multi-view depth with an uncertainty per pixel, and map pieces. Its multi-view weights derive from a non-commercial model, and its timings are on a GPU.
+  - **Any2Full** (Apache-2.0, small checkpoint) uses measured points to correct the learned depth's shape as well as its size. It is the one candidate found for the 8-16 cm shape error.
+  - **The plane sweep has no permissive CPU code**, so it will be written here from MIT-licensed parts.
+- **12 November. Two Android projects already run without ARCore, and tracking was what failed.** DAVIO (GPL-3) and 3d-recon (AGPL-3) can only be read for ideas. 3d-recon's author reports that handheld tracking, not depth, was the weak point. Calibrating the Redmi (Task103) and running Basalt on its walks (Task104) are now the critical path.
+- **12 November. The code's stages swap easily; its data and pipelines are built around ARCore.**
+  - The depth model, the scale fit, clean-up and mapping take plain arrays.
+  - A frame recorded without ARCore has no pose or intrinsics, so both pipelines would skip it.
+  - Fusion and object counting depend on ARCore's anchors.
+  - Turning images upright assumes ARCore's y-up world.
+  - The five changes needed are in [DESIGN section 7.15](../DESIGN.md#715-removing-arcore-five-changes).
+
 ## What this adds up to
 
-1. **Get the camera path from a live SLAM system with joint refinement**, not from aligning depth maps. On the phone that is ARCore's tracking. SfM was the offline stand-in used to prove the design on recorded data.
+1. **Get the camera path from a live SLAM system with joint refinement**, not from aligning depth maps. On the phone that was to be ARCore's tracking. Since 12 November it is an open visual-inertial tracker (Basalt first). SfM was the offline stand-in used to prove the design on recorded data.
 2. **Get the real-world size from a few metric readings or the IMU**, never from a learned depth model's own metres.
 3. **Use learned depth only for dense shape**, resized every frame to the tracked points.
-4. **The remaining error is the depth model's shape** (8-16 cm average). The untried next step is multi-view stereo along the SfM path, which needs GPU permission.
+4. **The remaining error is the depth model's shape** (8-16 cm average). The untried next step is depth triangulated along the camera path: sparse points first, then multi-view stereo, which Mobile3DRecon ran on a phone CPU, so it does not need a GPU.
 
 ## Open questions
 
-- How accurate is ARCore on the project's phone, for path, points and depth (Tasks 52, 75)?
+- How accurate is an open visual-inertial tracker on the project's phone once it is calibrated, against ARCore's recorded path and tape measures (Tasks 103, 104, 75)?
 - Does any of this hold on a real site walk outdoors?
 - How much accuracy is lost when the SfM stand-in is replaced by a live SLAM system that only sees past frames?
 - How much better is multi-view stereo than resized learned depth?

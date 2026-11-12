@@ -1,6 +1,8 @@
 # Phone AR platforms
 
-What ARCore and Apple's frameworks give a phone app: camera pose, depth and their accuracy. Task75 measures ARCore on the Redmi.
+What ARCore and Apple's frameworks give a phone app: camera pose, depth and their accuracy.
+
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). These notes stay as background, and ARCore's recorded poses and depth stay as a comparison on recordings. They are no longer a product input or the size reference. Physical path accuracy (Task75) is now measured for the open tracker, with ARCore alongside as a comparison. The replacement route is in [arcore_open_replacement.md](arcore_open_replacement.md) and [../visual_inertial_odometry/depth_without_arcore_2026-11-12.md](../visual_inertial_odometry/depth_without_arcore_2026-11-12.md).
 
 ## Notes
 

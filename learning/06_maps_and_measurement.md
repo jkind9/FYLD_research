@@ -4,7 +4,7 @@ A 3D surface in metres (chapter 5) is not yet a measurement. Someone has to say 
 
 ## Five steps to a top-down map
 
-1. **Choose the ground.** Decide which way is up and where the reference plane is. "Up" can come from gravity (the phone's IMU; ARCore already reports a gravity-aligned world), from fitting a plane to the floor points, or from a person declaring it. Record which was used: a tilted plane makes every height wrong.
+1. **Choose the ground.** Decide which way is up and where the reference plane is. "Up" can come from gravity (the phone's IMU; a visual-inertial tracker such as ARCore or Basalt reports a gravity-aligned world, though ARCore puts gravity along y and Basalt along z), from fitting a plane to the floor points, or from a person declaring it. Record which was used: a tilted plane makes every height wrong.
 2. **Lay a grid over the ground.** Pick a cell size, such as 5 cm. Every 3D point falls into one cell when viewed from above.
 3. **Summarise each cell.** Choose a rule (highest surface, lowest surface, or a height band) and record it. Keep a count of observations per cell.
 4. **Mark what was seen.** A cell with no points is **unknown**, not empty. A blank area on the map means "never filmed", never "clear" or "safe".

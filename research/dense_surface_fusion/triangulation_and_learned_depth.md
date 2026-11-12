@@ -10,6 +10,13 @@
 
 The project's gap is beyond 2.5 m, where it has only ARCore's sparse tracked points. Triangulating between frames 0.5-1 m apart along ARCore's recorded path would add far depth that agrees with the path, and it runs on a CPU.
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)).
+
+- **Triangulation now carries all of the size.** It runs along the open tracker's path (Basalt first), whose metres come from the motion sensors. It covers near surfaces as well as far, because ARCore depth no longer sizes anything under 2.5 m. Near is the easy case: a short baseline is enough close up.
+- **First trials may stand in ARCore's path.** Until the Redmi is calibrated and Basalt runs on its walks ([Task103](../../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md), [Task104](../../task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md)), the method can be developed on ARCore's recorded path for existing walks. Public visual-inertial recordings with reference poses can also serve.
+- **ARCore depth and tracked points are a comparison only.** They are not a sizing target in any version meant for the product.
+- **Where to find code.** Open templates and parts for every step are in [depth_without_arcore_2026-11-12.md](../visual_inertial_odometry/depth_without_arcore_2026-11-12.md): hloc's known-pose triangulation, SGM code, weighted and distance-aware sizing, and Any2Full.
+
 Terms used here:
 
 - **Triangulation**: placing a point in 3D from where it appears in two or more images whose camera poses are known.
@@ -52,10 +59,10 @@ So there are two ways to combine:
 ## Proposed order, all on the CPU
 
 1. **Sparse first (way A).** On the 15 October walk:
-   - Triangulate features along the recorded ARCore path with pycolmap's known-pose triangulator, pairing frames 0.3-1 m apart.
+   - Triangulate features along the tracker's path with pycolmap's known-pose triangulator, pairing frames 0.3-1 m apart. That means the open tracker's path, or ARCore's recorded path only as a development stand-in until the tracker runs on the Redmi (update above).
    - Keep COLMAP's checks: two-view geometry, at least 3 views, a minimum angle between rays and a small reprojection error.
    - Use the points as sizing targets with a size that varies with distance, for example a scale and shift per frame as the 2025 SfM-guided paper fits.
-   - Score beyond 3 m against held-out ARCore tracked points with `python -B -m research.evaluation.depth_check`, and look at the hallway door.
+   - Score beyond 3 m against held-out triangulated points and, as a comparison on existing walks, ARCore tracked points, with `python -B -m research.evaluation.depth_check`. Look at the hallway door. Tape-measured distances are the reference once the next recording round has them.
 2. **Dense next (way B).**
    - Plane sweep with Census costs and SGM between keyframes about 0.6 m apart, as in Mobile3DRecon.
    - Keep the confident pixels, fill the rest with sized learned depth, and fuse.
@@ -66,7 +73,7 @@ So there are two ways to combine:
 
 - **Score with points the method did not use.** If tracked points size the depth, score with other tracked points or with COLMAP points.
 - **Blank walls give no triangulation.** Learned depth must fill them, which is why combining beats replacing.
-- **Pose error becomes depth error.** Triangulation trusts ARCore's poses. Pair frames within one fragment (about 10 s on one ARCore anchor), so that an anchor correction cannot split a point between two pose sets.
+- **Pose error becomes depth error.** Triangulation trusts the tracker's poses. Pair frames within one fragment (about 10 s on one anchor or keyframe), so that a path correction cannot split a point between two pose sets.
 - **Wide baselines change how a surface looks.** Frames 0.6 m apart see a surface from different angles. Patch codes such as Census tolerate less change than SIFT features, which is why Mobile3DRecon limits the difference in viewing direction to about 10°.
 - **It avoids stale depth.** Triangulation reads the images, not ARCore's depth maps, so the 4.4 s old depth maps that doubled the cushion (Task116) cannot affect it.
 - **Moving people break both methods.** Mobile3DRecon deletes voxels a new view sees through, which removes a person who stood still and then left.

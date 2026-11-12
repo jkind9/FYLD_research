@@ -176,7 +176,7 @@ Every clean-up removes some real surface. Report what it removes and what it kee
 
 ## Trial on the 15 October walk, 8 November 2026 (Task120)
 
-`python -B -m research.experiments.surface_cleanup.denoise_trial --session <v2 session> --out <folder>` runs Depth Anything V2 Metric Small once per frame that `room_build` fuses (134 frames), then fuses and scores each variant below. CPU only, with the GPU hidden from the process; the whole run takes 81 s. Tracked points with even ids may be used for sizing; only odd ids (2,418 point views in cells without ARCore depth, and every odd-id view for the surface scores) are used for scoring. Tracked points are ARCore's own triangulation, not ground truth; ICL-NUIM has not been run yet. The settings are first guesses by Claude, not tuned: edge jump 5% in a 3 × 3 neighbourhood, side-on beyond 75°, vote margin the larger of 8 cm and 5%. The baseline reproduces `room_build` to within 2 of 676,855 points; the trial stores depth as 32-bit floats. A repeat run gave identical scores.
+`python -B -m research.experiments.surface_cleanup.denoise_trial --session <recording> --label <label>` runs Depth Anything V2 Metric Small once per frame that `room_build` fuses (134 frames), then fuses and scores each variant below. CPU only, with the GPU hidden from the process; the whole run takes 81 s. Tracked points with even ids may be used for sizing; only odd ids (2,418 point views in cells without ARCore depth, and every odd-id view for the surface scores) are used for scoring. Tracked points are ARCore's own triangulation, not ground truth; ICL-NUIM has not been run yet. The settings are first guesses by Claude, not tuned: edge jump 5% in a 3 × 3 neighbourhood, side-on beyond 75°, vote margin the larger of 8 cm and 5%. The baseline reproduces `room_build` to within 2 of 676,855 points; the trial stores depth as 32-bit floats. A repeat run gave identical scores.
 
 **Where the fused depth lies.** 10% of fused pixels are within 1 m, 76% at 1-2.5 m and 14% at 2.5-4 m; 1.2% of valid pixels lie beyond 4 m and are dropped. This walk is a small house, so it does not test a 10 m room. Depth-jump pixels are 1.8-3.0% of each band and side-on pixels 6.8-8.9%. The prediction that the floor band is mostly flying-pixel or side-on depth is not supported: removing both cut points below the floor by only 11%.
 
@@ -284,7 +284,7 @@ Filtering can only remove what views disagree about. The spots rule finds disagr
 
 The owner asked for every clean-up setting on a slider, starting from the raw room, to tune chain linking by eye. Two steps build it:
 
-    python -B -m research.experiments.surface_cleanup.cleanup_attributes --session <v2 session> --out <folder>
+    python -B -m research.experiments.surface_cleanup.cleanup_attributes --session <recording> --label <label>
     python -B -m tools.demos.cleanup_tuner --attributes <folder> --session <v2 session> --out <page.html> --views 65 420
 
 The first fuses the room under `room_build` rules (`raw.ply`, no clean-up) and stores, per point, the evidence the depth-map stages test: frames measuring it, see-through share of the weighted vote, nearest measured depth, second-widest angle between measuring views, and mean distance to its 20 nearest neighbours. The second builds one offline page (17.3 MB for 676,853 points; local only, it embeds photos). Each stage has an on/off tick and each parameter a slider with a description: vote share; minimum frames; spots angle and trusted distance; outlier spread; radius and neighbour count; and for chain linking the link distance, neighbours needed to extend a chain (DBSCAN's `min_points`; 1 is plain chain linking), maximum normal difference for a link (PCL's rule), minimum piece size, and how many of the largest pieces to keep (2DGS's rule). Radius outliers and chain linking run in the page on the raw points (1-3 s per change in headless Chromium without a GPU).
@@ -332,7 +332,66 @@ Local outputs: `outputs/cleanup/room_build_clean_up_093913/{surface.ply,raw_surf
 
 Local outputs: `outputs/cleanup/denoise_trial_093913_v7/{results.json,<variant>.ply}` (all 22 variants, Task124; earlier variants give the same scores as before), `outputs/cleanup/denoise_trial_093913_v5/` (Task122's 16 variants), `outputs/cleanup/denoise_trial_093913_v2/` (Task120), and the first run in `outputs/cleanup/denoise_trial_093913/`. It lacks the two "beyond 2.5 m" rows, has the same numbers for the rest, and adds one more variant (tracked-point size in every cell, masks and vote: blocked 1.2% and 4.2%, 119,990 points below the floor). Tests: `research/experiments/surface_cleanup/tests/test_filters.py` and `test_denoise_trial.py`.
 
+## Density-based outlier filters on the triangulated room, 12 November 2026
+
+**Question (owner, 12 November).** In the point view of the triangulated 15 October room, some sparse points sit outside the main body of the room. Is there a density-based outlier filter that would remove them?
+
+**Short answer.** Not at the scale the standard filters use. The fused surface has no isolated points at 2 cm. Fusion writes one point per 2 cm voxel wherever a surface crosses it, so a stray sheet comes out as dense as a real wall. At 10–20 cm a density or shape test does single out a few thousand points. Whether those are the strays seen in the viewer has not been checked.
+
+**The room.** Run `outputs/redmi-20261015-0939/room/20261112-1430_sweep-jump125/` (local only; the walk shows a home). ARCore's path was read back as tracker poses, depth was sized by the plane sweep then sparse points, and frames whose scale jumped more than 1.25 times were skipped ([triangulation trial](../experiments/triangulation/README.md#second-trial-the-15-october-redmi-walk-12-nov-2026)). The run's viewer page draws `voted_surface.ply`: the room after the visibility vote, 1,167,796 points (SHA-256 `b945abb3…`, the same file the page records). By default the page hides pieces by the room build's rule (the 50 largest of at least 5,000 points), in both its point and splat views. So what it shows by default is close to `surface.ply`, 1,137,969 points.
+
+**Methods found.** From a web search on 12 November. Rows marked "summary" were taken from search summaries and documentation, not checked against a paper's own text.
+
+| Method | Decides by | Known limit | Source |
+|---|---|---|---|
+| Statistical outlier removal (SOR) | Mean distance to the k nearest neighbours above the cloud's mean + n × std | One threshold for the whole cloud. Tried here on 8 November ([stage 3](#stage-3-on-the-fused-surface-periodically)) | [Open3D tutorial](https://www.open3d.org/docs/latest/tutorial/geometry/pointcloud_outlier_removal.html) |
+| Radius outlier removal | Fewer than n neighbours within a radius | Fixed radius. On the ARCore room it thinned real surface ([Task126](#owners-setting-in-the-room-build-task126)) | Same |
+| DBSCAN, Euclidean clusters | Size of each connected group | The same job as the largest-pieces step | Open3D `cluster_dbscan` |
+| Local outlier factor (LOF) | A point's density against its neighbours' density | Depends on k. Compared with SOR on a dense image-matching cloud and on vehicle GPS points, the winner depended on how density varied: "no one-solution-fits-all" | Pirotti, Ravanelli, Fissore and Masiero, *Implementation and assessment of two density-based outlier detection methods over large spatial point clouds*, Open Geospatial Data, Software and Standards, 2018 (abstract checked) |
+| HDBSCAN with GLOSH scores | A 0–1 outlier score from the cluster hierarchy: a point's density against the densest part of its cluster | Sensitive to `min_pts`; noise labels and scores are different things | [hdbscan docs](https://hdbscan.readthedocs.io/en/0.8.3/outlier_detection.html), [GLOSH profiles, arXiv 2411.08867](https://arxiv.org/html/2411.08867v1) (summary) |
+| PCA shape features | Eigenvalues of each neighbourhood at a chosen scale: line, plane or blob | The scale has to be chosen. Duan et al. report an F-score of 0.92 on LiDAR at half the cost of their baseline | [arXiv 2007.14180](https://arxiv.org/abs/2007.14180) (abstract checked) |
+| Multi-view geometric consistency | Keep a depth pixel only if it reprojects consistently into at least N other views | Acts on depth maps before fusion, not on the cloud | [MVSNet](https://arxiv.org/abs/1804.02505), [IterMVS](https://arxiv.org/abs/2112.05126) (summary) |
+
+**Measured on that run.** Nearest neighbours by `scipy.spatial.cKDTree`, k = 20; pieces by `sitescan.cleanup.pieces.piece_ranks` with 2 cm cells.
+
+| Measure | After the vote (`voted_surface.ply`) | After the pieces step (`surface.ply`) |
+|---|---:|---:|
+| Points | 1,167,796 | 1,137,969 |
+| Nearest-neighbour distance, median / max | 0.8 / 16.6 cm | 0.8 / 5.6 cm |
+| Mean distance to 20 neighbours, median / 99th percentile / max | 2.6 / 5.5 / 22.2 cm | 2.6 / 4.4 / 14.0 cm |
+| Points with no neighbour within 6 cm | 131 | 0 |
+| Points whose 5th neighbour is beyond 6 cm | 2,419 | 274 |
+| Points whose 5th neighbour is beyond 10 cm | 174 | 5 |
+| SOR at 20 neighbours, std 2.0 (the Open3D tutorial's setting): points removed | 32,824 (cut at 4.0 cm) | 32,353 (cut at 3.7 cm) |
+| SOR at std 3.0 | 19,671 | 15,081 |
+| SOR with median + 5 × MAD instead of mean + std | 20,338 | 9,123 |
+| LOF-style ratio over 2 (own 20-neighbour distance against its neighbours' mean) | 503 | 91 |
+
+At a coarser scale, on `surface.ply`:
+
+| Measure | Value |
+|---|---:|
+| Neighbours within 20 cm: median | 1,351 |
+| Points with under 10% of that median within 20 cm | 3,450 |
+| Points with under 25% of that median within 20 cm | 20,330 |
+| Points whose neighbourhood is line-like at 15 cm (linearity (λ1 − λ2) / λ1 over 0.8, up to 64 neighbours) | 2,694 |
+
+What this shows:
+
+- **The largest-pieces step already removes the isolated points.** Of the 2,419 voted points whose 5th neighbour is beyond 6 cm, 2,257 are in pieces outside the 50 largest. After that step, every point has a neighbour within 5.6 cm.
+- **SOR at the tutorial setting would cut real surface.** Its cut-off of 3.7 cm sits just above the 2.6 cm median, so it removes 32,353 points (2.8%): the edges and thin parts of the surface, not strays. The radius filter on the ARCore room did the same on 8 November.
+- **Density at 2 cm measures the voxel grid, not the evidence.** A sheet from a wrongly sized frame is fused into the same 2 cm grid as a wall, so it is as dense as the wall.
+- **At 10–20 cm a density or shape test has something to work with.** A thin streak has far fewer neighbours within 20 cm than a wall does, and its neighbourhood is line-shaped. Not checked: whether the flagged points are the strays seen in the viewer, and how many real thin things (chair legs, table edges) are among them.
+
+**Next.**
+
+1. Colour the 3,450 coarse-density points and the 2,694 line-like points in the viewer, and judge by eye whether they are the strays.
+2. If they are, run a coarse-density or line-shape rule after the largest-pieces step as an off/on trial, scored as in [How to score a clean-up](#how-to-score-a-clean-up).
+3. Fix the cause upstream. The triangulation trial traces the streaks to frames, or grid cells within a frame, sized 10–25% off. A multi-view consistency check on each frame's depth before fusion would stop those points from being fused at all. A density filter only hides them.
+
 ## Order to try
+
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). In steps 2-4, sizing targets and multi-view stereo come from depth triangulated along the open tracker's path, near and far. ARCore depth pixels and tracked points serve only as a comparison on the existing walks. Within those walks, ARCore's recorded path can stand in while the method is developed. The clean-up steps (1, 5-7) do not depend on where depth comes from. Templates and parts: [depth_without_arcore_2026-11-12.md](../visual_inertial_odometry/depth_without_arcore_2026-11-12.md).
 
 1. **Put the visibility vote in the live processor:** each update votes with its newest view against the current surface (about 17 ms). Check on ICL-NUIM, where the true surface is known, that it removes floaters and not real surface.
 2. **Size beyond ARCore's reach with a size that varies with distance:** fit, per frame, size against learned depth from ARCore depth pixels near and tracked points far, instead of one fallback for all cells. Score it at held-out tracked points as above, and against the floor.

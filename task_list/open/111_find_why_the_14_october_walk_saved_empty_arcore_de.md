@@ -2,27 +2,32 @@
 id: "111"
 title: Find why the 14 October walk saved empty ARCore depth
 status: open
-priority: HIGH
+priority: LOW
 type: bug
 blocked_by: []
-blocks: ["52"]
-verification_test: "experiments/01_camera_capture_delivery/tests/test_capture_receiver.py"
+blocks: []
+verification_test: "research/experiments/01_camera_capture_delivery/tests/test_capture_receiver.py"
 plan_reviewed: null
 files:
-  - experiments/01_camera_capture_delivery/**
+  - research/experiments/01_camera_capture_delivery/**
 docs:
-  - experiments/01_camera_capture_delivery/README.md
+  - research/experiments/01_camera_capture_delivery/README.md
 baseline_metric:
   source: "Task106 probe, 7 November 2026"
   field: "raw-depth content and timing, 20261014_220756_walk"
   baseline_value: "44 depth messages, all zero bytes; their timestamps span 0.4 s and are 4.3-38.7 s older than the frames carrying them (median 21.5 s)"
   target: "A stated cause, and a capture or receiver check that flags stale or empty depth during recording"
 created: 2026-11-07
-last_updated: 2026-11-07
+last_updated: 2026-11-12
 superseded_by: null
 ---
 
 # Task 111: Find why the 14 October walk saved empty ARCore depth
+
+## Amendment, 12 November 2026
+
+Deferred. After owner decision 10 ([plan](../../PROJECT_PLAN.md#owner-decisions-in-force)), ARCore depth is not a product input, so why it was empty on 14 October matters only for comparison recordings. It no longer blocks Task52. The general lesson moves to Task52: capture checks should flag stale or empty measured data of any kind. Move it to `stale/` with the board tool when that is next run.
+
 
 ## In plain English
 

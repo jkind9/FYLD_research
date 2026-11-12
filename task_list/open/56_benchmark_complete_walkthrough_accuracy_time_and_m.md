@@ -6,13 +6,13 @@ priority: HIGH
 type: infra
 blocked_by: [52, 53, 61]
 blocks: []
-verification_test: "experiments/evaluation/tests/test_complete_walkthrough.py"
+verification_test: "research/experiments/evaluation/tests/test_complete_walkthrough.py"
 plan_reviewed: null
 files:
-  - experiments/evaluation/**
+  - research/experiments/evaluation/**
 docs:
-  - experiments/evaluation/README.md
-  - experiments/README.md
+  - research/experiments/evaluation/README.md
+  - research/experiments/README.md
   - README.md
   - task_list/README.md
 baseline_metric:

@@ -1,5 +1,13 @@
 # 12. Rebuilding ARCore from open parts
 
+**Update, 12 November 2026: this is now the product route.** The owner decided the product will not use ARCore ([decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)). What started as a second stream, kept as a fallback, is now the only route.
+
+- **Camera path:** an open visual-inertial tracker, Basalt first.
+- **Depth:** the project's own learned model, sized by depth triangulated along the tracker's path.
+- **ARCore's role now:** its recorded poses and depth stay as a comparison on recordings.
+
+Calibrating the Redmi (Task103) and running the trackers on its walks (Task104) are on the critical path. Open templates for the depth part, and what `sitescan/` must change, are in [research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md](../research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md).
+
 **Follow-up ownership, 15 October 2026.** The [reviewed board](../task_list/README.md) separates built tooling from unperformed handset work. Task52 owns capture metadata and sustained checks; [Task103](../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) owns the Redmi target video, long rest and calibration; [Task104](../task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md) owns calibrated same-walk tracker/surface comparisons. Tasks90/91 remain completed public-dataset results. Task102 first checks image orientation and geometry conventions. Phone inference remains deferred inside the same capture app; the current PC work is CPU only.
 
 Chapter 11 explained what ARCore does inside. This chapter follows the project's second development stream (Stream B, started 14 October 2026): replacing each of ARCore's functions with open-source or hand-built parts, so the product does not depend on Google. It starts with the part everything else rests on: getting camera images and motion-sensor readings onto one clock. Sources are in [research/visual_inertial_odometry/](../research/visual_inertial_odometry/README.md); the code is [research/experiments/open_vio/](../research/experiments/open_vio/README.md).
@@ -11,7 +19,7 @@ Chapter 11 explained what ARCore does inside. This chapter follows the project's
 | Camera images and motion-sensor readings on one clock | Android's camera (Camera2) and sensor interfaces, recorded by the project's own app | below |
 | Calibration of camera and motion sensors | Kalibr with a printed target | "Calibration" |
 | Camera path in metres with gravity | An open visual-inertial odometry system: Basalt, Kimera-VIO or OKVIS2 | "Choosing a tracker" |
-| Depth images | Learned depth resized to the tracker's points (chapter 5) | later |
+| Depth images | Learned depth sized by depth triangulated along the tracker's path: the tracker's own landmarks and sparse points first, then dense multi-view stereo between keyframes where the surface has texture (chapter 5) | "Depth without ARCore" |
 
 Visual-inertial odometry (VIO) means tracking with camera and motion sensors together; chapter 11 explains why the two complement each other. Licences matter: anything that ships must have a permissive licence (BSD, MIT, Apache). GPL systems such as OpenVINS and ORB-SLAM3 are used only to compare against. The rebuild must come from published methods. Taking ARCore apart is forbidden by its terms, and Google holds patents on some of its designs, so any design that resembles them is noted for a patent check before launch.
 
@@ -83,6 +91,15 @@ They take different approaches. **Basalt** keeps a short window of recent frames
 > **Project result (14 October 2026), one camera plus IMU, error of the whole path with no size fit.** Basalt: 0.146 m over a 146 m walk, every frame tracked, its own size correct to 0.7%, 44 ms per frame. OKVIS2: 0.505 m, but only with its own noise settings; with the published ones it ran away after 48 s. Kimera-VIO lost track a quarter of the way in. OpenVINS: 0.064 m, the best, but its GPL licence rules it out of the product; it shows what a filter can reach.
 
 Two lessons carry over to the phone. The noise settings matter as much as the method: the same OKVIS2 went from 0.5 m to hundreds of kilometres with different IMU noise values. And one public recording is not the phone: TUM-VI's camera has a global shutter and its IMU is wired to the camera's trigger. The ranking has to be repeated on Redmi recordings, scored against ARCore's path. Basalt is the first candidate to port.
+
+## Depth without ARCore
+
+ARCore's raw depth came from matching the live frame against a recent one, a short distance away. It reached only about 2.5 m, but up to that distance it sized the learned depth well. The open route has to produce that measured depth itself, from the same idea: a point seen from two known camera positions can be placed in 3D (chapter 4). The tracker's poses are in metres, so the triangulated points are too. The plan's order is:
+
+1. **Sparse points.** The tracker's own landmarks come free. More points come from matching features between frames 0.3-1 m apart along its path and triangulating them with the poses held fixed. These points become the targets the learned depth is sized to, near and far.
+2. **Dense depth where texture allows.** A plane sweep between keyframes about 0.6 m apart tries many depths per pixel and keeps the one where the views agree, as Mobile3DRecon did on one phone CPU core. Confident pixels are kept, and the sized learned depth fills blank walls.
+
+The error of a triangulated depth grows with distance squared divided by the baseline (the distance the camera moved). So far surfaces need wide baselines, and each point's weight in the sizing should reflect it. Learned depth stays because blank surfaces give triangulation nothing to match. Open templates and parts are in [research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md](../research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md). How the two kinds of depth combine is in [research/dense_surface_fusion/triangulation_and_learned_depth.md](../research/dense_surface_fusion/triangulation_and_learned_depth.md).
 
 ## Try it
 

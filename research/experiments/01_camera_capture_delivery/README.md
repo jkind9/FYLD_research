@@ -54,6 +54,14 @@ In the **hosted** route the phone only records and uploads; everything else runs
 
 ## What can be improved
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../../PROJECT_PLAN.md#owner-decisions-in-force)). The capture app opens the camera through ARCore's shared-camera mode, so ARCore sets frame rate, focus and exposure. Intrinsics also come only from ARCore's record. The next capture work is therefore:
+
+- **A plain Camera2 mode without ARCore.** Lock exposure, white balance and focus, and record the settings per frame as now. Keep the uncalibrated motion sensors on the same clock. Record intrinsics from the Redmi calibration ([Task103](../../../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md)), or from Camera2's lens calibration if the phone reports it (unchecked).
+- **Keep v2 readable.** The v2 format already allows camera-only frames (the ARCore record is null).
+- **Decide the ARCore mode's future.** Whether it stays as a comparison-only recording mode is an open owner decision.
+
+The bullet "Build the ARCore recorder first" below was done in Task96 and is not a direction for new work. Sources and the `sitescan/` changes are in [depth_without_arcore_2026-11-12.md](../../visual_inertial_odometry/depth_without_arcore_2026-11-12.md).
+
 - **Write a capability report for both phones**: exact model and variant, camera IDs, which lens pairs can stream together, ARCore depth availability and supported image sizes.
 - **Build the ARCore recorder first.** It is the quickest way to get real phone data with depth and camera position into layers 2 to 5.
 - **Calibrate each phone** with a ChArUco board or Kalibr, and compare against the calibration the phone reports.

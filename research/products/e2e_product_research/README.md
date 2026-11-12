@@ -201,7 +201,7 @@ Three things could be new, and each would need a targeted literature search to c
 ## What this means for the project
 
 - **Measuring the site (layers 1–4) adds little as a product.** SkyeBrowse, Reconstruct and Polycam already sell it. The layer-by-layer pipeline is still useful as a way to measure where error comes from, and as a reference to score those products against.
-- **Counting on Android is the real gap:** ARCore or Lightship positions, plus a light rule for "same object or new one", scored against CountVid and SAM 3 on count accuracy, phone speed and battery. No product or open project found does that for street works.
+- **Counting on Android is the real gap:** 3D positions from the phone, plus a light rule for "same object or new one". The positions were from ARCore or Lightship when this was written; since 12 November the product takes them from an open visual-inertial tracker, because it will not use ARCore ([owner decision 10](../../../PROJECT_PLAN.md#owner-decisions-in-force)). Score the rule against CountVid and SAM 3 on count accuracy, phone speed and battery. No product or open project found does that for street works.
 - **Expect the "why not buy it?" question.** ViaSight, Blyncsy and SkyeBrowse are the obvious ones to compare against. A proposal to FYLD should name them and say what they don't do.
 
 ## Suggested checks

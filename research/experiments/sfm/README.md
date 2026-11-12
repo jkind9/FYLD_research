@@ -4,6 +4,8 @@ This folder answers one question: **can the camera path and the scene's 3D struc
 
 The owner asked for this on 13 October 2026: standalone SfM experiments in their own folder, on existing data, with speed and edge deployment in mind but not the focus. Tasks: [67](../../../task_list/done/67_track_the_camera_without_depth_so_depth_scale_erro.md) (camera path), [71](../../../task_list/done/71_rebuild_surfaces_from_the_recorded_camera_poses_to.md) (surfaces from true poses), [72](../../../task_list/done/72_scale_learned_depth_to_the_image_only_tracker_s_3d.md) (dense structure from the SfM path), [76](../../../task_list/archive/76_read_saved_sfm_camera_paths_and_points_into_the_wa.md) (walkthrough readers). Background: [the tracking review](../../camera_tracking_and_slam/tracking_review_2026-10-13.md).
 
+**Update, 12 November 2026.** Where this record says a metric size would come from ARCore on the phone, read the open tracker's metric path instead. The product will not use ARCore ([owner decision 10](../../../PROJECT_PLAN.md#owner-decisions-in-force)). The results below stand. The finding that sparse triangulated points size learned depth well (Task72) now feeds the plan's first triangulation trial along that path ([depth_without_arcore_2026-11-12.md](../../visual_inertial_odometry/depth_without_arcore_2026-11-12.md)).
+
 ## How it works
 
 Structure from motion (SfM) finds the same points in many images, then solves every camera position and every 3D point together so that the points project back onto the images (bundle adjustment). From images alone the result has no real-world size; one overall size must come from elsewhere (a known distance, the phone's motion tracking, or a depth model).

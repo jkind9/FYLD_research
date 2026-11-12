@@ -68,6 +68,8 @@ From [Morelli et al. 2025](papers/dl_visual_odometry_morelli2025.pdf) (ISPRS Arc
 
 ## What fits this project
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). Its camera path will come from an open visual-inertial tracker (Basalt first). The conclusion below still holds against that tracker, because these systems also lack the motion sensors and real-world size. In item 2, read "ARCore's poses" as the open tracker's poses.
+
 This project already gets its camera path from ARCore, live, with the motion sensors and real-world size. So the main output of these systems duplicates ARCore. For the open-source route (replacing ARCore), Basalt and OpenVINS fit better because they use the motion sensors (see [sota_slam_review_2026-10-14.md](sota_slam_review_2026-10-14.md)). What carries over:
 
 1. **Keyframe choice by pixel motion.** Keep a frame for triangulation once the median matched feature has moved far enough since the last keyframe. They used 80 px at 752 × 480 on EuRoC and 5 px on CARLA. It costs about 0.05 s per frame. Here it would pick frame pairs with enough baseline for far points. It would also give `room_build` fewer, more different frames, which matters because the visibility vote's cost grows with frames × points.

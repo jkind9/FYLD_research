@@ -4,19 +4,19 @@ title: Diagnose the Redmi reconstruction on the same recorded walk
 status: open
 priority: HIGH
 type: experiment
-blocked_by: ["107", "108", "109"]
+blocked_by: ["107", "109"]
 blocks: []
 verification_test: "src/live/tests/test_sizing.py"
 plan_reviewed: null
 files:
   - src/live/**
-  - experiments/01_camera_capture_delivery/host/**
-  - experiments/01_camera_capture_delivery/tests/**
-  - experiments/sfm/**
+  - research/experiments/01_camera_capture_delivery/host/**
+  - research/experiments/01_camera_capture_delivery/tests/**
+  - research/experiments/sfm/**
   - tools/demos/**
 docs:
   - src/live/README.md
-  - experiments/01_camera_capture_delivery/README.md
+  - research/experiments/01_camera_capture_delivery/README.md
   - learning/05_dense_surfaces.md
   - task_list/README.md
 baseline_metric:
@@ -25,11 +25,16 @@ baseline_metric:
   baseline_value: "845428-point poor geometry; 33 point-scaled and 30 previous-scale updates, zero raw-depth-scaled updates; photos appear rotated"
   target: "Reproducible causal comparison distinguishing orientation, depth, pose and fusion; fix only confirmed defects"
 created: 2026-10-15
-last_updated: 2026-11-07
+last_updated: 2026-11-12
 superseded_by: null
 ---
 
 # Task 102: Diagnose the Redmi reconstruction on the same recorded walk
+
+## Amendment, 12 November 2026
+
+Narrowed by owner decision 10 ([plan](../../PROJECT_PLAN.md#owner-decisions-in-force)). Task108 is deferred and no longer gates this task. The ARCore-specific suspects (empty depth, axis conventions, anchor corrections) matter only for using ARCore recordings as a comparison. The sideways-image finding (Task109) and the scale-hiding motions (Task110) hold for any tracker.
+
 
 ## In plain English
 

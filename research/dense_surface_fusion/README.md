@@ -69,6 +69,8 @@ So the echoes come from sizing in cells without ARCore depth, mostly beyond what
 
 ## Order to try
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). Where this order or the notes below say "ARCore depth taking priority" or "along ARCore's path", the product version uses depth triangulated along the open tracker's path. ARCore depth and tracked points on the existing walks remain a comparison. Stale-depth rejection (step 1) still applies to any measured depth that arrives after its image. See [triangulation_and_learned_depth.md](triangulation_and_learned_depth.md) and [depth_without_arcore_2026-11-12.md](../visual_inertial_odometry/depth_without_arcore_2026-11-12.md).
+
 1. Reject stale depth (done in `room_build`; the live processor still needs it).
 2. Count how much of the remaining doubling is fallback sizing: rebuild with fallback cells left out and compare the walls.
 3. Size new frames against the surface already built, with ARCore depth taking priority.
@@ -90,7 +92,7 @@ Three papers supplied by the owner on 8 November 2026, each with its own note. E
 
 Mobile3DRecon is the one to act on. Step 4 of the [surface_denoising order](../surface_denoising/README.md#order-to-try), multi-view stereo along ARCore's path, said to measure its CPU cost first. Mobile3DRecon published one: 48 ms per keyframe on one 2018 phone core, before its learned clean-up.
 
-**Triangulation combined with learned depth.** [triangulation_and_learned_depth.md](triangulation_and_learned_depth.md) answers the owner's question of 8 November: should COLMAP-style triangulation be combined with the depth maps? Yes. It lists the project's five depth sources by distance and eight published systems that combine triangulated and learned depth. It then sets out a CPU order to try: sparse points triangulated along ARCore's path as sizing targets first, then dense multi-view stereo fused where it is confident.
+**Triangulation combined with learned depth.** [triangulation_and_learned_depth.md](triangulation_and_learned_depth.md) answers the owner's question of 8 November: should COLMAP-style triangulation be combined with the depth maps? Yes. It lists the project's five depth sources by distance and eight published systems that combine triangulated and learned depth. It then sets out a CPU order to try: sparse points triangulated along ARCore's path as sizing targets first, then dense multi-view stereo fused where it is confident. Since 12 November the path is the open tracker's; ARCore's recorded path serves only as a stand-in while the method is developed.
 
 ## Papers in `papers/`
 

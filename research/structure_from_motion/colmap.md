@@ -47,6 +47,8 @@ SLAM is the live counterpart. It tracks as frames arrive and re-solves only rece
 
 ### COLMAP parts that fit a pipeline that already has ARCore's path
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). Read "ARCore's path" below as the open tracker's path (Basalt first). The known-pose parts apply unchanged, and they now matter more, because triangulation must supply all of the size. hloc's known-pose triangulation wraps the same calls ([depth_without_arcore_2026-11-12.md](../visual_inertial_odometry/depth_without_arcore_2026-11-12.md#step-1-sparse-triangulation-along-the-path)).
+
 ARCore supplies the camera path live, so COLMAP's mappers are not needed. The useful parts start from known poses. All are BSD-3 and run on a CPU.
 
 | Part | What it would do here | Where it fits | Status |

@@ -16,7 +16,7 @@ SLAM and structure from motion (SfM) are not two layers stacked on each other. T
 | Accuracy | Usually the best, because every image constrains every other | Slightly lower, because it commits to poses before seeing later frames |
 | Example | COLMAP, GLOMAP | ORB-SLAM3, DROID-SLAM, ARCore (strictly visual-inertial odometry with a map) |
 
-Think of SLAM as the live version and SfM as the offline version. *Visual odometry* is SLAM with the map and loop closure removed: frame-to-frame only, so it drifts. The project's first tracker (Open3D RGB-D odometry) was odometry; COLMAP is SfM; ARCore on the phone is the live version.
+Think of SLAM as the live version and SfM as the offline version. *Visual odometry* is SLAM with the map and loop closure removed: frame-to-frame only, so it drifts. The project's first tracker (Open3D RGB-D odometry) was odometry; COLMAP is SfM. On the phone, the live version was ARCore and is now an open visual-inertial tracker, Basalt first (owner decision, 12 November 2026).
 
 **Neither produces a dense surface or knows about objects.** Both output camera poses and a sparse set of points: a few thousand distinctive spots, not every wall. Everything after that is separate stages that *consume* the poses.
 
@@ -24,7 +24,7 @@ Think of SLAM as the live version and SfM as the offline version. *Visual odomet
 
 ```text
                  ┌──────────────── camera tracking ────────────────┐
-images ─────────►│ SfM (offline) │ SLAM (live) │ ARCore VIO (phone) │──► camera poses + sparse 3D points
+images ─────────►│ SfM (offline) │ SLAM (live) │ Basalt VIO (phone) │──► camera poses + sparse 3D points
                  └─────────────────────────────────────────────────┘        (no real size unless a
                                          ▲                                     depth sensor or IMU is used)
                       size source ───────┘  (IMU, depth readings, a known distance)
@@ -55,7 +55,7 @@ A name can be a whole software package, one complete system, one algorithm insid
 | **pycolmap** | Python bindings for COLMAP | Same algorithms, called from Python | Reading COLMAP's saved models only (its Windows build crashed on ALIKED) |
 | **Open3D** | General 3D data library | Point clouds and meshes, viewers, ICP registration, RGB-D odometry, TSDF fusion, plane fitting | Two pieces: RGB-D odometry as the walkthrough's first camera tracker, and TSDF fusion for surfaces. It is not "a camera tracker"; that is one function in it. |
 | **OpenCV** | General computer vision library | Image processing, features (ORB, SIFT), calibration, PnP, stereo matching (SGBM), GrabCut | Corner tracking and PnP in the overlap chain (Task65), classical masks |
-| **ARCore** | Google's Android augmented-reality platform | Visual-inertial tracking, depth, planes, anchors, recording and playback | The planned phone source of poses, size and points |
+| **ARCore** | Google's Android augmented-reality platform | Visual-inertial tracking, depth, planes, anchors, recording and playback | Recorded walks and the comparison path. It was the planned phone source of poses, size and points until 12 November 2026, when the owner dropped it from the product in favour of an open visual-inertial tracker (decision 10) |
 | **nvblox** | NVIDIA GPU library | TSDF fusion and meshing on a GPU | Researched for an edge box |
 
 ### Complete systems: input in, finished result out
@@ -129,7 +129,7 @@ A name can be a whole software package, one complete system, one algorithm insid
 | Open3D RGB-D odometry | Visual odometry, direct | Colour and depth for consecutive frames; intrinsics | — | Pose per frame (frame to frame) | Yes, from the depth | Yes | The walkthrough's first tracker; 112 mm on TUM desk with Kinect depth |
 | COLMAP, incremental mapper | SfM | Images | Intrinsics (else estimated); matching order for video | Poses, intrinsics, sparse 3D points, pixel-to-point links | No | No | Task67: 11.9-34 mm path error; 15.2 mm on desk with the published lens calibration once `max_extra_param` is raised (8 November) |
 | COLMAP, global mapper (GLOMAP) | SfM | Same | Same | Same | No | No | Task67: faster, dropped frames on ICL |
-| COLMAP triangulation with known poses (`point_triangulator`, `pycolmap.triangulate_points`) | A stage inside SfM, run on a path from elsewhere | Images; camera poses and intrinsics (here from ARCore) | Pairs chosen by camera distance (`spatial_matcher`) | Sparse 3D points with their pixels | Yes, if the poses are | Offline; a version limited to recent keyframes could run live | Proposed 8 November for sizing far depth; not run |
+| COLMAP triangulation with known poses (`point_triangulator`, `pycolmap.triangulate_points`) | A stage inside SfM, run on a path from elsewhere | Images; camera poses and intrinsics (from the visual-inertial tracker; ARCore's on existing walks) | Pairs chosen by camera distance (`spatial_matcher`) | Sparse 3D points with their pixels | Yes, if the poses are | Offline; a version limited to recent keyframes could run live | Proposed 8 November for sizing far depth; not run |
 | COLMAP-SLAM, colmap-odometry | Visual odometry built on COLMAP's mapper | Video; intrinsics | Second camera; satellite positions | Keyframe poses, sparse map | Only with stereo or satellite positions | 5 frames per second with a GPU (authors) | Researched 8 November (`research/camera_tracking_and_slam/colmap_based_slam.md`) |
 | SIFT; ALIKED + LightGlue | Features and matching, a stage inside SfM or SLAM | Images | — | Keypoints, descriptors, matches | — | — | Task67 |
 | ORB-SLAM3 | SLAM, feature-based | Video; intrinsics | Second camera, depth, or IMU | Poses, keyframes, sparse map | With stereo, depth or IMU | Yes | Reference only (GPLv3) |

@@ -36,7 +36,7 @@ It is the core of accurate 3D from images: every measurement constrains everythi
 
 ## Why the result has no size
 
-Multiply every point and every camera position by 2: every reprojection error stays exactly the same. The photos cannot tell a model from one twice its size. SfM therefore returns a world in arbitrary "SfM units". To get metres you need one extra measurement: a known distance, a depth sensor, or the phone's IMU (via ARCore).
+Multiply every point and every camera position by 2: every reprojection error stays exactly the same. The photos cannot tell a model from one twice its size. SfM therefore returns a world in arbitrary "SfM units". To get metres you need one extra measurement: a known distance, a depth sensor, or the phone's IMU (through a visual-inertial tracker such as ARCore or Basalt).
 
 > **Project result: 20 metric depth readings fix the size.** The project simulated a phone supplying a few depth readings at SfM points, using the Kinect (TUM) or rendered depth (ICL) as the stand-in. With 20 readings in total, drawn at random over the whole walk, the camera path error was 13.7 mm on xyz, 24.2 mm on desk and 34.1 mm on ICL, against 11.9, 21.5 and 34.1 mm with the size fitted to the true path. More readings did not help: with every reading the size was still 3.7% small on xyz, the Kinect's own bias. Five readings worked on a typical draw but the spread was wider. (Task78, `research/experiments/sfm/README.md`.)
 
@@ -63,9 +63,11 @@ What this teaches:
 - **The sparse points are very accurate but sparse.** 64-83% of them lie within 5 cm of the true surface, but they cover only 4-20% of it (Task72). Dense surfaces need chapter 5.
 - **A correct lens calibration helps, once COLMAP accepts it.** The desk recording's published calibration first failed outright. COLMAP removes any camera with a lens distortion number above 1, as a guard against its own bad lens estimates, and this calibration has one of 1.16. With that limit raised (`--Mapper.max_extra_param 2`), the path error fell to 15.2 mm, the best desk result so far. If COLMAP fails with a calibration you trust, check this limit first.
 
-Speed: 1.2-7.1 frames per second end to end, offline, on a desktop CPU, but only after every frame has been captured. The deployed system must be live (owner ruling, 14 October 2026), so SfM is not a deployable part: ARCore tracks the same kind of features live with its IMU. SfM's role in the project is the accurate reference path on recorded data, and the evidence for the design. Its per-frame points were refined using later frames too, so results built on them are somewhat better than a live system would get.
+Speed: 1.2-7.1 frames per second end to end, offline, on a desktop CPU, but only after every frame has been captured. The deployed system must be live (owner ruling, 14 October 2026), so SfM is not a deployable part: a visual-inertial tracker follows the same kind of features live with its IMU. That tracker was ARCore until 12 November 2026 and is now an open one, Basalt first. SfM's role in the project is the accurate reference path on recorded data, and the evidence for the design. Its per-frame points were refined using later frames too, so results built on them are somewhat better than a live system would get.
 
-## Using COLMAP's parts with ARCore's camera path
+## Using COLMAP's parts with a known camera path
+
+**Update, 12 November 2026.** This section was written for ARCore's path. The product now takes its path from an open visual-inertial tracker instead ([owner decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)). Everything below applies unchanged to that tracker's path, which is also live and in metres. ARCore's recorded path remains usable as a comparison on existing walks. Read "ARCore" below as "the tracker".
 
 ARCore already gives the camera path live, in metres. The parts of COLMAP worth using are the ones that start from known camera positions:
 
@@ -73,7 +75,7 @@ ARCore already gives the camera path live, in metres. The parts of COLMAP worth 
 - **Pair frames by distance, not by time.** At walking pace, neighbouring frames are about 3 cm apart, and two nearly parallel rays give a very uncertain depth. For a point 5 m away, the error is about 1.7 m from neighbouring frames and about 5 cm from frames 1 m apart (500 px focal length, 1 px matching error). Linking frames by features, for example with ORB, works once the pairs are far enough apart.
 - **Bundle adjustment with ARCore's positions as soft guides** refines the points and polishes the path without losing the real size.
 
-Researchers have also run COLMAP itself as a live tracker: COLMAP-SLAM and colmap-odometry run COLMAP's mapper again for each new keyframe. They kept up with 5 frames a second using a GPU, they have no real-world size from one camera, and they ignore the motion sensors, so ARCore remains the tracker here. Two things carry over. Their keyframe rule takes a new keyframe only after the matched features have moved enough pixels. Their tests also showed keyframes 0.2 s apart giving errors up to 121 cm, against at most 10 cm for keyframes 1 s apart, which is the short-baseline problem above. Details: [research/camera_tracking_and_slam/colmap_based_slam.md](../research/camera_tracking_and_slam/colmap_based_slam.md) and [research/structure_from_motion/colmap.md](../research/structure_from_motion/colmap.md).
+Researchers have also run COLMAP itself as a live tracker: COLMAP-SLAM and colmap-odometry run COLMAP's mapper again for each new keyframe. They kept up with 5 frames a second using a GPU, they have no real-world size from one camera, and they ignore the motion sensors, so a visual-inertial tracker remains the tracker here. Two things carry over. Their keyframe rule takes a new keyframe only after the matched features have moved enough pixels. Their tests also showed keyframes 0.2 s apart giving errors up to 121 cm, against at most 10 cm for keyframes 1 s apart, which is the short-baseline problem above. Details: [research/camera_tracking_and_slam/colmap_based_slam.md](../research/camera_tracking_and_slam/colmap_based_slam.md) and [research/structure_from_motion/colmap.md](../research/structure_from_motion/colmap.md).
 
 ## Newer alternatives
 

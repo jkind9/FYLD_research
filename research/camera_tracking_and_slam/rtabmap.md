@@ -109,6 +109,12 @@ The standalone C++/CMake route avoids requiring ROS. Its dependency set includes
 
 ## Proposed controlled comparison
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)).
+
+- **Run B** should take the open tracker's poses (Basalt first) as the motion it is fed. The same run with ARCore's recorded motion stays as a comparison.
+- **Run C** (raw ARCore depth) becomes a comparison only. Its product counterpart is depth triangulated along the open tracker's path.
+- **RTAB-Map's Android ARCore driver** is no longer a product candidate.
+
 This is an experiment proposal, not an implementation commitment or a result:
 
 | Run | Fixed inputs | Changed component |

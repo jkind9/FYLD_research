@@ -2,6 +2,15 @@
 
 This experiment rebuilds what ARCore gives the project (the camera's path in metres with gravity, calibration, depth) from open-source or hand-built parts, so the product does not depend on Google. The plan and checked licences are in [research/phone_ar_platforms/arcore_open_replacement.md](../../phone_ar_platforms/arcore_open_replacement.md); the plain-language explanation is [learning/12_rebuilding_arcore.md](../../../learning/12_rebuilding_arcore.md).
 
+**Update, 12 November 2026: this is now the product route.** The owner decided the product will not use ARCore ([decision 10](../../../PROJECT_PLAN.md#owner-decisions-in-force)). Sections below that call this stream an alternative to ARCore, or wait for a tracker to be chosen, predate that decision. The order is now:
+
+1. Calibrate the Redmi ([Task103](../../../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md)).
+2. Run Basalt and the other trackers on the recorded v2 walks, compared with ARCore's recorded path ([Task104](../../../task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md)).
+3. Feed the chosen tracker's poses into `sitescan/`.
+4. Size learned depth with depth triangulated along that path.
+
+ARCore's poses here are a comparison, not ground truth and not a product input. Templates, parts and the `sitescan/` changes are in [depth_without_arcore_2026-11-12.md](../../visual_inertial_odometry/depth_without_arcore_2026-11-12.md). 3d-recon, an open Android project without ARCore, reports that handheld tracking is its weak point. So step 2 decides whether this route holds on the Redmi.
+
 Visual-inertial odometry (VIO) is the core part: it fuses camera images with gyroscope and accelerometer readings, which give scale in metres and the direction of gravity. Every open VIO system needs camera frames and motion-sensor readings stamped on one clock, plus a calibration of the phone. ARCore keeps all of this inside. The steps, in order:
 
 | Step | What | Status (15 October 2026) |
@@ -9,7 +18,7 @@ Visual-inertial odometry (VIO) is the core part: it fuses camera images with gyr
 | 1. Capture app (Tasks96 and 99, continuing Task95 and Task88) | One phone app records the inputs for every reconstruction method; the PC receives one v2 session folder, checks it and converts it for the open trackers | Capture 1.2 completed 1,194 frames with zero reported drops; reader, replay and EuRoC export checked; one image lacks settings, 17 lack ARCore; rest and calibration still needed |
 | 2. Calibration (Task90) | Kalibr: camera intrinsics, camera-to-IMU rotation, offset and time shift (printed target); IMU noise from a long recording at rest | Pipeline built; reproduces TUM-VI's published calibration (0.014 degrees, 1.0 mm, 0.13 ms); A4 target ready; Redmi calibration waits for its recordings |
 | 3. Offline comparison (Task91) | Basalt (BSD-3), Kimera-VIO (BSD-2), OKVIS2 (BSD-style), with OpenVINS (GPL-3.0, reference only), run in WSL on the recordings and scored against ARCore's poses and tape-measured distances, with time per frame | All four built and run on TUM-VI room1 with one camera: Basalt 0.146 m, OKVIS2 0.505 m (own noise settings), Kimera lost track, OpenVINS 0.064 m (reference); Redmi runs wait for recordings |
-| 4. Port to the phone | Best system built for Android (NDK); learned depth resized to its tracked points replaces ARCore's depth | Not started |
+| 4. Port to the phone | Best system built for Android (NDK); learned depth sized by depth triangulated along its path (its landmarks, sparse triangulation, then dense multi-view stereo) replaces ARCore's depth | Not started. Since 12 November this is the product route, after calibration and Redmi runs |
 
 **Remaining work, reviewed 15 October.** [Task52](../../../task_list/open/52_build_and_verify_a_usable_phone_recording.md) owns capture fidelity and sustained checks. Task90's tools are built; [Task103](../../../task_list/open/103_measure_redmi_camera_and_imu_calibration_from_owne.md) owns the unperformed Redmi target/rest calibration. Task91's public-dataset comparison is complete; [Task104](../../../task_list/open/104_compare_open_trackers_and_surfaces_on_the_same_red.md) owns calibrated Redmi runs on the same v2 walk. [Task102](../../../task_list/open/102_diagnose_the_redmi_reconstruction_on_the_same_reco.md) checks orientation and geometry first. The phone port is deferred under the capture-first decision, inside the same app. ARCore comparison poses are another estimate, not independent ground truth. Full order: [task board](../../../task_list/README.md).
 

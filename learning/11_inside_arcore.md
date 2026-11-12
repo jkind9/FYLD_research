@@ -1,6 +1,8 @@
 # 11. Inside ARCore
 
-ARCore is the phone's built-in tracker, and the project's plan relies on it for the camera path, the real-world size and the depth images (chapter 8). It is closed source, but Google's documentation, two Google patents, a Google paper and an independent study describe how it works. This chapter explains each part from first principles and says what it means for the project. Where a statement comes from a patent, treat it as Google's described design, not a guarantee of the shipping code. Sources are in [research/phone_ar_platforms/arcore_internals.md](../research/phone_ar_platforms/arcore_internals.md).
+**Update, 12 November 2026.** The product no longer uses ARCore ([owner decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)). This chapter stays as background, because every part described here must now be built from open parts: the visual-inertial filter, calibration, depth from motion and anchors. [Chapter 12](12_rebuilding_arcore.md) covers that rebuild. ARCore's recorded poses and depth remain a comparison on recordings.
+
+ARCore is the phone's built-in tracker. Until 12 November 2026 the project's plan relied on it for the camera path, the real-world size and the depth images (chapter 8). It is closed source, but Google's documentation, two Google patents, a Google paper and an independent study describe how it works. This chapter explains each part from first principles and says what it means for the project. Where a statement comes from a patent, treat it as Google's described design, not a guarantee of the shipping code. Sources are in [research/phone_ar_platforms/arcore_internals.md](../research/phone_ar_platforms/arcore_internals.md).
 
 ## The big picture
 

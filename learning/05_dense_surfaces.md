@@ -43,7 +43,9 @@ It took 70 ms for depth and 31 ms for the mesh per keyframe, each on one CPU cor
 - Use triangulated points as sizing targets for learned depth. The project does this already with ARCore depth and tracked points.
 - Fuse triangulated depth directly where it is confident, and use learned depth only where triangulation has no answer. Mobile3DRecon and CNN-SLAM work this way.
 
-The project's next test is the first way with many more points: features triangulated between frames 0.3-1 m apart along ARCore's path, so that far surfaces get sizing targets too. The source list and the order to try: [research/dense_surface_fusion/triangulation_and_learned_depth.md](../research/dense_surface_fusion/triangulation_and_learned_depth.md).
+The project's next test is the first way with many more points: features triangulated between frames 0.3-1 m apart along the camera path, so that far surfaces get sizing targets too. The source list and the order to try: [research/dense_surface_fusion/triangulation_and_learned_depth.md](../research/dense_surface_fusion/triangulation_and_learned_depth.md).
+
+**Update, 12 November 2026.** That path was to be ARCore's. The product will not use ARCore ([owner decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)). The path now comes from an open visual-inertial tracker, and triangulated depth replaces ARCore depth as the sizing source near as well as far. ARCore's recorded path and depth remain a comparison on existing walks. Open templates for both ways: [research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md](../research/visual_inertial_odometry/depth_without_arcore_2026-11-12.md).
 
 Two older systems in the same line were also read. Newcombe and Davison (2010) fitted a rough surface to a tracker's points, drew it from nearby viewpoints, and corrected each pixel's depth along its camera ray with optical flow. Prisacariu et al. (2015) built one object at a time on an iPhone from its outline alone; that gives the outer shape but no hollows. Notes on all three: [research/dense_surface_fusion](../research/dense_surface_fusion/README.md#live-reconstruction-from-one-camera-three-earlier-systems).
 
@@ -56,13 +58,15 @@ For each frame:
 3. Read the learned depth at the same pixels.
 4. The frame's size is the median of (SfM depth ÷ learned depth). Multiply the whole depth image by it.
 
-Then multiply everything by the SfM world's metric size (chapter 4) and fuse along the SfM path. On a phone, ARCore would supply both the path and the points.
+Then multiply everything by the SfM world's metric size (chapter 4) and fuse along the SfM path. On a phone, a visual-inertial tracker supplies the path, and points triangulated along it supply the sizing targets. That tracker was to be ARCore; since 12 November 2026 it is an open one.
 
 ## When the camera path changes
 
 A live tracker such as ARCore sometimes corrects where it thinks the camera has been, for example when it recognises a place it saw earlier. A signed-distance volume cannot take back a frame it has already fused, so a surface fused into one big volume would keep the old, wrong positions.
 
 The fix is to fuse into short pieces of surface, *fragments*, each stored in its own local frame (Choi, Zhou and Koltun, 2015, used 50-frame fragments). Each fragment is placed in the world by a pose that can change later. On the phone that pose comes from an ARCore *anchor*: a fixed point that ARCore keeps consistent with its own corrections. The project's live processor (`sitescan/pipelines`, Task89) starts one anchor per second and gives each group of 10 anchors one fragment. When ARCore moves an anchor, its fragment moves with it, at the cost of one matrix multiply. Counted objects are kept relative to an anchor in the same way.
+
+Without ARCore the idea is unchanged. An anchor is any pose that may be corrected later, so an open tracker's keyframe poses can play the same part. With odometry alone they are never corrected. If a back end with loop closure is added, its corrected keyframe poses move the fragments as ARCore's anchors do today. [DESIGN section 7.15](../DESIGN.md#715-removing-arcore-five-changes) lists the change.
 
 The price: frames inside one fragment all follow the fragment's first anchor, so a correction that bends the path within 10 s moves the whole fragment rigidly. Where neighbouring fragments overlap, there are two layers of surface until both are placed correctly. Sources: [research/camera_tracking_and_slam/fragments_and_anchors.md](../research/camera_tracking_and_slam/fragments_and_anchors.md).
 
@@ -95,7 +99,7 @@ Averaging in the volume removes random scatter, but some errors survive it. Thre
 - **Flying pixels.** Where a near object sits in front of a far wall, learned depth models such as Depth Anything give the edge pixels a depth between the two, because an average is the safest guess when training penalises distance from the answer. Back in 3D, those pixels form a sheet hanging from the object's edge toward the wall. The closer the object and the farther the wall, the longer the sheet. Indoor rooms, with furniture in front of walls everywhere, are full of such edges.
 - **Side-on surfaces.** A surface seen almost edge-on, at a *grazing angle*, gets poor depth from every kind of sensor. The floor far ahead is always side-on: from a phone 0.9 m above it, the floor 5 m away is seen 80° from square-on.
 
-The owner's target scenes are indoor, with surfaces up to about 10 m away. The pipeline fuses depth only out to 4.0 m, and ARCore depth, which sizes the learned depth, rarely reaches past 2.5 m. Beyond that, the main known error is the size of each frame's depth, as with the door echoes above, and clean-up cannot fix it.
+The owner's target scenes are indoor, with surfaces up to about 10 m away. The pipeline fuses depth only out to 4.0 m, and ARCore depth, which sizes the learned depth today, rarely reaches past 2.5 m. Beyond that, the main known error is the size of each frame's depth, as with the door echoes above, and clean-up cannot fix it. Depth triangulated along the tracker's path is to replace ARCore depth as the sizing source (12 November 2026).
 - **Floaters.** Patches in empty space, from a frame that got something wrong once.
 
 The offline room build now cleans its surface (below); the live processor does not yet. Methods exist for each point in the pipeline:

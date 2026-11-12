@@ -4,6 +4,8 @@ This Android project is the phone-side recorder for [experiment 01, camera captu
 
 The project is `capture/` with one module, `app/` (package `org.fyld.capture`, version 1.2, minimum Android API 26, ARCore SDK 1.56.0). The Java sources are in `app/src/main/java/org/fyld/capture/`.
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../../../PROJECT_PLAN.md#owner-decisions-in-force)). Version 1.2 can only open the camera through ARCore (`SharedCameraRig`). The next change is a plain Camera2 recording mode with exposure, white balance and focus locked, writing camera-only v2 frames. That change needs owner approval. Whether the ARCore mode stays, for comparison recordings only, is an open owner decision. See [the experiment README](../README.md#what-can-be-improved).
+
 ## Source files
 
 | File | What it does |

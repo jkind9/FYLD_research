@@ -16,10 +16,19 @@ imports anything here. Measured results of the pipelines are in [results.md](res
 | [`stage_report/`](stage_report/README.md) | One accuracy report per run, stage by stage, and a comparison of two reports | `python -B -m research.evaluation.stage_report.run --help` |
 | [`tests/`](tests/) | Tests of the scripts above | `python -B -m pytest -c pytest-full.ini evaluation` |
 
+## References after ARCore
+
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). `depth_check.py`, `orientation_control.py` and `landmark_probe.py` score against ARCore depth or tracked points. They remain valid on the existing recordings, as one estimate compared with another. They are not the reference for the product route. New scores use two references:
+
+- tape-measured distances from the next recording round;
+- points triangulated along the open tracker's path, held out from any sizing fit.
+
+`stand_in.py` writes public clips into ARCore's fields of a recording. That is still the quickest way to feed known poses and depth through the pipelines until `sitescan/` takes poses from outside a recording ([DESIGN 7.15](../../DESIGN.md#715-removing-arcore-five-changes)).
+
 ## Known debt
 
 Some of these still import experiment code: `stand_in.py` reads clips through
 `research.experiments.sfm.src.sequences`, `score.py` uses the ICL reader in `research/experiments/sfm` and the
 surface scorer in `research/experiments/04_surface_reconstruction`, and `layers/` uses the shared
-contracts in `research/experiments/shared`. Moving those readers here is listed under Future work in the
-[root README](../../README.md#future-work).
+contracts in `research/experiments/shared`. Moving those readers here is listed under Refactor status in the
+[root README](../../README.md#refactor-status).

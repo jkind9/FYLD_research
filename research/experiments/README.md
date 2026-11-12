@@ -4,6 +4,8 @@ The project was built as six execution steps, each tested on its own with known 
 
 Run modules from the repository root as `research.experiments.<folder>...`. This folder was `experiments/` at the top level until 12 November 2026, so runs, receipts and provenance citations made before then name that old path.
 
+**Update, 12 November 2026.** The product will not use ARCore ([owner decision 10](../../PROJECT_PLAN.md#owner-decisions-in-force)). Rows below that say ARCore is used on the phone, or that depth is sized to ARCore depth, describe the code as it stands. The route forward is [open_vio](open_vio/README.md): an open tracker gives the camera path, and depth triangulated along it gives the size ([templates and parts](../visual_inertial_odometry/depth_without_arcore_2026-11-12.md)). New experiments score against tape measures and held-out triangulated points; ARCore results are a comparison only.
+
 Status on 11 November 2026:
 
 | Layer | Folder | What it answers | Status |
@@ -17,7 +19,8 @@ Status on 11 November 2026:
 | Clean-up | [surface_cleanup](surface_cleanup/README.md) | Which surface clean-up filters help? | Visibility vote and largest pieces adopted (`sitescan/cleanup`); six other filters rejected; the trial and tuner scripts live here |
 | Support | [geometry_validation](geometry_validation/README.md), [shared](shared/README.md), [datasets](datasets/README.md) | Coordinate checks, shared records and run export, test data guidance | In use. The layer-by-layer runner and the per-stage report moved to [`research/evaluation/`](../evaluation/README.md) |
 | Standalone | [live_slam](live_slam/README.md) | Live camera tracking from images alone (stella_vslam, ORB-SLAM3) run frame by frame on the CPU and scored against the true paths | xyz 12.8-17.1 mm, desk 26-28 mm live, 5-12 ms per frame; desk tracking drops 3-12% of frames |
-| Standalone | [open_vio](open_vio/README.md) | Replacing ARCore with open parts: raw camera and motion-sensor recorder on the phone, calibration, open visual-inertial trackers scored against ARCore | Recorder app built; calibration pipeline reproduces TUM-VI (0.014 degrees, 1.0 mm, 0.13 ms); on TUM-VI room1 with one camera Basalt 0.146 m, OpenVINS 0.064 m (GPL reference); no Redmi recording yet |
+| Standalone, now the product route (12 November) | [open_vio](open_vio/README.md) | Replacing ARCore with open parts: raw camera and motion-sensor recorder on the phone, calibration, open visual-inertial trackers compared with ARCore's recorded path | Recorder app built; calibration pipeline reproduces TUM-VI (0.014 degrees, 1.0 mm, 0.13 ms); on TUM-VI room1 with one camera Basalt 0.146 m, OpenVINS 0.064 m (GPL reference); no Redmi recording yet |
+| Standalone, product route (12 November) | [triangulation](triangulation/README.md) | How well does depth triangulated along a known camera path size learned depth, without ARCore? | Built in `sitescan/triangulate`. On the TUM desk fixture: sparse depth within a median 2–5% of the Kinect on 4 of 6 frames; rooms sized only by triangulation sit 6–9 cm from the Kinect surface, against 3 cm when sized by the Kinect itself. No phone recording yet |
 | Standalone | [sfm](sfm/README.md) | Camera path and 3D structure from images alone (COLMAP 4.2.1), scored against true paths and surfaces | Desk: every frame placed, 24 mm best-fit error with size |
 | Standalone | [lingbot_map](lingbot_map/README.md) | Does a feed-forward 3D model give better depth than the adopted one? | Its depth, scaled by ARCore, had 38% lower error than Depth Anything V2 on the same frames, but it needs a 1.16-billion-parameter model on a GPU |
 

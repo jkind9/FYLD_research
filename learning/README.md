@@ -36,13 +36,20 @@ The project builds and tests each box on its own with known inputs, then connect
 | 5 | [Dense surfaces](05_dense_surfaces.md) | Fusion, multi-view stereo, learned depth sized to tracked points, and how surfaces are scored |
 | 6 | [Maps and measurement](06_maps_and_measurement.md) | Ground planes, height grids, unknown against empty, and area |
 | 7 | [Objects and counting](07_objects_and_counting.md) | Detection, segmentation, 3D placement, identity across views |
-| 8 | [The phone](08_phone_and_deployment.md) | What ARCore gives, the 1 frame per second floor, and the design the results point to |
+| 8 | [The phone](08_phone_and_deployment.md) | What ARCore gives and why the product no longer uses it (12 November 2026), the 1 frame per second floor, and the design the results point to |
 | 9 | [Measuring accuracy](09_evaluation_and_datasets.md) | Benchmarks, reference data, and the scores used everywhere in the project |
 | 10 | [What we have learned so far](10_findings_timeline.md) | The project's main results in the order they were found, with numbers |
-| 11 | [Inside ARCore](11_inside_arcore.md) | How the phone's tracker works: IMU and camera fusion, the MSCKF filter, mapping and loop closure, depth from motion, and what the Redmi measured |
-| 12 | [Rebuilding ARCore from open parts](12_rebuilding_arcore.md) | Replacing ARCore with open-source parts: camera and motion-sensor clocks, exposure and rolling shutter, the project's raw recorder, measuring the time offset, calibration and choosing a tracker |
+| 11 | [Inside ARCore](11_inside_arcore.md) | How Google's phone tracker works: IMU and camera fusion, the MSCKF filter, mapping and loop closure, depth from motion, and what the Redmi measured. Background on what the open parts must replace |
+| 12 | [Rebuilding ARCore from open parts](12_rebuilding_arcore.md) | The product route since 12 November 2026: camera and motion-sensor clocks, exposure and rolling shutter, the project's raw recorder, measuring the time offset, calibration, choosing a tracker, and depth triangulated along its path |
 
 Chapters 1 to 4 are the core of SLAM. If you only have an hour, read 1, 3, 4 and 10.
+
+**Update, 12 November 2026.** The owner decided the product will not use ARCore ([decision 10](../PROJECT_PLAN.md#owner-decisions-in-force)). Instead:
+
+- the camera path comes from an open visual-inertial tracker on the phone's camera and motion sensors;
+- depth comes from the project's own learned model, sized by depth triangulated along that path.
+
+Chapters written before that date describe ARCore as the planned source. Their measured results stand. Where they state a plan, the dated notes in each chapter and [chapter 12](12_rebuilding_arcore.md) give the current one.
 
 ## How to use the chapters
 

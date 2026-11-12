@@ -11,6 +11,7 @@ How far away each pixel is: phone stereo with two cameras, and learned depth fro
 | [mobilestereonet.md](mobilestereonet.md) | A smaller learned stereo network |
 | [banet.md](banet.md) | A newer lightweight stereo network for phones |
 | [hypersight.md](hypersight.md) | Using camera motion to see further with phone stereo |
+| [../visual_inertial_odometry/depth_without_arcore_2026-11-12.md](../visual_inertial_odometry/depth_without_arcore_2026-11-12.md) | 12 November 2026, after the owner decided the product will not use ARCore. Ways to size learned depth with triangulated points: weighting, outlier removal, a size that varies with distance, a smooth correction field. Also covers Any2Full (Apache-2.0, ViT-S checkpoint), which uses sparse points to correct shape, and VI-Depth (MIT). Mobile depth models to compare with Depth Anything V2 Small: Distill-Any-Depth-Small (MIT, the same architecture) and MoGe-2 ViT-S (MIT, metric points and normals). Arm lists an INT8 Depth Anything V2 Small build at 728 ms per frame on a 2025 flagship phone CPU (vendor figure) |
 
 ## Papers
 

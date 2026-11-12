@@ -2,17 +2,17 @@
 id: "103"
 title: Measure Redmi camera and IMU calibration from owner recordings
 status: open
-priority: MED
+priority: HIGH
 type: experiment
 blocked_by: [52]
 blocks: []
-verification_test: "experiments/open_vio/tests/test_calibration.py"
+verification_test: "research/experiments/open_vio/tests/test_calibration.py"
 plan_reviewed: null
 files:
-  - experiments/open_vio/calibration/**
-  - experiments/open_vio/tests/**
+  - research/experiments/open_vio/calibration/**
+  - research/experiments/open_vio/tests/**
 docs:
-  - experiments/open_vio/README.md
+  - research/experiments/open_vio/README.md
   - learning/12_rebuilding_arcore.md
   - task_list/README.md
 baseline_metric:
@@ -21,11 +21,16 @@ baseline_metric:
   baseline_value: "Kalibr pipeline validated on TUM-VI; no Redmi target video or long rest; clock estimate -2.67 ms correlation 0.62"
   target: "Measured Redmi calibration and noise with uncertainty, convergence evidence and clock cross-check"
 created: 2026-10-15
-last_updated: 2026-10-15
+last_updated: 2026-11-12
 superseded_by: null
 ---
 
 # Task 103: Measure Redmi camera and IMU calibration from owner recordings
+
+## Amendment, 12 November 2026
+
+Now on the critical path. Owner decision 10 ([plan](../../PROJECT_PLAN.md#owner-decisions-in-force)) removes ARCore, so the product's camera path depends on this calibration, and each supported phone model will need one. The plan is unchanged: a target video with a measured tag, a rest recording of about 3 hours, and Kalibr with the Task90 tools. Also record how long the procedure takes, because it will be repeated once per phone model. Paths are under `research/experiments/` since the 12 November move.
+
 
 ## In plain English
 
