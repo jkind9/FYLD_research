@@ -21,20 +21,16 @@ task_list/**/pytest*/
 task_list/**/job_alloc_probe_*
 task_list/.pytest-temp/
 tools/**/.pytest-temp/
-experiments/**/.pytest-tmp/
-experiments/**/tests/.pytest-temp/
-experiments/**/tests/.test-*.sqlite3*
+research/experiments/**/.pytest-tmp/
+research/experiments/**/tests/.pytest-temp/
+research/experiments/**/tests/.test-*.sqlite3*
 .pytest-work-*/
 .tmp_task*_pytest_*/
 .test_tmp*/
-experiments/**/runs/
+research/experiments/**/runs/
 .kilo/
 .harness*-backup/
 shared-harness/
-archive/**/__pycache__/
-archive/task00_prototype/outputs/
-archive/task00_prototype/third_party/
-archive/local_staging/
 *.egg-info/
 third_party/
 data/*
@@ -43,12 +39,12 @@ outputs/
 mobile_deployments/*
 !mobile_deployments/README.md
 build/
-!experiments/01_camera_capture_delivery/build/
-!experiments/01_camera_capture_delivery/build/*.py
-!experiments/01_camera_capture_delivery/build/*.json
-!experiments/01_camera_capture_delivery/build/*.sh
-!experiments/01_camera_capture_delivery/build/*.ps1
-!experiments/01_camera_capture_delivery/build/Dockerfile
+!research/experiments/01_camera_capture_delivery/build/
+!research/experiments/01_camera_capture_delivery/build/*.py
+!research/experiments/01_camera_capture_delivery/build/*.json
+!research/experiments/01_camera_capture_delivery/build/*.sh
+!research/experiments/01_camera_capture_delivery/build/*.ps1
+!research/experiments/01_camera_capture_delivery/build/Dockerfile
 dist/
 .env
 
@@ -83,7 +79,7 @@ data/**/*
 !data/README.md
 data/**/review_temp/
 # Derived object-reference publication stays local; its frozen source manifest
-# lives under experiments/06_object_recognition/datasets/.
+# lives under research/experiments/06_object_recognition/datasets/.
 data/object_revisits/desk_smoke_v1/
 
 # Generated outputs are never pushed: images, arrays, rendered pages and result records.
@@ -95,10 +91,10 @@ data/object_revisits/desk_smoke_v1/
 # Data acquisition and geometry records may be versioned, except raw controlled-scene bundles.
 !data/**/*.json
 data/controlled_scene/input/
-!experiments/shared/*.html
-experiments/**/output/
-experiments/**/debug/
-experiments/01_camera_capture_delivery/build/container-readiness.json
+!research/experiments/shared/*.html
+research/experiments/**/output/
+research/experiments/**/debug/
+research/experiments/01_camera_capture_delivery/build/container-readiness.json
 .worktrees/
 
 # Papers and lecture slides are third-party copyright; they stay local. READMEs name each source.

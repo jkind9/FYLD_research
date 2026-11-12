@@ -8,4 +8,4 @@
 *.ply binary
 
 # Preserve the exact bytes sealed by Task17 and consumed by cached receipts.
-experiments/06_object_recognition/datasets/desk_smoke_v1.json -text whitespace=cr-at-eol
+research/experiments/06_object_recognition/datasets/desk_smoke_v1.json -text whitespace=cr-at-eol
