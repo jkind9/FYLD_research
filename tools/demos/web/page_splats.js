@@ -4,7 +4,7 @@
   const host = document.getElementById("viewer");
   let V;
   try { V = new DemoViewer(host.querySelector("canvas"), { up: D.up }); } catch (e) { showError(host, e); return; }
-  window.sceneViewer = V;  // page_timeline.js adds its layers to the same viewer
+  window.sceneViewer = V;  // page_capture.js adds its layers to the same viewer
 
   const pos = DemoData.positions(S.positions);
   const n = pos.length / 3;
@@ -16,21 +16,46 @@
   let mode = "splats", base = colours, showRemoved = false, hideRemoved = false;
   // Cells a clean-up removed (capture_scene --kept): optionally painted red, or hidden.
   const removed = S.removed && DemoData.array(S.removed);
-  const hidden = removed && alpha.map((a, i) => (removed[i] ? 0 : a));
+  // Surface pieces, one set per neighbour rule: each splat's piece rank, largest first, and each piece's size.
+  // The sliders pick a rule and keep its largest pieces above a size.
+  const rules = S.pieces || [], ranks = [];
+  let rank = null, sizes = null, keepPieces = Infinity, minPoints = 0;
+  const off = (i) => (hideRemoved && removed[i]) || (rank && (rank[i] >= keepPieces || sizes[rank[i]] < minPoints));
   const paint = (c) => {
     if (c) base = c;
     const shown = showRemoved ? base.map((v, i) => (removed[Math.floor(i / 3)] ? [230, 40, 40][i % 3] : v)) : base;
-    V.addSplats("splats", pos, normals, shown, hideRemoved ? hidden : alpha, st, sn, { visible: mode === "splats" });
+    V.addSplats("splats", pos, normals, shown, alpha.map((a, i) => (off(i) ? 0 : a)), st, sn, { visible: mode === "splats" });
     let p = pos, c3 = shown;
-    if (hideRemoved) {
-      const keep = [];
-      for (let i = 0; i < n; i++) if (!removed[i]) keep.push(i);
+    const keep = [];
+    for (let i = 0; i < n; i++) if (!off(i)) keep.push(i);
+    if (keep.length < n) {
       p = new Float32Array(keep.length * 3); c3 = new Uint8Array(keep.length * 3);
       keep.forEach((k, j) => { p.set(pos.subarray(3 * k, 3 * k + 3), 3 * j); c3.set(shown.subarray(3 * k, 3 * k + 3), 3 * j); });
     }
     V.addPoints("points", p, c3, { size: D.voxel * 0.8, worldSize: true, visible: mode === "points" });
   };
   paint(colours);
+  if (rules.length) {
+    const keepEl = document.getElementById("piece-keep"), minEl = document.getElementById("piece-min");
+    const linksEl = document.getElementById("piece-links");
+    const pieces = () => {
+      const r = Number(linksEl.value);
+      ranks[r] = ranks[r] || DemoData.array(rules[r].rank);
+      rank = ranks[r]; sizes = rules[r].sizes;
+      document.getElementById("piece-links-value").textContent = rules[r].neighbours;
+      keepPieces = S.keepStops[Number(keepEl.value)];
+      minPoints = S.smallestStops[Number(minEl.value)];
+      let count = 0, points = 0;
+      sizes.forEach((s, r) => { if (r < keepPieces && s >= minPoints) { count += 1; points += s; } });
+      document.getElementById("piece-keep-value").textContent = keepPieces.toLocaleString();
+      document.getElementById("piece-min-value").textContent = minPoints.toLocaleString();
+      document.getElementById("piece-shown").textContent =
+        `showing ${count.toLocaleString()} of ${sizes.length.toLocaleString()} pieces, ${points.toLocaleString()} of ${D.source.points.toLocaleString()} points`;
+      paint();
+    };
+    [keepEl, minEl, linksEl].forEach((el) => el.addEventListener("input", pieces));
+    pieces();
+  }
   if (removed) {
     document.getElementById("show-removed").addEventListener("input", (e) => { showRemoved = e.target.checked; paint(); });
     document.getElementById("hide-removed").addEventListener("input", (e) => { hideRemoved = e.target.checked; paint(); });
@@ -63,7 +88,7 @@
       let best = null;
       for (let i = 0; i < n; i++) {
         const p = [pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]], h = V3.dot(p, V.up);
-        if (h < V.cut[0] || h > V.cut[1] || (hideRemoved && removed[i])) continue;
+        if (h < V.cut[0] || h > V.cut[1] || off(i)) continue;
         if (V.oneWay && V3.dot([normals[3 * i], normals[3 * i + 1], normals[3 * i + 2]], V3.sub(eye, p)) < 0) continue;
         const s = V.project(p);
         if (s && Math.hypot(s.x - x, s.y - y) < 8 && (!best || s.z < best.z)) best = { p, z: s.z };
@@ -129,14 +154,14 @@
   document.getElementById("splat-scale").addEventListener("input", (e) => { V.splatScale = Number(e.target.value); V.redraw(); });
 
   const photo = document.getElementById("compare-photo"), caption = document.getElementById("compare-caption");
-  const buttons = document.getElementById("compare-buttons");
-  const choose = (c, btn) => {
+  const buttons = document.getElementById("compare-buttons");  // the capture viewer's own player shows these instead
+  const choose = buttons && ((c, btn) => {
     V.lookFromPose(c.pose, c.fy || D.fy, c.height || D.height);
     photo.src = c.photo;
     caption.textContent = `Real photo from ${D.sceneName || "desk"}, frame ${c.frame}. Drag to explore.`;
     buttons.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
-  };
-  D.compare.forEach((c, i) => {
+  });
+  if (buttons) D.compare.forEach((c, i) => {
     const b = document.createElement("button");
     b.className = "btn";
     b.textContent = c.label || `Frame ${c.frame}`;

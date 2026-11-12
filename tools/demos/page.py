@@ -59,8 +59,9 @@ def read_web(name: str) -> str:
     return (WEB / name).read_text(encoding="utf-8")
 
 
-def build_page(title: str, description: str, body_html: str, data: dict, scripts: list[str], page_js: str) -> str:
-    """Return a complete HTML document that works offline from a single file."""
+def build_page(title: str, description: str, body_html: str, data: dict, scripts: list[str], page_js: str,
+               css: str = "") -> str:
+    """Return a complete HTML document that works offline from a single file; `css` follows the shared style."""
     payload = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
     js = "\n".join(read_web(s) for s in scripts) + "\n" + page_js
     if "</script" in js.lower():
@@ -74,6 +75,7 @@ def build_page(title: str, description: str, body_html: str, data: dict, scripts
 <title>{html.escape(title)}</title>
 <style>
 {read_web("style.css")}
+{css}
 </style>
 </head>
 <body>
