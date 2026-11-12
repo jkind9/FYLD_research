@@ -15,6 +15,7 @@ attributes remain aligned. These are the two adopted filters; trials live in
 | `cell` | float | Connected-piece grid width in metres |
 | `vote_tallies` result | Two N float64 arrays | Weighted support and see-through opposition |
 | Filter result | N bool array | Input-order mask; apply to both points and RGB |
+| `piece_ranks` result | N int array and P int array | Each point's piece rank (0 is the largest); each piece's point count, largest first. `largest_pieces` keeps ranks under `keep` whose count reaches `min_points` |
 
 ## How it works
 
@@ -53,6 +54,7 @@ print(keep.shape, keep.dtype)
 | Evidence far depth | 8 m | Room callers retain see-through evidence beyond the 4 m fusion limit | [Room pipeline](../pipelines/room.py) |
 | `cell` | 0.02 m in `clean_room`; required by `largest_pieces` | Default matches fusion voxel spacing | [Adopted chain](../../DESIGN.md#2-where-the-project-is) |
 | `keep` | 50 pieces | Owner chose this in the cleanup tuner | [Adopted chain](../../DESIGN.md#2-where-the-project-is) |
+| `neighbours` in `piece_ranks` | 0: any touching cells join | Trial. A cell with fewer filled neighbours (of 26) does not extend a chain, so thin streaks touching a wall split off. On the triangulated 15 October room, 9 neighbours dropped the streaks seen from above and kept 1,023,074 of 1,137,969 points; from 11, real surface splits too. The viewer offers 0, 5, 7, 9, 11 and 13; the room build still uses 0 | [Triangulation trial](../../research/experiments/triangulation/README.md) |
 | `min_points` | 5,000 | Owner's minimum piece size in the tuner | [Adopted chain](../../DESIGN.md#2-where-the-project-is) |
 
 ## Limits

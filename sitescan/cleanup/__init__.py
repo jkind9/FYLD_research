@@ -4,10 +4,16 @@ from typing import NamedTuple
 
 import numpy as np
 
-from .pieces import CELL_M, ROOM_PIECE_MIN_POINTS, ROOM_PIECES, largest_pieces
+from .pieces import (
+    CELL_M,
+    ROOM_PIECE_MIN_POINTS,
+    ROOM_PIECES,
+    largest_pieces,
+    piece_ranks,
+)
 from .vote import visibility_vote, vote_tallies
 
-__all__ = ["Cleaned", "clean_room", "largest_pieces", "visibility_vote", "vote_tallies"]
+__all__ = ["Cleaned", "clean_room", "largest_pieces", "piece_ranks", "visibility_vote", "vote_tallies"]
 
 
 class Cleaned(NamedTuple):

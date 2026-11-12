@@ -1,6 +1,6 @@
 """The raw fused room and, per point, the evidence each clean-up stage tests, for the clean-up tuner page.
 
-    python -B -m research.experiments.surface_cleanup.cleanup_attributes --session <v2 session> --out <folder>
+    python -B -m research.experiments.surface_cleanup.cleanup_attributes --session <recording> --label <label>
 
 Writes raw.ply (room pipeline rules, no clean-up) and attributes.npz. The page applies the thresholds itself, so
 moving a slider needs no depth maps. Chain linking and radius outliers depend on which points remain, so the page
@@ -40,10 +40,9 @@ def point_attributes(points: np.ndarray, views) -> dict[str, np.ndarray]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = parse_room_args(room_parser(__doc__.splitlines()[0]), argv)
+    args = parse_room_args(room_parser(__doc__.splitlines()[0]), argv, "cleanup-attributes")
     events, outcome = collect(args.session, load_model(DEPTH_MODEL, threads=args.threads))
     surface, colours, _, _, views = fuse(events, VARIANTS["baseline"], args.voxel, args.far)
-    args.out.mkdir(parents=True)
     cloud = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(surface))
     cloud.colors = o3d.utility.Vector3dVector(np.clip(colours, 0.0, 1.0))
     o3d.io.write_point_cloud(str(args.out / "raw.ply"), cloud)

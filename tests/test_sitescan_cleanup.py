@@ -2,7 +2,13 @@
 
 import numpy as np
 
-from sitescan.cleanup import clean_room, largest_pieces, visibility_vote, vote_tallies
+from sitescan.cleanup import (
+    clean_room,
+    largest_pieces,
+    piece_ranks,
+    visibility_vote,
+    vote_tallies,
+)
 
 CAMERA = (10.0, 10.0, 1.0, 1.0)
 
@@ -37,17 +43,28 @@ def test_near_view_weights_are_capped_at_the_existing_half_metre_floor():
     assert support[0] == 4 and against[0] == 0
 
 
+# Three pieces on a 2 cm grid: three touching points, two, and one.
+THREE_PIECES = np.array([[0.0, 0, 0], [0.01, 0, 0], [0.02, 0, 0], [1.0, 0, 0], [1.01, 0, 0], [2.0, 0, 0]])
+
+
+def test_piece_ranks_number_pieces_from_the_largest_and_count_their_points():
+    rank, sizes = piece_ranks(THREE_PIECES, 0.02)
+    np.testing.assert_array_equal(rank, [0, 0, 0, 1, 1, 2])
+    np.testing.assert_array_equal(sizes, [3, 2, 1])
+
+
+def test_a_neighbour_count_splits_a_thin_streak_from_the_sheet_it_touches():
+    sheet = [(i, j) for i in range(10) for j in range(10)]
+    streak = [(i, 0) for i in range(10, 20)]  # one cell wide; its cells have 1 to 3 filled neighbours
+    points = np.array([(i, j, 0.0) for i, j in sheet + streak])  # one point per 1 m cell
+    np.testing.assert_array_equal(piece_ranks(points, 1.0)[1], [110])
+    rank, sizes = piece_ranks(points, 1.0, neighbours=4)
+    np.testing.assert_array_equal(sizes, [101, 9])  # the streak's first cell touches the sheet and joins it
+    assert (rank[:101] == 0).all() and (rank[101:] == 1).all()
+
+
 def test_largest_pieces_retains_original_order_and_respects_size_and_count():
-    points = np.array(
-        [
-            [0.0, 0.0, 0.0],
-            [0.01, 0.0, 0.0],
-            [0.02, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [1.01, 0.0, 0.0],
-            [2.0, 0.0, 0.0],
-        ]
-    )
+    points = THREE_PIECES
     np.testing.assert_array_equal(
         largest_pieces(points, 0.02, keep=1, min_points=2), [True, True, True, False, False, False]
     )

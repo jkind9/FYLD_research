@@ -13,21 +13,37 @@ arguments or receives bytes, then calls `sitescan.pipelines`.
 From the repository root, in the environment built by `uv sync --all-extras`:
 
 ```text
-.venv/Scripts/python.exe -B -m apps.cli room   --session <recording> --out <new folder>
-.venv/Scripts/python.exe -B -m apps.cli replay --session <recording> --out <new folder> [--speed 1.0] [--no-objects]
-.venv/Scripts/python.exe -B -m apps.cli live   --port 8766 --out <new folder> [--no-objects]
+.venv/Scripts/python.exe -B -m apps.cli room   --session <recording> --label <label>
+.venv/Scripts/python.exe -B -m apps.cli replay --session <recording> --label <label> [--speed 1.0] [--no-objects]
+.venv/Scripts/python.exe -B -m apps.cli live   --port 8766 --label <label> [--no-objects]
 ```
+
+`--session` takes a recording's short name from [recordings.toml](../recordings.toml), or a folder. Each run
+writes `outputs/<recording>/<verb>/<yyyymmdd-hhmm>_<label>/` with `run.json` (settings, typed options, git
+commit, status and headline numbers); the live verb's recording name is `live`. A label is one to four lowercase
+words joined by hyphens. See "Where outputs go" in the [root README](../README.md#where-outputs-go).
 
 | Verb | What it runs | Writes |
 |---|---|---|
-| `room` | `build_room` on a saved recording | `surface.ply` (cleaned), `raw_surface.ply`, `frames.npz` (per-frame cameras and sampled points), `summary.json` |
+| `room` | `build_room` on a saved recording | `surface.ply` (cleaned), `raw_surface.ply`, `voted_surface.ply` (after the vote, before the piece rule), `frames.npz` (per-frame cameras and sampled points), `summary.json` |
 | `replay` | `LiveProcessor` fed a saved recording at its recorded speed (`--speed 0` as fast as possible) | `updates.jsonl` (one line per update), `surface.ply`, `summary.json` |
-| `live` | The capture receiver plus `LiveProcessor`, until the app ends the session | The same, plus the recording under `<out>/sessions/` |
+| `live` | The capture receiver plus `LiveProcessor`, until the app ends the session | The same, plus the recording under `<run>/sessions/` |
 
 `room` takes `--far` (default 4.0 m), `--voxel` (0.02 m), `--piece-cell` (default: the voxel),
-`--supported-only` (a trial: fuse only pixels whose grid cell has its own ARCore scale) and
+`--supported-only` (a trial: fuse only pixels whose grid cell has its own ARCore scale),
+`--scale-sources` (default `arcore_depth`), `--scale-fit` (`grid` or `power`), `--max-scale-jump`
+(a trial: skip a frame whose scale is more than this factor off the last 15 frames' median) and
 `--threads` (16). `replay` and `live` take `--voxel`, `--threads`, `--no-objects`,
-`--depth-model` and `--detector-model`. A run never overwrites an existing folder.
+`--depth-model`, `--detector-model` and `--scale-sources` (default `arcore_depth tracked_points`).
+A run never overwrites an existing folder.
+
+`room` and `replay` can take poses from an open tracker instead of ARCore:
+`--trajectory <file>` (TUM format), `--calibration <JSON>` (the phone's camera and
+`imu_from_camera`), `--trajectory-of imu|camera` (default `imu`, Basalt's output, which needs
+the calibration), `--trajectory-up X Y Z` (default `0 0 1`, Basalt's world) and `--tracker`
+(the name recorded as the pose source). With `--scale-sources sparse` or `dense sparse`,
+learned depth is sized by depth triangulated along the tracker's path. Scale source names are
+listed in [sitescan/pipelines/README.md](../sitescan/pipelines/README.md).
 
 Counting objects needs the `objects` extra and `models/yolo26x.pt`; add `--no-objects` without them.
 

@@ -5,7 +5,7 @@ size, 4.0 m far limit). Each variant is then fused and scored. Tracked points wi
 odd ids score it, so no variant is scored on points it was fitted to. Tracked points come from ARCore's tracking,
 not its depth maps, so they check depth beyond ARCore depth's reach. Sources: research/surface_denoising.
 
-    python -B -m research.experiments.surface_cleanup.denoise_trial --session <v2 session> --out <folder>
+    python -B -m research.experiments.surface_cleanup.denoise_trial --session <recording> --label <label>
 """
 
 from __future__ import annotations
@@ -294,10 +294,9 @@ def score(surface: np.ndarray, frames: list, corrections: list) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = parse_room_args(room_parser(__doc__.splitlines()[0]), argv)
+    args = parse_room_args(room_parser(__doc__.splitlines()[0]), argv, "denoise-trial")
     events, outcome = collect(args.session, load_model(DEPTH_MODEL, threads=args.threads))
     frames = [record for kind, record, *_ in events if kind == "frame"]
-    args.out.mkdir(parents=True)
     results = {"session": str(args.session), "far_m": args.far, "voxel_m": args.voxel, "frames": dict(outcome),
                "where_pixels_lie": diagnose(frames, args.far),
                "sizing_at_held_out_points": {key: sizing_ratios(frames, key) for key in ("grid", "tracked", "far")},

@@ -1,18 +1,29 @@
 """The live and room orchestrators on small synthetic frames, with a fake depth model and a fake detector."""
 
 import json
+import shutil
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import pytest
 from PIL import Image
+from scipy.spatial.transform import Rotation
 
 from apps import cli
+from sitescan import session
 from sitescan.objects import Detection
-from sitescan.pipelines import LiveProcessor, LiveSettings, run_live
+from sitescan.pipelines import (
+    LiveProcessor,
+    LiveSettings,
+    RoomSettings,
+    build_room,
+    run_live,
+)
 from sitescan.pipelines.live import frame_scale
-from sitescan.pipelines.room import fresh_depth, vote_views
+from sitescan.pipelines.room import fresh_depth, scale_jumps, vote_views
 from sitescan.session import wire_v1
+from sitescan.triangulate import SparseDepth
 
 K = (50.0, 50.0, 32.0, 24.0)
 POSE = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)  # ARCore camera at the origin, looking along -z
@@ -113,6 +124,18 @@ def test_room_frames_need_depth_measured_within_one_depth_period(age_s, fresh):
     assert fresh_depth(frame) is fresh
 
 
+@pytest.mark.parametrize(("history", "new", "limit", "jumps"), [
+    ([0.6] * 20, 1.6, 1.25, True),  # a frame sized 2.6 times too large, as at seq 565-572 of the 15 October walk
+    ([0.6] * 20, 0.4, 1.25, True),
+    ([0.6] * 20, 0.7, 1.25, False),
+    ([0.6] * 4, 1.6, 1.25, False),  # too few fused frames to compare with
+    ([0.6] * 20, 1.6, None, False),  # check off
+    ([3.0] * 5 + [0.6] * 15, 1.6, 1.25, True),  # only the most recent frames count
+])
+def test_room_skips_a_frame_whose_scale_jumps_from_recent_frames(history, new, limit, jumps):
+    assert scale_jumps(history, new, limit) is jumps
+
+
 def test_vote_views_move_each_camera_by_its_anchor_correction_since_fusion():
     moved = np.eye(4)
     moved[0, 3] = 1.0  # the anchor placing keyframe 3 has moved 1 m along x since the frame was fused
@@ -125,6 +148,73 @@ def test_vote_views_move_each_camera_by_its_anchor_correction_since_fusion():
     assert k == (1.0, 1.0, 0.0, 0.0) and depth is evidence
 
 
-def test_the_command_refuses_to_overwrite_a_run(tmp_path):
+def test_the_command_refuses_a_label_that_breaks_the_naming_rule(tmp_path):
     with pytest.raises(SystemExit):
-        cli.main(["room", "--session", str(tmp_path), "--out", str(tmp_path)])
+        cli.main(["room", "--session", str(tmp_path), "--label", "My Run", "--root", str(tmp_path)])
+
+
+def test_room_options_make_a_run_folder_named_after_the_recording(tmp_path):
+    args = cli.parse_room_args(cli.room_parser("trial"), ["--session", "tum-desk-20", "--label", "far-3",
+                                                          "--root", str(tmp_path), "--far", "3"], "trial")
+    assert args.session == FIXTURE and args.out.parent == tmp_path / "tum-desk-20" / "trial"
+    assert args.out.name.endswith("_far-3")
+    assert json.loads((args.out / "run.json").read_text(encoding="utf-8"))["typed"] == {"far": 3.0}
+
+
+FIXTURE = Path(__file__).parent / "fixtures" / "tum_desk_20"
+
+
+def flat_model(colour):
+    return np.full(colour.shape[:2], 3.0), np.ones(colour.shape[:2], bool)
+
+
+def fixture_trajectory(tmp_path, frames=20):
+    """The fixture's motion-capture poses as a tracker file, in their own z-up world."""
+    folder = tmp_path / "recording"
+    for name in ("frames", "cam0", "depth"):
+        shutil.copytree(FIXTURE / name, folder / name)
+    lines = (FIXTURE / "frames.jsonl").read_text(encoding="utf-8").splitlines()[:frames]
+    (folder / "frames.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    shutil.copy(FIXTURE / "session.json", folder / "session.json")
+    rows = []
+    for frame in session.frames(folder):
+        quaternion = Rotation.from_matrix(frame.pose[:3, :3]).as_quat()
+        rows.append(f"{frame.t_ns / 1e9:.9f} " + " ".join(f"{v:.12f}" for v in (*frame.pose[:3, 3], *quaternion)))
+    path = tmp_path / "trajectory.txt"
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    return folder, session.read_tum(path, source="mocap", up=(0.0, 0.0, 1.0))
+
+
+def test_sparse_points_scale_a_frame_and_count_by_their_depth_error():
+    learned = np.full((48, 64), 4.0)
+    uv = np.c_[np.arange(30), np.zeros(30)].astype(float)
+    depth = np.r_[np.full(20, 2.0), np.full(10, 3.0)]
+    sigma = np.r_[np.full(20, 0.5), np.full(10, 0.01)]  # the 3 m points are far more precise
+    sparse = SparseDepth(uv, depth, sigma, np.arange(30))
+    fitted, source = frame_scale(learned, np.ones_like(learned, bool), wire_frame(1, depth_m=None), None,
+                                 ("sparse",), sparse)
+    assert source == "sparse" and fitted == pytest.approx(0.75)
+
+
+@pytest.mark.parametrize("sources,frames", [(("sparse",), 20), (("dense", "sparse"), 7)])
+def test_a_room_builds_from_tracker_poses_sized_only_by_triangulated_depth(tmp_path, sources, frames):
+    folder, trajectory = fixture_trajectory(tmp_path, frames)
+    room = build_room(folder, flat_model, RoomSettings(scale_sources=sources), trajectory)
+    summary = room.summary
+    assert summary["pose_source"] == "mocap" and summary["scale"]["sources"] == list(sources)
+    used = summary["scale"]["frames_per_source"]
+    assert summary["frames"]["fused"] == sum(used.values()) >= frames // 2
+    assert used.get(sources[0], 0) >= 1
+    # The desk is 1-1.3 m away and the model reads 3 m everywhere, so the scale is about 0.4.
+    assert 0.3 < summary["scale_min_median_max"][1] < 0.45
+    assert summary["surface_points"] > 1000
+
+
+def test_live_updates_take_their_scale_from_sparse_points_on_tracker_poses(tmp_path):
+    folder, trajectory = fixture_trajectory(tmp_path)
+    processor = LiveProcessor(flat_model, None, LiveSettings(scale_sources=("sparse",)))
+    sources = []
+    for frame in session.read_wire_session(folder, trajectory):
+        processor.add(frame, folder / "frames" / f"{frame.seq:06d}.jpg")
+        sources.append(processor.update()["scale_source"])
+    assert sources[0] == "none" and sources.count("sparse") >= 15

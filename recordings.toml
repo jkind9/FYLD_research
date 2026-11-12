@@ -1,0 +1,28 @@
+# Recordings by short name. Tools take --session <name> instead of the folder path, and every run's
+# outputs go under outputs/<name>/. Names are <device>-<yyyymmdd>-<hhmm> for phone walks.
+# private = true: the recording shows a home or a person, so it and anything made from it stay out of git
+# and out of shared pages. Folders are relative to the repository root.
+
+[redmi-20261014-2122]
+path = "research/experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_212255_walk"
+private = true
+
+[redmi-20261014-2123]
+path = "research/experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_212303_walk"
+private = true
+
+[redmi-20261014-2148]
+path = "research/experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_214854_walk"
+private = true
+
+[redmi-20261014-2207]
+path = "research/experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261014_220756_walk"
+private = true
+
+[redmi-20261015-0939]
+path = "research/experiments/01_camera_capture_delivery/runs/capture_redmi_20261014/20261015_093913_walk"
+private = true
+
+[tum-desk-20]
+path = "tests/fixtures/tum_desk_20"
+private = false
