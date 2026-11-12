@@ -54,6 +54,7 @@ class Frame(session_v1.Frame):
     arcore_t_ns: int | None
     device_pose: tuple[float, ...] | None
     texture_intrinsics: tuple[float, float, float, float] | None
+    pose_source: str = "arcore"
 
     @property
     def wall_ms(self) -> int:

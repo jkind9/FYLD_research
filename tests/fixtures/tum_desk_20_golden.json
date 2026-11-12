@@ -7,6 +7,16 @@
    6
   ],
   "supported_only": false,
+  "pose_source": "arcore",
+  "scale": {
+   "sources": [
+    "arcore_depth"
+   ],
+   "fit": "grid",
+   "frames_per_source": {
+    "arcore_depth": 7
+   }
+  },
   "clean_up": {
    "raw_points": 55872,
    "vote_removed": 232,

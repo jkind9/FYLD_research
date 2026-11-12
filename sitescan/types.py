@@ -18,13 +18,36 @@ class Camera:
 
 
 @dataclass(frozen=True)
-class ArcoreDepth:
-    """Camera-plane depth in metres and confidence from 0 to 255."""
+class MeasuredDepth:
+    """Camera-plane depth in metres, confidence from 0 to 255, and where the depth came from.
+
+    `source` is "arcore" for the phone's raw depth or "sweep" for depth triangulated between
+    keyframes. Either has its own camera, which may be smaller than the colour image.
+    """
 
     t_ns: int
     depth_m: np.ndarray
     confidence: np.ndarray
     camera: Camera
+    source: str
+
+
+@dataclass(frozen=True)
+class Trajectory:
+    """Camera poses from a tracker: OpenCV world_from_camera in metres, in a world with +y up."""
+
+    source: str
+    t_ns: np.ndarray
+    world_from_camera: np.ndarray
+
+
+@dataclass(frozen=True)
+class Calibration:
+    """One phone's colour camera, lens distortion and camera pose in the motion sensors' frame."""
+
+    camera: Camera
+    distortion: tuple[float, ...]
+    imu_from_camera: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -36,7 +59,7 @@ class Frame:
     image: np.ndarray
     camera: Camera | None
     pose: np.ndarray | None
-    depth: ArcoreDepth | None
+    depth: MeasuredDepth | None
     point_ids: np.ndarray
     points_world: np.ndarray
     points_pixel: np.ndarray
@@ -46,3 +69,4 @@ class Frame:
     tracking: str
     failure: str
     arcore_t_ns: int | None
+    pose_source: str

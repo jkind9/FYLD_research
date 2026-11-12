@@ -60,6 +60,9 @@ shape errors or a wrong camera path. An anchor must be received before its first
 Only the anchor that first binds a group places that group's volume; a later group-start
 event does not rebind it. Anchor updates must keep the same local grid basis as integration.
 The stage applies no visibility vote, component filtering or frame selection.
+Anchors come from ARCore's records today. Owner decision 10 plans an open tracker's keyframe
+poses in their place, which this stage accepts as they are
+([DESIGN section 7.15](../../DESIGN.md#715-removing-arcore-five-changes)).
 
 ## Tests
 

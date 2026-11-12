@@ -56,6 +56,10 @@ factors from 0.86 to 2.09. Fused shape errors remain about 8–16 cm even with k
 positions. Edges can mix foreground and background depth. These outputs need the scale
 and cleanup stages. The validity mask keeps positive values below 0.1 m for compatibility;
 fusion applies its own 0.1 m near limit. A phone runtime has not been measured.
+The upright rule finds "down" from the world's y axis, which is ARCore's up. An open
+tracker's world with gravity along z would turn images the wrong way with no error raised.
+So its poses must be converted to a y-up world at the reader
+([DESIGN section 7.15](../../DESIGN.md#715-removing-arcore-five-changes)).
 
 `load_model` currently uses Transformers and PyTorch internally. A later runtime can
 return the same array callable without changing `predict` or adding a wrapper class.

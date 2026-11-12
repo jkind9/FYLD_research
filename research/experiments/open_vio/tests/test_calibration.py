@@ -122,3 +122,24 @@ def test_transform_difference_reports_angle_and_distance():
     b = _pose(Rotation.from_euler("z", 12, degrees=True), [0.03, 0.04, 0])
     angle, distance = kalibr_files.transform_difference(a, b)
     assert angle == pytest.approx(2.0) and distance == pytest.approx(0.05)
+
+
+def test_a_kalibr_result_becomes_a_calibration_sitescan_reads(tmp_path):
+    import json
+
+    import to_sitescan
+
+    from sitescan import session
+
+    path = tmp_path / "data-camchain-imucam.yaml"
+    path.write_text("cam0:\n  T_cam_imu:\n  - [0.0, -1.0, 0.0, 0.01]\n  - [1.0, 0.0, 0.0, 0.02]\n  - [0.0, 0.0, 1.0, 0.03]\n"
+                    "  - [0.0, 0.0, 0.0, 1.0]\n  camera_model: pinhole\n  distortion_coeffs: [0.1, 0.01, 0.0, 0.0]\n"
+                    "  distortion_model: radtan\n  intrinsics: [500.0, 501.0, 320.0, 240.0]\n  resolution: [640, 480]\n"
+                    "  timeshift_cam_imu: -0.0125\n")
+    out = tmp_path / "calibration.json"
+    out.write_text(json.dumps(to_sitescan.sitescan_calibration(path)))
+    calibration = session.read_calibration(out)
+    assert (calibration.camera.fx, calibration.camera.width) == (500.0, 640)
+    assert calibration.distortion == (0.1, 0.01, 0.0, 0.0)
+    camera_from_imu = kalibr_files.read_camchain(path)["T_cam_imu"]
+    np.testing.assert_allclose(calibration.imu_from_camera @ camera_from_imu, np.eye(4), atol=1e-12)

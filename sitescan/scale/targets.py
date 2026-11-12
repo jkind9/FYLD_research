@@ -2,16 +2,16 @@
 
 import numpy as np
 
-from sitescan.types import ArcoreDepth, Camera
+from sitescan.types import Camera, MeasuredDepth
 
 MIN_CONFIDENCE = 128
 MAX_DEPTH_AGE_S = 0.1
 
 
 def depth_targets(
-    depth: ArcoreDepth, camera: Camera, *, min_confidence: int = MIN_CONFIDENCE
+    depth: MeasuredDepth, camera: Camera, *, min_confidence: int = MIN_CONFIDENCE
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Colour pixels and measured depths from confident ARCore depth pixels."""
+    """Colour pixels and measured depths from confident pixels of a measured depth map."""
     rows, cols = np.nonzero((depth.depth_m > 0) & (depth.confidence >= min_confidence))
     raw = depth.camera
     uv = np.c_[

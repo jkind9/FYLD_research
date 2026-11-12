@@ -8,9 +8,10 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from sitescan.types import ArcoreDepth, Camera, Frame
+from sitescan.types import Calibration, Camera, Frame, MeasuredDepth, Trajectory
 
 from . import wire_v1, wire_v2
+from .trajectory import with_trajectory
 
 
 def raw_header(header: dict) -> dict:
@@ -32,9 +33,16 @@ def frame_payload(folder: Path, header: dict) -> bytes:
     return payload
 
 
-def read_wire_session(folder: Path | str) -> Iterator[wire_v1.Frame]:
-    """Checked wire records for callers awaiting the pipeline migration."""
-    folder = Path(folder)
+def read_wire_session(
+    folder: Path | str, trajectory: Trajectory | None = None, calibration: Calibration | None = None
+) -> Iterator[wire_v1.Frame]:
+    """Checked wire records, posed by ARCore or, given a trajectory, by an open tracker."""
+    records = wire_records(Path(folder))
+    return records if trajectory is None else with_trajectory(records, trajectory, calibration)
+
+
+def wire_records(folder: Path) -> Iterator[wire_v1.Frame]:
+    """Checked wire records in file order, as the phone recorded them."""
     version = json.loads((folder / "session.json").read_text(encoding="utf-8"))["version"]
     wire_v1._require(version in (1, 2), "recording version must be 1 or 2")
     with (folder / "frames.jsonl").open(encoding="utf-8") as lines:
@@ -57,15 +65,18 @@ def camera(record: wire_v1.Frame) -> Camera | None:
     return Camera(*record.intrinsics, *record.image_size)
 
 
-def arcore_depth(depth: wire_v1.Depth) -> ArcoreDepth:
-    """A wire depth record as the shared depth type, with its own camera."""
+def arcore_depth(depth: wire_v1.Depth) -> MeasuredDepth:
+    """ARCore's wire depth record as a measured depth map, with its own camera."""
     height, width = depth.depth_m.shape
-    return ArcoreDepth(depth.t_ns, depth.depth_m, depth.confidence, Camera(*depth.intrinsics, width, height))
+    camera = Camera(*depth.intrinsics, width, height)
+    return MeasuredDepth(depth.t_ns, depth.depth_m, depth.confidence, camera, "arcore")
 
 
-def frames(folder: Path | str) -> Iterator[Frame]:
+def frames(
+    folder: Path | str, trajectory: Trajectory | None = None, calibration: Calibration | None = None
+) -> Iterator[Frame]:
     """Frames in file order, with RGB arrays and world_from_camera matrices."""
-    for record in read_wire_session(folder):
+    for record in read_wire_session(folder, trajectory, calibration):
         with Image.open(BytesIO(record.image_jpeg)) as image:
             rgb = np.asarray(image.convert("RGB"))
         depth = None if record.depth is None else arcore_depth(record.depth)
@@ -90,4 +101,5 @@ def frames(folder: Path | str) -> Iterator[Frame]:
             record.tracking,
             record.failure,
             getattr(record, "arcore_t_ns", record.t_ns),
+            getattr(record, "pose_source", "arcore"),
         )

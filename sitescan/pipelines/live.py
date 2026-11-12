@@ -22,34 +22,47 @@ from sitescan.fusion.fragments import DEPTH_RANGE_M
 from sitescan.io import write_cloud, write_json
 from sitescan.objects import Objects
 from sitescan.objects.match import AMBIGUITY_MARGIN_M, MAX_DISTANCE_M
-from sitescan.scale.fit import MIN_DEPTH_PIXELS, MIN_POINTS
 from sitescan.session.wire_v1 import world_from_camera, world_from_camera_cv
+from sitescan.triangulate import SparseDepth, Triangulator
+from sitescan.types import MeasuredDepth
+
+from . import targets
 
 MAP_SETTINGS = {"cell_size_m": 0.05, "inlier_distance_m": 0.02, "iterations": 500, "sample_size": 50_000, "seed": 0}
 MIN_MAP_POINTS = 1000
+LIVE_SOURCES = ("arcore_depth", "tracked_points")
 
 
 @dataclass(frozen=True)
 class LiveSettings:
-    """Fusion voxel and fragment size, and the object matching distances."""
+    """Fusion voxel and fragment size, object matching distances, and scale sources in order."""
 
     voxel_m: float = 0.02
     keyframes_per_fragment: int = 10
     max_distance_m: float = MAX_DISTANCE_M
     ambiguity_margin_m: float = AMBIGUITY_MARGIN_M
+    scale_sources: tuple[str, ...] = LIVE_SOURCES
 
 
-def frame_scale(learned: np.ndarray, valid: np.ndarray, frame, previous: float | None) -> tuple[float | None, str]:
-    """(scale, source) for one frame: ARCore depth, else tracked points, else the previous scale."""
-    if frame.depth is not None:
-        uv, target = scale.depth_targets(session.arcore_depth(frame.depth), session.camera(frame))
-        fitted = scale.fit_one(learned, valid, uv, target, MIN_DEPTH_PIXELS)
-        if fitted is not None:
-            return fitted, "arcore_depth"
+def frame_scale(
+    learned: np.ndarray,
+    valid: np.ndarray,
+    frame,
+    previous: float | None,
+    sources: tuple[str, ...] = LIVE_SOURCES,
+    sparse: SparseDepth | None = None,
+    dense: MeasuredDepth | None = None,
+) -> tuple[float | None, str]:
+    """(scale, source) for one frame: the first named source that fits, else the previous scale."""
     pose = None if frame.pose is None else world_from_camera_cv(frame.pose)
-    fitted = scale.fit_one(learned, valid, *scale.point_targets(frame.points_world, frame.points_pixel, pose), MIN_POINTS)
-    if fitted is not None:
-        return fitted, "tracked_points"
+    for source in sources:
+        found = targets.scale_targets(source, frame, pose, sparse, dense)
+        if found is None:
+            continue
+        uv, metres, weight = found
+        fitted = scale.fit_one(learned, valid, uv, metres, targets.MINIMUM[source], weight)
+        if fitted is not None:
+            return fitted, source
     return (previous, "previous") if previous is not None else (None, "none")
 
 
@@ -59,6 +72,9 @@ class LiveProcessor:
     def __init__(self, depth_model: Callable, detector: Callable | None = None, settings: LiveSettings = LiveSettings()):
         """depth_model(rgb) -> (depth_m, valid); detector(rgb) -> list of Detection, or None for no objects."""
         self.depth_model, self.detector = depth_model, detector
+        self.scale_sources = settings.scale_sources
+        triangulated = set(settings.scale_sources) & set(targets.TRIANGULATED)
+        self.triangulator = Triangulator() if triangulated else None
         self.fragments = Fragments(voxel_m=settings.voxel_m, keyframes_per_fragment=settings.keyframes_per_fragment)
         self.objects = Objects(max_distance_m=settings.max_distance_m, ambiguity_margin_m=settings.ambiguity_margin_m)
         self._lock = threading.Lock()
@@ -110,7 +126,13 @@ class LiveProcessor:
         lap("decode")
         learned, valid = self.depth_model(colour)
         lap("depth_model")
-        fitted, source = frame_scale(learned, valid, frame, self.scale)
+        sparse, dense = None, None
+        if self.triangulator is not None:
+            sparse, dense = self._triangulate(frame, learned, valid)
+            lap("triangulate")
+        fitted, source = frame_scale(
+            learned, valid, frame, self.scale, self.scale_sources, sparse, dense
+        )
         lap("scale")
         self.updates += 1
         record = {"update": self.updates, "frame_seq": frame.seq, "frame_t_ns": frame.t_ns, "frames_received": received,
@@ -143,6 +165,16 @@ class LiveProcessor:
     def surface(self) -> np.ndarray:
         """The fused surface so far, in world metres."""
         return self.fragments.surface()
+
+    def _triangulate(self, frame, learned, valid) -> tuple[SparseDepth, MeasuredDepth | None]:
+        """Sparse depth against the keyframe window, and plane-sweep depth when a source asks."""
+        camera = session.camera(frame)
+        pose = world_from_camera_cv(frame.pose)
+        sparse = self.triangulator.sparse(frame.grey, camera, pose)
+        if "dense" not in self.scale_sources:
+            return sparse, None
+        prior = targets.sweep_prior(learned, valid, sparse)
+        return sparse, self.triangulator.dense(frame.grey, camera, pose, frame.t_ns, prior)
 
     def _objects(self, colour, metric, valid, frame, pose, keyframe, anchors) -> tuple[float, list[dict]]:
         """Detect, place and count on the worker thread; returns its milliseconds and one row per detection."""
